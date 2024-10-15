@@ -76,21 +76,8 @@ are stored in the notes. The values can be of any type. Defaults to None.</dd>
         Raises:
             ValueError: If the seed is not a string, dictionary, or None.
         &#34;&#34;&#34;
-        self.seed = self._process_seed(seed)
-        self.model = SoulModel.from_seed(self.seed)
-        self.state = {}
-
-    def _process_seed(self, seed: Optional[Union[str, Dict[str, Any]]]) -&gt; Dict[str, Any]:
-        if seed is None:
-            return {&#34;text&#34;: &#34;You are a helpful AI assistant.&#34;}
-        elif isinstance(seed, str):
-            return {&#34;text&#34;: seed}
-        elif isinstance(seed, dict):
-            processed_seed = {&#34;text&#34;: seed.get(&#34;text&#34;, seed.get(&#34;essence&#34;, &#34;You are a helpful AI assistant.&#34;))}
-            processed_seed.update({k: v for k, v in seed.items() if k not in [&#34;text&#34;, &#34;essence&#34;]})
-            return processed_seed
-        else:
-            raise ValueError(&#34;Seed must be either a string, dictionary, or None.&#34;)
+        self.model = SoulModel(seed=seed)
+        self.seed = self.model.seed
 
     def update_state(self, key: str, value: Any) -&gt; None:
         &#34;&#34;&#34;
@@ -100,9 +87,6 @@ are stored in the notes. The values can be of any type. Defaults to None.</dd>
             key (str): The key to update.
             value (Any): The value to set.
         &#34;&#34;&#34;
-        if not hasattr(self, &#39;state&#39;):
-            self.state = {}
-        self.state[key] = value
         self.model.state[key] = value
 
     def get_state(self, key: str) -&gt; Any:
@@ -116,6 +100,10 @@ are stored in the notes. The values can be of any type. Defaults to None.</dd>
             Any: The value associated with the key, or None if not found.
         &#34;&#34;&#34;
         return self.model.state.get(key)
+
+    @property
+    def state(self):
+        return self.model.state
 
     def get_current_state(self) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
@@ -206,7 +194,7 @@ are stored in the notes. The values can be of any type. Defaults to None.</dd>
         Args:
             seed (Dict[str, Any]): A dictionary containing the new seed for the Soul.
         &#34;&#34;&#34;
-        self.model = SoulModel.from_seed(seed)
+        self.model = SoulModel(seed=seed)
 
     def copy(self) -&gt; &#34;Soul&#34;:
         &#34;&#34;&#34;
@@ -217,6 +205,21 @@ are stored in the notes. The values can be of any type. Defaults to None.</dd>
         &#34;&#34;&#34;
         return Soul(seed={&#34;text&#34;: self.model.essence, **self.model.notes})</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="frame.src.framer.soul.soul.Soul.state"><code class="name">prop <span class="ident">state</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def state(self):
+    return self.model.state</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.soul.soul.Soul.copy"><code class="name flex">
@@ -398,6 +401,7 @@ are stored in the notes. The values can be of any type. Defaults to None.</dd>
 <li><code><a title="frame.src.framer.soul.soul.Soul.reset_model" href="#frame.src.framer.soul.soul.Soul.reset_model">reset_model</a></code></li>
 <li><code><a title="frame.src.framer.soul.soul.Soul.reset_notes" href="#frame.src.framer.soul.soul.Soul.reset_notes">reset_notes</a></code></li>
 <li><code><a title="frame.src.framer.soul.soul.Soul.reset_state" href="#frame.src.framer.soul.soul.Soul.reset_state">reset_state</a></code></li>
+<li><code><a title="frame.src.framer.soul.soul.Soul.state" href="#frame.src.framer.soul.soul.Soul.state">state</a></code></li>
 <li><code><a title="frame.src.framer.soul.soul.Soul.update_essence" href="#frame.src.framer.soul.soul.Soul.update_essence">update_essence</a></code></li>
 <li><code><a title="frame.src.framer.soul.soul.Soul.update_notes" href="#frame.src.framer.soul.soul.Soul.update_notes">update_notes</a></code></li>
 <li><code><a title="frame.src.framer.soul.soul.Soul.update_state" href="#frame.src.framer.soul.soul.Soul.update_state">update_state</a></code></li>

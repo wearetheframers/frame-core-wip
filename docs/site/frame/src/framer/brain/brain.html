@@ -137,6 +137,9 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
             priority=5
         )
 
+        # Update the agency&#39;s action_registry
+        self.agency.action_registry = self.action_registry
+
     async def _execute_think_action(self, decision: Decision) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Execute the &#39;think&#39; action, which involves pondering on various aspects and potentially creating new tasks.
@@ -169,6 +172,9 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
             Any: The parsed JSON data or an error dictionary.
         &#34;&#34;&#34;
         try:
+            # Remove trailing commas from the response
+            response = re.sub(r&#39;,\s*}&#39;, &#39;}&#39;, response)
+            response = re.sub(r&#39;,\s*]&#39;, &#39;]&#39;, response)
             return json.loads(response)
         except json.JSONDecodeError as e:
             logger.error(f&#34;JSON parsing error: {e}&#34;)
@@ -178,6 +184,9 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
             if response.startswith(&#34;```&#34;) and response.endswith(&#34;```&#34;):
                 cleaned_response = &#34;\n&#34;.join(response.split(&#34;\n&#34;)[1:-1])
                 try:
+                    # Remove trailing commas from the cleaned response
+                    cleaned_response = re.sub(r&#39;,\s*}&#39;, &#39;}&#39;, cleaned_response)
+                    cleaned_response = re.sub(r&#39;,\s*]&#39;, &#39;]&#39;, cleaned_response)
                     return json.loads(cleaned_response)
                 except json.JSONDecodeError:
                     pass  # If this also fails, continue to the error return
@@ -301,9 +310,18 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
             else:
                 if decision.action not in self.action_registry.actions:
                     raise ValueError(f&#34;Action &#39;{decision.action}&#39; not found in registry.&#34;)
-                result = await self.action_registry.execute_action(
-                    decision.action, decision.parameters
-                )
+                
+                # For &#39;respond&#39; action, ensure &#39;content&#39; is passed correctly
+                if decision.action == &#34;respond&#34;:
+                    # For &#39;respond&#39; action, we&#39;ll use the agency&#39;s perform_task method directly
+                    result = await self.agency.perform_task({
+                        &#34;description&#34;: decision.parameters.get(&#34;content&#34;, &#34;&#34;),
+                        &#34;workflow_id&#34;: &#34;default&#34;
+                    })
+                else:
+                    result = await self.action_registry.execute_action(
+                        decision.action, decision.parameters
+                    )
 
             logger.info(f&#34;Executed action: {decision.action}&#34;)
             logger.debug(f&#34;Action result: {result}&#34;)

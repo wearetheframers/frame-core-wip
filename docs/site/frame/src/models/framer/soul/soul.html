@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.models.framer.soul.soul.Soul"><code class="flex name class">
 <span>class <span class="ident">Soul</span></span>
-<span>(</span><span>**data)</span>
+<span>(</span><span>**data: Any)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
@@ -109,28 +109,20 @@ validated to form a valid model.</p>
     class Config:
         arbitrary_types_allowed = True
 
-    def __init__(self, **data):
-        super().__init__(**data)
-        if &#34;seed&#34; in data:
-            self._process_seed(data[&#34;seed&#34;])
+    @validator(&#39;seed&#39;, pre=True, always=True)
+    def process_seed(cls, v, values):
+        if isinstance(v, str):
+            values[&#39;essence&#39;] = v
+            return {&#34;text&#34;: v}
+        elif isinstance(v, dict):
+            values[&#39;essence&#39;] = v.get(&#34;text&#34;, v.get(&#34;essence&#34;, values.get(&#39;essence&#39;)))
+            seed = {&#34;text&#34;: values[&#39;essence&#39;]}
+            values[&#39;notes&#39;].update({k: v for k, v in v.items() if k not in [&#34;text&#34;, &#34;essence&#34;]})
+            return seed
+        elif v is None:
+            return {&#34;text&#34;: values.get(&#39;essence&#39;, &#34;You are a helpful AI assistant.&#34;)}
         else:
-            self.seed = {&#34;text&#34;: &#34;You are a helpful AI assistant.&#34;}
-
-    def _process_seed(self, seed: Union[str, Dict[str, Any]]):
-        if isinstance(seed, str):
-            self.essence = seed
-            self.seed = {&#34;text&#34;: seed}
-        elif isinstance(seed, dict):
-            self.essence = seed.get(&#34;text&#34;, seed.get(&#34;essence&#34;, self.essence))
-            self.seed = {&#34;text&#34;: self.essence}
-            self.notes.update(
-                {k: v for k, v in seed.items() if k not in [&#34;text&#34;, &#34;essence&#34;]}
-            )
-        else:
-            raise ValueError(&#34;Seed must be either a string or a dictionary.&#34;)
-
-        if &#34;text&#34; not in self.seed:
-            self.seed[&#34;text&#34;] = self.essence
+            raise ValueError(&#34;Seed must be either a string, dictionary, or None.&#34;)
 
     @classmethod
     def from_seed(cls, seed: Union[str, Dict[str, Any]]) -&gt; &#34;Soul&#34;:
@@ -208,6 +200,12 @@ Can be either a string or a dictionary:
 <dd>A new Soul instance initialized with the provided seed.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.models.framer.soul.soul.Soul.process_seed"><code class="name flex">
+<span>def <span class="ident">process_seed</span></span>(<span>v, values)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -235,6 +233,7 @@ Can be either a string or a dictionary:
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.model_config" href="#frame.src.models.framer.soul.soul.Soul.model_config">model_config</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.model_fields" href="#frame.src.models.framer.soul.soul.Soul.model_fields">model_fields</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.notes" href="#frame.src.models.framer.soul.soul.Soul.notes">notes</a></code></li>
+<li><code><a title="frame.src.models.framer.soul.soul.Soul.process_seed" href="#frame.src.models.framer.soul.soul.Soul.process_seed">process_seed</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.seed" href="#frame.src.models.framer.soul.soul.Soul.seed">seed</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.state" href="#frame.src.models.framer.soul.soul.Soul.state">state</a></code></li>
 </ul>
