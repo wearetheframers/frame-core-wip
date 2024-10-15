@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/frame-logo-transparent.png" alt="Frame Logo" width="200"/>
+</p>
+
 # Frame (internal)
 
 Frame is a multi-modal cognitive agent framework designed to support fully emergent characteristics.
