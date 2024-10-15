@@ -109,12 +109,12 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         self.llm_service = llm_service
         self.context = context or {}
         self.execution_context = execution_context or ExecutionContext(llm_service=llm_service)
-        self.roles = roles or []
-        self.goals = goals or []
+        self.roles = roles if roles is not None else []
+        self.goals = goals if goals is not None else []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, &#39;default_model&#39;, &#39;gpt-3.5-turbo&#39;)
-        self.action_registry = ActionRegistry()
+        self.action_registry = ActionRegistry(self.execution_context)
 
     def add_role(self, role: Dict[str, Any]) -&gt; None:
         &#34;&#34;&#34;
@@ -171,20 +171,23 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         return self.goals
 
     def create_task(
-        self, description: str, priority: float = 50.0, workflow_id: str = &#34;default&#34;
+        self, description: str, priority: Union[float, str] = 50.0, workflow_id: str = &#34;default&#34;
     ) -&gt; Task:
         &#34;&#34;&#34;
         Create a new task with the given description and priority.
 
         Args:
             description (str): The description of the task.
-            priority (float, optional): The priority of the task. Defaults to 50.0.
+            priority (Union[float, str], optional): The priority of the task. Can be a float or a string. Defaults to 50.0.
             workflow_id (str, optional): The ID of the workflow this task belongs to. Defaults to &#34;default&#34;.
 
         Returns:
             Task: The created Task object.
         &#34;&#34;&#34;
-        return Task(description=description, priority=priority, workflow_id=workflow_id)
+        if isinstance(priority, str):
+            priority_map = {&#34;Low&#34;: 25.0, &#34;Medium&#34;: 50.0, &#34;High&#34;: 75.0}
+            priority = priority_map.get(priority.capitalize(), 50.0)
+        return Task(description=description, priority=float(priority), workflow_id=workflow_id)
 
     def add_task(self, task: Task, workflow_id: str = &#34;default&#34;) -&gt; None:
         &#34;&#34;&#34;
@@ -271,19 +274,26 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             all_tasks.extend([task.to_dict() for task in workflow.tasks])
         return all_tasks
 
-    async def perform_task(self, task: Dict[str, Any]) -&gt; Dict[str, Any]:
+    async def perform_task(self, task: Union[Dict[str, Any], Task]) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Perform a task asynchronously.
 
         Args:
-            task (Dict[str, Any]): Dictionary containing task details.
+            task (Union[Dict[str, Any], Task]): Dictionary containing task details or a Task object.
 
         Returns:
             Dict[str, Any]: Result of the task execution.
         &#34;&#34;&#34;
         logger.debug(f&#34;perform_task called with task: {task}&#34;)
-        task_obj = task if isinstance(task, Task) else Task(**task)
-        return await self._perform_task(task_obj)
+        if isinstance(task, Task):
+            task_obj = task
+        else:
+            task_dict = task.copy()
+            if &#39;workflow_id&#39; not in task_dict:
+                task_dict[&#39;workflow_id&#39;] = &#39;default&#39;
+            task_obj = Task(**task_dict)
+        result = await self._perform_task(task_obj)
+        return result if result is not None else {&#34;output&#34;: &#34;No result returned&#34;}
 
     async def _perform_task(self, task: Task) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
@@ -455,7 +465,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 
     async def generate_roles_and_goals(
         self,
-    ) -&gt; Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    ) -&gt; Tuple[List[str], List[str]]:
         &#34;&#34;&#34;
         Generate roles and goals for the Framer.
 
@@ -465,11 +475,18 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         3. If both exist, generate new goals and add them to existing ones.
 
         Returns:
-            Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]: A tuple containing
-            the final roles and goals.
+            Tuple[List[str], List[str]]: A tuple containing
+            the final roles and goals as strings.
         &#34;&#34;&#34;
         new_roles = await self.generate_roles()
         new_goals = await self.generate_goals()
+        
+        if not new_roles:
+            new_roles = [&#34;Task Assistant&#34;]
+        
+        if not new_goals:
+            new_goals = [&#34;Assist users to the best of my abilities&#34;]
+        
         return new_roles, new_goals
 
     async def execute_task(self, task: Task) -&gt; str:
@@ -559,7 +576,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.create_task"><code class="name flex">
-<span>def <span class="ident">create_task</span></span>(<span>self, description: str, priority: float = 50.0, workflow_id: str = 'default') ‑> <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a></span>
+<span>def <span class="ident">create_task</span></span>(<span>self, description: str, priority: Union[float, str] = 50.0, workflow_id: str = 'default') ‑> <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new task with the given description and priority.</p>
@@ -567,8 +584,8 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <dl>
 <dt><strong><code>description</code></strong> :&ensp;<code>str</code></dt>
 <dd>The description of the task.</dd>
-<dt><strong><code>priority</code></strong> :&ensp;<code>float</code>, optional</dt>
-<dd>The priority of the task. Defaults to 50.0.</dd>
+<dt><strong><code>priority</code></strong> :&ensp;<code>Union[float, str]</code>, optional</dt>
+<dd>The priority of the task. Can be a float or a string. Defaults to 50.0.</dd>
 <dt><strong><code>workflow_id</code></strong> :&ensp;<code>str</code>, optional</dt>
 <dd>The ID of the workflow this task belongs to. Defaults to "default".</dd>
 </dl>
@@ -648,7 +665,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.generate_roles_and_goals"><code class="name flex">
-<span>async def <span class="ident">generate_roles_and_goals</span></span>(<span>self) ‑> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]</span>
+<span>async def <span class="ident">generate_roles_and_goals</span></span>(<span>self) ‑> Tuple[List[str], List[str]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate roles and goals for the Framer.</p>
@@ -658,10 +675,10 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 3. If both exist, generate new goals and add them to existing ones.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]</code></dt>
+<dt><code>Tuple[List[str], List[str]]</code></dt>
 <dd>A tuple containing</dd>
 </dl>
-<p>the final roles and goals.</p></div>
+<p>the final roles and goals as strings.</p></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.get_all_tasks"><code class="name flex">
 <span>def <span class="ident">get_all_tasks</span></span>(<span>self) ‑> List[Dict[str, Any]]</span>
@@ -713,14 +730,14 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.perform_task"><code class="name flex">
-<span>async def <span class="ident">perform_task</span></span>(<span>self, task: Dict[str, Any]) ‑> Dict[str, Any]</span>
+<span>async def <span class="ident">perform_task</span></span>(<span>self, task: Union[Dict[str, Any], <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Perform a task asynchronously.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>task</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
-<dd>Dictionary containing task details.</dd>
+<dt><strong><code>task</code></strong> :&ensp;<code>Union[Dict[str, Any], Task]</code></dt>
+<dd>Dictionary containing task details or a Task object.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
