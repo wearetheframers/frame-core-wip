@@ -295,6 +295,11 @@ you are using <code>textual run</code> with the <code>dev</code> switch.</dd>
             use_local_model=False,
         )
 
+        # Generate roles and goals
+        roles, goals = await self.framer.agency.generate_roles_and_goals()
+        self.framer.agency.set_roles(roles)
+        self.framer.agency.set_goals(goals)
+
         logger.info(f&#34;Running Framer: {self.framer.config.name}&#34;)
         logger.info(f&#34;Using model: {self.framer.config.default_model}&#34;)
         logger.info(
@@ -303,8 +308,8 @@ you are using <code>textual run</code> with the <code>dev</code> switch.</dd>
         logger.info(f&#34;Max length: {self._max_len}&#34;)
         logger.info(f&#34;Debug mode: {self._debug}&#34;)
         logger.info(f&#34;Soul seed: {self._soul_seed}&#34;)
-        logger.info(f&#34;Framer roles: {self.framer.agency.roles}&#34;)
-        logger.info(f&#34;Framer goals: {self.framer.agency.goals}&#34;)
+        logger.info(f&#34;Framer roles: {roles}&#34;)
+        logger.info(f&#34;Framer goals: {goals}&#34;)
 
         # Update the UI with the current settings
         self.query_one(&#34;#framer_name_label&#34;).update(f&#34;Framer: {self._name}&#34;)

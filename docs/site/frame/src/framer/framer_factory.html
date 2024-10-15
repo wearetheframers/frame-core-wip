@@ -141,29 +141,31 @@ ensuring that all necessary components are properly initialized.</p>
 
     async def create_framer(
         self,
-        soul_seed: Optional[Dict[str, str]] = None,
+        soul_seed: Optional[Union[str, Dict[str, Any]]] = None,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
     ) -&gt; Framer:
         agency = Agency(llm_service=self.llm_service, context=None)
         # Initialize the Agency component with the LLM service
+        # Generate roles and goals
+        roles, goals = await agency.generate_roles_and_goals()
+
         brain = Brain(
             # Initialize the Brain component with default model, roles, and goals
             llm_service=self.llm_service,
             default_model=self.config.default_model,
-            roles=[],
-            goals=[],
+            roles=roles,
+            goals=goals,
         )
 
         if soul_seed is None:
             # Generate a default soul seed if none is provided
-            soul_seed = f&#34;Default seed for {self.config.name}&#34;
+            soul_seed = &#34;You are a helpful AI assistant.&#34;
 
         soul = Soul(
             seed=(
-                {&#34;seed&#34;: soul_seed.get(&#34;seed&#34;)}
-                if isinstance(soul_seed, dict)
-                else {&#34;seed&#34;: soul_seed}
+                soul_seed if isinstance(soul_seed, dict)
+                else {&#34;text&#34;: soul_seed}
             )
         )
         # Initialize the Soul component with the provided or default seed
@@ -184,6 +186,9 @@ ensuring that all necessary components are properly initialized.</p>
             eq_service=eq_service,
         )
 
+        framer.agency.set_roles(roles)
+        framer.agency.set_goals(goals)
+
         return framer
 
     def get_plugin(self, plugin_name: str) -&gt; Any:
@@ -201,7 +206,7 @@ ensuring that all necessary components are properly initialized.</p>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.framer_factory.FramerFactory.create_framer"><code class="name flex">
-<span>async def <span class="ident">create_framer</span></span>(<span>self, soul_seed: Optional[Dict[str, str]] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+<span>async def <span class="ident">create_framer</span></span>(<span>self, soul_seed: Union[str, Dict[str, Any], ForwardRef(None)] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>

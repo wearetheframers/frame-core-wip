@@ -2,6 +2,34 @@
 
 This section provides a comprehensive guide on how to use the Frame framework to create and manage AI agents.
 
+## Role and Goal Generation
+
+When initializing a Framer, the behavior for role and goal generation is as follows:
+
+- If both roles and goals are None, they will be automatically generated using `generate_roles_and_goals()`.
+- If roles is an empty list `[]` and goals is None, only roles will be generated and set.
+- If goals is an empty list `[]` and roles is None, only goals will be generated and set.
+- If both roles and goals are empty lists `[]`, both will be generated and set.
+- If either roles or goals is provided (not None or empty list), the provided value will be used, meaning the agent will have no roles or goals.
+
+## Soul Seed
+
+When creating a Framer, you can provide a soul_seed that can be either a string or a dictionary:
+
+- If a string is provided, it will be used as the 'text' value in the soul's seed dictionary.
+- If a dictionary is provided, it can include any keys and values, with an optional 'text' key for the soul's essence.
+
+This allows for more flexible and detailed soul initialization.
+
+## Prompt Formatting
+
+When using different LLM adapters, it's important to format your prompts correctly:
+
+- For LMQL: Use triple quotes and optionally specify the expected output format.
+- For DSPy: Use standard string formatting.
+- For Hugging Face: Use standard string formatting.
+For detailed examples and explanations, see the [[prompt_examples]] documentation.
+
 ## Getting Started
 
 1. **Initialize Frame**

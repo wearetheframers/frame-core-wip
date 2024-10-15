@@ -225,9 +225,7 @@ When initializing a Framer, the behavior for role and goal generation is as foll
 - If roles is an empty list `[]` and goals is None, only roles will be generated and set.
 - If goals is an empty list `[]` and roles is None, only goals will be generated and set.
 - If both roles and goals are empty lists `[]`, both will be generated and set.
-- If either roles or goals is provided (not None or empty list), the provided value will be used.
-
-This ensures that Framers always have some roles and goals, either user-defined or automatically generated.
+- If either roles or goals is provided (not None or empty list), the provided value will be used, meaning the agent will have no roles or goals.
 
 #### Soul Seed
 

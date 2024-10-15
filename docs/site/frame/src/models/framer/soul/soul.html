@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.models.framer.soul.soul.Soul"><code class="flex name class">
 <span>class <span class="ident">Soul</span></span>
-<span>(</span><span>**data: Any)</span>
+<span>(</span><span>**data)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
@@ -139,6 +139,10 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.models.framer.soul.soul.Soul.seed"><code class="name">var <span class="ident">seed</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.models.framer.soul.soul.Soul.state"><code class="name">var <span class="ident">state</span> : Dict[str, Any]</code></dt>
 <dd>
 <div class="desc"><p>The Soul class represents the intrinsic characteristics and identity of a Framer.</p>
@@ -151,6 +155,28 @@ if personality is enabled in the Framer.</p>
 <dd>The seed for the Soul's initialization.</dd>
 <dt><strong><code>state</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
 <dd>The state of the Soul, including characteristics.</dd>
+</dl></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="frame.src.models.framer.soul.soul.Soul.from_seed"><code class="name flex">
+<span>def <span class="ident">from_seed</span></span>(<span>seed: Union[str, Dict[str, Any]]) ‑> <a title="frame.src.models.framer.soul.soul.Soul" href="#frame.src.models.framer.soul.soul.Soul">Soul</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a Soul instance from a seed.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>seed</code></strong> :&ensp;<code>Union[str, Dict[str, Any]]</code></dt>
+<dd>The seed for the Soul.
+Can be either a string or a dictionary:
+- If a string is provided, it will be used as the 'essence' of the Soul.
+- If a dictionary is provided, it can include 'text' or 'essence' and other key-value pairs for notes.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="frame.src.models.framer.soul.soul.Soul" href="#frame.src.models.framer.soul.soul.Soul">Soul</a></code></dt>
+<dd>A new Soul instance initialized with the provided seed.</dd>
 </dl></div>
 </dd>
 </dl>
@@ -175,10 +201,12 @@ if personality is enabled in the Framer.</p>
 <ul class="">
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.Config" href="#frame.src.models.framer.soul.soul.Soul.Config">Config</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.essence" href="#frame.src.models.framer.soul.soul.Soul.essence">essence</a></code></li>
+<li><code><a title="frame.src.models.framer.soul.soul.Soul.from_seed" href="#frame.src.models.framer.soul.soul.Soul.from_seed">from_seed</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.model_computed_fields" href="#frame.src.models.framer.soul.soul.Soul.model_computed_fields">model_computed_fields</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.model_config" href="#frame.src.models.framer.soul.soul.Soul.model_config">model_config</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.model_fields" href="#frame.src.models.framer.soul.soul.Soul.model_fields">model_fields</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.notes" href="#frame.src.models.framer.soul.soul.Soul.notes">notes</a></code></li>
+<li><code><a title="frame.src.models.framer.soul.soul.Soul.seed" href="#frame.src.models.framer.soul.soul.Soul.seed">seed</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.state" href="#frame.src.models.framer.soul.soul.Soul.state">state</a></code></li>
 </ul>
 </li>

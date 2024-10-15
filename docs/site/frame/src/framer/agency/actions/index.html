@@ -41,30 +41,47 @@ hljs.highlightAll();
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="frame.src.framer.agency.actions.create_new_agent"><code class="name flex">
-<span>def <span class="ident">create_new_agent</span></span>(<span>self, config: Dict[str, Any]) ‑> Any</span>
+<span>def <span class="ident">create_new_agent</span></span>(<span>self, config: Dict[str, Any])</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Create a new agent with the required properties.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>self</code></strong></dt>
+<dd>The current Framer instance.</dd>
+<dt><strong><code>config</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>Configuration for the new agent.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Framer</code></dt>
+<dd>The newly created Framer instance.</dd>
+</dl></div>
 </dd>
 <dt id="frame.src.framer.agency.actions.generate_roles_and_goals"><code class="name flex">
-<span>def <span class="ident">generate_roles_and_goals</span></span>(<span>self) ‑> None</span>
+<span>def <span class="ident">generate_roles_and_goals</span></span>(<span>self) ‑> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate roles and goals for the Framer.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
+<dt><strong><code>self</code></strong></dt>
 <dd>The current Framer instance.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]</code></dt>
+<dd>A tuple containing the generated roles and goals.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.actions.research"><code class="name flex">
-<span>def <span class="ident">research</span></span>(<span>framer, research_topic: str) ‑> str</span>
+<span>def <span class="ident">research</span></span>(<span>self, research_topic: str) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Perform research on a given topic and summarize findings.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
+<dt><strong><code>self</code></strong></dt>
 <dd>The current Framer instance.</dd>
 <dt><strong><code>research_topic</code></strong> :&ensp;<code>str</code></dt>
 <dd>The research topic.</dd>
@@ -82,7 +99,7 @@ hljs.highlightAll();
 <div class="desc"><p>Generate a response to a given input or query.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
+<dt><strong><code>self</code></strong></dt>
 <dd>The current Framer instance.</dd>
 <dt><strong><code>input_data</code></strong> :&ensp;<code>str</code></dt>
 <dd>The input data or query.</dd>
@@ -94,16 +111,21 @@ hljs.highlightAll();
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.actions.think"><code class="name flex">
-<span>def <span class="ident">think</span></span>(<span>self, thought: str = 'Processing information...') ‑> None</span>
+<span>def <span class="ident">think</span></span>(<span>self, thought: str = 'Processing information...') ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Process information and generate new thoughts or ideas.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
+<dt><strong><code>self</code></strong></dt>
 <dd>The current Framer instance.</dd>
 <dt><strong><code>thought</code></strong> :&ensp;<code>str</code></dt>
 <dd>The thought or idea to process.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The processed thought or generated idea.</dd>
 </dl></div>
 </dd>
 </dl>

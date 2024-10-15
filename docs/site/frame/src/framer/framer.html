@@ -73,6 +73,12 @@ hljs.highlightAll();
         self._dynamic_model_choice = False
         self.observers = []
         self.can_execute = True  # Add can_execute attribute
+        
+        # Initialize roles and goals
+        self.roles = roles or []
+        self.goals = goals or []
+        self.agency.roles = self.roles
+        self.agency.goals = self.goals
 
     def add_observer(self, observer: Observer) -&gt; None:
         &#34;&#34;&#34;
@@ -129,23 +135,17 @@ hljs.highlightAll();
         cls,
         config: FramerConfig,
         llm_service: LLMService,
-        soul_seed: Optional[Dict[str, str]] = None,
+        soul_seed: Optional[Union[str, Dict[str, Any]]] = None,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
     ) -&gt; &#34;Framer&#34;:
         agency = Agency(llm_service=llm_service, context=None)
 
-        # Generate roles and goals if they are None or empty lists
+        # Generate roles and goals if they are None
         roles = config.roles
         goals = config.goals
 
-        if roles is None and goals is None:
-            roles, goals = await agency.generate_roles_and_goals()
-        elif roles == [] and goals is None:
-            roles, _ = await agency.generate_roles_and_goals()
-        elif goals == [] and roles is None:
-            _, goals = await agency.generate_roles_and_goals()
-        elif roles == [] and goals == []:
+        if roles is None or goals is None:
             roles, goals = await agency.generate_roles_and_goals()
 
         brain = Brain(
@@ -154,7 +154,7 @@ hljs.highlightAll();
             roles=roles,
             goals=goals,
         )
-        soul = Soul(seed=soul_seed if soul_seed else {&#34;seed&#34;: &#34;default&#34;})
+        soul = Soul(seed=soul_seed if soul_seed else &#34;You are a helpful AI assistant.&#34;)
         workflow_manager = WorkflowManager()
 
         return cls(
@@ -171,10 +171,22 @@ hljs.highlightAll();
         )
 
     async def initialize(self):
-        if not self.agency.roles:
-            self.agency.roles, self.agency.goals = (
-                await self.agency.generate_roles_and_goals()
-            )
+        if not hasattr(self.agency, &#39;roles&#39;):
+            self.agency.roles = []
+        if not hasattr(self.agency, &#39;goals&#39;):
+            self.agency.goals = []
+        
+        if self.roles is None and self.goals is None:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+        elif self.roles == [] and self.goals is None:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+        elif self.goals == [] and self.roles is None:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+        elif self.roles == [] and self.goals == []:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+        
+        self.agency.roles = self.roles if self.roles is not None else []
+        self.agency.goals = self.goals if self.goals is not None else []
 
     # Add a docstring explaining the role and goal generation behavior
     create.__doc__ = &#34;&#34;&#34;
@@ -190,7 +202,10 @@ hljs.highlightAll();
     Args:
         config (FramerConfig): Configuration for the Framer.
         llm_service (LLMService): Language model service.
-        soul_seed (Optional[Dict[str, str]]): Initial seed for the Framer&#39;s soul.
+        soul_seed (Optional[Union[str, Dict[str, Any]]]): Initial seed for the Framer&#39;s soul.
+            Can be either a string or a dictionary. If a string is provided, it will be used
+            as the &#39;text&#39; value in the soul&#39;s seed dictionary. If a dictionary is provided,
+            it can include any keys and values, with an optional &#39;text&#39; key for the soul&#39;s essence.
         memory_service (Optional[MemoryService]): Memory service for the Framer.
         eq_service (Optional[EQService]): Emotional intelligence service for the Framer.
 
@@ -237,7 +252,7 @@ hljs.highlightAll();
 <h3>Static methods</h3>
 <dl>
 <dt id="frame.src.framer.framer.Framer.create"><code class="name flex">
-<span>async def <span class="ident">create</span></span>(<span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, soul_seed: Optional[Dict[str, str]] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="#frame.src.framer.framer.Framer">Framer</a></span>
+<span>async def <span class="ident">create</span></span>(<span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, soul_seed: Union[str, Dict[str, Any], ForwardRef(None)] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>

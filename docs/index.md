@@ -17,16 +17,15 @@ Frame consists of three main components:
 
 ## Key Features
 
-- Multi-agent, multi-modal cognitive framework allowing for emergent behaviors
-- Layered emory mechanism for global and multi-user memory storage with RAG-like retrieval that accounts for entity relationships (Mem0)
-- Extensible architecture with flexible plugin engine
-- Integration with popular APIs (OpenAI GPT, Mistral, etc.) as well as local model support
-- Flexible behavior and decision-making mechanics
-- Dynamic task allocation and parallel processing in Framed groups
-- Monitoring and metrics capabilities, including built-in LLM API usage tracking
-- Support for emotional intelligence and personality traits 
-- Asynchronous operations with synchronous wrappers
-- CLI with graphical textual elements
+- Multi-modal cognitive agents framework
+- Supports developing dynamic, emergent behaviors
+- Layered memory understanding entity relationships with Mem0
+- Supports global and multi-user memory storage
+- Extensible architecture with plugin engine
+- Integration with popular AI APIs (OpenAI GPT, Mistral, etc.) as well as local model support
+- Streaming text generation support 
+- Flexible behavior and decision-making mechanics that can be based off of emotions and memories
+- Monitoring and metrics; built-in LLM API usage / costs tracking
 
 ## Technologies Used
 - LQML
@@ -78,7 +77,7 @@ Learn more in the [[framer]].
 
 ### Framed
 
-Framed groups enable:
+Frameds (pronounced as `frames`) enable:
 
 - Coordination of multiple Framer instances
 - Task distribution and management across Framers
