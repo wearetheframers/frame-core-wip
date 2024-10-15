@@ -68,18 +68,19 @@ from frame.src.framer.soul.soul import Soul
 def test_soul_initialization():
     soul = Soul()
     assert soul is not None
-    assert soul.seed is None
+    assert soul.seed == {"text": "You are a helpful AI assistant."}
     assert soul.model.seed == {"text": "You are a helpful AI assistant."}
 
 def test_soul_with_custom_seed():
     custom_seed = {"text": "Custom assistant", "trait": "friendly"}
     soul = Soul(seed=custom_seed)
     assert soul is not None
-    assert soul.seed == custom_seed
-    assert soul.model.essence == "Custom assistant"
+    assert soul.seed == {"text": "Custom assistant"}
+    assert soul.model.seed == {"text": "Custom assistant"}
     assert soul.model.notes == {"trait": "friendly"}
+    assert soul.model.essence == "Custom assistant"
 
 def test_soul_seed_is_never_none():
     soul = Soul(seed=None)
-    assert soul.seed is None
+    assert soul.seed == {"text": "You are a helpful AI assistant."}
     assert soul.model.seed == {"text": "You are a helpful AI assistant."}
