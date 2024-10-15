@@ -32,27 +32,30 @@ class Brain:
     # VALID_ACTIONS will be initialized in the __init__ method
     def __init__(
         self,
-        execution_context: ExecutionContext,
+        llm_service: LLMService,
         roles: List[Dict[str, Any]],
         goals: List[Dict[str, Any]],
         default_model: str = "gpt-3.5-turbo",
+        recent_memories_limit: int = 5,
+        execution_context: ExecutionContext = None
     ):
         """
         Initialize the Brain with the necessary components.
 
         Args:
-            execution_context (ExecutionContext): The execution context containing necessary services.
+            llm_service (LLMService): The language model service.
             roles (List[Dict[str, Any]]): Initial roles for the Brain.
             goals (List[Dict[str, Any]]): Initial goals for the Brain.
             default_model (str): The default language model to use.
+            recent_memories_limit (int): The number of recent memories to keep. Defaults to 5.
+            execution_context (ExecutionContext): The execution context for actions.
         """
-        self.execution_context = execution_context
-        self.llm_service = execution_context.llm_service
+        self.llm_service = llm_service
         self.default_model = default_model
         self.roles = roles
         self.goals = goals
 
-        self.mind = Mind(self)
+        self.mind = Mind(self, recent_memories_limit)
 
         memory_config = {
             "llm": {
@@ -65,7 +68,7 @@ class Brain:
         self.memory = Memory(memory_config)
         
         # Initialize ActionRegistry
-        self.action_registry = ActionRegistry(execution_context)
+        self.action_registry = ActionRegistry(execution_context or ExecutionContext(llm_service=self.llm_service))
 
         self.agency = Agency(llm_service=self.llm_service, context=None)
 

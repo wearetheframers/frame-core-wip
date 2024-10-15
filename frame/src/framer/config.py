@@ -46,6 +46,7 @@ class FramerConfig:
     is_multi_modal: Optional[bool] = False
     roles: Optional[List[Dict[str, str]]] = field(default_factory=list)
     goals: Optional[List[Dict[str, Any]]] = field(default_factory=list)
+    recent_memories_limit: Optional[int] = 5
 
     async def initialize(self):
         """Initialize the Framer with roles and goals."""

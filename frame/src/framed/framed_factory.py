@@ -128,7 +128,7 @@ class FramedBuilder:
         return self
 
     async def build(self) -> Framed:
-        agency = Agency(llm_service=self.llm_service, context=None)
+        agency = Agency(execution_context=execution_context, context=None)
         brain = Brain(
             llm_service=self.llm_service,
             default_model=self.config.default_model,

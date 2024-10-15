@@ -1,6 +1,6 @@
 import logging
 import json
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from unittest.mock import AsyncMock
 from ..perception import Perception
 from ..decision import Decision
@@ -17,19 +17,28 @@ class Mind:
     It manages thoughts, decision-making processes, perceptions, and interacts with the Brain and Soul components.
     """
 
-    def __init__(self, brain: Any, recent_perceptions_limit: int = 5):
+    def __init__(self, brain: Any, recent_memories_limit: Optional[int] = None):
         """
         Initialize the Mind instance.
 
         Args:
             brain (Any): The Brain instance associated with this Mind.
-            recent_perceptions_limit (int): The number of recent perceptions to keep. Defaults to 5.
+            recent_memories_limit (Optional[int]): The number of recent memories/perceptions to keep. If None, defaults to 5.
         """
         self.brain = brain
         self.thoughts: List[str] = []
         self.current_thought: str = ""
         self.perceptions: List[Perception] = []
-        self.recent_perceptions_limit = recent_perceptions_limit
+        self.recent_memories_limit = recent_memories_limit if recent_memories_limit is not None else 5
+
+    def set_recent_memories_limit(self, limit: int):
+        """
+        Set the limit for recent memories/perceptions.
+
+        Args:
+            limit (int): The new limit for recent memories/perceptions.
+        """
+        self.recent_memories_limit = limit
 
     async def make_decision(self, perception: Perception) -> Decision:
         """

@@ -9,7 +9,7 @@ from frame.src.framer.agency.default_actions import (
 from frame.src.framer.agency.execution_context import ExecutionContext
 
 class ActionRegistry:
-    def __init__(self, execution_context: ExecutionContext):
+    def __init__(self, execution_context: Optional[ExecutionContext] = None):
         self.execution_context = execution_context
         self.actions: Dict[str, Dict[str, Any]] = {}
         self._register_default_actions()

@@ -2,6 +2,7 @@ from frame.src.utils.llm_utils import track_llm_usage
 import json
 import functools
 import logging
+from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +14,48 @@ def log_method_call(func):
         result = func(*args, **kwargs)
         logger.info(f"Method {func.__name__} completed")
         return result
+
+    def _prepare_full_prompt(self, prompt: str, include_frame_context: bool, recent_memories: Optional[List[Dict[str, Any]]]) -> str:
+        full_prompt = prompt
+
+        if include_frame_context:
+            frame_context = """
+            Frame is a multi-modal cognitive agent framework designed to support fully emergent characteristics.
+            It consists of three main components: Frame, Framed, and Framer.
+            - Frame: The main interface for creating and managing Framer instances.
+            - Framer: An individual AI agent with capabilities for task management, decision-making, and interaction with language models.
+            - Framed: A collection of Framer objects working together to achieve complex tasks.
+            """
+            full_prompt = f"{frame_context}\n\n{full_prompt}"
+
+        if recent_memories:
+            memories_context = "Recent memories and perceptions:\n"
+            for memory in recent_memories:
+                memories_context += f"- {memory.get('type', 'Memory')}: {memory.get('content', '')}\n"
+            full_prompt = f"{memories_context}\n{full_prompt}"
+
+        return full_prompt
+
+    def _prepare_full_prompt(self, prompt: str, include_frame_context: bool, recent_memories: Optional[List[Dict[str, Any]]]) -> str:
+        full_prompt = prompt
+
+        if include_frame_context:
+            frame_context = """
+            Frame is a multi-modal cognitive agent framework designed to support fully emergent characteristics.
+            It consists of three main components: Frame, Framed, and Framer.
+            - Frame: The main interface for creating and managing Framer instances.
+            - Framer: An individual AI agent with capabilities for task management, decision-making, and interaction with language models.
+            - Framed: A collection of Framer objects working together to achieve complex tasks.
+            """
+            full_prompt = f"{frame_context}\n\n{full_prompt}"
+
+        if recent_memories:
+            memories_context = "Recent memories and perceptions:\n"
+            for memory in recent_memories:
+                memories_context += f"- {memory.get('type', 'Memory')}: {memory.get('content', '')}\n"
+            full_prompt = f"{memories_context}\n{full_prompt}"
+
+        return full_prompt
 
     return wrapper
 
@@ -114,6 +157,27 @@ class LLMService:
         """
         return self.metrics._total_cost
 
+    def _prepare_full_prompt(self, prompt: str, include_frame_context: bool, recent_memories: Optional[List[Dict[str, Any]]]) -> str:
+        full_prompt = prompt
+
+        if include_frame_context:
+            frame_context = """
+            Frame is a multi-modal cognitive agent framework designed to support fully emergent characteristics.
+            It consists of three main components: Frame, Framed, and Framer.
+            - Frame: The main interface for creating and managing Framer instances.
+            - Framer: An individual AI agent with capabilities for task management, decision-making, and interaction with language models.
+            - Framed: A collection of Framer objects working together to achieve complex tasks.
+            """
+            full_prompt = f"{frame_context}\n\n{full_prompt}"
+
+        if recent_memories:
+            memories_context = "Recent memories and perceptions:\n"
+            for memory in recent_memories:
+                memories_context += f"- {memory.get('type', 'Memory')}: {memory.get('content', '')}\n"
+            full_prompt = f"{memories_context}\n{full_prompt}"
+
+        return full_prompt
+
     def set_default_model(self, model: str):
         """
         Set the default model to be used for all operations.
@@ -134,6 +198,8 @@ class LLMService:
         expected_output: Optional[str] = None,
         use_local: bool = False,
         stream: bool = False,
+        include_frame_context: bool = False,
+        recent_memories: Optional[List[Dict[str, Any]]] = None,
     ) -> Union[str, Dict[str, Any], AsyncGenerator[str, None]]:
         """
         Generate a completion using the specified model or the default model.
@@ -147,6 +213,8 @@ class LLMService:
             expected_output (str, optional): Expected output format.
             use_local (bool, optional): Whether to use a local model.
             stream (bool, optional): Whether to stream the output.
+            include_frame_context (bool, optional): Whether to include context about Frame and Framers.
+            recent_memories (List[Dict[str, Any]], optional): List of recent memories/perceptions.
 
         Returns:
             Union[str, Dict[str, Any]]: The generated completion.
@@ -155,6 +223,9 @@ class LLMService:
         self.logger.debug(f"Using model: {model}")
 
         start_time = time.time()
+
+        # Prepare the full prompt with additional context if required
+        full_prompt = self._prepare_full_prompt(prompt, include_frame_context, recent_memories)
 
         if stream:
             self.logger.debug("Streaming mode enabled")
@@ -168,14 +239,14 @@ class LLMService:
                     model=model, max_tokens=max_tokens, temperature=temperature
                 )
                 result = self.huggingface_adapter.get_completion(
-                    prompt, config, additional_context, stream=True
+                    full_prompt, config, additional_context, stream=True
                 )
             elif "mistral" in model.lower():
                 self.logger.debug("Using LMQL adapter for Mistral streaming")
                 config = LMQLConfig(
                     model=model, max_tokens=max_tokens, temperature=temperature
                 )
-                lmql_prompt = f'"""{prompt}"""'
+                lmql_prompt = f'"""{full_prompt}"""'
                 if expected_output:
                     lmql_prompt += f"\n[RESPONSE]\n{expected_output}"
                 result = self.lmql_wrapper.get_completion(
@@ -186,7 +257,7 @@ class LLMService:
                 config = LMQLConfig(
                     model=model, max_tokens=max_tokens, temperature=temperature
                 )
-                lmql_prompt = f'"""{prompt}"""'
+                lmql_prompt = f'"""{full_prompt}"""'
                 if expected_output:
                     lmql_prompt += f"\n[RESPONSE]\n{expected_output}"
                 result = self.lmql_wrapper.get_completion(
@@ -205,7 +276,7 @@ class LLMService:
                 config = HuggingFaceConfig(
                     model=model, max_tokens=max_tokens, temperature=temperature
                 )
-                formatted_prompt = format_huggingface_prompt(prompt)
+                formatted_prompt = format_huggingface_prompt(full_prompt)
                 result = await self.huggingface_adapter.get_completion(
                     formatted_prompt, config, additional_context
                 )
@@ -214,7 +285,7 @@ class LLMService:
                 config = DSPyConfig(
                     model=model, max_tokens=max_tokens, temperature=temperature
                 )
-                formatted_prompt = format_dspy_prompt(prompt)
+                formatted_prompt = format_dspy_prompt(full_prompt)
                 result = await self.dspy_wrapper.get_completion(
                     formatted_prompt, config, additional_context
                 )
@@ -223,7 +294,7 @@ class LLMService:
                 config = LMQLConfig(
                     model=model, max_tokens=max_tokens, temperature=temperature
                 )
-                formatted_prompt = format_lmql_prompt(prompt, expected_output)
+                formatted_prompt = format_lmql_prompt(full_prompt, expected_output)
                 result = await self.lmql_wrapper.get_completion(
                     formatted_prompt,
                     config,

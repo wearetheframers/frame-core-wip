@@ -59,7 +59,7 @@ import logging
 from .src.utils.helpers import close_logger_handlers as __close_logger_handlers
 
 
-atexit.register(__close_logger_handlers)
+atexit.register(lambda: __close_logger_handlers())
 
 # Expose the CLI for easy access
 from .cli.cli import cli, main

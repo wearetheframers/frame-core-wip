@@ -34,7 +34,9 @@ class LLMMetrics:
 llm_metrics = LLMMetrics()
 
 
-def get_llm_provider(default_model: str) -> str:
+def get_llm_provider(default_model: str, use_local: bool = False) -> str:
+    if use_local:
+        return "huggingface"
     if default_model is None:
         return "openai"  # Default to OpenAI if no model is specified
     default_model_lower = default_model.lower()

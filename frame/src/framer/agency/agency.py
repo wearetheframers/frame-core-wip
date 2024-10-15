@@ -20,7 +20,7 @@ class Agency:
     It manages roles, goals, tasks, and workflows for the Framer.
 
     Attributes:
-        llm_service (LLMService): The language model service.
+        execution_context (ExecutionContext): The execution context containing necessary services.
         context (Context): The context service providing shared state and configurations.
         roles (List[Dict[str, Any]]): List of roles assigned to the Agency.
         goals (List[Dict[str, Any]]): List of goals for the Agency.
