@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from typing import Dict, Any, Union
 
 
@@ -23,28 +23,20 @@ class Soul(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    def __init__(self, **data):
-        super().__init__(**data)
-        if "seed" in data:
-            self._process_seed(data["seed"])
+    @validator('seed', pre=True, always=True)
+    def process_seed(cls, v, values):
+        if isinstance(v, str):
+            values['essence'] = v
+            return {"text": v}
+        elif isinstance(v, dict):
+            values['essence'] = v.get("text", v.get("essence", values.get('essence')))
+            seed = {"text": values['essence']}
+            values['notes'].update({k: v for k, v in v.items() if k not in ["text", "essence"]})
+            return seed
+        elif v is None:
+            return {"text": values.get('essence', "You are a helpful AI assistant.")}
         else:
-            self.seed = {"text": "You are a helpful AI assistant."}
-
-    def _process_seed(self, seed: Union[str, Dict[str, Any]]):
-        if isinstance(seed, str):
-            self.essence = seed
-            self.seed = {"text": seed}
-        elif isinstance(seed, dict):
-            self.essence = seed.get("text", seed.get("essence", self.essence))
-            self.seed = {"text": self.essence}
-            self.notes.update(
-                {k: v for k, v in seed.items() if k not in ["text", "essence"]}
-            )
-        else:
-            raise ValueError("Seed must be either a string or a dictionary.")
-
-        if "text" not in self.seed:
-            self.seed["text"] = self.essence
+            raise ValueError("Seed must be either a string, dictionary, or None.")
 
     @classmethod
     def from_seed(cls, seed: Union[str, Dict[str, Any]]) -> "Soul":

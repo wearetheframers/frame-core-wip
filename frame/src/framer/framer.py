@@ -54,10 +54,8 @@ class Framer:
         self.can_execute = True  # Add can_execute attribute
 
         # Initialize roles and goals
-        self.roles = roles or []
-        self.goals = goals or []
-        self.agency.set_roles(self.roles)
-        self.agency.set_goals(self.goals)
+        self.roles = roles
+        self.goals = goals
 
     def add_observer(self, observer: Observer) -> None:
         """
@@ -178,6 +176,10 @@ class Framer:
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
+
+        # Ensure the agency has the roles and goals attributes
+        self.agency.roles = self.roles
+        self.agency.goals = self.goals
 
     # Add a docstring explaining the role and goal generation behavior
     create.__doc__ = """

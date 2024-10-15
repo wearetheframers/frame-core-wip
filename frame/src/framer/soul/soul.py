@@ -18,21 +18,7 @@ class Soul:
         Raises:
             ValueError: If the seed is not a string, dictionary, or None.
         """
-        self.seed = self._process_seed(seed)
-        self.model = SoulModel.from_seed(self.seed)
-        self.state = {}
-
-    def _process_seed(self, seed: Optional[Union[str, Dict[str, Any]]]) -> Dict[str, Any]:
-        if seed is None:
-            return {"text": "You are a helpful AI assistant."}
-        elif isinstance(seed, str):
-            return {"text": seed}
-        elif isinstance(seed, dict):
-            processed_seed = {"text": seed.get("text", seed.get("essence", "You are a helpful AI assistant."))}
-            processed_seed.update({k: v for k, v in seed.items() if k not in ["text", "essence"]})
-            return processed_seed
-        else:
-            raise ValueError("Seed must be either a string, dictionary, or None.")
+        self.model = SoulModel(seed=seed)
 
     def update_state(self, key: str, value: Any) -> None:
         """
@@ -42,9 +28,6 @@ class Soul:
             key (str): The key to update.
             value (Any): The value to set.
         """
-        if not hasattr(self, 'state'):
-            self.state = {}
-        self.state[key] = value
         self.model.state[key] = value
 
     def get_state(self, key: str) -> Any:
@@ -148,7 +131,7 @@ class Soul:
         Args:
             seed (Dict[str, Any]): A dictionary containing the new seed for the Soul.
         """
-        self.model = SoulModel.from_seed(seed)
+        self.model = SoulModel(seed=seed)
 
     def copy(self) -> "Soul":
         """
