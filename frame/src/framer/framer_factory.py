@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union
 from frame.src.framer.framer import Framer
 
 # Import necessary components for Framer creation
@@ -45,7 +45,7 @@ class FramerFactory:
 
     async def create_framer(
         self,
-        soul_seed: Optional[Dict[str, str]] = None,
+        soul_seed: Optional[Union[str, Dict[str, Any]]] = None,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
     ) -> Framer:
@@ -64,13 +64,12 @@ class FramerFactory:
 
         if soul_seed is None:
             # Generate a default soul seed if none is provided
-            soul_seed = f"Default seed for {self.config.name}"
+            soul_seed = "You are a helpful AI assistant."
 
         soul = Soul(
             seed=(
-                {"seed": soul_seed.get("seed")}
-                if isinstance(soul_seed, dict)
-                else {"seed": soul_seed}
+                soul_seed if isinstance(soul_seed, dict)
+                else {"text": soul_seed}
             )
         )
         # Initialize the Soul component with the provided or default seed
@@ -90,6 +89,9 @@ class FramerFactory:
             memory_service=memory_service,
             eq_service=eq_service,
         )
+
+        framer.agency.set_roles(roles)
+        framer.agency.set_goals(goals)
 
         return framer
 

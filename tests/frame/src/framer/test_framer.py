@@ -144,8 +144,8 @@ async def test_framer_initialize():
         goals=[],
     )
     await framer.initialize()
-    assert framer.roles == ["Generated Role"]
-    assert framer.goals == []
+    assert framer.agency.roles == ["Generated Role"]
+    assert framer.agency.goals == []
     agency.generate_roles_and_goals.assert_called_once()
 
     # Test case 4: Roles are empty list, goals are None
@@ -165,8 +165,8 @@ async def test_framer_initialize():
         goals=None,
     )
     await framer.initialize()
-    assert framer.roles == []
-    assert framer.goals == ["Generated Goal"]
+    assert framer.agency.roles == []
+    assert framer.agency.goals == ["Generated Goal"]
     agency.generate_roles_and_goals.assert_called_once()
 
     # Test case 5: Both roles and goals are provided
@@ -182,8 +182,8 @@ async def test_framer_initialize():
         goals=["Provided Goal"],
     )
     await framer.initialize()
-    assert framer.roles == ["Provided Role"]
-    assert framer.goals == ["Provided Goal"]
+    assert framer.agency.roles == ["Provided Role"]
+    assert framer.agency.goals == ["Provided Goal"]
     agency.generate_roles_and_goals.assert_not_called()
 
 
@@ -212,8 +212,8 @@ async def test_framer_initialize_with_provided_values():
         roles=["Provided Role"],
     )
     await framer.initialize()
-    assert framer.roles == ["Provided Role"]
-    assert framer.goals == ["Generated Goal"]
+    assert framer.agency.roles == ["Provided Role"]
+    assert framer.agency.goals == ["Generated Goal"]
 
     # Test case 2: Goals are provided, roles are None
     agency.generate_roles_and_goals.return_value = (["Generated Role"], [])

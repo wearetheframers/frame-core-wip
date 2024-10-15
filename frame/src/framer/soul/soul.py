@@ -1,22 +1,30 @@
-from typing import Dict, Any
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union
 from frame.src.models.framer.soul.soul import Soul as SoulModel
 
 
 class Soul:
-    def __init__(self, seed: Optional[Dict[str, Any]] = None):
+    def __init__(self, seed: Optional[Union[str, Dict[str, Any]]] = None):
         """
         Initialize a Soul instance.
 
         Args:
-            seed (Optional[Dict[str, Any]]): A dictionary containing the initial seed for the Soul.
+            seed (Optional[Union[str, Dict[str, Any]]]): The initial seed for the Soul.
+                Can be either a string or a dictionary:
+                - If a string is provided, it will be used as the 'text' value in the soul's seed dictionary.
+                - If a dictionary is provided, it can include any keys and values, with an optional 'text' key for the soul's essence.
                 The 'text' key is used for the essence, and all other key-value pairs
                 are stored in the notes. The values can be of any type. If None, default values are used.
         """
         if seed is None:
-            seed = {"text": "You are a helpful assistant."}
+            seed = "You are a helpful AI assistant."
+        
+        if isinstance(seed, str):
+            seed = {"text": seed}
+        elif isinstance(seed, dict) and "seed" in seed:
+            seed = {"text": seed["seed"]}
+        
         self.model = SoulModel(
-            essence=seed.get("text", "You are a helpful assistant."),
+            essence=seed.get("text", "You are a helpful AI assistant."),
             notes={k: v for k, v in seed.items() if k != "text"},
             state={},
         )
@@ -148,3 +156,13 @@ class Soul:
             Soul: A new instance of the Soul class with a copy of the current model.
         """
         return Soul(seed={"text": self.model.essence, **self.model.notes})
+
+def test_empty_initialization():
+    soul = Soul()
+    assert soul.seed == {"text": "You are a helpful AI assistant."}
+def test_soul_initialization(sample_soul):
+    assert sample_soul.seed["text"] == "Test seed"
+
+def test_soul_seed_initialization():
+    soul = Soul(seed={"text": "Test soul seed"})
+    assert soul.seed["text"] == "Test soul seed"

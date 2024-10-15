@@ -8,8 +8,9 @@ def sample_soul():
 
 
 def test_soul_initialization(sample_soul):
-    assert sample_soul.seed["seed"] == "Test seed"
+    assert sample_soul.seed["text"] == "Test seed"
     assert isinstance(sample_soul.state, dict)
+    assert sample_soul.model.essence == "Test seed"
 
 
 def test_update_state(sample_soul):
@@ -43,11 +44,11 @@ def test_generate_state_summary(sample_soul):
 
 
 def test_soul_seed_initialization():
-    soul = Soul(seed={"seed": "Test soul seed"})
-    assert soul.seed["seed"] == "Test soul seed"
+    soul = Soul(seed={"text": "Test soul seed"})
+    assert soul.seed == {"text": "Test soul seed"}
 
 
 def test_empty_initialization():
     soul = Soul()
-    assert soul.seed == {"seed": "You are a helpful assistant."}
+    assert soul.seed == {"text": "You are a helpful AI assistant."}
     assert isinstance(soul.state, dict)

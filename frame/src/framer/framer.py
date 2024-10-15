@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import List, Dict, Any, Optional, Callable
+from typing import List, Dict, Any, Optional, Callable, Union
 from frame.src.services.llm.main import LLMService
 from frame.src.framer.config import FramerConfig
 from frame.src.framed.config import FramedConfig
@@ -54,6 +54,12 @@ class Framer:
         self._dynamic_model_choice = False
         self.observers = []
         self.can_execute = True  # Add can_execute attribute
+        
+        # Initialize roles and goals
+        self.roles = roles or []
+        self.goals = goals or []
+        self.agency.roles = self.roles
+        self.agency.goals = self.goals
 
     def add_observer(self, observer: Observer) -> None:
         """
@@ -110,7 +116,7 @@ class Framer:
         cls,
         config: FramerConfig,
         llm_service: LLMService,
-        soul_seed: Optional[Dict[str, str]] = None,
+        soul_seed: Optional[Union[str, Dict[str, Any]]] = None,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
     ) -> "Framer":
@@ -129,7 +135,7 @@ class Framer:
             roles=roles,
             goals=goals,
         )
-        soul = Soul(seed=soul_seed if soul_seed else {"seed": "default"})
+        soul = Soul(seed=soul_seed if soul_seed else "You are a helpful AI assistant.")
         workflow_manager = WorkflowManager()
 
         return cls(
@@ -146,10 +152,22 @@ class Framer:
         )
 
     async def initialize(self):
-        if not self.agency.roles:
-            self.agency.roles, self.agency.goals = (
-                await self.agency.generate_roles_and_goals()
-            )
+        if not hasattr(self.agency, 'roles'):
+            self.agency.roles = []
+        if not hasattr(self.agency, 'goals'):
+            self.agency.goals = []
+        
+        if self.roles is None and self.goals is None:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+        elif self.roles == [] and self.goals is None:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+        elif self.goals == [] and self.roles is None:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+        elif self.roles == [] and self.goals == []:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+        
+        self.agency.roles = self.roles if self.roles is not None else []
+        self.agency.goals = self.goals if self.goals is not None else []
 
     # Add a docstring explaining the role and goal generation behavior
     create.__doc__ = """
@@ -165,7 +183,10 @@ class Framer:
     Args:
         config (FramerConfig): Configuration for the Framer.
         llm_service (LLMService): Language model service.
-        soul_seed (Optional[Dict[str, str]]): Initial seed for the Framer's soul.
+        soul_seed (Optional[Union[str, Dict[str, Any]]]): Initial seed for the Framer's soul.
+            Can be either a string or a dictionary. If a string is provided, it will be used
+            as the 'text' value in the soul's seed dictionary. If a dictionary is provided,
+            it can include any keys and values, with an optional 'text' key for the soul's essence.
         memory_service (Optional[MemoryService]): Memory service for the Framer.
         eq_service (Optional[EQService]): Emotional intelligence service for the Framer.
 
