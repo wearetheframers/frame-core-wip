@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.agency.Agency"><code class="flex name class">
 <span>class <span class="ident">Agency</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, context: Optional[<a title="frame.src.services.context.context_service.Context" href="../../services/context/context_service.html#frame.src.services.context.context_service.Context">Context</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None, execution_context: Optional[<a title="frame.src.framer.agency.execution_context.ExecutionContext" href="execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, context: Optional[Dict[str, Any]] = None, execution_context: Optional[<a title="frame.src.framer.agency.execution_context.ExecutionContext" href="execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Agency class represents the decision-making and task management component of a Framer.</p>
@@ -48,8 +48,6 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <dl>
 <dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
 <dd>The execution context containing necessary services.</dd>
-<dt><strong><code>context</code></strong> :&ensp;<code>Context</code></dt>
-<dd>The context service providing shared state and configurations.</dd>
 <dt><strong><code>roles</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
 <dd>List of roles assigned to the Agency.</dd>
 <dt><strong><code>goals</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
@@ -62,14 +60,14 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <dl>
 <dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
 <dd>The language model service.</dd>
-<dt><strong><code>context</code></strong> :&ensp;<code>Optional[Context]</code></dt>
-<dd>The context service providing shared state and configurations. Defaults to None.</dd>
+<dt><strong><code>context</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code></dt>
+<dd>Additional context for the Agency. Defaults to None.</dd>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
+<dd>The execution context for the Agency. Defaults to None.</dd>
 <dt><strong><code>roles</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
 <dd>Initial roles for the Agency. Defaults to None.</dd>
 <dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
 <dd>Initial goals for the Agency. Defaults to None.</dd>
-<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
-<dd>The execution context for the Agency. Defaults to None.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -85,7 +83,6 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 
     Attributes:
         execution_context (ExecutionContext): The execution context containing necessary services.
-        context (Context): The context service providing shared state and configurations.
         roles (List[Dict[str, Any]]): List of roles assigned to the Agency.
         goals (List[Dict[str, Any]]): List of goals for the Agency.
         workflow_manager (WorkflowManager): Manages workflows and tasks.
@@ -94,29 +91,30 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
     def __init__(
         self,
         llm_service: LLMService,
-        context: Optional[Context] = None,
+        context: Optional[Dict[str, Any]] = None,
+        execution_context: Optional[ExecutionContext] = None,
         roles: Optional[List[Dict[str, Any]]] = None,
         goals: Optional[List[Dict[str, Any]]] = None,
-        execution_context: Optional[ExecutionContext] = None,
     ):
         &#34;&#34;&#34;
         Initialize an Agency instance.
 
         Args:
             llm_service (LLMService): The language model service.
-            context (Optional[Context]): The context service providing shared state and configurations. Defaults to None.
+            context (Optional[Dict[str, Any]]): Additional context for the Agency. Defaults to None.
+            execution_context (Optional[ExecutionContext]): The execution context for the Agency. Defaults to None.
             roles (Optional[List[Dict[str, Any]]]): Initial roles for the Agency. Defaults to None.
             goals (Optional[List[Dict[str, Any]]]): Initial goals for the Agency. Defaults to None.
-            execution_context (Optional[ExecutionContext]): The execution context for the Agency. Defaults to None.
         &#34;&#34;&#34;
         self.llm_service = llm_service
-        self.context = context or Context()
+        self.context = context or {}
+        self.execution_context = execution_context or ExecutionContext(llm_service=llm_service)
         self.roles = roles or []
         self.goals = goals or []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, &#39;default_model&#39;, &#39;gpt-3.5-turbo&#39;)
-        self.execution_context = execution_context or ExecutionContext(llm_service=llm_service)
+        self.action_registry = ActionRegistry()
 
     def add_role(self, role: Dict[str, Any]) -&gt; None:
         &#34;&#34;&#34;
@@ -345,6 +343,50 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                 {
                     &#34;name&#34;: &#34;Task Assistant&#34;,
                     &#34;description&#34;: &#34;Assist with the given task or query.&#34;,
+                }
+            ]
+
+    async def generate_goals(self) -&gt; List[Dict[str, Any]]:
+        &#34;&#34;&#34;
+        Generate goals based on the Framer&#39;s context.
+
+        Returns:
+            List[Dict[str, Any]]: A list of generated goals.
+        &#34;&#34;&#34;
+        soul = getattr(self.context, &#34;soul&#34;, {})
+        prompt = f&#34;&#34;&#34;Generate a goal that aligns with the Framer&#39;s current context. 
+        The goal should be clear, relevant, and directly related to the given information.
+        Avoid creating complex scenarios. Keep it simple and focused.
+        
+        Soul: {json.dumps(soul, indent=2)}
+        
+        Respond with a JSON object containing &#39;description&#39; and &#39;priority&#39; fields for the goal.&#34;&#34;&#34;
+
+        logger.debug(f&#34;Goal generation prompt: {prompt}&#34;)
+        try:
+            response = await self.llm_service.get_completion(
+                prompt, model=self.default_model, max_tokens=150, temperature=0.5
+            )
+            logger.debug(f&#34;Goal generation response: {response}&#34;)
+            goal = json.loads(response)
+            if not goal:
+                logger.warning(
+                    &#34;Received empty response while generating goal. Using default goal.&#34;
+                )
+                return [
+                    {
+                        &#34;description&#34;: &#34;Assist users based on the given input.&#34;,
+                        &#34;priority&#34;: 50.0,
+                    }
+                ]
+            return [goal] if isinstance(goal, dict) else goal
+        except Exception as e:
+            logger.error(f&#34;Error generating goal: {e}&#34;, exc_info=True)
+            logger.error(f&#34;Prompt used for goal generation: {prompt}&#34;)
+            return [
+                {
+                    &#34;description&#34;: &#34;Assist users to the best of my abilities&#34;,
+                    &#34;priority&#34;: 1,
                 }
             ]
 

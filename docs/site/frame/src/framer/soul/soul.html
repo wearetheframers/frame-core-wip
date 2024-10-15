@@ -31,27 +31,6 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="frame.src.framer.soul.soul.test_empty_initialization"><code class="name flex">
-<span>def <span class="ident">test_empty_initialization</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.soul.soul.test_soul_initialization"><code class="name flex">
-<span>def <span class="ident">test_soul_initialization</span></span>(<span>sample_soul)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.soul.soul.test_soul_seed_initialization"><code class="name flex">
-<span>def <span class="ident">test_soul_seed_initialization</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -64,43 +43,54 @@ hljs.highlightAll();
 <div class="desc"><p>Initialize a Soul instance.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>seed</code></strong> :&ensp;<code>Optional[Union[str, Dict[str, Any]]]</code></dt>
+<dt><strong><code>seed</code></strong> :&ensp;<code>Optional[Union[str, Dict[str, Any]]]</code>, optional</dt>
 <dd>The initial seed for the Soul.
 Can be either a string or a dictionary:
 - If a string is provided, it will be used as the 'text' value in the soul's seed dictionary.
 - If a dictionary is provided, it can include any keys and values, with an optional 'text' key for the soul's essence.
 The 'text' key is used for the essence, and all other key-value pairs
-are stored in the notes. The values can be of any type. If None, default values are used.</dd>
+are stored in the notes. The values can be of any type. Defaults to None.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If the seed is not a string, dictionary, or None.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Soul:
-    def __init__(self, seed: Optional[Union[str, Dict[str, Any]]] = None):
+    def __init__(self, seed: Optional[Union[str, Dict[str, Any]]] = None) -&gt; None:
         &#34;&#34;&#34;
         Initialize a Soul instance.
 
         Args:
-            seed (Optional[Union[str, Dict[str, Any]]]): The initial seed for the Soul.
+            seed (Optional[Union[str, Dict[str, Any]]], optional): The initial seed for the Soul.
                 Can be either a string or a dictionary:
                 - If a string is provided, it will be used as the &#39;text&#39; value in the soul&#39;s seed dictionary.
                 - If a dictionary is provided, it can include any keys and values, with an optional &#39;text&#39; key for the soul&#39;s essence.
                 The &#39;text&#39; key is used for the essence, and all other key-value pairs
-                are stored in the notes. The values can be of any type. If None, default values are used.
-        &#34;&#34;&#34;
-        if seed is None:
-            seed = {&#34;text&#34;: &#34;You are a helpful AI assistant.&#34;}
-        elif isinstance(seed, str):
-            seed = {&#34;text&#34;: seed}
+                are stored in the notes. The values can be of any type. Defaults to None.
 
-        self.model = SoulModel(
-            essence=seed.get(&#34;text&#34;, &#34;You are a helpful AI assistant.&#34;),
-            notes={k: v for k, v in seed.items() if k != &#34;text&#34;},
-            state={},
-        )
-        self.seed = seed
-        self.state = self.model.state
+        Raises:
+            ValueError: If the seed is not a string, dictionary, or None.
+        &#34;&#34;&#34;
+        self.seed = self._process_seed(seed)
+        self.model = SoulModel.from_seed(self.seed)
+        self.state = {}
+
+    def _process_seed(self, seed: Optional[Union[str, Dict[str, Any]]]) -&gt; Dict[str, Any]:
+        if seed is None:
+            return {&#34;text&#34;: &#34;You are a helpful AI assistant.&#34;}
+        elif isinstance(seed, str):
+            return {&#34;text&#34;: seed}
+        elif isinstance(seed, dict):
+            processed_seed = {&#34;text&#34;: seed.get(&#34;text&#34;, seed.get(&#34;essence&#34;, &#34;You are a helpful AI assistant.&#34;))}
+            processed_seed.update({k: v for k, v in seed.items() if k not in [&#34;text&#34;, &#34;essence&#34;]})
+            return processed_seed
+        else:
+            raise ValueError(&#34;Seed must be either a string, dictionary, or None.&#34;)
 
     def update_state(self, key: str, value: Any) -&gt; None:
         &#34;&#34;&#34;
@@ -110,6 +100,9 @@ are stored in the notes. The values can be of any type. If None, default values 
             key (str): The key to update.
             value (Any): The value to set.
         &#34;&#34;&#34;
+        if not hasattr(self, &#39;state&#39;):
+            self.state = {}
+        self.state[key] = value
         self.model.state[key] = value
 
     def get_state(self, key: str) -&gt; Any:
@@ -126,10 +119,10 @@ are stored in the notes. The values can be of any type. If None, default values 
 
     def get_current_state(self) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
-        Get the current state of the Soul.
+        Get a copy of the current state of the Soul.
 
         Returns:
-            Dict[str, Any]: The current state of the Soul.
+            Dict[str, Any]: A shallow copy of the current state of the Soul.
         &#34;&#34;&#34;
         return self.model.state.copy()
 
@@ -213,11 +206,7 @@ are stored in the notes. The values can be of any type. If None, default values 
         Args:
             seed (Dict[str, Any]): A dictionary containing the new seed for the Soul.
         &#34;&#34;&#34;
-        self.model = SoulModel(
-            essence=seed.get(&#34;text&#34;, &#34;You are a helpful assistant.&#34;),
-            notes={k: v for k, v in seed.items() if k != &#34;text&#34;},
-            state={},
-        )
+        self.model = SoulModel.from_seed(seed)
 
     def copy(self) -&gt; &#34;Soul&#34;:
         &#34;&#34;&#34;
@@ -256,11 +245,11 @@ are stored in the notes. The values can be of any type. If None, default values 
 <span>def <span class="ident">get_current_state</span></span>(<span>self) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get the current state of the Soul.</p>
+<div class="desc"><p>Get a copy of the current state of the Soul.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>Dict[str, Any]</code></dt>
-<dd>The current state of the Soul.</dd>
+<dd>A shallow copy of the current state of the Soul.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.soul.soul.Soul.get_essence"><code class="name flex">
@@ -391,13 +380,6 @@ are stored in the notes. The values can be of any type. If None, default values 
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="frame.src.framer.soul" href="index.html">frame.src.framer.soul</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="frame.src.framer.soul.soul.test_empty_initialization" href="#frame.src.framer.soul.soul.test_empty_initialization">test_empty_initialization</a></code></li>
-<li><code><a title="frame.src.framer.soul.soul.test_soul_initialization" href="#frame.src.framer.soul.soul.test_soul_initialization">test_soul_initialization</a></code></li>
-<li><code><a title="frame.src.framer.soul.soul.test_soul_seed_initialization" href="#frame.src.framer.soul.soul.test_soul_seed_initialization">test_soul_seed_initialization</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

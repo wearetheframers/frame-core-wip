@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.framer.Framer"><code class="flex name class">
 <span>class <span class="ident">Framer</span></span>
-<span>(</span><span>config: <a title="frame.src.framed.config.FramedConfig" href="../framed/config.html#frame.src.framed.config.FramedConfig">FramedConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager" href="agency/tasks/workflow/workflow_manager.html#frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None)</span>
+<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager" href="agency/tasks/workflow/workflow_manager.html#frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -48,7 +48,7 @@ hljs.highlightAll();
 <pre><code class="python">class Framer:
     def __init__(
         self,
-        config: FramedConfig,
+        config: FramerConfig,
         llm_service: LLMService,
         agency: Agency,
         brain: Brain,
@@ -62,8 +62,6 @@ hljs.highlightAll();
         self._streamed_response = {&#34;status&#34;: &#34;pending&#34;, &#34;result&#34;: &#34;&#34;}
         self.config = config
         self.llm_service = llm_service
-        if config.default_model and config.default_model != &#34;gpt-3.5-turbo&#34;:
-            self.llm_service.set_default_model(config.default_model)
         self.agency = agency
         self.brain = brain
         self.soul = soul
@@ -77,8 +75,8 @@ hljs.highlightAll();
         # Initialize roles and goals
         self.roles = roles or []
         self.goals = goals or []
-        self.agency.roles = self.roles
-        self.agency.goals = self.goals
+        self.agency.set_roles(self.roles)
+        self.agency.set_goals(self.goals)
 
     def add_observer(self, observer: Observer) -&gt; None:
         &#34;&#34;&#34;
@@ -145,10 +143,6 @@ hljs.highlightAll();
         roles = config.roles
         goals = config.goals
 
-        # We initialize roles and goals in the initialize method now
-        # if roles is None or goals is None:
-        #     roles, goals = await agency.generate_roles_and_goals()
-
         soul = Soul(seed=soul_seed)
         brain = Brain(
             llm_service=llm_service,
@@ -159,7 +153,7 @@ hljs.highlightAll();
         )
         workflow_manager = WorkflowManager()
 
-        return cls(
+        framer = cls(
             config=config,
             llm_service=llm_service,
             agency=agency,
@@ -171,6 +165,9 @@ hljs.highlightAll();
             roles=roles,
             goals=goals,
         )
+
+        await framer.initialize()
+        return framer
 
     async def initialize(self):
         &#34;&#34;&#34;
@@ -192,6 +189,11 @@ hljs.highlightAll();
         elif self.roles and self.goals is None:
             new_roles, _ = await self.agency.generate_roles_and_goals()
             self.roles.extend(new_roles)
+
+        if not self.roles:
+            self.roles = [{&#34;name&#34;: &#34;Default Role&#34;, &#34;description&#34;: &#34;A generated Role&#34;}]
+        if not self.goals:
+            self.goals = [{&#34;description&#34;: &#34;Assist users to the best of my abilities&#34;, &#34;priority&#34;: 1}]
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)

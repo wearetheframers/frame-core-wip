@@ -104,33 +104,33 @@ hljs.highlightAll();
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.actions.respond"><code class="name flex">
-<span>def <span class="ident">respond</span></span>(<span>self, input_data: str) ‑> str</span>
+<span>async def <span class="ident">respond</span></span>(<span>execution_context: <a title="frame.src.framer.agency.execution_context.ExecutionContext" href="../execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>, **kwargs) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Generate a response to a given input or query.</p>
+<div class="desc"><p>Generate a response based on the current context, emphasizing the most recent perception.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>self</code></strong></dt>
-<dd>The current Framer instance.</dd>
-<dt><strong><code>input_data</code></strong> :&ensp;<code>str</code></dt>
-<dd>The input data or query.</dd>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
+<dd>The execution context containing necessary services.</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Additional keyword arguments that might be passed to the action.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>str</code></dt>
-<dd>The generated response.</dd>
+<dt><code>Dict[str, Any]</code></dt>
+<dd>A dictionary containing the generated response.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.actions.think"><code class="name flex">
-<span>async def <span class="ident">think</span></span>(<span>framer: Any, thought: str = 'Processing information...') ‑> Dict[str, Any]</span>
+<span>async def <span class="ident">think</span></span>(<span>execution_context: <a title="frame.src.framer.agency.execution_context.ExecutionContext" href="../execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>, thought: str = 'Processing information...') ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Ponder and reflect on the current situation, potentially creating new tasks or generating a new prompt.
 This action is only necessary if a new prompt should be generated with new pretext and context for better results.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>framer</code></strong> :&ensp;<code>Any</code></dt>
-<dd>The Framer instance.</dd>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
+<dd>The execution context containing necessary services.</dd>
 <dt><strong><code>thought</code></strong> :&ensp;<code>str</code></dt>
 <dd>The initial thought or idea to process.</dd>
 </dl>

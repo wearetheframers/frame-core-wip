@@ -89,25 +89,64 @@ validated to form a valid model.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Soul(BaseModel):
-    seed: Optional[Dict[str, str]] = Field(
-        None,
-        description=&#34;The seed for the Framer&#39;s initialization. Can be a string or a dictionary with a &#39;seed&#39; key.&#34;,
+    essence: str = Field(
+        default=&#34;You are a helpful AI assistant.&#34;,
+        description=&#34;The essence or core of the Soul.&#34;,
+    )
+    notes: Dict[str, Any] = Field(
+        default_factory=dict,
+        description=&#34;Additional notes or attributes of the Soul.&#34;,
     )
     state: Dict[str, Any] = Field(
-        default_factory=dict, description=&#34;The state of the Soul&#34;
+        default_factory=dict,
+        description=&#34;The current state of the Soul&#34;,
+    )
+    seed: Dict[str, Any] = Field(
+        default_factory=lambda: {&#34;text&#34;: &#34;You are a helpful AI assistant.&#34;},
+        description=&#34;The seed for the Soul&#39;s initialization.&#34;,
     )
 
-    &#34;&#34;&#34;
-    The Soul class represents the intrinsic characteristics and identity of a Framer.
+    class Config:
+        arbitrary_types_allowed = True
 
-    Characteristics can be set to arbitrary values such as &#39;low&#39;, &#39;medium&#39;, &#39;high&#39;, and &#39;extreme&#39;.
-    These characteristics influence the Soul and, consequently, the personality and behavior of the Framer,
-    if personality is enabled in the Framer.
+    def __init__(self, **data):
+        super().__init__(**data)
+        if &#34;seed&#34; in data:
+            self._process_seed(data[&#34;seed&#34;])
+        else:
+            self.seed = {&#34;text&#34;: &#34;You are a helpful AI assistant.&#34;}
 
-    Attributes:
-        seed (Optional[str]): The seed for the Soul&#39;s initialization.
-        state (Dict[str, Any]): The state of the Soul, including characteristics.
-    &#34;&#34;&#34;</code></pre>
+    def _process_seed(self, seed: Union[str, Dict[str, Any]]):
+        if isinstance(seed, str):
+            self.essence = seed
+            self.seed = {&#34;text&#34;: seed}
+        elif isinstance(seed, dict):
+            self.essence = seed.get(&#34;text&#34;, seed.get(&#34;essence&#34;, self.essence))
+            self.seed = {&#34;text&#34;: self.essence}
+            self.notes.update(
+                {k: v for k, v in seed.items() if k not in [&#34;text&#34;, &#34;essence&#34;]}
+            )
+        else:
+            raise ValueError(&#34;Seed must be either a string or a dictionary.&#34;)
+
+        if &#34;text&#34; not in self.seed:
+            self.seed[&#34;text&#34;] = self.essence
+
+    @classmethod
+    def from_seed(cls, seed: Union[str, Dict[str, Any]]) -&gt; &#34;Soul&#34;:
+        &#34;&#34;&#34;
+        Create a Soul instance from a seed.
+
+        Args:
+            seed (Union[str, Dict[str, Any]]): The seed for the Soul.
+                Can be either a string or a dictionary:
+                - If a string is provided, it will be used as the &#39;essence&#39; of the Soul.
+                - If a dictionary is provided, it can include &#39;text&#39; or &#39;essence&#39; and other key-value pairs for notes.
+
+        Returns:
+            Soul: A new Soul instance initialized with the provided seed.
+        &#34;&#34;&#34;
+        return cls(seed=seed)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -145,17 +184,7 @@ validated to form a valid model.</p>
 </dd>
 <dt id="frame.src.models.framer.soul.soul.Soul.state"><code class="name">var <span class="ident">state</span> : Dict[str, Any]</code></dt>
 <dd>
-<div class="desc"><p>The Soul class represents the intrinsic characteristics and identity of a Framer.</p>
-<p>Characteristics can be set to arbitrary values such as 'low', 'medium', 'high', and 'extreme'.
-These characteristics influence the Soul and, consequently, the personality and behavior of the Framer,
-if personality is enabled in the Framer.</p>
-<h2 id="attributes">Attributes</h2>
-<dl>
-<dt><strong><code>seed</code></strong> :&ensp;<code>Optional[str]</code></dt>
-<dd>The seed for the Soul's initialization.</dd>
-<dt><strong><code>state</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
-<dd>The state of the Soul, including characteristics.</dd>
-</dl></div>
+<div class="desc"></div>
 </dd>
 </dl>
 <h3>Static methods</h3>

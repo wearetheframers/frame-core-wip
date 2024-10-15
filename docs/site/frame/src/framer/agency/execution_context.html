@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.execution_context.ExecutionContext"><code class="flex name class">
 <span>class <span class="ident">ExecutionContext</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None, state: Dict[str, Any] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -52,12 +52,35 @@ hljs.highlightAll();
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
         soul: Optional[Soul] = None,
+        state: Dict[str, Any] = None,
     ):
         self.llm_service = llm_service
         self.memory_service = memory_service
         self.eq_service = eq_service
-        self.soul = soul</code></pre>
+        self.soul = soul
+        self.state = state or {}
+
+    def set_state(self, key: str, value: Any) -&gt; None:
+        self.state[key] = value
+
+    def get_state(self, key: str, default: Any = None) -&gt; Any:
+        return self.state.get(key, default)</code></pre>
 </details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.execution_context.ExecutionContext.get_state"><code class="name flex">
+<span>def <span class="ident">get_state</span></span>(<span>self, key: str, default: Any = None) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.execution_context.ExecutionContext.set_state"><code class="name flex">
+<span>def <span class="ident">set_state</span></span>(<span>self, key: str, value: Any) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 </dd>
 </dl>
 </section>
@@ -76,6 +99,10 @@ hljs.highlightAll();
 <ul>
 <li>
 <h4><code><a title="frame.src.framer.agency.execution_context.ExecutionContext" href="#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.execution_context.ExecutionContext.get_state" href="#frame.src.framer.agency.execution_context.ExecutionContext.get_state">get_state</a></code></li>
+<li><code><a title="frame.src.framer.agency.execution_context.ExecutionContext.set_state" href="#frame.src.framer.agency.execution_context.ExecutionContext.set_state">set_state</a></code></li>
+</ul>
 </li>
 </ul>
 </li>
