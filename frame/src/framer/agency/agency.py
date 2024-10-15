@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional, Tuple, Union
 from frame.src.framer.agency.tasks.task import Task, TaskStatus
 from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services.llm.main import LLMService
@@ -110,20 +110,23 @@ class Agency:
         return self.goals
 
     def create_task(
-        self, description: str, priority: float = 50.0, workflow_id: str = "default"
+        self, description: str, priority: Union[float, str] = 50.0, workflow_id: str = "default"
     ) -> Task:
         """
         Create a new task with the given description and priority.
 
         Args:
             description (str): The description of the task.
-            priority (float, optional): The priority of the task. Defaults to 50.0.
+            priority (Union[float, str], optional): The priority of the task. Can be a float or a string. Defaults to 50.0.
             workflow_id (str, optional): The ID of the workflow this task belongs to. Defaults to "default".
 
         Returns:
             Task: The created Task object.
         """
-        return Task(description=description, priority=priority, workflow_id=workflow_id)
+        if isinstance(priority, str):
+            priority_map = {"Low": 25.0, "Medium": 50.0, "High": 75.0}
+            priority = priority_map.get(priority.capitalize(), 50.0)
+        return Task(description=description, priority=float(priority), workflow_id=workflow_id)
 
     def add_task(self, task: Task, workflow_id: str = "default") -> None:
         """
@@ -409,6 +412,23 @@ class Agency:
         """
         new_roles = await self.generate_roles()
         new_goals = await self.generate_goals()
+        
+        if not new_roles:
+            new_roles = [
+                {
+                    "name": "Task Assistant",
+                    "description": "Assist with the given task or query.",
+                }
+            ]
+        
+        if not new_goals:
+            new_goals = [
+                {
+                    "description": "Assist users to the best of my abilities",
+                    "priority": 1,
+                }
+            ]
+        
         return new_roles, new_goals
 
     async def execute_task(self, task: Task) -> str:

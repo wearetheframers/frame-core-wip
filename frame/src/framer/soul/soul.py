@@ -19,7 +19,7 @@ class Soul:
             ValueError: If the seed is not a string, dictionary, or None.
         """
         self.model = SoulModel(seed=seed)
-        self.seed = seed
+        self.seed = self.model.seed
 
     def update_state(self, key: str, value: Any) -> None:
         """
@@ -42,6 +42,10 @@ class Soul:
             Any: The value associated with the key, or None if not found.
         """
         return self.model.state.get(key)
+
+    @property
+    def state(self):
+        return self.model.state
 
     def get_current_state(self) -> Dict[str, Any]:
         """

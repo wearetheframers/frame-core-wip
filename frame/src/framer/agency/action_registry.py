@@ -115,10 +115,9 @@ class ActionRegistry:
     ):
         action = self.get_action(name)
         if not action:
-            # Use the default "respond" action if the requested action is not found
-            action = self.get_action("respond")
-            if not action:
-                raise ValueError("Default 'respond' action not found")
+            raise ValueError(f"Action '{name}' not found")
+        if self.execution_context is None:
+            raise ValueError("Execution context is not set")
         result = await action["action_func"](self.execution_context, *args, **kwargs)
         if callback:
             callback(result, *callback_args)
