@@ -74,23 +74,25 @@ class Brain:
 
         # Initialize ExecutionContext if not provided
         self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service,
-            soul=self.soul,
-            state={}
+            llm_service=self.llm_service, soul=self.soul, state={}
         )
 
         # Initialize ActionRegistry
         self.action_registry = ActionRegistry(self.execution_context)
-        
+
         # Initialize Agency
-        self.agency = Agency(llm_service=self.llm_service, context=None, execution_context=self.execution_context)
-        
+        self.agency = Agency(
+            llm_service=self.llm_service,
+            context=None,
+            execution_context=self.execution_context,
+        )
+
         # Register the respond action using the agency's perform_task method
         self.action_registry.register_action(
             "respond",
             self.agency.perform_task,
             description="Generate a response based on the current context",
-            priority=5
+            priority=5,
         )
 
         # Update the agency's action_registry
@@ -111,7 +113,11 @@ class Brain:
                 - new_prompt (str): The new prompt if generate_new_prompt is True.
         """
         # Gather context for thinking
-        soul_context = self.execution_context.soul.get_current_state() if self.execution_context.soul else {}
+        soul_context = (
+            self.execution_context.soul.get_current_state()
+            if self.execution_context.soul
+            else {}
+        )
         roles_and_goals = {"roles": self.roles, "goals": self.goals}
         recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
         recent_perceptions = self.mind.get_recent_perceptions(5)
@@ -129,8 +135,8 @@ class Brain:
         """
         try:
             # Remove trailing commas from the response
-            response = re.sub(r',\s*}', '}', response)
-            response = re.sub(r',\s*]', ']', response)
+            response = re.sub(r",\s*}", "}", response)
+            response = re.sub(r",\s*]", "]", response)
             return json.loads(response)
         except json.JSONDecodeError as e:
             logger.error(f"JSON parsing error: {e}")
@@ -141,8 +147,8 @@ class Brain:
                 cleaned_response = "\n".join(response.split("\n")[1:-1])
                 try:
                     # Remove trailing commas from the cleaned response
-                    cleaned_response = re.sub(r',\s*}', '}', cleaned_response)
-                    cleaned_response = re.sub(r',\s*]', ']', cleaned_response)
+                    cleaned_response = re.sub(r",\s*}", "}", cleaned_response)
+                    cleaned_response = re.sub(r",\s*]", "]", cleaned_response)
                     return json.loads(cleaned_response)
                 except json.JSONDecodeError:
                     pass  # If this also fails, continue to the error return
@@ -214,7 +220,9 @@ class Brain:
         action = decision_data.get("action", "respond").lower()
         valid_actions = [
             action.lower() for action in self.action_registry.actions.keys()
-        ] + ["test_action"]  # Add "test_action" for testing purposes
+        ] + [
+            "test_action"
+        ]  # Add "test_action" for testing purposes
 
         if action not in valid_actions:
             invalid_action = action
@@ -265,15 +273,19 @@ class Brain:
                 result = await self._execute_think_action(decision)
             else:
                 if decision.action not in self.action_registry.actions:
-                    raise ValueError(f"Action '{decision.action}' not found in registry.")
-                
+                    raise ValueError(
+                        f"Action '{decision.action}' not found in registry."
+                    )
+
                 # For 'respond' action, ensure 'content' is passed correctly
                 if decision.action == "respond":
                     # For 'respond' action, we'll use the agency's perform_task method directly
-                    result = await self.agency.perform_task({
-                        "description": decision.parameters.get("content", ""),
-                        "workflow_id": "default"
-                    })
+                    result = await self.agency.perform_task(
+                        {
+                            "description": decision.parameters.get("content", ""),
+                            "workflow_id": "default",
+                        }
+                    )
                 else:
                     result = await self.action_registry.execute_action(
                         decision.action, decision.parameters
@@ -303,10 +315,16 @@ class Brain:
             Any: The result of the think action.
         """
         # Gather context for thinking
-        soul_context = self.execution_context.soul.get_current_state() if self.execution_context.soul else {}
+        soul_context = (
+            self.execution_context.soul.get_current_state()
+            if self.execution_context.soul
+            else {}
+        )
         roles_and_goals = {"roles": self.roles, "goals": self.goals}
         recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
-        recent_perceptions = self.mind.get_recent_perceptions(5)  # Use a fixed number instead of recent_perceptions_limit
+        recent_perceptions = self.mind.get_recent_perceptions(
+            5
+        )  # Use a fixed number instead of recent_perceptions_limit
 
         # Prepare the prompt for the LLM
         prompt = f"""

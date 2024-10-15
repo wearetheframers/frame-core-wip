@@ -24,7 +24,9 @@ async def test_metrics_tracking(frame):
     metrics = metrics_manager.get_metrics()
 
     # Check total calls
-    assert metrics["total_calls"] >= 3, f"Expected at least 3 calls, got {metrics['total_calls']}. Metrics: {metrics}"
+    assert (
+        metrics["total_calls"] >= 3
+    ), f"Expected at least 3 calls, got {metrics['total_calls']}. Metrics: {metrics}"
 
     # Check model-specific calls
     assert metrics["models"]["gpt-3.5-turbo"]["calls"] == 2

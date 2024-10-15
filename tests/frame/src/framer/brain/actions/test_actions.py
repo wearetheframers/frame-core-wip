@@ -16,7 +16,9 @@ async def test_register_and_perform_action(action_registry):
     action_registry.register_action(
         "test_action", test_action, "Test action description", 8
     )
-    result = await action_registry.perform_action("test_action", arg1="value1", arg2="value2")
+    result = await action_registry.perform_action(
+        "test_action", arg1="value1", arg2="value2"
+    )
     assert result == "Test action performed with value1 and value2"
 
     action_info = action_registry.actions["test_action"]
@@ -107,7 +109,9 @@ async def test_default_actions(action_registry):
     for action in default_actions:
         assert action in valid_actions
         if action == "research":
-            result = await action_registry.perform_action(action, research_topic="test topic")
+            result = await action_registry.perform_action(
+                action, research_topic="test topic"
+            )
         else:
             result = await action_registry.perform_action(action)
         assert result is not None or isinstance(result, (str, dict))

@@ -3,7 +3,9 @@ from typing import Optional
 from frame.src.framer.agency.execution_context import ExecutionContext
 
 
-async def research(execution_context: Optional[ExecutionContext], research_topic: str) -> str:
+async def research(
+    execution_context: Optional[ExecutionContext], research_topic: str
+) -> str:
     """
     Perform research on a given topic and summarize findings.
 

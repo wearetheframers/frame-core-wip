@@ -107,10 +107,7 @@ class Mind:
         Args:
             thought (str): The thought to add.
         """
-        new_thought = {
-            "content": thought,
-            "timestamp": datetime.now()
-        }
+        new_thought = {"content": thought, "timestamp": datetime.now()}
         self.thoughts.append(new_thought)
         self.current_thought = new_thought
         logger.debug(f"New thought: {thought}")
@@ -145,7 +142,7 @@ class Mind:
         Returns:
             List[Dict[str, Any]]: All thoughts with their timestamps.
         """
-        return sorted(self.thoughts, key=lambda x: x['timestamp'], reverse=True)
+        return sorted(self.thoughts, key=lambda x: x["timestamp"], reverse=True)
 
     def clear_thoughts(self) -> None:
         """

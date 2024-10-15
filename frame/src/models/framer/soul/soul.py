@@ -23,18 +23,20 @@ class Soul(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    @validator('seed', pre=True, always=True)
+    @validator("seed", pre=True, always=True)
     def process_seed(cls, v, values):
         if isinstance(v, str):
-            values['essence'] = v
+            values["essence"] = v
             return {"text": v}
         elif isinstance(v, dict):
-            values['essence'] = v.get("text", v.get("essence", values.get('essence')))
-            seed = {"text": values['essence']}
-            values['notes'].update({k: v for k, v in v.items() if k not in ["text", "essence"]})
+            values["essence"] = v.get("text", v.get("essence", values.get("essence")))
+            seed = {"text": values["essence"]}
+            values["notes"].update(
+                {k: v for k, v in v.items() if k not in ["text", "essence"]}
+            )
             return seed
         elif v is None:
-            return {"text": values.get('essence', "You are a helpful AI assistant.")}
+            return {"text": values.get("essence", "You are a helpful AI assistant.")}
         else:
             raise ValueError("Seed must be either a string, dictionary, or None.")
 

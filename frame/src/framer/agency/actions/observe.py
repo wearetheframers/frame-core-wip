@@ -23,6 +23,8 @@ def observe(
     # Placeholder for observation processing logic
     print(f"Processing observation: {observation}")
     return f"Processed observation: {observation}"
+
+
 from typing import Dict, Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:

@@ -15,22 +15,28 @@ async def respond(execution_context: ExecutionContext, **kwargs) -> Dict[str, An
     """
     llm_service = execution_context.llm_service
     soul = execution_context.soul
-    
+
     # Get the most recent perception
-    recent_perception = execution_context.get_state("recent_perception", "No recent perception available.")
-    
+    recent_perception = execution_context.get_state(
+        "recent_perception", "No recent perception available."
+    )
+
     # Get recent memories and perceptions
-    recent_memories = execution_context.memory_service.get_recent_memories(5) if execution_context.memory_service else []
+    recent_memories = (
+        execution_context.memory_service.get_recent_memories(5)
+        if execution_context.memory_service
+        else []
+    )
     recent_perceptions = execution_context.get_state("recent_perceptions", [])[-5:]
-    
+
     # Get roles, goals, and soul information
     roles = execution_context.get_state("roles", [])
     goals = execution_context.get_state("goals", [])
     soul_state = soul.get_current_state() if soul else {}
-    
+
     # Get the content from kwargs if provided, otherwise use recent_perception
-    content = kwargs.get('content', recent_perception)
-    
+    content = kwargs.get("content", recent_perception)
+
     # Construct the prompt
     prompt = f"""
     As an AI assistant with the following characteristics:
@@ -50,8 +56,8 @@ async def respond(execution_context: ExecutionContext, **kwargs) -> Dict[str, An
     
     Response:
     """
-    
+
     # Get the completion from the language model
     response = await llm_service.get_completion(prompt)
-    
+
     return {"response": response.strip()}

@@ -128,7 +128,9 @@ def run_framer(ctx, json_input, sync, stream):
         )
 
         if framed.soul is None:
-            logger.error("Error: Framer's Soul is null. Initializing with default values.")
+            logger.error(
+                "Error: Framer's Soul is null. Initializing with default values."
+            )
             framed.soul = Soul()
 
         if perception:

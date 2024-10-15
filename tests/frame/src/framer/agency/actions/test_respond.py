@@ -18,10 +18,12 @@ def mock_execution_context():
 
 @pytest.mark.asyncio
 async def test_respond(mock_execution_context):
-    mock_execution_context.llm_service.get_completion.return_value = "Generated response"
-    
+    mock_execution_context.llm_service.get_completion.return_value = (
+        "Generated response"
+    )
+
     result = await respond(mock_execution_context)
-    
+
     assert isinstance(result, dict)
     assert "response" in result
     assert result["response"] == "Generated response"
@@ -30,4 +32,7 @@ async def test_respond(mock_execution_context):
     mock_execution_context.llm_service.get_completion.assert_called_once()
     prompt = mock_execution_context.llm_service.get_completion.call_args[0][0]
     assert "As an AI assistant with the following characteristics:" in prompt
-    assert "Please generate a response that takes into account all of the above information" in prompt
+    assert (
+        "Please generate a response that takes into account all of the above information"
+        in prompt
+    )

@@ -62,14 +62,18 @@ def test_soul_initialization_with_dict():
     assert soul.seed == {"text": "Test essence"}
     assert soul.model.essence == "Test essence"
     assert soul.model.notes == {"attribute1": "value1", "attribute2": "value2"}
+
+
 import pytest
 from frame.src.framer.soul.soul import Soul
+
 
 def test_soul_initialization():
     soul = Soul()
     assert soul is not None
     assert soul.seed == {"text": "You are a helpful AI assistant."}
     assert soul.model.seed == {"text": "You are a helpful AI assistant."}
+
 
 def test_soul_with_custom_seed():
     custom_seed = {"text": "Custom assistant", "trait": "friendly"}
@@ -79,6 +83,7 @@ def test_soul_with_custom_seed():
     assert soul.model.seed == {"text": "Custom assistant"}
     assert soul.model.notes == {"trait": "friendly"}
     assert soul.model.essence == "Custom assistant"
+
 
 def test_soul_seed_is_never_none():
     soul = Soul(seed=None)

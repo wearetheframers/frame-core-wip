@@ -4,7 +4,7 @@ from frame.src.services.memory.main import MemoryService
 from frame.src.services.eq.main import EQService
 from frame.src.framer.soul.soul import Soul
 
-__all__ = ['ExecutionContext']
+__all__ = ["ExecutionContext"]
 
 
 class ExecutionContext:

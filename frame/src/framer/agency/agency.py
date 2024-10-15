@@ -47,12 +47,14 @@ class Agency:
         """
         self.llm_service = llm_service
         self.context = context or {}
-        self.execution_context = execution_context or ExecutionContext(llm_service=llm_service)
+        self.execution_context = execution_context or ExecutionContext(
+            llm_service=llm_service
+        )
         self.roles = roles if roles is not None else []
         self.goals = goals if goals is not None else []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
-        self.default_model = getattr(self.llm_service, 'default_model', 'gpt-3.5-turbo')
+        self.default_model = getattr(self.llm_service, "default_model", "gpt-3.5-turbo")
         self.action_registry = ActionRegistry(self.execution_context)
 
     def add_role(self, role: Dict[str, Any]) -> None:
@@ -110,7 +112,10 @@ class Agency:
         return self.goals
 
     def create_task(
-        self, description: str, priority: Union[float, str] = 50.0, workflow_id: str = "default"
+        self,
+        description: str,
+        priority: Union[float, str] = 50.0,
+        workflow_id: str = "default",
     ) -> Task:
         """
         Create a new task with the given description and priority.
@@ -126,7 +131,9 @@ class Agency:
         if isinstance(priority, str):
             priority_map = {"Low": 25.0, "Medium": 50.0, "High": 75.0}
             priority = priority_map.get(priority.capitalize(), 50.0)
-        return Task(description=description, priority=float(priority), workflow_id=workflow_id)
+        return Task(
+            description=description, priority=float(priority), workflow_id=workflow_id
+        )
 
     def add_task(self, task: Task, workflow_id: str = "default") -> None:
         """
@@ -228,8 +235,8 @@ class Agency:
             task_obj = task
         else:
             task_dict = task.copy()
-            if 'workflow_id' not in task_dict:
-                task_dict['workflow_id'] = 'default'
+            if "workflow_id" not in task_dict:
+                task_dict["workflow_id"] = "default"
             task_obj = Task(**task_dict)
         result = await self._perform_task(task_obj)
         return result if result is not None else {"output": "No result returned"}
@@ -419,13 +426,13 @@ class Agency:
         """
         new_roles = await self.generate_roles()
         new_goals = await self.generate_goals()
-        
+
         if not new_roles:
             new_roles = ["Task Assistant"]
-        
+
         if not new_goals:
             new_goals = ["Assist users to the best of my abilities"]
-        
+
         return new_roles, new_goals
 
     async def execute_task(self, task: Task) -> str:
