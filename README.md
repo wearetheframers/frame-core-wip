@@ -160,6 +160,8 @@ This updated hierarchy reflects the current structure of the Frame project, incl
    - The `Agency` manages task prioritization and execution within each Workflow.
 
 5. **Task Execution and Learning**
+   - Tasks are executed using the `ExecutionContext`, which provides access to necessary services.
+   - The `ExecutionContext` includes the LLM service, memory service, and EQ service.
    - Tasks are executed, updating the Framer's memory and potentially its emotional state.
    - Key information and experiences are stored in long-term and core memory for future use.
 
@@ -168,7 +170,7 @@ This updated hierarchy reflects the current structure of the Frame project, incl
    - Framed groups can process Workflows and Tasks sequentially or in parallel.
    - Inter-Framer communication and task delegation are managed within the Framed context.
 
-This architecture allows for a flexible, learning-capable AI agent system that can handle complex tasks while maintaining a consistent personality and improving over time.
+This architecture allows for a flexible, learning-capable AI agent system that can handle complex tasks while maintaining a consistent personality and improving over time. The `ExecutionContext` ensures that all necessary services are available during task execution, providing a consistent interface for actions across the system.
 
 ## Installation
 

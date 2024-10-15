@@ -23,8 +23,7 @@ async def main():
         soul_seed="Weather Assistant Soul", memory_service=None, eq_service=None
     )
 
-    framer.set_roles(roles)
-    framer.set_goals(goals)
+    await framer.initialize()  # Initialize roles and goals
 
     # Initialize and register the plugin
     weather_api_key = os.getenv("OPENWEATHERMAP_API_KEY")
@@ -56,7 +55,7 @@ async def main():
     # Process perceptions and make decisions
     for perception in perceptions:
         print(f"\nProcessing perception: {perception}")
-        decision = await framer.process_perception(perception)
+        decision = await framer.sense(perception)
         print(f"Decision made: {decision}")
 
         if decision:

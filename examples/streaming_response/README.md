@@ -1,6 +1,6 @@
 # Streaming Response Example
 
-This example demonstrates how to use the `_streamed_response` variable in the `Framer` class to handle streamed content.
+This example demonstrates how to use the streaming capability of the `Framer` class to handle streamed content in real-time.
 
 ## Installation
 
@@ -15,7 +15,15 @@ pip install frame
 Run the example script using Python:
 
 ```bash
-python streamed_response_example.py
+python main.py
 ```
 
-This will execute the example and demonstrate how the `_streamed_response` variable accumulates streamed content.
+This will execute the example and demonstrate how to:
+1. Create a Framer instance
+2. Use the `prompt` method with streaming enabled
+3. Process and display the streamed content in real-time
+4. Access the final accumulated streamed response
+
+## Note
+
+Make sure you have set up your API keys correctly in your environment variables or `.env` file before running the example.

@@ -1,27 +1,32 @@
 import asyncio
-from frame.src.framer.framer import Framer
+from frame.frame import Frame
 from frame.src.framer.config import FramerConfig
-from frame.src.services.llm.main import LLMService
 
 
 async def main():
-    # Initialize the LLMService and FramerConfig
-    llm_service = LLMService(openai_api_key="your_openai_api_key")
+    # Initialize the Frame and FramerConfig
+    frame = Frame()
     config = FramerConfig(name="Example Framer", default_model="gpt-3.5-turbo")
 
     # Create a Framer instance
-    framer = Framer(config=config, llm_service=llm_service)
+    framer = await frame.create_framer(config)
 
     # Define a prompt
     prompt = "Write a short story about an AI learning to understand human emotions."
 
     # Perform a task with streaming enabled
-    await framer.perform_task({"description": prompt})
+    result = await framer.prompt(prompt, stream=True)
 
-    # Access the streamed response
+    # Print the streamed response
+    print("Streamed Response:")
+    async for chunk in result:
+        print(chunk, end="", flush=True)
+    print("\n")
+
+    # Access the final streamed response
     streamed_response = framer._streamed_response
-    print("Streamed Response Status:", streamed_response["status"])
-    print("Streamed Response Result:", streamed_response["result"])
+    print("Final Streamed Response Status:", streamed_response["status"])
+    print("Final Streamed Response Result:", streamed_response["result"])
 
 
 if __name__ == "__main__":

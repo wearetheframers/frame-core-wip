@@ -48,9 +48,11 @@ action_registry.register_action(
 
 ### Methods
 
-#### `__init__(*args, **kwargs)`
+#### `__init__(execution_context: ExecutionContext)`
 
-Initializes the ActionRegistry with a set of default actions.
+Initializes the ActionRegistry with a set of default actions and an ExecutionContext.
+
+- `execution_context` (ExecutionContext): The execution context containing necessary services for action execution.
 
 #### `register_action(action_name: str, action_func: Callable, description: str = "", priority: int = 5, expected_output: str = "")`
 
@@ -66,21 +68,18 @@ Registers a new action or overrides an existing one.
 
 Returns a list of all registered action names.
 
-#### `perform_action(action_name: str, *args, callback=None, callback_args=None, **kwargs) -> Any`
+#### `execute_action(action_name: str, parameters: dict) -> Any`
 
-Performs a registered action.
+Executes a registered action using the ExecutionContext.
 
-- `action_name` (str): The name of the action to perform.
-- `*args`: Positional arguments to pass to the action function.
-- `callback` (Optional[Callable]): A function to call after the action is completed.
-- `callback_args` (Optional[Dict]): Arguments to pass to the callback function.
-- `**kwargs`: Keyword arguments to pass to the action function.
+- `action_name` (str): The name of the action to execute.
+- `parameters` (dict): A dictionary of parameters to pass to the action function.
 
 Returns the result of the action function.
 
 Raises `ValueError` if the action_name is not registered.
 
-If a callback is provided, it will be called with the result of the action and any additional arguments specified in `callback_args`.
+The ExecutionContext provides access to necessary services (like LLM, memory, and EQ) during action execution, ensuring consistent access to resources across all actions.
 
 ### Default Actions
 
