@@ -1,24 +1,34 @@
-from typing import Dict
+from typing import Dict, Any, Union
 from collections import defaultdict
 import logging
 
 
 class LLMMetrics:
     def __init__(self):
-        self.call_count: Dict[str, int] = defaultdict(int)
-        self.cost: Dict[str, float] = defaultdict(float)
+        self._metrics: Dict[str, Dict[str, Union[int, float]]] = defaultdict(lambda: {"calls": 0, "cost": 0.0})
+        self._total_calls: int = 0
+        self._total_cost: float = 0.0
 
     def increment_call(self, model: str):
-        self.call_count[model] += 1
+        self._metrics[model]["calls"] += 1
+        self._total_calls += 1
 
     def add_cost(self, model: str, cost: float):
-        self.cost[model] += cost
+        self._metrics[model]["cost"] += cost
+        self._total_cost += cost
 
     def get_total_calls(self) -> int:
-        return sum(self.call_count.values())
+        return self._total_calls
 
     def get_total_cost(self) -> float:
-        return sum(self.cost.values())
+        return self._total_cost
+
+    def get_metrics(self) -> Dict[str, Any]:
+        return {
+            "models": dict(self._metrics),
+            "total_calls": self._total_calls,
+            "total_cost": self._total_cost,
+        }
 
 
 llm_metrics = LLMMetrics()

@@ -124,10 +124,10 @@ class ActionRegistry:
         """
         return self.actions.get(name)
 
-    async def execute_action(self, action_name: str, *args, **kwargs):
+    async def execute_action(self, action_name: str, parameters: dict):
         """Execute an action by its name."""
         action = self.get_action(action_name)
         if action:
-            return await action["action_func"](*args, **kwargs)
+            return await action["action_func"](**parameters)
         else:
             raise ValueError(f"Action '{action_name}' not found in the registry.")

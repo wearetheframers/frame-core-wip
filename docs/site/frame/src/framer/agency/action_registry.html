@@ -162,11 +162,11 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         return self.actions.get(name)
 
-    async def execute_action(self, action_name: str, *args, **kwargs):
+    async def execute_action(self, action_name: str, **kwargs):
         &#34;&#34;&#34;Execute an action by its name.&#34;&#34;&#34;
         action = self.get_action(action_name)
         if action:
-            return await action[&#34;action_func&#34;](*args, **kwargs)
+            return await action[&#34;action_func&#34;](**kwargs)
         else:
             raise ValueError(f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;)</code></pre>
 </details>
@@ -190,7 +190,7 @@ hljs.highlightAll();
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry.execute_action"><code class="name flex">
-<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, *args, **kwargs)</span>
+<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Execute an action by its name.</p></div>

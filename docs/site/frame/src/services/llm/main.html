@@ -107,14 +107,7 @@ the specified or default model.</p>
             Dict[str, Any]: A dictionary containing the call count and cost for each model,
             as well as the total calls and total cost.
         &#34;&#34;&#34;
-        return {
-            &#34;models&#34;: {
-                model: {&#34;calls&#34;: data[&#34;calls&#34;], &#34;cost&#34;: data[&#34;cost&#34;]}
-                for model, data in self.metrics._metrics[&#34;models&#34;].items()
-            },
-            &#34;total_calls&#34;: self.metrics._total_calls,
-            &#34;total_cost&#34;: self.metrics._total_cost,
-        }
+        return self.metrics.get_metrics()
 
     def get_total_calls(self) -&gt; int:
         &#34;&#34;&#34;

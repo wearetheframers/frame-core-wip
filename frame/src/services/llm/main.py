@@ -94,14 +94,7 @@ class LLMService:
             Dict[str, Any]: A dictionary containing the call count and cost for each model,
             as well as the total calls and total cost.
         """
-        return {
-            "models": {
-                model: {"calls": data["calls"], "cost": data["cost"]}
-                for model, data in self.metrics._metrics["models"].items()
-            },
-            "total_calls": self.metrics._total_calls,
-            "total_cost": self.metrics._total_cost,
-        }
+        return self.metrics.get_metrics()
 
     def get_total_calls(self) -> int:
         """
