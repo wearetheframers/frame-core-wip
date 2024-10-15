@@ -102,7 +102,7 @@ are stored in the notes. The values can be of any type. If None, default values 
             notes={k: v for k, v in seed.items() if k != &#34;text&#34;},
             state={},
         )
-        self.seed = seed
+        self.seed = {&#34;text&#34;: self.model.essence}
         self.state = self.model.state
 
     def update_state(self, key: str, value: Any) -&gt; None:

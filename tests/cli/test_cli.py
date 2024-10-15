@@ -59,7 +59,7 @@ def test_cli_run_framer_command(runner, mocker):
 
     # Check if the completion message is in the logger output
     mock_logger = mocker.patch("frame.cli.cli.logger")
-    mock_logger.info.assert_any_call("Framer execution completed")
+    mock_logger.info.assert_any_call("Framer execution completed.")
 
     # Check if the execute_framer function was called with the correct arguments
     call_args = mock_execute_framer.call_args

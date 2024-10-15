@@ -86,6 +86,23 @@ class LLMService:
         )
         self.metrics = metrics or llm_metrics
 
+    def get_metrics(self) -> Dict[str, Any]:
+        """
+        Get the current LLM usage metrics.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the call count and cost for each model,
+            as well as the total calls and total cost.
+        """
+        return {
+            "models": {
+                model: {"calls": data["calls"], "cost": data["cost"]}
+                for model, data in self.metrics._metrics["models"].items()
+            },
+            "total_calls": self.metrics._total_calls,
+            "total_cost": self.metrics._total_cost,
+        }
+
     def get_total_calls(self) -> int:
         """
         Get the total number of LLM calls made.
@@ -93,7 +110,7 @@ class LLMService:
         Returns:
             int: The total number of calls made.
         """
-        return self.metrics.get_total_calls()
+        return self.metrics._total_calls
 
     def get_total_cost(self) -> float:
         """
@@ -102,7 +119,7 @@ class LLMService:
         Returns:
             float: The total cost incurred.
         """
-        return self.metrics.get_total_cost()
+        return self.metrics._total_cost
 
     def set_default_model(self, model: str):
         """

@@ -99,6 +99,23 @@ the specified or default model.</p>
         )
         self.metrics = metrics or llm_metrics
 
+    def get_metrics(self) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Get the current LLM usage metrics.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the call count and cost for each model,
+            as well as the total calls and total cost.
+        &#34;&#34;&#34;
+        return {
+            &#34;models&#34;: {
+                model: {&#34;calls&#34;: data[&#34;calls&#34;], &#34;cost&#34;: data[&#34;cost&#34;]}
+                for model, data in self.metrics._metrics[&#34;models&#34;].items()
+            },
+            &#34;total_calls&#34;: self.metrics._total_calls,
+            &#34;total_cost&#34;: self.metrics._total_cost,
+        }
+
     def get_total_calls(self) -&gt; int:
         &#34;&#34;&#34;
         Get the total number of LLM calls made.
@@ -106,7 +123,7 @@ the specified or default model.</p>
         Returns:
             int: The total number of calls made.
         &#34;&#34;&#34;
-        return self.metrics.get_total_calls()
+        return self.metrics._total_calls
 
     def get_total_cost(self) -&gt; float:
         &#34;&#34;&#34;
@@ -115,7 +132,7 @@ the specified or default model.</p>
         Returns:
             float: The total cost incurred.
         &#34;&#34;&#34;
-        return self.metrics.get_total_cost()
+        return self.metrics._total_cost
 
     def set_default_model(self, model: str):
         &#34;&#34;&#34;
@@ -301,6 +318,18 @@ the specified or default model.</p>
 <dd>The generated completion.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.services.llm.main.LLMService.get_metrics"><code class="name flex">
+<span>def <span class="ident">get_metrics</span></span>(<span>self) ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the current LLM usage metrics.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Dict[str, Any]</code></dt>
+<dd>A dictionary containing the call count and cost for each model,</dd>
+</dl>
+<p>as well as the total calls and total cost.</p></div>
+</dd>
 <dt id="frame.src.services.llm.main.LLMService.get_total_calls"><code class="name flex">
 <span>def <span class="ident">get_total_calls</span></span>(<span>self) ‑> int</span>
 </code></dt>
@@ -360,6 +389,7 @@ the specified or default model.</p>
 <h4><code><a title="frame.src.services.llm.main.LLMService" href="#frame.src.services.llm.main.LLMService">LLMService</a></code></h4>
 <ul class="">
 <li><code><a title="frame.src.services.llm.main.LLMService.get_completion" href="#frame.src.services.llm.main.LLMService.get_completion">get_completion</a></code></li>
+<li><code><a title="frame.src.services.llm.main.LLMService.get_metrics" href="#frame.src.services.llm.main.LLMService.get_metrics">get_metrics</a></code></li>
 <li><code><a title="frame.src.services.llm.main.LLMService.get_total_calls" href="#frame.src.services.llm.main.LLMService.get_total_calls">get_total_calls</a></code></li>
 <li><code><a title="frame.src.services.llm.main.LLMService.get_total_cost" href="#frame.src.services.llm.main.LLMService.get_total_cost">get_total_cost</a></code></li>
 <li><code><a title="frame.src.services.llm.main.LLMService.set_default_model" href="#frame.src.services.llm.main.LLMService.set_default_model">set_default_model</a></code></li>

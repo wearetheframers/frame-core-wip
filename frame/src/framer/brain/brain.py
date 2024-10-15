@@ -162,23 +162,20 @@ class Brain:
 
         logger.debug(f"Decision data received: {decision_data}")
 
-        if decision_data.get("action") == "error":
-            logger.error(
-                f"Error in decision making: {decision_data.get('parameters', {}).get('error')}"
-            )
-            return Decision(**decision_data)
-
         action = decision_data.get("action", "no_action").lower()
         valid_actions = [action.lower() for action in self.action_registry.actions.keys()]
         
         if action not in valid_actions:
+            invalid_action = action
+            action = "error"
             logger.warning(
-                f"Invalid action '{action}' generated. "
+                f"Invalid action '{invalid_action}' generated. "
                 f"Valid actions are: {', '.join(valid_actions)}"
             )
-            logger.info(f"Attempting to execute action '{action}' anyway.")
-        else:
-            logger.info(f"Valid action '{action}' generated: {decision_data}")
+            decision_data["action"] = action
+            decision_data["reasoning"] = f"Invalid action '{invalid_action}' was generated. Defaulted to '{action}'."
+
+        logger.info(f"Action '{action}' generated: {decision_data}")
 
         parameters = decision_data.get("parameters", {})
         if "topic" in parameters:
@@ -187,6 +184,10 @@ class Brain:
             parameters = {"value": parameters}
 
         reasoning = decision_data.get("reasoning", "No reasoning provided.")
+
+        # Check if goals are None and generate them if necessary
+        if self.agency.goals is None:
+            _, self.agency.goals = await self.agency.generate_roles_and_goals()
 
         return Decision(
             action=action,
@@ -207,20 +208,9 @@ class Brain:
         logger.debug(f"Decision parameters: {decision.parameters}")
 
         try:
-            action_info = self.action_registry.get_action(decision.action)
-            if action_info:
-                action_func = action_info.get("action_func")
-                if action_func:
-                    if asyncio.iscoroutinefunction(action_func):
-                        result = await action_func(self, **decision.parameters)
-                    else:
-                        result = action_func(self, **decision.parameters)
-                    logger.info(f"Executed action: {decision.action}")
-                    logger.debug(f"Action result: {result}")
-                else:
-                    logger.warning(f"No function found for action: {decision.action}")
-            else:
-                logger.warning(f"Unknown action: {decision.action}")
+            result = await self.action_registry.execute_action(decision.action, decision.parameters)
+            logger.info(f"Executed action: {decision.action}")
+            logger.debug(f"Action result: {result}")
 
             logger.info(f"Executed decision: {decision.action}")
             logger.debug(f"Decision reasoning: {decision.reasoning}")
@@ -230,7 +220,8 @@ class Brain:
             logger.exception("Detailed traceback:")
 
         if decision.action == "think":
-            await self._generate_new_query(decision)
+            new_query = await self._generate_new_query(decision)
+            await self.process_perception(Perception(type="thought", data={"query": new_query}))
 
     async def _generate_new_query(self, decision: Decision) -> str:
         """
@@ -361,12 +352,12 @@ class Brain:
             # Double-check that the action is valid
             if decision_data["action"] not in self.action_registry.actions:
                 logger.warning(
-                    f"Invalid action: {decision_data['action']}. Defaulting to 'think'."
+                    f"Invalid action: {decision_data['action']}. Defaulting to 'error'."
                 )
-                decision_data["action"] = "think"
+                decision_data["action"] = "error"
                 decision_data["reasoning"] = (
                     f"Invalid action '{decision_data['action']}' was generated. "
-                    f"Defaulted to 'think'."
+                    f"Defaulted to 'error'."
                 )
 
             # Ensure the decision_data is properly formatted

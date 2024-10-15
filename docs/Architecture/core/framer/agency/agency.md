@@ -20,9 +20,9 @@ The Agency component is responsible for roles, goals, and task management within
 The Agency can automatically generate roles and goals for a Framer when they are not provided or are empty. The behavior is as follows:
 
 - If both roles and goals are None, they will be generated using `generate_roles_and_goals()`.
-- If roles is an empty list `[]` and goals is None, only roles will be generated.
+- If roles is an empty list `[]`, no roles or goals will be assigned, as the Agency has no roles to base goals on.
 - If goals is an empty list `[]` and roles is None, only goals will be generated.
-- If both roles and goals are empty lists `[]`, both will be generated.
+- If both roles and goals are empty lists `[]`, no roles or goals will be assigned.
 - If either roles or goals is provided (not None or empty list), the provided value will be used.
 
 This ensures that Framers always have some roles and goals to guide their behavior, even if they are not explicitly defined by the user.

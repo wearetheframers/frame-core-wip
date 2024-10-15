@@ -228,7 +228,7 @@ model to be used for completions.</p>
         # This is a simple estimation, you may want to use a more accurate method
         return len(prompt.split()) + len(result.split())
 
-    def get_metrics(self) -&gt; Dict[str, Dict[str, float]]:
+    def get_metrics(self) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Get the current LLM usage metrics.
 
@@ -236,15 +236,7 @@ model to be used for completions.</p>
             A dictionary containing the call count and cost for each model,
             as well as the total calls and total cost.
         &#34;&#34;&#34;
-        metrics = {
-            &#34;models&#34;: {
-                model: {&#34;calls&#34;: count, &#34;cost&#34;: llm_metrics.cost.get(model, 0)}
-                for model, count in llm_metrics.call_count.items()
-            },
-            &#34;total_calls&#34;: llm_metrics.get_total_calls(),
-            &#34;total_cost&#34;: llm_metrics.get_total_cost(),
-        }
-        return metrics</code></pre>
+        return self.llm_service.get_metrics()</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
@@ -347,7 +339,7 @@ value of False. This can be overridden by passing 'stream=True'
 in the kwargs.</p></div>
 </dd>
 <dt id="frame.frame.Frame.get_metrics"><code class="name flex">
-<span>def <span class="ident">get_metrics</span></span>(<span>self) ‑> Dict[str, Dict[str, float]]</span>
+<span>def <span class="ident">get_metrics</span></span>(<span>self) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the current LLM usage metrics.</p>

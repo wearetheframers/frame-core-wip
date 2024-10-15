@@ -226,11 +226,11 @@ def run_framer(ctx, prompt, name, model, debug, sync, stream):
     # Log LLM usage metrics
     metrics = frame.get_metrics()
     logger.info("LLM Usage Metrics:")
-    logger.info(f"Total calls: {metrics['total_calls']}")
-    logger.info(f"Total cost: ${metrics['total_cost']:.4f}")
-    for model, model_data in metrics["models"].items():
+    logger.info(f"Total calls: {metrics.get('total_calls', 0)}")
+    logger.info(f"Total cost: ${metrics.get('total_cost', 0):.4f}")
+    for model, model_data in metrics.get("models", {}).items():
         logger.info(
-            f"  {model}: {model_data['calls']} calls, ${model_data['cost']:.4f}"
+            f"  {model}: {model_data.get('calls', 0)} calls, ${model_data.get('cost', 0):.4f}"
         )
 
 

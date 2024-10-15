@@ -45,4 +45,7 @@ def cleanup(logger=None):
         error_message = f"Error during cleanup logging: {e}"
         print(error_message, file=sys.stderr, flush=True)
 
-    close_logger_handlers(logger)
+    try:
+        close_logger_handlers(logger)
+    except Exception as e:
+        print(f"Error during logger cleanup: {e}", file=sys.stderr, flush=True)

@@ -21,17 +21,24 @@ class MetricsManager(metaclass=SingletonMeta):
     def __init__(self):
         if not hasattr(self, "_initialized"):
             self._metrics = defaultdict(lambda: {"calls": 0, "cost": 0.0})
+            self._total_calls = 0
+            self._total_cost = 0.0
             self._initialized = True
 
     def update_metrics(self, model: str, calls: int, cost: float):
         self._metrics[model]["calls"] += calls
         self._metrics[model]["cost"] += cost
+        self._total_calls += calls
+        self._total_cost += cost
 
     def get_metrics(self) -> Dict[str, Any]:
-        total_calls = sum(data["calls"] for data in self._metrics.values())
-        total_cost = sum(data["cost"] for data in self._metrics.values())
         return {
-            "total_calls": total_calls,
-            "total_cost": total_cost,
+            "total_calls": self._total_calls,
+            "total_cost": self._total_cost,
             "models": dict(self._metrics),
         }
+
+    def reset_metrics(self):
+        self._metrics.clear()
+        self._total_calls = 0
+        self._total_cost = 0.0

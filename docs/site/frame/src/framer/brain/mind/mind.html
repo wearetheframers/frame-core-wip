@@ -91,7 +91,7 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
             if isinstance(response, AsyncMock):
                 # For testing purposes, return a default decision
                 return Decision(
-                    action=&#34;think&#34;,
+                    action=&#34;default_action&#34;,
                     parameters={},
                     reasoning=&#34;Default decision for testing&#34;,
                     confidence=0.5,
@@ -101,16 +101,16 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
             decision_data = json.loads(response) if isinstance(response, str) else {}
             action = decision_data.get(&#34;action&#34;, &#34;default_action&#34;)
             if action not in self.brain.action_registry.actions:
-                logger.warning(f&#34;Invalid action: {action}. Defaulting to &#39;think&#39;.&#34;)
-                action = &#34;think&#34;
-                reasoning = f&#34;Invalid action &#39;{action}&#39; was generated. Defaulted to &#39;think&#39;.&#34;
+                logger.warning(f&#34;Invalid action: {action}. Defaulting to &#39;default_action&#39;.&#34;)
+                action = &#34;default_action&#34;
+                reasoning = f&#34;Invalid action &#39;{action}&#39; was generated. Defaulted to &#39;default_action&#39;.&#34;
             else:
                 reasoning = decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
             
             decision = Decision(
                 action=action,
-                parameters=decision_data.get(&#34;data&#34;, {}),
-                reasoning=reasoning,
+                parameters=decision_data.get(&#34;parameters&#34;, {}),
+                reasoning=decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;),
                 confidence=float(decision_data.get(&#34;confidence&#34;, 0.5)),
                 priority=int(decision_data.get(&#34;priority&#34;, 5)),
             )

@@ -85,7 +85,26 @@ class FramerConfig:
     llm_presence_penalty: Optional[float] = 0.0
     is_multi_modal: Optional[bool] = False
     roles: Optional[List[Dict[str, str]]] = field(default_factory=list)
-    goals: Optional[List[Dict[str, Any]]] = field(default_factory=list)</code></pre>
+    goals: Optional[List[Dict[str, Any]]] = field(default_factory=list)
+
+    async def initialize(self):
+        &#34;&#34;&#34;Initialize the Framer with roles and goals.&#34;&#34;&#34;
+        if self.agency.roles is None and self.agency.goals is None:
+            self.agency.roles, self.agency.goals = await self.agency.generate_roles_and_goals()
+        elif self.agency.roles == [] and self.agency.goals is None:
+            _, self.agency.goals = await self.agency.generate_roles_and_goals()
+        elif self.agency.goals == [] and self.agency.roles is None:
+            self.agency.roles, _ = await self.agency.generate_roles_and_goals()
+        elif self.agency.roles == [] and self.agency.goals == []:
+            self.agency.roles, self.agency.goals = await self.agency.generate_roles_and_goals()
+        
+        # Ensure goals are generated if they are None
+        if self.agency.goals is None:
+            _, self.agency.goals = await self.agency.generate_roles_and_goals()
+
+        # Ensure roles are generated if they are None
+        if self.agency.roles is None:
+            self.agency.roles, _ = await self.agency.generate_roles_and_goals()</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -183,6 +202,15 @@ It uses the FramerConfigModel to validate and set default values for the configu
 <div class="desc"></div>
 </dd>
 </dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.config.FramerConfig.initialize"><code class="name flex">
+<span>async def <span class="ident">initialize</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Initialize the Framer with roles and goals.</p></div>
+</dd>
+</dl>
 </dd>
 </dl>
 </section>
@@ -206,6 +234,7 @@ It uses the FramerConfigModel to validate and set default values for the configu
 <li><code><a title="frame.src.framer.config.FramerConfig.description" href="#frame.src.framer.config.FramerConfig.description">description</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.gender" href="#frame.src.framer.config.FramerConfig.gender">gender</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.goals" href="#frame.src.framer.config.FramerConfig.goals">goals</a></code></li>
+<li><code><a title="frame.src.framer.config.FramerConfig.initialize" href="#frame.src.framer.config.FramerConfig.initialize">initialize</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.is_multi_modal" href="#frame.src.framer.config.FramerConfig.is_multi_modal">is_multi_modal</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.llm_frequency_penalty" href="#frame.src.framer.config.FramerConfig.llm_frequency_penalty">llm_frequency_penalty</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.llm_max_tokens" href="#frame.src.framer.config.FramerConfig.llm_max_tokens">llm_max_tokens</a></code></li>

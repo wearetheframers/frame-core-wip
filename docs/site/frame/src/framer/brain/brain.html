@@ -208,23 +208,20 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
 
         logger.debug(f&#34;Decision data received: {decision_data}&#34;)
 
-        if decision_data.get(&#34;action&#34;) == &#34;error&#34;:
-            logger.error(
-                f&#34;Error in decision making: {decision_data.get(&#39;parameters&#39;, {}).get(&#39;error&#39;)}&#34;
-            )
-            return Decision(**decision_data)
-
         action = decision_data.get(&#34;action&#34;, &#34;no_action&#34;).lower()
         valid_actions = [action.lower() for action in self.action_registry.actions.keys()]
         
         if action not in valid_actions:
+            invalid_action = action
+            action = &#34;error&#34;
             logger.warning(
-                f&#34;Invalid action &#39;{action}&#39; generated. &#34;
+                f&#34;Invalid action &#39;{invalid_action}&#39; generated. &#34;
                 f&#34;Valid actions are: {&#39;, &#39;.join(valid_actions)}&#34;
             )
-            logger.info(f&#34;Attempting to execute action &#39;{action}&#39; anyway.&#34;)
-        else:
-            logger.info(f&#34;Valid action &#39;{action}&#39; generated: {decision_data}&#34;)
+            decision_data[&#34;action&#34;] = action
+            decision_data[&#34;reasoning&#34;] = f&#34;Invalid action &#39;{invalid_action}&#39; was generated. Defaulted to &#39;{action}&#39;.&#34;
+
+        logger.info(f&#34;Action &#39;{action}&#39; generated: {decision_data}&#34;)
 
         parameters = decision_data.get(&#34;parameters&#34;, {})
         if &#34;topic&#34; in parameters:
@@ -233,6 +230,10 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
             parameters = {&#34;value&#34;: parameters}
 
         reasoning = decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
+
+        # Check if goals are None and generate them if necessary
+        if self.agency.goals is None:
+            _, self.agency.goals = await self.agency.generate_roles_and_goals()
 
         return Decision(
             action=action,
@@ -253,20 +254,9 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         logger.debug(f&#34;Decision parameters: {decision.parameters}&#34;)
 
         try:
-            action_info = self.action_registry.get_action(decision.action)
-            if action_info:
-                action_func = action_info.get(&#34;action_func&#34;)
-                if action_func:
-                    if asyncio.iscoroutinefunction(action_func):
-                        result = await action_func(self, **decision.parameters)
-                    else:
-                        result = action_func(self, **decision.parameters)
-                    logger.info(f&#34;Executed action: {decision.action}&#34;)
-                    logger.debug(f&#34;Action result: {result}&#34;)
-                else:
-                    logger.warning(f&#34;No function found for action: {decision.action}&#34;)
-            else:
-                logger.warning(f&#34;Unknown action: {decision.action}&#34;)
+            result = await self.action_registry.execute_action(decision.action, decision.parameters)
+            logger.info(f&#34;Executed action: {decision.action}&#34;)
+            logger.debug(f&#34;Action result: {result}&#34;)
 
             logger.info(f&#34;Executed decision: {decision.action}&#34;)
             logger.debug(f&#34;Decision reasoning: {decision.reasoning}&#34;)
@@ -276,7 +266,8 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
             logger.exception(&#34;Detailed traceback:&#34;)
 
         if decision.action == &#34;think&#34;:
-            await self._generate_new_query(decision)
+            new_query = await self._generate_new_query(decision)
+            await self.process_perception(Perception(type=&#34;thought&#34;, data={&#34;query&#34;: new_query}))
 
     async def _generate_new_query(self, decision: Decision) -&gt; str:
         &#34;&#34;&#34;
@@ -407,12 +398,12 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
             # Double-check that the action is valid
             if decision_data[&#34;action&#34;] not in self.action_registry.actions:
                 logger.warning(
-                    f&#34;Invalid action: {decision_data[&#39;action&#39;]}. Defaulting to &#39;think&#39;.&#34;
+                    f&#34;Invalid action: {decision_data[&#39;action&#39;]}. Defaulting to &#39;error&#39;.&#34;
                 )
-                decision_data[&#34;action&#34;] = &#34;think&#34;
+                decision_data[&#34;action&#34;] = &#34;error&#34;
                 decision_data[&#34;reasoning&#34;] = (
                     f&#34;Invalid action &#39;{decision_data[&#39;action&#39;]}&#39; was generated. &#34;
-                    f&#34;Defaulted to &#39;think&#39;.&#34;
+                    f&#34;Defaulted to &#39;error&#39;.&#34;
                 )
 
             # Ensure the decision_data is properly formatted

@@ -52,3 +52,9 @@ def test_empty_initialization():
     soul = Soul()
     assert soul.seed == {"text": "You are a helpful AI assistant."}
     assert isinstance(soul.state, dict)
+
+def test_soul_initialization_with_dict():
+    soul = Soul(seed={"text": "Test essence", "attribute1": "value1", "attribute2": "value2"})
+    assert soul.seed == {"text": "Test essence"}
+    assert soul.model.essence == "Test essence"
+    assert soul.model.notes == {"attribute1": "value1", "attribute2": "value2"}

@@ -270,12 +270,12 @@ class Agency:
             role = json.loads(response)
             if not role:
                 logger.warning("Received empty response while generating role. Using default role.")
-                return [{"name": "Assistant", "description": "A helpful AI assistant"}]
+                return [{"name": "Task Assistant", "description": "Assist with the given task or query."}]
             return [role] if isinstance(role, dict) else role
         except Exception as e:
             logger.error(f"Error generating role: {str(e)}", exc_info=True)
             logger.error(f"Prompt used for role generation: {prompt}")
-            return [{"name": "Assistant", "description": "A helpful AI assistant"}]
+            return [{"name": "Task Assistant", "description": "Assist with the given task or query."}]
 
     async def generate_goals(self) -> List[Dict[str, Any]]:
         """
@@ -307,7 +307,7 @@ class Agency:
         except Exception as e:
             logger.error(f"Error generating goal: {e}", exc_info=True)
             logger.error(f"Prompt used for goal generation: {prompt}")
-            return [{"description": "Assist users based on the given input.", "priority": 50.0}]
+            return [{"description": "Assist users to the best of my abilities", "priority": 1}]
 
     async def generate_roles_and_goals(
         self,
@@ -315,48 +315,18 @@ class Agency:
         """
         Generate roles and goals for the Framer.
 
-        This method first generates roles using the LLM service and then uses
-        those roles to generate corresponding goals.
+        This method generates roles and goals based on the current state:
+        1. If roles are empty, generate new roles.
+        2. If goals are empty, generate new goals.
+        3. If both exist, generate new goals and add them to existing ones.
 
         Returns:
             Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]: A tuple containing
-            the generated roles and goals.
+            the final roles and goals.
         """
-        roles = await self.generate_roles()
-        goals = await self.generate_goals()
-        self.roles = roles if roles else [{"name": "Assistant", "description": "A helpful AI assistant"}]
-        self.goals = goals if goals else [{"description": "Assist users based on the given input.", "priority": 50.0}]
-        return self.roles, self.goals
-        """
-        Generate tasks based on a prompt using the LLM service.
-
-        Args:
-            prompt (str): The prompt to generate tasks from.
-
-        Returns:
-            List[Task]: A list of generated tasks.
-        """
-        prompt = "Generate tasks based on the current context."
-        response = await self.llm_service.get_completion(
-            prompt,
-            model=self.default_model,
-            max_tokens=200,
-            temperature=0.7,
-        )
-        tasks = []
-        try:
-            task_list = json.loads(response)
-            for task_data in task_list:
-                task = Task(
-                    description=task_data.get("description", ""),
-                    priority=task_data.get("priority", 50.0),
-                    workflow_id=task_data.get("workflow_id", "default"),
-                )
-                tasks.append(task)
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse tasks from LLM response: {response}")
-            logger.error(f"JSONDecodeError: {e}")
-        return tasks
+        new_roles = await self.generate_roles()
+        new_goals = await self.generate_goals()
+        return new_roles, new_goals
 
     async def execute_task(self, task: Task) -> str:
         """

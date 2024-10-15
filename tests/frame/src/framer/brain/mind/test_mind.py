@@ -89,13 +89,15 @@ async def test_make_decision(mind, mocker):
     mocker.patch.object(
         mind.brain.llm_service,
         "get_completion",
-        return_value='{"action": "default_action", "reasoning": "Based on current thoughts"}',
+        return_value='{"action": "default_action", "parameters": {}, "reasoning": "Based on current thoughts", "confidence": 0.8, "priority": 5}',
     )
     perception = Perception(type="test", data={"key": "value"})
     decision = await mind.make_decision(perception)
     assert isinstance(decision, Decision)
     assert decision.action == "default_action"
     assert decision.reasoning == "Based on current thoughts"
+    assert decision.confidence == 0.8
+    assert decision.priority == 5
 
 
 def test_generate_thoughts(mind):

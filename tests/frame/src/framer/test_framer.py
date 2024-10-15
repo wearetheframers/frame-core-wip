@@ -30,29 +30,9 @@ async def test_framer_initialization():
     agency.roles = []
     agency.goals = []
     agency.generate_roles_and_goals.return_value = ([], [])
-    agency.roles = []
-    agency.goals = []
-    agency.roles = []
-    agency.goals = []
-    agency.roles = []
-    agency.goals = []
-    agency.roles = []
-    agency.goals = []
-    agency.roles = []
-    agency.goals = []
-    agency.roles = []
-    agency.goals = []
-    agency.roles = []
-    agency.goals = []
     brain = Mock(spec=Brain)
     brain.roles = []
     brain.goals = []
-    agency.roles = []
-    agency.goals = []
-    agency.roles = []
-    agency.goals = []
-    agency.roles = []
-    agency.goals = []
     soul = Mock(spec=Soul)
     workflow_manager = Mock(spec=WorkflowManager)
     framer = Framer(
@@ -104,7 +84,7 @@ async def test_framer_initialize():
     await framer.initialize()
     assert framer.roles == ["Generated Role"]
     assert framer.goals == ["Generated Goal"]
-    agency.generate_roles_and_goals.assert_called_once()
+    assert agency.generate_roles_and_goals.call_count == 1
 
     # Test case 2: Both roles and goals are empty lists
     agency.generate_roles_and_goals.reset_mock()
@@ -125,7 +105,7 @@ async def test_framer_initialize():
     await framer.initialize()
     assert framer.roles == ["Generated Role"]
     assert framer.goals == ["Generated Goal"]
-    agency.generate_roles_and_goals.assert_called_once()
+    assert agency.generate_roles_and_goals.call_count == 1
 
     # Test case 3: Roles are None, goals are empty list
     agency.generate_roles_and_goals.reset_mock()
@@ -144,9 +124,9 @@ async def test_framer_initialize():
         goals=[],
     )
     await framer.initialize()
-    assert framer.agency.roles == ["Generated Role"]
-    assert framer.agency.goals == []
-    agency.generate_roles_and_goals.assert_called_once()
+    assert framer.roles == ["Generated Role"]
+    assert framer.goals == ["Generated Goal"]
+    assert agency.generate_roles_and_goals.call_count == 1
 
     # Test case 4: Roles are empty list, goals are None
     agency.generate_roles_and_goals.reset_mock()
@@ -165,9 +145,9 @@ async def test_framer_initialize():
         goals=None,
     )
     await framer.initialize()
-    assert framer.agency.roles == []
-    assert framer.agency.goals == ["Generated Goal"]
-    agency.generate_roles_and_goals.assert_called_once()
+    assert framer.roles == ["Generated Role"]
+    assert framer.goals == ["Generated Goal"]
+    assert agency.generate_roles_and_goals.call_count == 1
 
     # Test case 5: Both roles and goals are provided
     agency.generate_roles_and_goals.reset_mock()
@@ -182,8 +162,8 @@ async def test_framer_initialize():
         goals=["Provided Goal"],
     )
     await framer.initialize()
-    assert framer.agency.roles == ["Provided Role"]
-    assert framer.agency.goals == ["Provided Goal"]
+    assert framer.roles == ["Provided Role"]
+    assert framer.goals == ["Provided Goal"]
     agency.generate_roles_and_goals.assert_not_called()
 
 
@@ -201,7 +181,7 @@ async def test_framer_initialize_with_provided_values():
     workflow_manager = Mock(spec=WorkflowManager)
 
     # Test case 1: Roles are provided, goals are None
-    agency.generate_roles_and_goals.return_value = ([], ["Generated Goal"])
+    agency.generate_roles_and_goals.return_value = (["Generated Role"], ["Generated Goal"])
     framer = Framer(
         config=config,
         llm_service=llm_service,
@@ -212,11 +192,31 @@ async def test_framer_initialize_with_provided_values():
         roles=["Provided Role"],
     )
     await framer.initialize()
-    assert framer.agency.roles == ["Provided Role"]
-    assert framer.agency.goals == ["Generated Goal"]
+    assert framer.roles == ["Provided Role"]
+    assert framer.goals == ["Generated Goal"]
+    agency.generate_roles_and_goals.assert_called_once()
 
-    # Test case 2: Goals are provided, roles are None
-    agency.generate_roles_and_goals.return_value = (["Generated Role"], [])
+    # Test case 2: Roles are empty, goals are None
+    agency.generate_roles_and_goals.reset_mock()
+    agency.generate_roles_and_goals.return_value = (["Generated Role"], ["Generated Goal"])
+    framer = Framer(
+        config=config,
+        llm_service=llm_service,
+        agency=agency,
+        brain=brain,
+        soul=soul,
+        workflow_manager=workflow_manager,
+        roles=[],
+        goals=None,
+    )
+    await framer.initialize()
+    assert framer.roles == []
+    assert framer.goals == []
+    agency.generate_roles_and_goals.assert_not_called()
+
+    # Test case 3: Goals are provided, roles are None
+    agency.generate_roles_and_goals.reset_mock()
+    agency.generate_roles_and_goals.return_value = (["Generated Role"], ["Generated Goal"])
     framer = Framer(
         config=config,
         llm_service=llm_service,
@@ -229,6 +229,42 @@ async def test_framer_initialize_with_provided_values():
     await framer.initialize()
     assert framer.roles == ["Generated Role"]
     assert framer.goals == ["Provided Goal"]
+    agency.generate_roles_and_goals.assert_called_once()
+
+    # Test case 4: Roles are empty list, goals are None
+    agency.generate_roles_and_goals.reset_mock()
+    framer = Framer(
+        config=config,
+        llm_service=llm_service,
+        agency=agency,
+        brain=brain,
+        soul=soul,
+        workflow_manager=workflow_manager,
+        roles=[],
+        goals=None,
+    )
+    await framer.initialize()
+    assert framer.roles == []
+    assert framer.goals == []
+    agency.generate_roles_and_goals.assert_not_called()
+
+    # Test case 5: Roles are not empty, goals are None
+    agency.generate_roles_and_goals.reset_mock()
+    agency.generate_roles_and_goals.return_value = (["Generated Role"], ["Generated Goal"])
+    framer = Framer(
+        config=config,
+        llm_service=llm_service,
+        agency=agency,
+        brain=brain,
+        soul=soul,
+        workflow_manager=workflow_manager,
+        roles=["Provided Role"],
+        goals=None,
+    )
+    await framer.initialize()
+    assert framer.roles == ["Provided Role", "Generated Role"]
+    assert framer.goals == ["Generated Goal"]
+    agency.generate_roles_and_goals.assert_called_once()
 
 
 @pytest.mark.asyncio

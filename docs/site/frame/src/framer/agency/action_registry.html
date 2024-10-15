@@ -161,11 +161,14 @@ hljs.highlightAll();
             Optional[Dict[str, Any]]: The action details if found, otherwise None.
         &#34;&#34;&#34;
         return self.actions.get(name)
-        return {
-            name: action
-            for name, action in self.actions.items()
-            if action[&#34;priority&#34;] &gt; 0
-        }</code></pre>
+
+    async def execute_action(self, action_name: str, *args, **kwargs):
+        &#34;&#34;&#34;Execute an action by its name.&#34;&#34;&#34;
+        action = self.get_action(action_name)
+        if action:
+            return await action[&#34;action_func&#34;](*args, **kwargs)
+        else:
+            raise ValueError(f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -185,6 +188,12 @@ hljs.highlightAll();
 <dt><strong><code>priority</code></strong> :&ensp;<code>int</code>, optional</dt>
 <dd>The priority of the action. Defaults to 5.</dd>
 </dl></div>
+</dd>
+<dt id="frame.src.framer.agency.action_registry.ActionRegistry.execute_action"><code class="name flex">
+<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute an action by its name.</p></div>
 </dd>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry.extend_actions"><code class="name flex">
 <span>def <span class="ident">extend_actions</span></span>(<span>self, new_actions: Dict[str, Dict[str, Any]])</span>
@@ -258,6 +267,7 @@ hljs.highlightAll();
 <h4><code><a title="frame.src.framer.agency.action_registry.ActionRegistry" href="#frame.src.framer.agency.action_registry.ActionRegistry">ActionRegistry</a></code></h4>
 <ul class="two-column">
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.add_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.add_action">add_action</a></code></li>
+<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.execute_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.execute_action">execute_action</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.extend_actions" href="#frame.src.framer.agency.action_registry.ActionRegistry.extend_actions">extend_actions</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.get_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.get_action">get_action</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.get_all_actions" href="#frame.src.framer.agency.action_registry.ActionRegistry.get_all_actions">get_all_actions</a></code></li>

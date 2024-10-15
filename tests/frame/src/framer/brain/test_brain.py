@@ -91,9 +91,10 @@ async def test_make_decision_invalid_action(brain, caplog):
 
     assert isinstance(decision, Decision)
     assert decision.action == "error"
-    assert "Invalid action: invalid_action" in decision.parameters["error"]
-    assert "raw_response" in decision.parameters
-    assert decision.parameters["raw_response"] == mock_get_completion.return_value
+    assert "Invalid action 'invalid_action' was generated" in decision.reasoning
+    assert "Defaulted to 'error'" in decision.reasoning
+    assert "invalid_action" in decision.reasoning and "error" in decision.reasoning
+    assert isinstance(decision.parameters, dict)
 
 
 def test_framed_create_method():

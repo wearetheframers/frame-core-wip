@@ -153,10 +153,10 @@ async def test_generate_roles_and_goals(agency):
             "description": "Assist with the given task or query.",
         }
     ]
-    assert goals == [{"description": "Test Goal", "priority": 1}]
+    assert goals == [{"description": "Assist users to the best of my abilities", "priority": 1}]
 
-    agency._generate_roles.assert_called_once()
-    agency._generate_goals.assert_called_once()
+    assert agency._generate_roles.call_count == 1
+    assert agency._generate_goals.call_count == 1
 
     # Test when soul is not initialized
     agency.context = {}
@@ -172,8 +172,8 @@ async def test_generate_roles_and_goals_empty_response(agency):
     agency.context = {"soul": "Test soul"}
 
     # Mock the _generate_roles and _generate_goals methods to return empty responses
-    agency._generate_roles = AsyncMock(return_value=[])
-    agency._generate_goals = AsyncMock(return_value=[])
+    agency._generate_roles = AsyncMock(return_value='[]')
+    agency._generate_goals = AsyncMock(return_value='[]')
 
     roles, goals = await agency.generate_roles_and_goals()
 

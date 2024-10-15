@@ -162,7 +162,7 @@ class Frame:
         # This is a simple estimation, you may want to use a more accurate method
         return len(prompt.split()) + len(result.split())
 
-    def get_metrics(self) -> Dict[str, Dict[str, float]]:
+    def get_metrics(self) -> Dict[str, Any]:
         """
         Get the current LLM usage metrics.
 
@@ -170,12 +170,4 @@ class Frame:
             A dictionary containing the call count and cost for each model,
             as well as the total calls and total cost.
         """
-        metrics = {
-            "models": {
-                model: {"calls": count, "cost": llm_metrics.cost.get(model, 0)}
-                for model, count in llm_metrics.call_count.items()
-            },
-            "total_calls": llm_metrics.get_total_calls(),
-            "total_cost": llm_metrics.get_total_cost(),
-        }
-        return metrics
+        return self.llm_service.get_metrics()

@@ -482,11 +482,13 @@ python -m frame.cli tui
 
 ## Plugins and Actions
 
-Frame supports a plugin system that allows you to extend the functionality of Framers by adding new actions. This enables you to customize the behavior of your AI agents and add domain-specific capabilities.
+Frame supports a powerful plugin system that allows you to extend the functionality of Framers by adding new actions. This enables you to customize the behavior of your AI agents and add domain-specific capabilities. Plugins in Frame are closely tied to the overall component architecture, interacting with various parts of the system such as the Brain, Agency, and ActionRegistry.
+
+For a detailed overview of how plugins fit into the Frame architecture, refer to the [Component Hierarchy and Interactions](#component-hierarchy-and-interactions) section.
 
 ### Adding New Actions
 
-To add a new action, follow these steps:
+To add a new action as a plugin, follow these steps:
 
 1. **Create a New Action File**: Place your new action in the `frame/src/framer/agency/actions` directory. This file should define the logic for your action.
 
@@ -496,33 +498,54 @@ To add a new action, follow these steps:
 
 4. **Bind Variables to Action Callbacks**: When registering the action, you can bind additional variables to the action function using keyword arguments.
 
-5. **Update VALID_ACTIONS**: Ensure your action is added to the `VALID_ACTIONS` dictionary in `default_actions.py`.
+5. **Implement Plugin Hooks**: If your plugin needs to interact with other components or respond to specific events, implement the necessary hooks such as `on_decision_made` or `on_task_completed`.
 
-6. **Example**: Check the `examples/` directory for a complete example of extending the bot with new behavior.
-
-Here's a quick example of adding a new action:
+Example of adding a new action as a plugin:
 
 ```python
-# In frame/src/framer/agency/actions/my_action.py
-def my_custom_action(param1, param2):
-    # Action logic here
-    return f"Action performed with {param1} and {param2}"
+# In frame/src/framer/agency/actions/weather_plugin.py
+import requests
 
-# Registering the action
+def get_weather(location, api_key, **kwargs):
+    """Get weather information for a location."""
+    url = f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}"
+    response = requests.get(url)
+    return response.json()
+
+class WeatherPlugin:
+    def __init__(self, api_key):
+        self.api_key = api_key
+
+    def register(self, action_registry):
+        action_registry.register_action(
+            "get_weather",
+            get_weather,
+            description="Get weather information for a location",
+            priority=5,
+            api_key=self.api_key
+        )
+
+    def on_decision_made(self, decision):
+        if decision.action == "get_weather":
+            print(f"Weather information requested for: {decision.parameters.get('location')}")
+
+# Usage
 from frame.src.framer.agency.action_registry import ActionRegistry
 
 action_registry = ActionRegistry()
-action_registry.register_action(
-    "my_custom_action",
-    my_custom_action,
-    description="Perform a custom action",
-    priority=5
-)
+weather_plugin = WeatherPlugin(api_key="your_api_key_here")
+weather_plugin.register(action_registry)
+
+# The plugin is now available for use in Framers
 ```
+
+In this example, we've created a WeatherPlugin that adds a `get_weather` action to the Framer. The plugin also implements an `on_decision_made` hook to respond when the action is used. This demonstrates how plugins can extend functionality and interact with the Frame system.
+
+Plugins allow you to create modular, reusable components that can be easily added to or removed from your Frame-based AI agents, enhancing their capabilities and allowing for domain-specific customizations.
 
 ### Action Files
 
-Each action is implemented in a separate file within the `actions` directory. These files contain the logic for each action and can be extended or modified as needed.
+Each current default action is implemented in a separate file within the `actions` directory.
 
 - `create_new_agent.py`: Handles creating a new agent with specific capabilities.
 - `generate_roles_and_goals.py`: Generates roles and goals for an agent.
@@ -538,59 +561,6 @@ The Observer Pattern is used to notify plugins of events or changes in the syste
 - `on_task_completed(task: Task)`: Called when a task is completed by a Framer.
 
 This allows plugins to perform additional actions or logging based on the decisions and tasks processed by Framers.
-
-### Adding New Actions
-
-Frame supports a plugin system that allows you to extend the functionality of Framers by adding new actions. This enables you to customize the behavior of your AI agents and add domain-specific capabilities.
-
-To add a new action, follow these steps:
-
-1. **Create a New Action File**: Place your new action in the `frame/src/framer/agency/actions` directory. This file should define the logic for your action.
-
-2. **Define the Action Function**: Implement the action logic in a function. This function should accept any necessary parameters and return the result of the action.
-
-3. **Register the Action**: Use the `ActionRegistry` to register your action. Provide a name, the function, a description, and a priority level.
-
-4. **Bind Variables to Action Callbacks**: When registering the action, you can bind additional variables to the action function using keyword arguments.
-
-5. **Update VALID_ACTIONS**: Ensure your action is added to the `VALID_ACTIONS` dictionary in `default_actions.py`.
-
-6. **Example**: Check the `examples/` directory for a complete example of extending the bot with new behavior.
-
-Here's a quick example of adding a new action:
-
-```python
-# In frame/src/framer/agency/actions/my_action.py
-def my_custom_action(param1, param2, **kwargs):
-    # Action logic here
-    return f"Action performed with {param1} and {param2}"
-
-# Registering the action
-from frame.src.framer.agency.action_registry import ActionRegistry
-
-action_registry = ActionRegistry()
-action_registry.register_action(
-    "my_custom_action",
-    my_custom_action,
-    description="Perform a custom action",
-    priority=5,
-    bound_var1="value1",
-    bound_var2="value2"
-)
-```
-
-In this example, `bound_var1` and `bound_var2` are bound to the action and will be passed as keyword arguments when the action is called.
-
-#### Action and Decision Models
-
-Frame uses models to represent actions and decisions:
-
-- `Action`: Represents an executable action with properties like name, function, description, and priority.
-- `Decision`: Represents a decision made by a Framer, including the chosen action and any associated parameters.
-
-These models help standardize the structure of actions and decisions throughout the framework.
-
-To learn more about creating and using plugins, including detailed examples, please refer to the [plugins documentation](docs/plugins.md).
 
 ## License
 

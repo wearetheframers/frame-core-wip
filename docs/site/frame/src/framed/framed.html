@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framed.framed.Framed"><code class="flex name class">
 <span>class <span class="ident">Framed</span></span>
-<span>(</span><span>config: <a title="frame.src.framed.config.FramedConfig" href="config.html#frame.src.framed.config.FramedConfig">FramedConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="../framer/agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="../framer/brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="../framer/soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager" href="../framer/agency/tasks/workflow/workflow_manager.html#frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None)</span>
+<span>(</span><span>config: <a title="frame.src.framed.config.FramedConfig" href="config.html#frame.src.framed.config.FramedConfig">FramedConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="../framer/agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="../framer/brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="../framer/soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager" href="../framer/agency/tasks/workflow/workflow_manager.html#frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -56,6 +56,8 @@ hljs.highlightAll();
         workflow_manager: WorkflowManager,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
+        roles: Optional[List[Dict[str, Any]]] = None,
+        goals: Optional[List[Dict[str, Any]]] = None,
     ):
         self.config = config
         self.llm_service = llm_service
@@ -65,6 +67,8 @@ hljs.highlightAll();
         self.workflow_manager = workflow_manager
         self.memory_service = memory_service
         self.eq_service = eq_service
+        self.roles = roles or config.roles or []
+        self.goals = goals or config.goals or []
         logger.debug(&#34;Framed instance created&#34;)
 
     @classmethod
@@ -103,7 +107,18 @@ hljs.highlightAll();
 
     async def perform_task(self, task: dict) -&gt; dict:
         # Implement task execution logic here
-        return await self.workflow_manager.execute_task(task)</code></pre>
+        return await self.workflow_manager.execute_task(task)
+
+    async def initialize(self):
+        &#34;&#34;&#34;Initialize the Framed instance.&#34;&#34;&#34;
+        if self.agency.roles is None and self.agency.goals is None:
+            self.agency.roles, self.agency.goals = await self.agency.generate_roles_and_goals()
+        elif self.agency.roles == [] and self.agency.goals is None:
+            _, self.agency.goals = await self.agency.generate_roles_and_goals()
+        elif self.agency.goals == [] and self.agency.roles is None:
+            self.agency.roles, _ = await self.agency.generate_roles_and_goals()
+        elif self.agency.roles == [] and self.agency.goals == []:
+            self.agency.roles, self.agency.goals = await self.agency.generate_roles_and_goals()</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>
@@ -116,6 +131,12 @@ hljs.highlightAll();
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="frame.src.framed.framed.Framed.initialize"><code class="name flex">
+<span>async def <span class="ident">initialize</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Initialize the Framed instance.</p></div>
+</dd>
 <dt id="frame.src.framed.framed.Framed.perform_task"><code class="name flex">
 <span>async def <span class="ident">perform_task</span></span>(<span>self, task: dict) ‑> dict</span>
 </code></dt>
@@ -149,6 +170,7 @@ hljs.highlightAll();
 <h4><code><a title="frame.src.framed.framed.Framed" href="#frame.src.framed.framed.Framed">Framed</a></code></h4>
 <ul class="">
 <li><code><a title="frame.src.framed.framed.Framed.create" href="#frame.src.framed.framed.Framed.create">create</a></code></li>
+<li><code><a title="frame.src.framed.framed.Framed.initialize" href="#frame.src.framed.framed.Framed.initialize">initialize</a></code></li>
 <li><code><a title="frame.src.framed.framed.Framed.perform_task" href="#frame.src.framed.framed.Framed.perform_task">perform_task</a></code></li>
 <li><code><a title="frame.src.framed.framed.Framed.sense" href="#frame.src.framed.framed.Framed.sense">sense</a></code></li>
 </ul>

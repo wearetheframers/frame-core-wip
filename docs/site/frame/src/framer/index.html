@@ -172,8 +172,9 @@ hljs.highlightAll();
         roles = config.roles
         goals = config.goals
 
-        if roles is None or goals is None:
-            roles, goals = await agency.generate_roles_and_goals()
+        # We initialize roles and goals in the initialize method now
+        # if roles is None or goals is None:
+        #     roles, goals = await agency.generate_roles_and_goals()
 
         brain = Brain(
             llm_service=llm_service,
@@ -198,22 +199,28 @@ hljs.highlightAll();
         )
 
     async def initialize(self):
-        if not hasattr(self.agency, &#39;roles&#39;):
-            self.agency.roles = []
-        if not hasattr(self.agency, &#39;goals&#39;):
-            self.agency.goals = []
-        
+        &#34;&#34;&#34;
+        Initialize the Framer by generating or updating roles and goals.
+
+        This method ensures that the Framer has valid roles and goals:
+        1. If both roles and goals are None, generate new roles and goals.
+        2. If roles are an empty list, set both roles and goals to empty lists.
+        3. If goals are None and roles are provided (not None or empty), generate new goals.
+        4. If both roles and goals are provided (not None), use the provided values.
+        &#34;&#34;&#34;
         if self.roles is None and self.goals is None:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
-        elif self.roles == [] and self.goals is None:
-            self.roles, self.goals = await self.agency.generate_roles_and_goals()
-        elif self.goals == [] and self.roles is None:
-            self.roles, self.goals = await self.agency.generate_roles_and_goals()
-        elif self.roles == [] and self.goals == []:
-            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+        elif self.roles == []:
+            self.goals = []
+        elif self.goals is None and self.roles:
+            _, new_goals = await self.agency.generate_roles_and_goals()
+            self.goals = new_goals
+        elif self.roles and self.goals is None:
+            new_roles, _ = await self.agency.generate_roles_and_goals()
+            self.roles.extend(new_roles)
         
-        self.agency.roles = self.roles if self.roles is not None else []
-        self.agency.goals = self.goals if self.goals is not None else []
+        self.agency.set_roles(self.roles)
+        self.agency.set_goals(self.goals)
 
     # Add a docstring explaining the role and goal generation behavior
     create.__doc__ = &#34;&#34;&#34;
@@ -302,7 +309,12 @@ hljs.highlightAll();
 <span>async def <span class="ident">initialize</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Initialize the Framer by generating or updating roles and goals.</p>
+<p>This method ensures that the Framer has valid roles and goals:
+1. If both roles and goals are None, generate new roles and goals.
+2. If roles are an empty list, set both roles and goals to empty lists.
+3. If goals are None and roles are provided (not None or empty), generate new goals.
+4. If both roles and goals are provided (not None), use the provided values.</p></div>
 </dd>
 <dt id="frame.src.framer.Framer.notify_observers"><code class="name flex">
 <span>def <span class="ident">notify_observers</span></span>(<span>self, decision: <a title="frame.src.framer.brain.decision.decision.Decision" href="brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>) ‑> None</span>
@@ -421,7 +433,26 @@ class FramerConfig:
     llm_presence_penalty: Optional[float] = 0.0
     is_multi_modal: Optional[bool] = False
     roles: Optional[List[Dict[str, str]]] = field(default_factory=list)
-    goals: Optional[List[Dict[str, Any]]] = field(default_factory=list)</code></pre>
+    goals: Optional[List[Dict[str, Any]]] = field(default_factory=list)
+
+    async def initialize(self):
+        &#34;&#34;&#34;Initialize the Framer with roles and goals.&#34;&#34;&#34;
+        if self.agency.roles is None and self.agency.goals is None:
+            self.agency.roles, self.agency.goals = await self.agency.generate_roles_and_goals()
+        elif self.agency.roles == [] and self.agency.goals is None:
+            _, self.agency.goals = await self.agency.generate_roles_and_goals()
+        elif self.agency.goals == [] and self.agency.roles is None:
+            self.agency.roles, _ = await self.agency.generate_roles_and_goals()
+        elif self.agency.roles == [] and self.agency.goals == []:
+            self.agency.roles, self.agency.goals = await self.agency.generate_roles_and_goals()
+        
+        # Ensure goals are generated if they are None
+        if self.agency.goals is None:
+            _, self.agency.goals = await self.agency.generate_roles_and_goals()
+
+        # Ensure roles are generated if they are None
+        if self.agency.roles is None:
+            self.agency.roles, _ = await self.agency.generate_roles_and_goals()</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -517,6 +548,15 @@ It uses the FramerConfigModel to validate and set default values for the configu
 <dt id="frame.src.framer.FramerConfig.singleton"><code class="name">var <span class="ident">singleton</span> : Optional[bool]</code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.FramerConfig.initialize"><code class="name flex">
+<span>async def <span class="ident">initialize</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Initialize the Framer with roles and goals.</p></div>
 </dd>
 </dl>
 </dd>
@@ -706,6 +746,7 @@ ensuring that all necessary components are properly initialized.</p>
 <li><code><a title="frame.src.framer.FramerConfig.description" href="#frame.src.framer.FramerConfig.description">description</a></code></li>
 <li><code><a title="frame.src.framer.FramerConfig.gender" href="#frame.src.framer.FramerConfig.gender">gender</a></code></li>
 <li><code><a title="frame.src.framer.FramerConfig.goals" href="#frame.src.framer.FramerConfig.goals">goals</a></code></li>
+<li><code><a title="frame.src.framer.FramerConfig.initialize" href="#frame.src.framer.FramerConfig.initialize">initialize</a></code></li>
 <li><code><a title="frame.src.framer.FramerConfig.is_multi_modal" href="#frame.src.framer.FramerConfig.is_multi_modal">is_multi_modal</a></code></li>
 <li><code><a title="frame.src.framer.FramerConfig.llm_frequency_penalty" href="#frame.src.framer.FramerConfig.llm_frequency_penalty">llm_frequency_penalty</a></code></li>
 <li><code><a title="frame.src.framer.FramerConfig.llm_max_tokens" href="#frame.src.framer.FramerConfig.llm_max_tokens">llm_max_tokens</a></code></li>

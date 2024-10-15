@@ -38,9 +38,10 @@ The Framer class represents an individual AI agent within the Frame cognitive ag
 - Plugin Support: Extend functionality through custom plugins.
 - Automatic Role and Goal Generation: If roles or goals are not provided during initialization, they will be automatically generated:
   - If both roles and goals are None, they will be generated using `generate_roles_and_goals()`.
-  - If roles is an empty list `[]` and goals is None, only roles will be generated.
-  - If goals is an empty list `[]` and roles is None, only goals will be generated.
+  - If roles is an empty list `[]`, no roles or goals will be assigned, as the Framer has no roles to base goals on.
+  - If goals is an empty list `[]` and roles is None, roles will be generated and goals will be generated based on these roles.
   - If both roles and goals are empty lists `[]`, both will be generated.
+  - If roles are None or an empty list and goals are provided, roles will be generated and new goals will be added to the existing ones.
   - If either roles or goals is provided (not None or empty list), the provided value will be used.
 
 ## Advanced Features
@@ -77,9 +78,17 @@ framer.add_plugin(ImageAnalysisPlugin())
 image_analysis_result = framer.use_plugin("image_analysis", image_data)
 ```
 
+# Example of Framer initialization with empty roles
+framer_with_no_roles = await framer_factory.create_framer(
+    config=FramerConfig(name="EmptyRolesFramer"),
+    roles=[]
+)
+print(framer_with_no_roles.agency.roles)  # Output: []
+print(framer_with_no_roles.agency.goals)  # Output: []
+
 ## Best Practices
 
-1. **Configure Appropriately**: Carefully define roles, goals, and the soul seed to shape the Framer's behavior effectively.
+1. **Configure Appropriately**: Carefully define roles, goals, and the soul seed to shape the Framer's behavior effectively. Be aware that initializing a Framer with an empty list of roles will result in no goals being assigned.
 2. **Use Multi-modal Inputs**: Leverage the Framer's ability to process various types of inputs for more comprehensive understanding.
 3. **Manage Memory**: Utilize the memory system to maintain context and improve the Framer's performance over time.
 4. **Monitor and Adjust**: Regularly review the Framer's performance and adjust its configuration as needed.

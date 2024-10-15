@@ -50,7 +50,7 @@ class Mind:
             if isinstance(response, AsyncMock):
                 # For testing purposes, return a default decision
                 return Decision(
-                    action="think",
+                    action="default_action",
                     parameters={},
                     reasoning="Default decision for testing",
                     confidence=0.5,
@@ -60,16 +60,16 @@ class Mind:
             decision_data = json.loads(response) if isinstance(response, str) else {}
             action = decision_data.get("action", "default_action")
             if action not in self.brain.action_registry.actions:
-                logger.warning(f"Invalid action: {action}. Defaulting to 'think'.")
-                action = "think"
-                reasoning = f"Invalid action '{action}' was generated. Defaulted to 'think'."
+                logger.warning(f"Invalid action: {action}. Defaulting to 'default_action'.")
+                action = "default_action"
+                reasoning = f"Invalid action '{action}' was generated. Defaulted to 'default_action'."
             else:
                 reasoning = decision_data.get("reasoning", "No reasoning provided.")
             
             decision = Decision(
                 action=action,
-                parameters=decision_data.get("data", {}),
-                reasoning=reasoning,
+                parameters=decision_data.get("parameters", {}),
+                reasoning=decision_data.get("reasoning", "No reasoning provided."),
                 confidence=float(decision_data.get("confidence", 0.5)),
                 priority=int(decision_data.get("priority", 5)),
             )

@@ -126,8 +126,9 @@ class Framer:
         roles = config.roles
         goals = config.goals
 
-        if roles is None or goals is None:
-            roles, goals = await agency.generate_roles_and_goals()
+        # We initialize roles and goals in the initialize method now
+        # if roles is None or goals is None:
+        #     roles, goals = await agency.generate_roles_and_goals()
 
         brain = Brain(
             llm_service=llm_service,
@@ -152,22 +153,28 @@ class Framer:
         )
 
     async def initialize(self):
-        if not hasattr(self.agency, 'roles'):
-            self.agency.roles = []
-        if not hasattr(self.agency, 'goals'):
-            self.agency.goals = []
-        
+        """
+        Initialize the Framer by generating or updating roles and goals.
+
+        This method ensures that the Framer has valid roles and goals:
+        1. If both roles and goals are None, generate new roles and goals.
+        2. If roles are an empty list, set both roles and goals to empty lists.
+        3. If goals are None and roles are provided (not None or empty), generate new goals.
+        4. If both roles and goals are provided (not None), use the provided values.
+        """
         if self.roles is None and self.goals is None:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
-        elif self.roles == [] and self.goals is None:
-            self.roles, self.goals = await self.agency.generate_roles_and_goals()
-        elif self.goals == [] and self.roles is None:
-            self.roles, self.goals = await self.agency.generate_roles_and_goals()
-        elif self.roles == [] and self.goals == []:
-            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+        elif self.roles == []:
+            self.goals = []
+        elif self.goals is None and self.roles:
+            _, new_goals = await self.agency.generate_roles_and_goals()
+            self.goals = new_goals
+        elif self.roles and self.goals is None:
+            new_roles, _ = await self.agency.generate_roles_and_goals()
+            self.roles.extend(new_roles)
         
-        self.agency.roles = self.roles if self.roles is not None else []
-        self.agency.goals = self.goals if self.goals is not None else []
+        self.agency.set_roles(self.roles)
+        self.agency.set_goals(self.goals)
 
     # Add a docstring explaining the role and goal generation behavior
     create.__doc__ = """

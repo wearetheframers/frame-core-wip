@@ -123,8 +123,11 @@ class ActionRegistry:
             Optional[Dict[str, Any]]: The action details if found, otherwise None.
         """
         return self.actions.get(name)
-        return {
-            name: action
-            for name, action in self.actions.items()
-            if action["priority"] > 0
-        }
+
+    async def execute_action(self, action_name: str, *args, **kwargs):
+        """Execute an action by its name."""
+        action = self.get_action(action_name)
+        if action:
+            return await action["action_func"](*args, **kwargs)
+        else:
+            raise ValueError(f"Action '{action_name}' not found in the registry.")

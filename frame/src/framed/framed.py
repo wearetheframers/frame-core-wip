@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from frame.src.framed.config import FramedConfig
 from frame.src.services.llm.main import LLMService
 from frame.src.framer.agency.agency import Agency
@@ -23,6 +23,8 @@ class Framed:
         workflow_manager: WorkflowManager,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
+        roles: Optional[List[Dict[str, Any]]] = None,
+        goals: Optional[List[Dict[str, Any]]] = None,
     ):
         self.config = config
         self.llm_service = llm_service
@@ -32,6 +34,8 @@ class Framed:
         self.workflow_manager = workflow_manager
         self.memory_service = memory_service
         self.eq_service = eq_service
+        self.roles = roles or config.roles or []
+        self.goals = goals or config.goals or []
         logger.debug("Framed instance created")
 
     @classmethod
@@ -71,3 +75,14 @@ class Framed:
     async def perform_task(self, task: dict) -> dict:
         # Implement task execution logic here
         return await self.workflow_manager.execute_task(task)
+
+    async def initialize(self):
+        """Initialize the Framed instance."""
+        if self.agency.roles is None and self.agency.goals is None:
+            self.agency.roles, self.agency.goals = await self.agency.generate_roles_and_goals()
+        elif self.agency.roles == [] and self.agency.goals is None:
+            _, self.agency.goals = await self.agency.generate_roles_and_goals()
+        elif self.agency.goals == [] and self.agency.roles is None:
+            self.agency.roles, _ = await self.agency.generate_roles_and_goals()
+        elif self.agency.roles == [] and self.agency.goals == []:
+            self.agency.roles, self.agency.goals = await self.agency.generate_roles_and_goals()

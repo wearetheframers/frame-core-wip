@@ -28,7 +28,7 @@ class Soul:
             notes={k: v for k, v in seed.items() if k != "text"},
             state={},
         )
-        self.seed = seed
+        self.seed = {"text": self.model.essence}
         self.state = self.model.state
 
     def update_state(self, key: str, value: Any) -> None:
