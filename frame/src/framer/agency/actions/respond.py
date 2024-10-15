@@ -28,6 +28,9 @@ async def respond(execution_context: ExecutionContext, **kwargs) -> Dict[str, An
     goals = execution_context.get_state("goals", [])
     soul_state = soul.get_current_state() if soul else {}
     
+    # Get the content from kwargs if provided, otherwise use recent_perception
+    content = kwargs.get('content', recent_perception)
+    
     # Construct the prompt
     prompt = f"""
     As an AI assistant with the following characteristics:
@@ -39,11 +42,11 @@ async def respond(execution_context: ExecutionContext, **kwargs) -> Dict[str, An
     Recent memories: {recent_memories}
     Recent perceptions: {recent_perceptions}
     
-    You are responding to the following most recent input/perception:
-    {recent_perception}
+    You are responding to the following input:
+    {content}
     
     Please generate a response that takes into account all of the above information, 
-    with particular emphasis on addressing the most recent input/perception.
+    with particular emphasis on addressing the given input.
     
     Response:
     """

@@ -256,9 +256,16 @@ class Brain:
             else:
                 if decision.action not in self.action_registry.actions:
                     raise ValueError(f"Action '{decision.action}' not found in registry.")
-                result = await self.action_registry.execute_action(
-                    decision.action, decision.parameters
-                )
+                
+                # For 'respond' action, ensure 'content' is passed correctly
+                if decision.action == "respond" and "content" in decision.parameters:
+                    result = await self.action_registry.execute_action(
+                        decision.action, {"content": decision.parameters["content"]}
+                    )
+                else:
+                    result = await self.action_registry.execute_action(
+                        decision.action, decision.parameters
+                    )
 
             logger.info(f"Executed action: {decision.action}")
             logger.debug(f"Action result: {result}")
