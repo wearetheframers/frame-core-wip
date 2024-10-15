@@ -229,6 +229,15 @@ When initializing a Framer, the behavior for role and goal generation is as foll
 
 This ensures that Framers always have some roles and goals, either user-defined or automatically generated.
 
+#### Soul Seed
+
+When creating a Framer, you can provide a soul_seed that can be either a string or a dictionary:
+
+- If a string is provided, it will be used as the 'text' value in the soul's seed dictionary.
+- If a dictionary is provided, it can include any keys and values, with an optional 'text' key for the soul's essence.
+
+This allows for more flexible and detailed soul initialization.
+
 #### Prompt Formatting
 
 When using different LLM adapters, it's important to format your prompts correctly:
@@ -244,10 +253,16 @@ from frame import Frame, Framed
 framer_factory = Frame()
 framed_factory = Framed()
 
-# Create a new Framer with Context
-context = Context(soul={"text": "You are a research assistant and tutor with access to a local library of text, PDF, and image files, as well as access to online web sources like Google.", "specialty": "AI and machine learning", "experience_level": "expert"})
+# Create a new Framer with Context and Soul Seed
+context = Context()
+soul_seed = {
+    "text": "You are a research assistant and tutor with access to a local library of text, PDF, and image files, as well as access to online web sources like Google.",
+    "specialty": "AI and machine learning",
+    "experience_level": "expert"
+}
 research_assistant = await framer_factory.create_framer(
-    context_service=context
+    context_service=context,
+    soul_seed=soul_seed
 )
 
 # Add roles and goals using Context
@@ -435,10 +450,10 @@ The Frame CLI supports both JSON input and traditional CLI arguments for more fl
 
 ```bash
 # Using traditional CLI arguments (default behavior)
-python -m frame.cli run-framer --name "Research Assistant" --model "gpt-4" --prompt "What are the best open-source cognitive AI agent libraries in 2024?"
+python -m frame.cli run-framer --name "Research Assistant" --model "gpt-4" --prompt "What are the best open-source AI agent libraries in 2024?"
 
 # Using JSON input (must be explicitly specified with --json flag)
-python -m frame.cli run-framer-json '{"name": "Research Assistant", "model": "gpt-4", "prompt": "What are the best open-source cognitive AI agent libraries in 2024?"}'
+python -m frame.cli run-framer-json '{"name": "Research Assistant", "model": "gpt-4", "prompt": "What are the best open-source AI agent libraries in 2024?"}'
 
 # Run a Framer with a perception input
 python -m frame.cli run-framer-json '{"name": "Visual Analyzer", "perception": {"type": "visual", "data": {"object": "tree"}, "source": "camera"}}'
@@ -528,9 +543,56 @@ This allows plugins to perform additional actions or logging based on the decisi
 
 ### Adding New Actions
 
-You can add new actions to the Frame framework by defining a function, registering it with a description and priority, and adding it to the `VALID_ACTIONS` set in `brain.py`. This ensures that your action is recognized and can be used in decision-making processes.
+Frame supports a plugin system that allows you to extend the functionality of Framers by adding new actions. This enables you to customize the behavior of your AI agents and add domain-specific capabilities.
 
-To learn more about creating and using plugins, please refer to the [plugins documentation](docs/plugins.md).
+To add a new action, follow these steps:
+
+1. **Create a New Action File**: Place your new action in the `frame/src/framer/agency/actions` directory. This file should define the logic for your action.
+
+2. **Define the Action Function**: Implement the action logic in a function. This function should accept any necessary parameters and return the result of the action.
+
+3. **Register the Action**: Use the `ActionRegistry` to register your action. Provide a name, the function, a description, and a priority level.
+
+4. **Bind Variables to Action Callbacks**: When registering the action, you can bind additional variables to the action function using keyword arguments.
+
+5. **Update VALID_ACTIONS**: Ensure your action is added to the `VALID_ACTIONS` dictionary in `default_actions.py`.
+
+6. **Example**: Check the `examples/` directory for a complete example of extending the bot with new behavior.
+
+Here's a quick example of adding a new action:
+
+```python
+# In frame/src/framer/agency/actions/my_action.py
+def my_custom_action(param1, param2, **kwargs):
+    # Action logic here
+    return f"Action performed with {param1} and {param2}"
+
+# Registering the action
+from frame.src.framer.agency.action_registry import ActionRegistry
+
+action_registry = ActionRegistry()
+action_registry.register_action(
+    "my_custom_action",
+    my_custom_action,
+    description="Perform a custom action",
+    priority=5,
+    bound_var1="value1",
+    bound_var2="value2"
+)
+```
+
+In this example, `bound_var1` and `bound_var2` are bound to the action and will be passed as keyword arguments when the action is called.
+
+#### Action and Decision Models
+
+Frame uses models to represent actions and decisions:
+
+- `Action`: Represents an executable action with properties like name, function, description, and priority.
+- `Decision`: Represents a decision made by a Framer, including the chosen action and any associated parameters.
+
+These models help standardize the structure of actions and decisions throughout the framework.
+
+To learn more about creating and using plugins, including detailed examples, please refer to the [plugins documentation](docs/plugins.md).
 
 ## License
 
