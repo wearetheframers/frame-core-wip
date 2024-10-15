@@ -93,8 +93,10 @@ def test_cli_run_framer_with_prompt(runner, mocker):
         cli_app, ["run-framer", "--name", "Test Framer", "--prompt", "Test prompt"]
     )
 
-    assert result.exit_code == 0, f"Exit code was {result.exit_code}, expected 0. Output: {result.output}"
-        
+    assert (
+        result.exit_code == 0
+    ), f"Exit code was {result.exit_code}, expected 0. Output: {result.output}"
+
     # Check if execute_framer was called
     mock_execute_framer.assert_called_once()
 

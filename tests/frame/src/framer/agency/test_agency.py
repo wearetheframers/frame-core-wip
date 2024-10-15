@@ -22,7 +22,11 @@ def mock_llm_service():
 def agency(mock_llm_service):
     mock_execution_context = Mock()
     mock_execution_context.llm_service = mock_llm_service
-    return Agency(llm_service=mock_llm_service, context={}, execution_context=mock_execution_context)
+    return Agency(
+        llm_service=mock_llm_service,
+        context={},
+        execution_context=mock_execution_context,
+    )
 
 
 def test_agency_initialization(agency, mock_llm_service):
@@ -152,7 +156,12 @@ async def test_generate_roles_and_goals(agency):
 
     roles, goals = await agency.generate_roles_and_goals()
 
-    assert roles == [{"name": "Task Assistant", "description": "Assist with the given task or query."}]
+    assert roles == [
+        {
+            "name": "Task Assistant",
+            "description": "Assist with the given task or query.",
+        }
+    ]
     assert goals == [{"description": "Test Goal", "priority": 1}]
 
     assert agency.generate_roles.call_count == 1

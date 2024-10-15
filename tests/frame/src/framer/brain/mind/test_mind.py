@@ -28,21 +28,22 @@ def test_mind_initialization(mind):
 import time
 from datetime import datetime, timedelta
 
+
 def test_think(mind):
     thought = "This is a test thought"
     mind.think(thought)
     assert len(mind.thoughts) == 1
-    assert mind.thoughts[0]['content'] == thought
-    assert isinstance(mind.thoughts[0]['timestamp'], datetime)
-    assert mind.current_thought['content'] == thought
+    assert mind.thoughts[0]["content"] == thought
+    assert isinstance(mind.thoughts[0]["timestamp"], datetime)
+    assert mind.current_thought["content"] == thought
 
 
 def test_get_current_thought(mind):
     thought = "Current thought"
     mind.think(thought)
     current_thought = mind.get_current_thought()
-    assert current_thought['content'] == thought
-    assert isinstance(current_thought['timestamp'], datetime)
+    assert current_thought["content"] == thought
+    assert isinstance(current_thought["timestamp"], datetime)
 
 
 def test_get_all_thoughts(mind):
@@ -53,10 +54,15 @@ def test_get_all_thoughts(mind):
         time.sleep(0.001)
     all_thoughts = mind.get_all_thoughts()
     assert len(all_thoughts) == 3
-    assert [t['content'] for t in all_thoughts] == thoughts[::-1]  # Reverse order due to sorting
-    assert all(isinstance(t['timestamp'], datetime) for t in all_thoughts)
+    assert [t["content"] for t in all_thoughts] == thoughts[
+        ::-1
+    ]  # Reverse order due to sorting
+    assert all(isinstance(t["timestamp"], datetime) for t in all_thoughts)
     # Check if thoughts are sorted by timestamp in descending order
-    assert all(all_thoughts[i]['timestamp'] >= all_thoughts[i+1]['timestamp'] for i in range(len(all_thoughts)-1))
+    assert all(
+        all_thoughts[i]["timestamp"] >= all_thoughts[i + 1]["timestamp"]
+        for i in range(len(all_thoughts) - 1)
+    )
 
 
 def test_clear_thoughts(mind):
@@ -73,7 +79,9 @@ async def test_process_perception(mind, mocker):
         "get_completion",
         new_callable=AsyncMock,
     )
-    mind.brain.llm_service.get_completion.return_value = '{"action": "default_action", "parameters": {}}'
+    mind.brain.llm_service.get_completion.return_value = (
+        '{"action": "default_action", "parameters": {}}'
+    )
     perception = Perception(type="test", data={"key": "value"})
     await mind.process_perception(perception)
     assert len(mind.perceptions) == 1
@@ -192,4 +200,7 @@ async def test_process_multiple_perceptions(mind, mocker):
     for perception in perceptions:
         await mind.process_perception(perception)
     assert len(mind.perceptions) == 3
-    assert mind.get_current_thought()["content"] == f"Processed perception: {perceptions[-1].type}"
+    assert (
+        mind.get_current_thought()["content"]
+        == f"Processed perception: {perceptions[-1].type}"
+    )

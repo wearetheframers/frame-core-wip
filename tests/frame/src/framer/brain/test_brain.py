@@ -21,8 +21,8 @@ def brain():
     goals = []
     mock_agency = AsyncMock()
     mock_agency.perform_task = AsyncMock()
-    
-    with patch('frame.src.framer.brain.brain.Agency', return_value=mock_agency):
+
+    with patch("frame.src.framer.brain.brain.Agency", return_value=mock_agency):
         brain = Brain(
             llm_service=mock_llm_service,
             roles=roles,
@@ -52,7 +52,9 @@ def test_brain_initialization(brain):
 @pytest.mark.asyncio
 async def test_process_perception(brain):
     perception = Perception(type="visual", data={"object": "tree"})
-    brain.action_registry.register_action("test_action", AsyncMock(), description="Test action")
+    brain.action_registry.register_action(
+        "test_action", AsyncMock(), description="Test action"
+    )
     with patch.object(
         brain.llm_service, "get_completion", new_callable=AsyncMock
     ) as mock_get_completion:
@@ -99,7 +101,10 @@ async def test_make_decision_invalid_action(brain, caplog):
 
     assert isinstance(decision, Decision)
     assert decision.action == "error"
-    assert "Invalid action 'invalid_action' was generated" in decision.reasoning or "Defaulted to 'error'" in decision.reasoning
+    assert (
+        "Invalid action 'invalid_action' was generated" in decision.reasoning
+        or "Defaulted to 'error'" in decision.reasoning
+    )
     assert "Defaulted to 'error'" in decision.reasoning
     assert isinstance(decision.parameters, dict)
 
@@ -245,7 +250,7 @@ async def test_execute_decision_think_action(brain):
             "analysis": "AI is advancing rapidly",
             "new_tasks": [],
             "generate_new_prompt": False,
-            "new_prompt": ""
+            "new_prompt": "",
         }
         await brain.execute_decision(decision)
         mock_execute_think_action.assert_called_once_with(decision)

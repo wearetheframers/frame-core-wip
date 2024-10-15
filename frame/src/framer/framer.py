@@ -160,22 +160,43 @@ class Framer:
         4. If both roles and goals are provided (not None), use the provided values.
         """
         if self.roles is None and self.goals is None:
-            generated_roles, generated_goals = await self.agency.generate_roles_and_goals()
-            self.roles = [{"name": role, "description": f"{role} description"} for role in generated_roles]
-            self.goals = [{"description": goal, "priority": 1} for goal in generated_goals]
+            generated_roles, generated_goals = (
+                await self.agency.generate_roles_and_goals()
+            )
+            self.roles = [
+                {"name": role, "description": f"{role} description"}
+                for role in generated_roles
+            ]
+            self.goals = [
+                {"description": goal, "priority": 1} for goal in generated_goals
+            ]
         elif self.roles == []:
             self.goals = []
         elif self.goals is None and self.roles:
             _, generated_goals = await self.agency.generate_roles_and_goals()
-            self.goals = [{"description": goal, "priority": 1} for goal in generated_goals]
+            self.goals = [
+                {"description": goal, "priority": 1} for goal in generated_goals
+            ]
         elif self.roles and self.goals is None:
             new_roles, _ = await self.agency.generate_roles_and_goals()
-            self.roles.extend([{"name": role, "description": f"{role} description"} for role in new_roles])
+            self.roles.extend(
+                [
+                    {"name": role, "description": f"{role} description"}
+                    for role in new_roles
+                ]
+            )
 
         if not self.roles:
-            self.roles = [{"name": "Default Role", "description": "Default role description"}]
+            self.roles = [
+                {"name": "Default Role", "description": "Default role description"}
+            ]
         if not self.goals:
-            self.goals = [{"description": "Assist users to the best of my abilities", "priority": 1}]
+            self.goals = [
+                {
+                    "description": "Assist users to the best of my abilities",
+                    "priority": 1,
+                }
+            ]
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)

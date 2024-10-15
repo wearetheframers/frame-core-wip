@@ -21,6 +21,7 @@ def test_cleanup_with_exception(capfd):
         assert "Error during cleanup logging: Test exception" in captured.err
         assert "Cleaning up Frame resources..." in captured.out
 
+
 def test_cleanup_with_exception_and_capfd(capfd):
     with patch("frame.src.utils.cleanup.logger") as mock_logger:
         mock_logger.info.side_effect = Exception("Test exception")
