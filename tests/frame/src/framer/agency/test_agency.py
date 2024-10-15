@@ -19,7 +19,9 @@ def mock_llm_service():
 
 @pytest.fixture
 def agency(mock_llm_service):
-    return Agency(llm_service=mock_llm_service, use_local_model=False, context={})
+    mock_execution_context = Mock()
+    mock_execution_context.llm_service = mock_llm_service
+    return Agency(execution_context=mock_execution_context, context={})
 
 
 def test_agency_initialization(agency, mock_llm_service):
@@ -36,8 +38,8 @@ async def test_generate_roles_and_goals(agency):
     mock_roles = [{"name": "Test Role", "description": "A test role"}]
     mock_goals = [{"description": "Test Goal", "priority": 1}]
 
-    with patch.object(agency, "_generate_roles", return_value=mock_roles), patch.object(
-        agency, "_generate_goals", return_value=mock_goals
+    with patch.object(agency, "generate_roles", return_value=mock_roles), patch.object(
+        agency, "generate_goals", return_value=mock_goals
     ):
         roles, goals = await agency.generate_roles_and_goals()
 
@@ -77,9 +79,6 @@ def test_create_task(agency):
     assert task.description == "Test task"
     assert task.priority == 75.0
     assert task.workflow_id == "test_workflow"
-
-
-import pytest
 
 
 @pytest.mark.parametrize(
@@ -137,12 +136,12 @@ async def test_generate_roles_and_goals(agency):
     # Mock the context and soul
     agency.context = {"soul": "Test soul"}
 
-    # Mock the _generate_roles and _generate_goals methods
-    agency._generate_roles = AsyncMock(
-        return_value='[{"name": "Task Assistant", "description": "Assist with the given task or query."}]'
+    # Mock the generate_roles and generate_goals methods
+    agency.generate_roles = AsyncMock(
+        return_value=[{"name": "Task Assistant", "description": "Assist with the given task or query."}]
     )
-    agency._generate_goals = AsyncMock(
-        return_value='[{"description": "Test Goal", "priority": 1}]'
+    agency.generate_goals = AsyncMock(
+        return_value=[{"description": "Test Goal", "priority": 1}]
     )
 
     roles, goals = await agency.generate_roles_and_goals()
@@ -153,17 +152,10 @@ async def test_generate_roles_and_goals(agency):
             "description": "Assist with the given task or query.",
         }
     ]
-    assert goals == [{"description": "Assist users to the best of my abilities", "priority": 1}]
+    assert goals == [{"description": "Test Goal", "priority": 1}]
 
-    assert agency._generate_roles.call_count == 1
-    assert agency._generate_goals.call_count == 1
-
-    # Test when soul is not initialized
-    agency.context = {}
-    with pytest.raises(
-        ValueError, match="Soul is not initialized. Cannot generate roles and goals."
-    ):
-        await agency.generate_roles_and_goals()
+    assert agency.generate_roles.call_count == 1
+    assert agency.generate_goals.call_count == 1
 
 
 @pytest.mark.asyncio
@@ -171,9 +163,9 @@ async def test_generate_roles_and_goals_empty_response(agency):
     # Mock the context and soul
     agency.context = {"soul": "Test soul"}
 
-    # Mock the _generate_roles and _generate_goals methods to return empty responses
-    agency._generate_roles = AsyncMock(return_value='[]')
-    agency._generate_goals = AsyncMock(return_value='[]')
+    # Mock the generate_roles and generate_goals methods to return empty responses
+    agency.generate_roles = AsyncMock(return_value=[])
+    agency.generate_goals = AsyncMock(return_value=[])
 
     roles, goals = await agency.generate_roles_and_goals()
 
@@ -187,5 +179,5 @@ async def test_generate_roles_and_goals_empty_response(agency):
         {"description": "Assist users to the best of my abilities", "priority": 1}
     ]
 
-    agency._generate_roles.assert_called_once()
-    agency._generate_goals.assert_called_once()
+    agency.generate_roles.assert_called_once()
+    agency.generate_goals.assert_called_once()

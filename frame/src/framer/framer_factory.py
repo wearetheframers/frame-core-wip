@@ -10,6 +10,7 @@ from frame.src.framer.soul.soul import Soul
 from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
 from frame.src.services.memory.main import MemoryService
 from frame.src.services.eq.main import EQService
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 
 class FramerFactory:
@@ -56,10 +57,11 @@ class FramerFactory:
 
         brain = Brain(
             # Initialize the Brain component with default model, roles, and goals
-            llm_service=self.llm_service,
-            default_model=self.config.default_model,
+            execution_context=ExecutionContext(llm_service=self.llm_service),
             roles=roles,
             goals=goals,
+            default_model=self.config.default_model,
+            use_local_model=False,
         )
 
         if soul_seed is None:

@@ -42,3 +42,6 @@ class MetricsManager(metaclass=SingletonMeta):
         self._metrics.clear()
         self._total_calls = 0
         self._total_cost = 0.0
+
+    def clear(self):
+        self.reset_metrics()

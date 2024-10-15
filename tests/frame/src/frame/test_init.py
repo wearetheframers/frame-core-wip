@@ -78,7 +78,8 @@ def test_cleanup_with_exception():
             mock_print.assert_any_call("Cleaning up Frame resources...", flush=True)
 
 
-def test_framed_initialization():
+@pytest.mark.asyncio
+async def test_framed_initialization():
     config = FramedConfig(name="TestFramed")
     llm_service = LLMService()
     agency = Agency(llm_service=llm_service, context={})

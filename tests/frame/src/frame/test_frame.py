@@ -43,7 +43,7 @@ def test_set_default_model(frame):
 
 @pytest.mark.asyncio
 async def test_get_completion(frame, mocker):
-    mock_get_completion = mocker.AsyncMock(return_value="Mocked completion")
+    mock_get_completion = AsyncMock(return_value="Mocked completion")
     mocker.patch.object(frame.llm_service, "get_completion", mock_get_completion)
 
     result = await frame.get_completion("Test prompt")

@@ -137,9 +137,22 @@ def run_framer(ctx, json_input, sync, stream):
             )
             return
 
+        framed._streamed_response = {"status": "pending", "result": ""}
+
         if stream:
-            async for chunk in result:
-                click.echo(chunk, nl=False)
+            async def stream_output():
+                while framed._streamed_response["status"] != "finished":
+                    new_content = framed._streamed_response["result"]
+                    if new_content:
+                        click.echo(new_content, nl=False)
+                        framed._streamed_response["result"] = ""
+                    await asyncio.sleep(0.1)
+                
+                # Print any remaining content
+                if framed._streamed_response["result"]:
+                    click.echo(framed._streamed_response["result"], nl=False)
+            
+            await stream_output()
         else:
             click.echo(result)
 

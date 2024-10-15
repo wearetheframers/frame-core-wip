@@ -61,8 +61,8 @@ VALID_ACTIONS: Dict[str, Dict[str, Any]] = {
     },
     "think": {
         "func": think,
-        "description": "Process information and generate new thoughts or ideas.",
-        "priority": 5,
+        "description": "Ponder and reflect on the current situation, potentially creating new tasks or generating a new prompt. Only necessary if a new prompt should be generated with new pretext and context for better results.",
+        "priority": 2,
     },
     "use": {
         "func": None,

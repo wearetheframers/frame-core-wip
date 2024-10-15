@@ -23,7 +23,6 @@ async def test_framer_initialization():
         name="Test Framer",
         default_model="gpt-3.5-turbo",
         description="A test description",
-        # Add other necessary configuration parameters here
     )
     llm_service = AsyncMock(spec=LLMService)
     agency = AsyncMock(spec=Agency)
@@ -82,8 +81,8 @@ async def test_framer_initialize():
         workflow_manager=workflow_manager,
     )
     await framer.initialize()
-    assert framer.roles == ["Generated Role"]
-    assert framer.goals == ["Generated Goal"]
+    assert framer.agency.roles == ["Generated Role"]
+    assert framer.agency.goals == ["Generated Goal"]
     assert agency.generate_roles_and_goals.call_count == 1
 
     # Test case 2: Both roles and goals are empty lists
@@ -192,8 +191,8 @@ async def test_framer_initialize_with_provided_values():
         roles=["Provided Role"],
     )
     await framer.initialize()
-    assert framer.roles == ["Provided Role"]
-    assert framer.goals == ["Generated Goal"]
+    assert framer.agency.roles == ["Provided Role"]
+    assert framer.agency.goals == ["Generated Goal"]
     agency.generate_roles_and_goals.assert_called_once()
 
     # Test case 2: Roles are empty, goals are None
@@ -285,4 +284,5 @@ async def test_cancel_task():
 
 
 def test_soul_seed_initialization():
-    soul = Soul(seed={"seed": "Test soul seed"})
+    soul = Soul(seed={"text": "Test soul seed"})
+    assert soul.seed == {"text": "Test soul seed"}

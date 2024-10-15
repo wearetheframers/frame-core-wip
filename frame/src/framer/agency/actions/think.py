@@ -1,14 +1,17 @@
-def think(self, thought: str = "Processing information...") -> str:
+import asyncio
+from typing import Dict, Any
+
+async def think(framer: Any, thought: str = "Processing information...") -> Dict[str, Any]:
     """
-    Process information and generate new thoughts or ideas.
+    Ponder and reflect on the current situation, potentially creating new tasks or generating a new prompt.
+    This action is only necessary if a new prompt should be generated with new pretext and context for better results.
 
     Args:
-        self: The current Framer instance.
-        thought (str): The thought or idea to process.
+        framer (Any): The Framer instance.
+        thought (str): The initial thought or idea to process.
 
     Returns:
-        str: The processed thought or generated idea.
+        Dict[str, Any]: A dictionary containing the results of the thinking process.
     """
-    # Placeholder for thought processing logic
-    self.mind.think(thought)
-    return f"Thought: {self.mind.current_thought}"
+    # This function is now just a wrapper. The main logic is in the Brain's _execute_think_action method
+    return await framer.brain._execute_think_action(framer.brain.make_decision({"action": "think", "parameters": {"thought": thought}}))

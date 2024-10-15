@@ -13,15 +13,17 @@ from unittest.mock import Mock
 
 @pytest.fixture
 def brain():
-    mock_llm_service = AsyncMock()
+    mock_execution_context = Mock()
+    mock_execution_context.llm_service = AsyncMock()
+    mock_execution_context.llm_service.default_model = "gpt-3.5-turbo"
     default_model = "gpt-3.5-turbo"
     roles = []
     goals = []
     return Brain(
-        llm_service=mock_llm_service,
-        default_model=default_model,
+        execution_context=mock_execution_context,
         roles=roles,
         goals=goals,
+        default_model=default_model,
     )
 
 
@@ -43,13 +45,11 @@ def test_brain_initialization(brain):
 
 
 @pytest.mark.asyncio
-@patch("frame.src.framer.brain.mind.mind.Mind.make_decision", new_callable=AsyncMock)
 async def test_process_perception(mock_make_decision, brain):
     perception = Perception(type="visual", data={"object": "tree"})
     with patch.object(
         brain.llm_service, "get_completion", new_callable=AsyncMock
     ) as mock_get_completion:
-        mock_get_completion.return_value = '{"action": "test_action", "data": {}, "reasoning": "Test reasoning", "confidence": 0.9, "priority": 1}'
         mock_get_completion.return_value = '{"action": "test_action", "data": {}, "reasoning": "Test reasoning", "confidence": 0.9, "priority": 1}'
         await brain.process_perception(perception)
     assert len(brain.mind.perceptions) == 1
@@ -60,7 +60,7 @@ async def test_process_perception(mock_make_decision, brain):
 async def test_make_decision(brain):
     # Register a mock action in the action registry
     brain.action_registry.register_action(
-        "test_action", lambda: None, description="A test action", priority=1
+        "test_action", AsyncMock(), description="A test action", priority=1
     )
     with patch.object(
         brain.llm_service, "get_completion", new_callable=AsyncMock

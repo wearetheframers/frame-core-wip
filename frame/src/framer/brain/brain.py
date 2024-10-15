@@ -18,6 +18,8 @@ from frame.src.services.llm.llm_adapters.lmql.lmql_adapter import LMQLConfig
 logger = logging.getLogger(__name__)
 
 
+from frame.src.framer.agency.execution_context import ExecutionContext
+
 class Brain:
     """
     The Brain class represents the decision-making component of the Framer.
@@ -27,34 +29,28 @@ class Brain:
     VALID_ACTIONS are derived from the ActionRegistry and default actions.
     """
 
-    # Initialize VALID_ACTIONS from ActionRegistry and default actions
-    VALID_ACTIONS = ActionRegistry().actions
-
+    # VALID_ACTIONS will be initialized in the __init__ method
     def __init__(
         self,
-        llm_service: LLMService,
+        execution_context: ExecutionContext,
         roles: List[Dict[str, Any]],
         goals: List[Dict[str, Any]],
         default_model: str = "gpt-3.5-turbo",
-        use_local_model: bool = False,
-        valid_actions: Optional[List[str]] = None,
     ):
         """
         Initialize the Brain with the necessary components.
 
         Args:
-            llm_service (LLMService): The language model service to use.
+            execution_context (ExecutionContext): The execution context containing necessary services.
             roles (List[Dict[str, Any]]): Initial roles for the Brain.
             goals (List[Dict[str, Any]]): Initial goals for the Brain.
             default_model (str): The default language model to use.
-            use_local_model (bool): Whether to use a local language model.
-            valid_actions (Optional[List[str]]): A list of valid actions that the Brain can execute.
         """
-        self.llm_service = llm_service
+        self.execution_context = execution_context
+        self.llm_service = execution_context.llm_service
         self.default_model = default_model
         self.roles = roles
         self.goals = goals
-        self.use_local_model = use_local_model
 
         self.mind = Mind(self)
 
@@ -68,11 +64,10 @@ class Brain:
         }
         self.memory = Memory(memory_config)
         
-        # Initialize ActionRegistry and VALID_ACTIONS
-        self.action_registry = ActionRegistry()
-        self.valid_actions = valid_actions or self.VALID_ACTIONS
+        # Initialize ActionRegistry
+        self.action_registry = ActionRegistry(execution_context)
 
-        self.agency = Agency(llm_service=llm_service, context=None)
+        self.agency = Agency(llm_service=self.llm_service, context=None)
 
     def parse_json_response(self, response: str) -> Any:
         """
@@ -208,7 +203,11 @@ class Brain:
         logger.debug(f"Decision parameters: {decision.parameters}")
 
         try:
-            result = await self.action_registry.execute_action(decision.action, decision.parameters)
+            if decision.action == "think":
+                result = await self._execute_think_action(decision)
+            else:
+                result = await self.action_registry.execute_action(decision.action, decision.parameters)
+            
             logger.info(f"Executed action: {decision.action}")
             logger.debug(f"Action result: {result}")
 
@@ -219,9 +218,61 @@ class Brain:
             logger.error(f"Error executing decision: {e}")
             logger.exception("Detailed traceback:")
 
-        if decision.action == "think":
-            new_query = await self._generate_new_query(decision)
-            await self.process_perception(Perception(type="thought", data={"query": new_query}))
+    async def _execute_think_action(self, decision: Decision):
+        """
+        Execute the 'think' action, which involves pondering on various aspects and potentially creating new tasks.
+
+        Args:
+            decision (Decision): The decision to execute.
+
+        Returns:
+            Any: The result of the think action.
+        """
+        # Gather context for thinking
+        soul_context = self.framer.soul.get_current_state()
+        roles_and_goals = {"roles": self.roles, "goals": self.goals}
+        recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
+        recent_perceptions = self.mind.get_recent_perceptions(self.mind.recent_perceptions_limit)
+
+        # Prepare the prompt for the LLM
+        prompt = f"""
+        Based on the following context, ponder and reflect on the current situation:
+
+        Soul state: {soul_context}
+        Roles and goals: {roles_and_goals}
+        Recent thoughts: {recent_thoughts}
+        Recent perceptions: {recent_perceptions}
+
+        Current decision: {decision.to_dict()}
+
+        1. Analyze the current situation and provide insights.
+        2. Determine if any new tasks or actions are necessary.
+        3. If new tasks are needed, describe them in detail.
+        4. Decide if a new prompt should be generated for better results.
+
+        Respond with a JSON object containing:
+        - analysis: Your analysis of the situation
+        - new_tasks: A list of new tasks if any (each task should have 'description' and 'priority')
+        - generate_new_prompt: Boolean indicating if a new prompt should be generated
+        - new_prompt: The new prompt if generate_new_prompt is true
+        """
+
+        response = await self.llm_service.get_completion(prompt, model=self.default_model)
+        result = json.loads(response)
+
+        # Process the result
+        self.mind.think(result['analysis'])
+
+        if result['new_tasks']:
+            for task_data in result['new_tasks']:
+                new_task = self.agency.create_task(**task_data)
+                self.agency.add_task(new_task)
+
+        if result['generate_new_prompt']:
+            new_perception = Perception(type="thought", data={"query": result['new_prompt']})
+            await self.process_perception(new_perception)
+
+        return result
 
     async def _generate_new_query(self, decision: Decision) -> str:
         """
@@ -262,7 +313,6 @@ class Brain:
             ]
         )
 
-        valid_actions_list = list(self.action_registry.actions.keys())
         prompt = f"""Given the following perception, decide on the most appropriate action to take.
         Perception: {perception}
         Current roles: {self.roles}
@@ -290,13 +340,14 @@ class Brain:
         Ensure your decision is well-reasoned, aligns with the current goals and roles, and uses only the valid actions provided.
         """
 
+        valid_actions = list(self.action_registry.actions.keys())
         response = await self.llm_service.get_completion(
             prompt,
             model=self.default_model,
             additional_context={"valid_actions": valid_actions},
             expected_output=f"""
             {{
-                "action": str where str in {valid_actions_list},
+                "action": str where str in {valid_actions},
                 "parameters": dict,
                 "reasoning": str,
                 "confidence": float where 0 <= float <= 1,

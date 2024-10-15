@@ -1,19 +1,28 @@
+import asyncio
 from typing import Dict, Any, Callable, Optional
 from frame.src.framer.agency.actions.observe import observe
+from frame.src.framer.agency.actions.think import think
 from frame.src.framer.agency.default_actions import (
     VALID_ACTIONS,
     extend_valid_actions,
 )
-
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 class ActionRegistry:
-    def __init__(self):
+    def __init__(self, execution_context: ExecutionContext):
+        self.execution_context = execution_context
         self.actions: Dict[str, Dict[str, Any]] = {}
         self._register_default_actions()
         self.register_action(
             "observe",
             observe,
             description="Process an observation and generate insights or actions",
+            priority=5,
+        )
+        self.register_action(
+            "think",
+            think,
+            description="Process information and generate new thoughts or ideas",
             priority=5,
         )
 
@@ -35,6 +44,10 @@ class ActionRegistry:
     ):
         if not (1 <= priority <= 10):
             raise ValueError("Priority must be between 1 and 10")
+        if not asyncio.iscoroutinefunction(action_func):
+            async def wrapper(*args, **kwargs):
+                return action_func(*args, **kwargs)
+            action_func = wrapper
         self.actions[name] = {
             "action_func": action_func,
             "description": description,
@@ -128,6 +141,6 @@ class ActionRegistry:
         """Execute an action by its name."""
         action = self.get_action(action_name)
         if action:
-            return await action["action_func"](**parameters)
+            return await action["action_func"](self.execution_context, **parameters)
         else:
             raise ValueError(f"Action '{action_name}' not found in the registry.")

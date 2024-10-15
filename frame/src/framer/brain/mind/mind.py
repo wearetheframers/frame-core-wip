@@ -17,17 +17,19 @@ class Mind:
     It manages thoughts, decision-making processes, perceptions, and interacts with the Brain and Soul components.
     """
 
-    def __init__(self, brain: Any):
+    def __init__(self, brain: Any, recent_perceptions_limit: int = 5):
         """
         Initialize the Mind instance.
 
         Args:
             brain (Any): The Brain instance associated with this Mind.
+            recent_perceptions_limit (int): The number of recent perceptions to keep. Defaults to 5.
         """
         self.brain = brain
         self.thoughts: List[str] = []
         self.current_thought: str = ""
         self.perceptions: List[Perception] = []
+        self.recent_perceptions_limit = recent_perceptions_limit
 
     async def make_decision(self, perception: Perception) -> Decision:
         """

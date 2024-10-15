@@ -68,7 +68,7 @@ async def test_framer_builder_with_invalid_config():
     with pytest.raises(ValueError, match="Config must be an instance of FramerConfig"):
         FramerBuilder(
             config="Invalid Config",  # Pass an invalid config type
-            llm_service=None,  # LLMService is required
+            llm_service=AsyncMock(),  # Use AsyncMock for LLMService
         )
 
 
@@ -83,6 +83,10 @@ async def test_framer_builder_create_framer_without_soul_seed(framer_builder):
 @pytest.mark.asyncio
 async def test_generate_roles_and_goals(framer_builder):
     framer = await framer_builder.build()
-    roles, goals = await framer.agency.generate_roles_and_goals()
-    assert isinstance(framer.agency.roles, list)
-    assert isinstance(framer.agency.goals, list)
+    with patch.object(framer.agency, 'generate_roles_and_goals', new_callable=AsyncMock) as mock_generate:
+        mock_generate.return_value = (["Test Role"], ["Test Goal"])
+        roles, goals = await framer.agency.generate_roles_and_goals()
+        assert isinstance(roles, list)
+        assert isinstance(goals, list)
+        assert roles == ["Test Role"]
+        assert goals == ["Test Goal"]

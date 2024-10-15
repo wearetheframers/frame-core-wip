@@ -19,45 +19,37 @@ class Agency:
     It manages roles, goals, tasks, and workflows for the Framer.
 
     Attributes:
-        llm_service (LLMService): The LLM service used for language model interactions.
+        llm_service (LLMService): The language model service.
         context (Context): The context service providing shared state and configurations.
-        default_model (str): The default model to use for operations.
         roles (List[Dict[str, Any]]): List of roles assigned to the Agency.
         goals (List[Dict[str, Any]]): List of goals for the Agency.
         workflow_manager (WorkflowManager): Manages workflows and tasks.
-        use_local_model (bool): Whether to use a local model or not.
     """
 
     def __init__(
         self,
-        llm_service: LLMService,
-        context: Context,
-        default_model: str = "gpt-3.5-turbo",
-        use_local_model: bool = False,
+        execution_context: ExecutionContext,
+        context: Optional[Context] = None,
         roles: Optional[List[Dict[str, Any]]] = None,
         goals: Optional[List[Dict[str, Any]]] = None,
     ):
-        self.roles = roles or []
-        self.goals = goals or []
         """
         Initialize an Agency instance.
 
         Args:
-            llm_service (LLMService): The LLMService instance to use for completions.
-            context (Context): The context service providing shared state and configurations.
-            default_model (str, optional): The default model to use for operations. Defaults to "gpt-3.5-turbo".
-            use_local_model (bool, optional): Whether to use a local model. Defaults to False.
+            execution_context (ExecutionContext): The execution context containing necessary services.
+            context (Optional[Context]): The context service providing shared state and configurations. Defaults to None.
             roles (Optional[List[Dict[str, Any]]]): Initial roles for the Agency. Defaults to None.
             goals (Optional[List[Dict[str, Any]]]): Initial goals for the Agency. Defaults to None.
         """
-        self.llm_service = llm_service
-        self.context = context
-        self.default_model = default_model
-        self.use_local_model = use_local_model
+        self.execution_context = execution_context
+        self.llm_service = execution_context.llm_service
+        self.context = context or Context()
         self.roles = roles or []
         self.goals = goals or []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
+        self.default_model = self.llm_service.default_model
 
     def add_role(self, role: Dict[str, Any]) -> None:
         """
@@ -308,6 +300,23 @@ class Agency:
             logger.error(f"Error generating goal: {e}", exc_info=True)
             logger.error(f"Prompt used for goal generation: {prompt}")
             return [{"description": "Assist users to the best of my abilities", "priority": 1}]
+
+    async def generate_roles_and_goals(self) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        """
+        Generate roles and goals for the Framer.
+
+        This method generates roles and goals based on the current state:
+        1. If roles are empty, generate new roles.
+        2. If goals are empty, generate new goals.
+        3. If both exist, generate new goals and add them to existing ones.
+
+        Returns:
+            Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]: A tuple containing
+            the final roles and goals.
+        """
+        roles = await self.generate_roles()
+        goals = await self.generate_goals()
+        return roles, goals
 
     async def generate_roles_and_goals(
         self,

@@ -1,5 +1,6 @@
 import pytest
 from click.testing import CliRunner
+from unittest.mock import AsyncMock
 from frame.frame import Frame
 from frame.src.services.llm.main import LLMService
 from frame.cli import cli as cli_app
@@ -29,7 +30,7 @@ def test_cli_tui_command(runner, mocker):
 
 
 def test_cli_run_framer_command(runner, mocker):
-    mock_execute_framer = mocker.patch("frame.cli.cli.execute_framer", autospec=True)
+    mock_execute_framer = mocker.patch("frame.cli.cli.execute_framer", new_callable=AsyncMock)
     mock_frame = mocker.patch("frame.frame.Frame", autospec=True)
     mock_llm_service = mocker.patch(
         "frame.src.services.llm.main.LLMService", autospec=True
