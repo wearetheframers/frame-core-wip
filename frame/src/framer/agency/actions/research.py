@@ -1,12 +1,11 @@
-from typing import Dict, Any
+from typing import Any
 
-
-def research(framer, research_topic: str) -> str:
+def research(self, research_topic: str) -> str:
     """
     Perform research on a given topic and summarize findings.
 
     Args:
-        framer (Framer): The current Framer instance.
+        self: The current Framer instance.
         research_topic (str): The research topic.
 
     Returns:

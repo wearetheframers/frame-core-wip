@@ -1,19 +1,14 @@
-# Define default actions here
-
-# To add a new default action, define the function here and add it to the VALID_ACTIONS dictionary.
-# Ensure the function is registered with the ActionRegistry to be recognized by the system.
-
-from typing import Dict, Any
-
-
-def think(self, thought: str = "Processing information...") -> None:
+def think(self, thought: str = "Processing information...") -> str:
     """
     Process information and generate new thoughts or ideas.
 
     Args:
-        framer (Framer): The current Framer instance.
+        self: The current Framer instance.
         thought (str): The thought or idea to process.
+
+    Returns:
+        str: The processed thought or generated idea.
     """
     # Placeholder for thought processing logic
     self.mind.think(thought)
-    print("Thought: ", self.mind.current_thought)
+    return f"Thought: {self.mind.current_thought}"

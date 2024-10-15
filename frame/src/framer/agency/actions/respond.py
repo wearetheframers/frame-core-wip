@@ -1,12 +1,9 @@
-from typing import Dict, Any
-
-
 def respond(self, input_data: str) -> str:
     """
     Generate a response to a given input or query.
 
     Args:
-        framer (Framer): The current Framer instance.
+        self: The current Framer instance.
         input_data (str): The input data or query.
 
     Returns:

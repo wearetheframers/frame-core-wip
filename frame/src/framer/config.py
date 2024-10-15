@@ -2,8 +2,13 @@ from typing import Optional, List, Dict, Any
 from dataclasses import dataclass, field
 
 
+from dataclasses import dataclass, field
+from typing import Optional
+
 @dataclass
 class FramerConfig:
+    name: str
+    model: Optional[str] = field(default=None)
     """
     Configuration class for Framer instances.
 
