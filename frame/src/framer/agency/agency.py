@@ -4,6 +4,7 @@ from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services.llm.main import LLMService
 from frame.src.services.context.context_service import Context
 from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.framer.agency.action_registry import ActionRegistry
 import json
 import logging
 import time
@@ -21,7 +22,6 @@ class Agency:
 
     Attributes:
         execution_context (ExecutionContext): The execution context containing necessary services.
-        context (Context): The context service providing shared state and configurations.
         roles (List[Dict[str, Any]]): List of roles assigned to the Agency.
         goals (List[Dict[str, Any]]): List of goals for the Agency.
         workflow_manager (WorkflowManager): Manages workflows and tasks.
@@ -30,29 +30,30 @@ class Agency:
     def __init__(
         self,
         llm_service: LLMService,
-        context: Optional[Context] = None,
+        context: Optional[Dict[str, Any]] = None,
+        execution_context: Optional[ExecutionContext] = None,
         roles: Optional[List[Dict[str, Any]]] = None,
         goals: Optional[List[Dict[str, Any]]] = None,
-        execution_context: Optional[ExecutionContext] = None,
     ):
         """
         Initialize an Agency instance.
 
         Args:
             llm_service (LLMService): The language model service.
-            context (Optional[Context]): The context service providing shared state and configurations. Defaults to None.
+            context (Optional[Dict[str, Any]]): Additional context for the Agency. Defaults to None.
+            execution_context (Optional[ExecutionContext]): The execution context for the Agency. Defaults to None.
             roles (Optional[List[Dict[str, Any]]]): Initial roles for the Agency. Defaults to None.
             goals (Optional[List[Dict[str, Any]]]): Initial goals for the Agency. Defaults to None.
-            execution_context (Optional[ExecutionContext]): The execution context for the Agency. Defaults to None.
         """
         self.llm_service = llm_service
-        self.context = context or Context()
+        self.context = context or {}
+        self.execution_context = execution_context or ExecutionContext(llm_service=llm_service)
         self.roles = roles or []
         self.goals = goals or []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, 'default_model', 'gpt-3.5-turbo')
-        self.execution_context = execution_context or ExecutionContext(llm_service=llm_service)
+        self.action_registry = ActionRegistry()
 
     def add_role(self, role: Dict[str, Any]) -> None:
         """
@@ -281,6 +282,50 @@ class Agency:
                 {
                     "name": "Task Assistant",
                     "description": "Assist with the given task or query.",
+                }
+            ]
+
+    async def generate_goals(self) -> List[Dict[str, Any]]:
+        """
+        Generate goals based on the Framer's context.
+
+        Returns:
+            List[Dict[str, Any]]: A list of generated goals.
+        """
+        soul = getattr(self.context, "soul", {})
+        prompt = f"""Generate a goal that aligns with the Framer's current context. 
+        The goal should be clear, relevant, and directly related to the given information.
+        Avoid creating complex scenarios. Keep it simple and focused.
+        
+        Soul: {json.dumps(soul, indent=2)}
+        
+        Respond with a JSON object containing 'description' and 'priority' fields for the goal."""
+
+        logger.debug(f"Goal generation prompt: {prompt}")
+        try:
+            response = await self.llm_service.get_completion(
+                prompt, model=self.default_model, max_tokens=150, temperature=0.5
+            )
+            logger.debug(f"Goal generation response: {response}")
+            goal = json.loads(response)
+            if not goal:
+                logger.warning(
+                    "Received empty response while generating goal. Using default goal."
+                )
+                return [
+                    {
+                        "description": "Assist users based on the given input.",
+                        "priority": 50.0,
+                    }
+                ]
+            return [goal] if isinstance(goal, dict) else goal
+        except Exception as e:
+            logger.error(f"Error generating goal: {e}", exc_info=True)
+            logger.error(f"Prompt used for goal generation: {prompt}")
+            return [
+                {
+                    "description": "Assist users to the best of my abilities",
+                    "priority": 1,
                 }
             ]
 

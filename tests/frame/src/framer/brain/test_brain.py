@@ -19,12 +19,17 @@ def brain():
     default_model = "gpt-3.5-turbo"
     roles = []
     goals = []
-    return Brain(
-        llm_service=mock_llm_service,
-        roles=roles,
-        goals=goals,
-        default_model=default_model,
-    )
+    mock_agency = AsyncMock()
+    mock_agency.perform_task = AsyncMock()
+    
+    with patch('frame.src.framer.brain.brain.Agency', return_value=mock_agency):
+        brain = Brain(
+            llm_service=mock_llm_service,
+            roles=roles,
+            goals=goals,
+            default_model=default_model,
+        )
+    return brain
 
 
 @pytest.fixture
@@ -47,6 +52,7 @@ def test_brain_initialization(brain):
 @pytest.mark.asyncio
 async def test_process_perception(brain):
     perception = Perception(type="visual", data={"object": "tree"})
+    brain.action_registry.register_action("test_action", AsyncMock(), description="Test action")
     with patch.object(
         brain.llm_service, "get_completion", new_callable=AsyncMock
     ) as mock_get_completion:

@@ -1,13 +1,54 @@
-def respond(self, input_data: str) -> str:
+from typing import Dict, Any
+from frame.src.framer.agency.execution_context import ExecutionContext
+
+
+async def respond(execution_context: ExecutionContext, **kwargs) -> Dict[str, Any]:
     """
-    Generate a response to a given input or query.
+    Generate a response based on the current context, emphasizing the most recent perception.
 
     Args:
-        self: The current Framer instance.
-        input_data (str): The input data or query.
+        execution_context (ExecutionContext): The execution context containing necessary services.
+        **kwargs: Additional keyword arguments that might be passed to the action.
 
     Returns:
-        str: The generated response.
+        Dict[str, Any]: A dictionary containing the generated response.
     """
-    # Placeholder for response generation logic
-    return f"Response to input: {input_data}"
+    llm_service = execution_context.llm_service
+    soul = execution_context.soul
+    
+    # Get the most recent perception
+    recent_perception = execution_context.get_state("recent_perception", "No recent perception available.")
+    
+    # Get recent memories and perceptions
+    recent_memories = execution_context.memory_service.get_recent_memories(5) if execution_context.memory_service else []
+    recent_perceptions = execution_context.get_state("recent_perceptions", [])[-5:]
+    
+    # Get roles, goals, and soul information
+    roles = execution_context.get_state("roles", [])
+    goals = execution_context.get_state("goals", [])
+    soul_state = soul.get_current_state() if soul else {}
+    
+    # Construct the prompt
+    prompt = f"""
+    As an AI assistant with the following characteristics:
+    
+    Roles: {roles}
+    Goals: {goals}
+    Soul: {soul_state}
+    
+    Recent memories: {recent_memories}
+    Recent perceptions: {recent_perceptions}
+    
+    You are responding to the following most recent input/perception:
+    {recent_perception}
+    
+    Please generate a response that takes into account all of the above information, 
+    with particular emphasis on addressing the most recent input/perception.
+    
+    Response:
+    """
+    
+    # Get the completion from the language model
+    response = await llm_service.get_completion(prompt)
+    
+    return {"response": response.strip()}

@@ -1,7 +1,11 @@
 import asyncio
+import logging
 from typing import Dict, Any, Callable, Optional
 from frame.src.framer.agency.actions.observe import observe
 from frame.src.framer.agency.actions.think import think
+from frame.src.framer.agency.actions.respond import respond
+
+logger = logging.getLogger(__name__)
 from frame.src.framer.agency.default_actions import (
     VALID_ACTIONS,
     extend_valid_actions,
@@ -11,21 +15,12 @@ from frame.src.framer.agency.execution_context import ExecutionContext
 
 class ActionRegistry:
     def __init__(self, execution_context: Optional[ExecutionContext] = None):
-        self.execution_context = execution_context
         self.actions: Dict[str, Dict[str, Any]] = {}
+        self.execution_context = execution_context
         self._register_default_actions()
-        self.register_action(
-            "observe",
-            observe,
-            description="Process an observation and generate insights or actions",
-            priority=5,
-        )
-        self.register_action(
-            "think",
-            think,
-            description="Process information and generate new thoughts or ideas",
-            priority=5,
-        )
+
+    def set_execution_context(self, execution_context: ExecutionContext):
+        self.execution_context = execution_context
 
     def _register_default_actions(self):
         for action, info in VALID_ACTIONS.items():
@@ -120,7 +115,10 @@ class ActionRegistry:
     ):
         action = self.get_action(name)
         if not action:
-            raise ValueError(f"Action '{name}' not found")
+            # Use the default "respond" action if the requested action is not found
+            action = self.get_action("respond")
+            if not action:
+                raise ValueError("Default 'respond' action not found")
         result = await action["action_func"](self.execution_context, *args, **kwargs)
         if callback:
             callback(result, *callback_args)

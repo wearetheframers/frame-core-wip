@@ -29,7 +29,7 @@ logger = logging.getLogger("frame.framer")
 class Framer:
     def __init__(
         self,
-        config: FramedConfig,
+        config: FramerConfig,
         llm_service: LLMService,
         agency: Agency,
         brain: Brain,
@@ -43,8 +43,6 @@ class Framer:
         self._streamed_response = {"status": "pending", "result": ""}
         self.config = config
         self.llm_service = llm_service
-        if config.default_model and config.default_model != "gpt-3.5-turbo":
-            self.llm_service.set_default_model(config.default_model)
         self.agency = agency
         self.brain = brain
         self.soul = soul
@@ -58,8 +56,8 @@ class Framer:
         # Initialize roles and goals
         self.roles = roles or []
         self.goals = goals or []
-        self.agency.roles = self.roles
-        self.agency.goals = self.goals
+        self.agency.set_roles(self.roles)
+        self.agency.set_goals(self.goals)
 
     def add_observer(self, observer: Observer) -> None:
         """
@@ -126,10 +124,6 @@ class Framer:
         roles = config.roles
         goals = config.goals
 
-        # We initialize roles and goals in the initialize method now
-        # if roles is None or goals is None:
-        #     roles, goals = await agency.generate_roles_and_goals()
-
         soul = Soul(seed=soul_seed)
         brain = Brain(
             llm_service=llm_service,
@@ -140,7 +134,7 @@ class Framer:
         )
         workflow_manager = WorkflowManager()
 
-        return cls(
+        framer = cls(
             config=config,
             llm_service=llm_service,
             agency=agency,
@@ -152,6 +146,9 @@ class Framer:
             roles=roles,
             goals=goals,
         )
+
+        await framer.initialize()
+        return framer
 
     async def initialize(self):
         """
@@ -173,6 +170,11 @@ class Framer:
         elif self.roles and self.goals is None:
             new_roles, _ = await self.agency.generate_roles_and_goals()
             self.roles.extend(new_roles)
+
+        if not self.roles:
+            self.roles = [{"name": "Default Role", "description": "A generated Role"}]
+        if not self.goals:
+            self.goals = [{"description": "Assist users to the best of my abilities", "priority": 1}]
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)

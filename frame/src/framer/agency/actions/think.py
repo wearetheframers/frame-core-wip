@@ -18,11 +18,11 @@ async def think(
         Dict[str, Any]: A dictionary containing the results of the thinking process.
     """
     # This function is now just a wrapper. The main logic is in the Brain's _execute_think_action method
-    if execution_context.framer and execution_context.framer.brain:
-        return await execution_context.framer.brain._execute_think_action(
-            execution_context.framer.brain.make_decision(
+    if execution_context and execution_context.brain:
+        return await execution_context.brain._execute_think_action(
+            execution_context.brain.make_decision(
                 {"action": "think", "parameters": {"thought": thought}}
             )
         )
     else:
-        return {"error": "Framer or Brain not available in execution context"}
+        return {"error": "Brain not available in execution context"}

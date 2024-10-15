@@ -75,6 +75,8 @@ def test_soul_with_custom_seed():
     soul = Soul(seed=custom_seed)
     assert soul is not None
     assert soul.seed == custom_seed
+    assert soul.model.essence == "Custom assistant"
+    assert soul.model.notes == {"trait": "friendly"}
 
 def test_soul_seed_is_never_none():
     soul = Soul(seed=None)
