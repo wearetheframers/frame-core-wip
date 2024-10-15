@@ -465,10 +465,10 @@ async def run_async(
             _roles = framer.agency.get_roles()
             _goals = framer.agency.get_goals()
             for role in _roles:
-                if role.json() not in _roles:
+                if role not in _roles:
                     logger.info(f"Updated role: {role}")
             for goal in _goals:
-                if goal.json() not in _goals:
+                if goal not in _goals:
                     logger.info(f"Updated goal: {goal}")
             logger.info(f"Decision: {pretty_log(decision)}")
         return framer
