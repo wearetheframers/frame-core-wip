@@ -18,6 +18,7 @@ The Agency class represents the decision-making and task management component of
 - **Task Management**: Create, assign, and complete tasks.
 - **Workflow Management**: Organize tasks into workflows to achieve specific objectives.
 - **Automatic Role and Goal Generation**: Generate roles and goals when they are not provided or are empty.
+- **Execution Context**: Utilize a centralized execution context for consistent access to services across actions.
 
 ## Usage
 
@@ -27,11 +28,24 @@ To use the Agency class, initialize it with the necessary services and configura
 from frame.src.framer.agency.agency import Agency
 from frame.src.services.llm.main import LLMService
 from frame.src.services.context.context_service import Context
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 llm_service = LLMService()
 context = Context()
-agency = Agency(llm_service, context)
+execution_context = ExecutionContext(llm_service=llm_service)
+agency = Agency(execution_context, context)
 ```
+
+## Execution Context
+
+The ExecutionContext is a crucial addition to the Agency architecture. It serves as a centralized container for various services that actions might need, such as the LLM service, memory service, and EQ service. This approach offers several benefits:
+
+1. **Consistency**: Ensures that all actions have access to the same set of services, promoting consistency across the system.
+2. **Flexibility**: Makes it easier to add or modify services without changing the signature of every action.
+3. **Dependency Injection**: Facilitates better testing and modular design by allowing easy substitution of services.
+4. **Reduced Coupling**: Actions no longer need to be directly aware of specific services, reducing dependencies.
+
+By using the ExecutionContext, we can more easily manage the resources available to actions and ensure that they have everything they need to operate effectively within the Framer ecosystem.
 
 ## Role and Goal Generation
 

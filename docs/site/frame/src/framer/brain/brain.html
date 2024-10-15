@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.brain.Brain"><code class="flex name class">
 <span>class <span class="ident">Brain</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, roles: List[Dict[str, Any]], goals: List[Dict[str, Any]], default_model: str = 'gpt-3.5-turbo', use_local_model: bool = False, valid_actions: Optional[List[str]] = None)</span>
+<span>(</span><span>execution_context: <a title="frame.src.framer.agency.execution_context.ExecutionContext" href="../agency/execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>, roles: List[Dict[str, Any]], goals: List[Dict[str, Any]], default_model: str = 'gpt-3.5-turbo', use_local_model: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Brain class represents the decision-making component of the Framer.</p>
@@ -47,8 +47,8 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
 <p>Initialize the Brain with the necessary components.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
-<dd>The language model service to use.</dd>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
+<dd>The execution context containing necessary services.</dd>
 <dt><strong><code>roles</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
 <dd>Initial roles for the Brain.</dd>
 <dt><strong><code>goals</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
@@ -57,8 +57,6 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
 <dd>The default language model to use.</dd>
 <dt><strong><code>use_local_model</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Whether to use a local language model.</dd>
-<dt><strong><code>valid_actions</code></strong> :&ensp;<code>Optional[List[str]]</code></dt>
-<dd>A list of valid actions that the Brain can execute.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -73,30 +71,27 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
     VALID_ACTIONS are derived from the ActionRegistry and default actions.
     &#34;&#34;&#34;
 
-    # Initialize VALID_ACTIONS from ActionRegistry and default actions
-    VALID_ACTIONS = ActionRegistry().actions
-
+    # VALID_ACTIONS will be initialized in the __init__ method
     def __init__(
         self,
-        llm_service: LLMService,
+        execution_context: ExecutionContext,
         roles: List[Dict[str, Any]],
         goals: List[Dict[str, Any]],
         default_model: str = &#34;gpt-3.5-turbo&#34;,
         use_local_model: bool = False,
-        valid_actions: Optional[List[str]] = None,
     ):
         &#34;&#34;&#34;
         Initialize the Brain with the necessary components.
 
         Args:
-            llm_service (LLMService): The language model service to use.
+            execution_context (ExecutionContext): The execution context containing necessary services.
             roles (List[Dict[str, Any]]): Initial roles for the Brain.
             goals (List[Dict[str, Any]]): Initial goals for the Brain.
             default_model (str): The default language model to use.
             use_local_model (bool): Whether to use a local language model.
-            valid_actions (Optional[List[str]]): A list of valid actions that the Brain can execute.
         &#34;&#34;&#34;
-        self.llm_service = llm_service
+        self.execution_context = execution_context
+        self.llm_service = execution_context.llm_service
         self.default_model = default_model
         self.roles = roles
         self.goals = goals
@@ -114,11 +109,10 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         }
         self.memory = Memory(memory_config)
         
-        # Initialize ActionRegistry and VALID_ACTIONS
-        self.action_registry = ActionRegistry()
-        self.valid_actions = valid_actions or self.VALID_ACTIONS
+        # Initialize ActionRegistry
+        self.action_registry = ActionRegistry(execution_context)
 
-        self.agency = Agency(llm_service=llm_service, context=None)
+        self.agency = Agency(llm_service=self.llm_service, context=None)
 
     def parse_json_response(self, response: str) -&gt; Any:
         &#34;&#34;&#34;
@@ -254,7 +248,11 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         logger.debug(f&#34;Decision parameters: {decision.parameters}&#34;)
 
         try:
-            result = await self.action_registry.execute_action(decision.action, decision.parameters)
+            if decision.action == &#34;think&#34;:
+                result = await self._execute_think_action(decision)
+            else:
+                result = await self.action_registry.execute_action(decision.action, decision.parameters)
+            
             logger.info(f&#34;Executed action: {decision.action}&#34;)
             logger.debug(f&#34;Action result: {result}&#34;)
 
@@ -265,9 +263,61 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
             logger.error(f&#34;Error executing decision: {e}&#34;)
             logger.exception(&#34;Detailed traceback:&#34;)
 
-        if decision.action == &#34;think&#34;:
-            new_query = await self._generate_new_query(decision)
-            await self.process_perception(Perception(type=&#34;thought&#34;, data={&#34;query&#34;: new_query}))
+    async def _execute_think_action(self, decision: Decision):
+        &#34;&#34;&#34;
+        Execute the &#39;think&#39; action, which involves pondering on various aspects and potentially creating new tasks.
+
+        Args:
+            decision (Decision): The decision to execute.
+
+        Returns:
+            Any: The result of the think action.
+        &#34;&#34;&#34;
+        # Gather context for thinking
+        soul_context = self.framer.soul.get_current_state()
+        roles_and_goals = {&#34;roles&#34;: self.roles, &#34;goals&#34;: self.goals}
+        recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
+        recent_perceptions = self.mind.get_recent_perceptions(self.mind.recent_perceptions_limit)
+
+        # Prepare the prompt for the LLM
+        prompt = f&#34;&#34;&#34;
+        Based on the following context, ponder and reflect on the current situation:
+
+        Soul state: {soul_context}
+        Roles and goals: {roles_and_goals}
+        Recent thoughts: {recent_thoughts}
+        Recent perceptions: {recent_perceptions}
+
+        Current decision: {decision.to_dict()}
+
+        1. Analyze the current situation and provide insights.
+        2. Determine if any new tasks or actions are necessary.
+        3. If new tasks are needed, describe them in detail.
+        4. Decide if a new prompt should be generated for better results.
+
+        Respond with a JSON object containing:
+        - analysis: Your analysis of the situation
+        - new_tasks: A list of new tasks if any (each task should have &#39;description&#39; and &#39;priority&#39;)
+        - generate_new_prompt: Boolean indicating if a new prompt should be generated
+        - new_prompt: The new prompt if generate_new_prompt is true
+        &#34;&#34;&#34;
+
+        response = await self.llm_service.get_completion(prompt, model=self.default_model)
+        result = json.loads(response)
+
+        # Process the result
+        self.mind.think(result[&#39;analysis&#39;])
+
+        if result[&#39;new_tasks&#39;]:
+            for task_data in result[&#39;new_tasks&#39;]:
+                new_task = self.agency.create_task(**task_data)
+                self.agency.add_task(new_task)
+
+        if result[&#39;generate_new_prompt&#39;]:
+            new_perception = Perception(type=&#34;thought&#34;, data={&#34;query&#34;: result[&#39;new_prompt&#39;]})
+            await self.process_perception(new_perception)
+
+        return result
 
     async def _generate_new_query(self, decision: Decision) -&gt; str:
         &#34;&#34;&#34;
@@ -308,7 +358,6 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
             ]
         )
 
-        valid_actions_list = list(self.action_registry.actions.keys())
         prompt = f&#34;&#34;&#34;Given the following perception, decide on the most appropriate action to take.
         Perception: {perception}
         Current roles: {self.roles}
@@ -336,13 +385,14 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         Ensure your decision is well-reasoned, aligns with the current goals and roles, and uses only the valid actions provided.
         &#34;&#34;&#34;
 
+        valid_actions = list(self.action_registry.actions.keys())
         response = await self.llm_service.get_completion(
             prompt,
             model=self.default_model,
             additional_context={&#34;valid_actions&#34;: valid_actions},
             expected_output=f&#34;&#34;&#34;
             {{
-                &#34;action&#34;: str where str in {valid_actions_list},
+                &#34;action&#34;: str where str in {valid_actions},
                 &#34;parameters&#34;: dict,
                 &#34;reasoning&#34;: str,
                 &#34;confidence&#34;: float where 0 &lt;= float &lt;= 1,
@@ -431,13 +481,6 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
                 }
             )</code></pre>
 </details>
-<h3>Class variables</h3>
-<dl>
-<dt id="frame.src.framer.brain.brain.Brain.VALID_ACTIONS"><code class="name">var <span class="ident">VALID_ACTIONS</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.brain.Brain.execute_decision"><code class="name flex">
@@ -533,8 +576,7 @@ and priority (1-10 scale).</dd>
 <ul>
 <li>
 <h4><code><a title="frame.src.framer.brain.brain.Brain" href="#frame.src.framer.brain.brain.Brain">Brain</a></code></h4>
-<ul class="two-column">
-<li><code><a title="frame.src.framer.brain.brain.Brain.VALID_ACTIONS" href="#frame.src.framer.brain.brain.Brain.VALID_ACTIONS">VALID_ACTIONS</a></code></li>
+<ul class="">
 <li><code><a title="frame.src.framer.brain.brain.Brain.execute_decision" href="#frame.src.framer.brain.brain.Brain.execute_decision">execute_decision</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.make_decision" href="#frame.src.framer.brain.brain.Brain.make_decision">make_decision</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.parse_json_response" href="#frame.src.framer.brain.brain.Brain.parse_json_response">parse_json_response</a></code></li>

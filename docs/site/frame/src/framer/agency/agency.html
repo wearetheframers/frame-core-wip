@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.agency.Agency"><code class="flex name class">
 <span>class <span class="ident">Agency</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, context: <a title="frame.src.services.context.context_service.Context" href="../../services/context/context_service.html#frame.src.services.context.context_service.Context">Context</a>, default_model: str = 'gpt-3.5-turbo', use_local_model: bool = False, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, context: Optional[<a title="frame.src.services.context.context_service.Context" href="../../services/context/context_service.html#frame.src.services.context.context_service.Context">Context</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Agency class represents the decision-making and task management component of a Framer.</p>
@@ -47,19 +47,27 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
 <dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
-<dd>The LLM service used for language model interactions.</dd>
+<dd>The language model service.</dd>
 <dt><strong><code>context</code></strong> :&ensp;<code>Context</code></dt>
 <dd>The context service providing shared state and configurations.</dd>
-<dt><strong><code>default_model</code></strong> :&ensp;<code>str</code></dt>
-<dd>The default model to use for operations.</dd>
 <dt><strong><code>roles</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
 <dd>List of roles assigned to the Agency.</dd>
 <dt><strong><code>goals</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
 <dd>List of goals for the Agency.</dd>
 <dt><strong><code>workflow_manager</code></strong> :&ensp;<code>WorkflowManager</code></dt>
 <dd>Manages workflows and tasks.</dd>
-<dt><strong><code>use_local_model</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Whether to use a local model or not.</dd>
+</dl>
+<p>Initialize an Agency instance.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>The language model service.</dd>
+<dt><strong><code>context</code></strong> :&ensp;<code>Optional[Context]</code></dt>
+<dd>The context service providing shared state and configurations. Defaults to None.</dd>
+<dt><strong><code>roles</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
+<dd>Initial roles for the Agency. Defaults to None.</dd>
+<dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
+<dd>Initial goals for the Agency. Defaults to None.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -74,45 +82,36 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
     It manages roles, goals, tasks, and workflows for the Framer.
 
     Attributes:
-        llm_service (LLMService): The LLM service used for language model interactions.
+        llm_service (LLMService): The language model service.
         context (Context): The context service providing shared state and configurations.
-        default_model (str): The default model to use for operations.
         roles (List[Dict[str, Any]]): List of roles assigned to the Agency.
         goals (List[Dict[str, Any]]): List of goals for the Agency.
         workflow_manager (WorkflowManager): Manages workflows and tasks.
-        use_local_model (bool): Whether to use a local model or not.
     &#34;&#34;&#34;
 
     def __init__(
         self,
         llm_service: LLMService,
-        context: Context,
-        default_model: str = &#34;gpt-3.5-turbo&#34;,
-        use_local_model: bool = False,
+        context: Optional[Context] = None,
         roles: Optional[List[Dict[str, Any]]] = None,
         goals: Optional[List[Dict[str, Any]]] = None,
     ):
-        self.roles = roles or []
-        self.goals = goals or []
         &#34;&#34;&#34;
         Initialize an Agency instance.
 
         Args:
-            llm_service (LLMService): The LLMService instance to use for completions.
-            context (Context): The context service providing shared state and configurations.
-            default_model (str, optional): The default model to use for operations. Defaults to &#34;gpt-3.5-turbo&#34;.
-            use_local_model (bool, optional): Whether to use a local model. Defaults to False.
+            llm_service (LLMService): The language model service.
+            context (Optional[Context]): The context service providing shared state and configurations. Defaults to None.
             roles (Optional[List[Dict[str, Any]]]): Initial roles for the Agency. Defaults to None.
             goals (Optional[List[Dict[str, Any]]]): Initial goals for the Agency. Defaults to None.
         &#34;&#34;&#34;
         self.llm_service = llm_service
-        self.context = context
-        self.default_model = default_model
-        self.use_local_model = use_local_model
+        self.context = context or Context()
         self.roles = roles or []
         self.goals = goals or []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
+        self.default_model = llm_service.default_model
 
     def add_role(self, role: Dict[str, Any]) -&gt; None:
         &#34;&#34;&#34;
@@ -364,6 +363,23 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             logger.error(f&#34;Prompt used for goal generation: {prompt}&#34;)
             return [{&#34;description&#34;: &#34;Assist users to the best of my abilities&#34;, &#34;priority&#34;: 1}]
 
+    async def generate_roles_and_goals(self) -&gt; Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        &#34;&#34;&#34;
+        Generate roles and goals for the Framer.
+
+        This method generates roles and goals based on the current state:
+        1. If roles are empty, generate new roles.
+        2. If goals are empty, generate new goals.
+        3. If both exist, generate new goals and add them to existing ones.
+
+        Returns:
+            Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]: A tuple containing
+            the final roles and goals.
+        &#34;&#34;&#34;
+        roles = await self.generate_roles()
+        goals = await self.generate_goals()
+        return roles, goals
+
     async def generate_roles_and_goals(
         self,
     ) -&gt; Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
@@ -419,28 +435,6 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 
         return response</code></pre>
 </details>
-<h3>Instance variables</h3>
-<dl>
-<dt id="frame.src.framer.agency.agency.Agency.goals"><code class="name">var <span class="ident">goals</span></code></dt>
-<dd>
-<div class="desc"><p>Initialize an Agency instance.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
-<dd>The LLMService instance to use for completions.</dd>
-<dt><strong><code>context</code></strong> :&ensp;<code>Context</code></dt>
-<dd>The context service providing shared state and configurations.</dd>
-<dt><strong><code>default_model</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>The default model to use for operations. Defaults to "gpt-3.5-turbo".</dd>
-<dt><strong><code>use_local_model</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Whether to use a local model. Defaults to False.</dd>
-<dt><strong><code>roles</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
-<dd>Initial roles for the Agency. Defaults to None.</dd>
-<dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
-<dd>Initial goals for the Agency. Defaults to None.</dd>
-</dl></div>
-</dd>
-</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.agency.agency.Agency.add_goal"><code class="name flex">
@@ -731,7 +725,6 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <li><code><a title="frame.src.framer.agency.agency.Agency.get_goals" href="#frame.src.framer.agency.agency.Agency.get_goals">get_goals</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.get_next_task" href="#frame.src.framer.agency.agency.Agency.get_next_task">get_next_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.get_roles" href="#frame.src.framer.agency.agency.Agency.get_roles">get_roles</a></code></li>
-<li><code><a title="frame.src.framer.agency.agency.Agency.goals" href="#frame.src.framer.agency.agency.Agency.goals">goals</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.perform_task" href="#frame.src.framer.agency.agency.Agency.perform_task">perform_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.set_final_task_for_workflow" href="#frame.src.framer.agency.agency.Agency.set_final_task_for_workflow">set_final_task_for_workflow</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.set_goals" href="#frame.src.framer.agency.agency.Agency.set_goals">set_goals</a></code></li>

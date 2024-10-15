@@ -37,6 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry"><code class="flex name class">
 <span>class <span class="ident">ActionRegistry</span></span>
+<span>(</span><span>execution_context: <a title="frame.src.framer.agency.execution_context.ExecutionContext" href="execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -45,13 +46,20 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ActionRegistry:
-    def __init__(self):
+    def __init__(self, execution_context: ExecutionContext):
+        self.execution_context = execution_context
         self.actions: Dict[str, Dict[str, Any]] = {}
         self._register_default_actions()
         self.register_action(
             &#34;observe&#34;,
             observe,
             description=&#34;Process an observation and generate insights or actions&#34;,
+            priority=5,
+        )
+        self.register_action(
+            &#34;think&#34;,
+            think,
+            description=&#34;Process information and generate new thoughts or ideas&#34;,
             priority=5,
         )
 
@@ -73,6 +81,10 @@ hljs.highlightAll();
     ):
         if not (1 &lt;= priority &lt;= 10):
             raise ValueError(&#34;Priority must be between 1 and 10&#34;)
+        if not asyncio.iscoroutinefunction(action_func):
+            async def wrapper(*args, **kwargs):
+                return action_func(*args, **kwargs)
+            action_func = wrapper
         self.actions[name] = {
             &#34;action_func&#34;: action_func,
             &#34;description&#34;: description,
@@ -162,11 +174,11 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         return self.actions.get(name)
 
-    async def execute_action(self, action_name: str, **kwargs):
+    async def execute_action(self, action_name: str, parameters: dict):
         &#34;&#34;&#34;Execute an action by its name.&#34;&#34;&#34;
         action = self.get_action(action_name)
         if action:
-            return await action[&#34;action_func&#34;](**kwargs)
+            return await action[&#34;action_func&#34;](self.execution_context, **parameters)
         else:
             raise ValueError(f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;)</code></pre>
 </details>
@@ -190,7 +202,7 @@ hljs.highlightAll();
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry.execute_action"><code class="name flex">
-<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, **kwargs)</span>
+<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, parameters: dict)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Execute an action by its name.</p></div>

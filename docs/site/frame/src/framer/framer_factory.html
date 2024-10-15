@@ -152,10 +152,11 @@ ensuring that all necessary components are properly initialized.</p>
 
         brain = Brain(
             # Initialize the Brain component with default model, roles, and goals
-            llm_service=self.llm_service,
-            default_model=self.config.default_model,
+            execution_context=ExecutionContext(llm_service=self.llm_service),
             roles=roles,
             goals=goals,
+            default_model=self.config.default_model,
+            use_local_model=False,
         )
 
         if soul_seed is None:

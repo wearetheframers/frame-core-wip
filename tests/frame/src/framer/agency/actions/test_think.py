@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
 from frame.src.framer.agency.actions.think import think
+from frame.src.framer.agency.action_registry import ActionRegistry
 
 @pytest.fixture
 def mock_framer():

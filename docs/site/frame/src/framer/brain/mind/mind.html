@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.mind.mind.Mind"><code class="flex name class">
 <span>class <span class="ident">Mind</span></span>
-<span>(</span><span>brain: Any)</span>
+<span>(</span><span>brain: Any, recent_perceptions_limit: int = 5)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Mind class represents the cognitive processes of a Framer.
@@ -47,6 +47,8 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
 <dl>
 <dt><strong><code>brain</code></strong> :&ensp;<code>Any</code></dt>
 <dd>The Brain instance associated with this Mind.</dd>
+<dt><strong><code>recent_perceptions_limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of recent perceptions to keep. Defaults to 5.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -58,17 +60,19 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
     It manages thoughts, decision-making processes, perceptions, and interacts with the Brain and Soul components.
     &#34;&#34;&#34;
 
-    def __init__(self, brain: Any):
+    def __init__(self, brain: Any, recent_perceptions_limit: int = 5):
         &#34;&#34;&#34;
         Initialize the Mind instance.
 
         Args:
             brain (Any): The Brain instance associated with this Mind.
+            recent_perceptions_limit (int): The number of recent perceptions to keep. Defaults to 5.
         &#34;&#34;&#34;
         self.brain = brain
         self.thoughts: List[str] = []
         self.current_thought: str = &#34;&#34;
         self.perceptions: List[Perception] = []
+        self.recent_perceptions_limit = recent_perceptions_limit
 
     async def make_decision(self, perception: Perception) -&gt; Decision:
         &#34;&#34;&#34;

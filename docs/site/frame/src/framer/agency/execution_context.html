@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
-<title>frame.src.framer.agency API documentation</title>
+<title>frame.src.framer.agency.execution_context API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -22,44 +22,42 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>frame.src.framer.agency</code></h1>
+<h1 class="title">Module <code>frame.src.framer.agency.execution_context</code></h1>
 </header>
 <section id="section-intro">
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt><code class="name"><a title="frame.src.framer.agency.action_registry" href="action_registry.html">frame.src.framer.agency.action_registry</a></code></dt>
+<dt id="frame.src.framer.agency.execution_context.ExecutionContext"><code class="flex name class">
+<span>class <span class="ident">ExecutionContext</span></span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None)</span>
+</code></dt>
 <dd>
 <div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.framer.agency.actions" href="actions/index.html">frame.src.framer.agency.actions</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.framer.agency.agency" href="agency.html">frame.src.framer.agency.agency</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.framer.agency.default_actions" href="default_actions.html">frame.src.framer.agency.default_actions</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.framer.agency.execution_context" href="execution_context.html">frame.src.framer.agency.execution_context</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.framer.agency.tasks" href="tasks/index.html">frame.src.framer.agency.tasks</a></code></dt>
-<dd>
-<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ExecutionContext:
+    def __init__(
+        self,
+        llm_service: LLMService,
+        memory_service: Optional[MemoryService] = None,
+        eq_service: Optional[EQService] = None
+    ):
+        self.llm_service = llm_service
+        self.memory_service = memory_service
+        self.eq_service = eq_service</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
-</section>
-<section>
 </section>
 </article>
 <nav id="sidebar">
@@ -69,17 +67,14 @@ hljs.highlightAll();
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="frame.src.framer" href="../index.html">frame.src.framer</a></code></li>
+<li><code><a title="frame.src.framer.agency" href="index.html">frame.src.framer.agency</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li><code><a title="frame.src.framer.agency.action_registry" href="action_registry.html">frame.src.framer.agency.action_registry</a></code></li>
-<li><code><a title="frame.src.framer.agency.actions" href="actions/index.html">frame.src.framer.agency.actions</a></code></li>
-<li><code><a title="frame.src.framer.agency.agency" href="agency.html">frame.src.framer.agency.agency</a></code></li>
-<li><code><a title="frame.src.framer.agency.default_actions" href="default_actions.html">frame.src.framer.agency.default_actions</a></code></li>
-<li><code><a title="frame.src.framer.agency.execution_context" href="execution_context.html">frame.src.framer.agency.execution_context</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks" href="tasks/index.html">frame.src.framer.agency.tasks</a></code></li>
+<li>
+<h4><code><a title="frame.src.framer.agency.execution_context.ExecutionContext" href="#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>
