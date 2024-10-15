@@ -418,7 +418,7 @@ async def run_async(
         logger.debug(f"Framer agency after generate_roles_and_goals: {framer.agency}")
         logger.info(f"Generated roles: {roles}")
         logger.info(f"Generated goals: {goals}")
-        
+
         if isinstance(perception, str):
             perception_data = json.loads(perception)
         elif isinstance(perception, dict):

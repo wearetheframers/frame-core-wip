@@ -64,7 +64,7 @@ class FramerFactory:
             roles=roles,
             goals=goals,
             default_model=self.config.default_model,
-            execution_context=execution_context
+            execution_context=execution_context,
         )
 
         if soul_seed is None:
@@ -72,10 +72,7 @@ class FramerFactory:
             soul_seed = "You are a helpful AI assistant."
 
         soul = Soul(
-            seed=(
-                soul_seed if isinstance(soul_seed, dict)
-                else {"text": soul_seed}
-            )
+            seed=(soul_seed if isinstance(soul_seed, dict) else {"text": soul_seed})
         )
         # Initialize the Soul component with the provided or default seed
         workflow_manager = WorkflowManager()

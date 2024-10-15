@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 from frame.src.framer.agency.execution_context import ExecutionContext
 
+
 class Brain:
     """
     The Brain class represents the decision-making component of the Framer.
@@ -37,7 +38,7 @@ class Brain:
         goals: List[Dict[str, Any]],
         default_model: str = "gpt-3.5-turbo",
         recent_memories_limit: int = 5,
-        execution_context: ExecutionContext = None
+        execution_context: ExecutionContext = None,
     ):
         """
         Initialize the Brain with the necessary components.
@@ -66,9 +67,11 @@ class Brain:
             }
         }
         self.memory = Memory(memory_config)
-        
+
         # Initialize ActionRegistry
-        self.action_registry = ActionRegistry(execution_context or ExecutionContext(llm_service=self.llm_service))
+        self.action_registry = ActionRegistry(
+            execution_context or ExecutionContext(llm_service=self.llm_service)
+        )
 
         self.agency = Agency(llm_service=self.llm_service, context=None)
 
@@ -161,8 +164,10 @@ class Brain:
         logger.debug(f"Decision data received: {decision_data}")
 
         action = decision_data.get("action", "no_action").lower()
-        valid_actions = [action.lower() for action in self.action_registry.actions.keys()]
-        
+        valid_actions = [
+            action.lower() for action in self.action_registry.actions.keys()
+        ]
+
         if action not in valid_actions:
             invalid_action = action
             action = "error"
@@ -171,7 +176,9 @@ class Brain:
                 f"Valid actions are: {', '.join(valid_actions)}"
             )
             decision_data["action"] = action
-            decision_data["reasoning"] = f"Invalid action '{invalid_action}' was generated. Defaulted to '{action}'."
+            decision_data["reasoning"] = (
+                f"Invalid action '{invalid_action}' was generated. Defaulted to '{action}'."
+            )
 
         logger.info(f"Action '{action}' generated: {decision_data}")
 
@@ -209,8 +216,10 @@ class Brain:
             if decision.action == "think":
                 result = await self._execute_think_action(decision)
             else:
-                result = await self.action_registry.execute_action(decision.action, decision.parameters)
-            
+                result = await self.action_registry.execute_action(
+                    decision.action, decision.parameters
+                )
+
             logger.info(f"Executed action: {decision.action}")
             logger.debug(f"Action result: {result}")
 
@@ -235,7 +244,9 @@ class Brain:
         soul_context = self.framer.soul.get_current_state()
         roles_and_goals = {"roles": self.roles, "goals": self.goals}
         recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
-        recent_perceptions = self.mind.get_recent_perceptions(self.mind.recent_perceptions_limit)
+        recent_perceptions = self.mind.get_recent_perceptions(
+            self.mind.recent_perceptions_limit
+        )
 
         # Prepare the prompt for the LLM
         prompt = f"""
@@ -260,19 +271,23 @@ class Brain:
         - new_prompt: The new prompt if generate_new_prompt is true
         """
 
-        response = await self.llm_service.get_completion(prompt, model=self.default_model)
+        response = await self.llm_service.get_completion(
+            prompt, model=self.default_model
+        )
         result = json.loads(response)
 
         # Process the result
-        self.mind.think(result['analysis'])
+        self.mind.think(result["analysis"])
 
-        if result['new_tasks']:
-            for task_data in result['new_tasks']:
+        if result["new_tasks"]:
+            for task_data in result["new_tasks"]:
                 new_task = self.agency.create_task(**task_data)
                 self.agency.add_task(new_task)
 
-        if result['generate_new_prompt']:
-            new_perception = Perception(type="thought", data={"query": result['new_prompt']})
+        if result["generate_new_prompt"]:
+            new_perception = Perception(
+                type="thought", data={"query": result["new_prompt"]}
+            )
             await self.process_perception(new_perception)
 
         return result

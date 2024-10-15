@@ -23,13 +23,16 @@ async def main():
     )
 
     # Example usage of the custom action
-    decision = await framer.brain.make_decision({"type": "greeting", "data": {"name": "Alice"}})
+    decision = await framer.brain.make_decision(
+        {"type": "greeting", "data": {"name": "Alice"}}
+    )
     if decision.action == "custom_greet":
         result = await framer.brain.execute_decision(decision)
         print(result)
 
     # Clean up
     await frame.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

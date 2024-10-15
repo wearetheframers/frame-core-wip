@@ -15,7 +15,12 @@ def log_method_call(func):
         logger.info(f"Method {func.__name__} completed")
         return result
 
-    def _prepare_full_prompt(self, prompt: str, include_frame_context: bool, recent_memories: Optional[List[Dict[str, Any]]]) -> str:
+    def _prepare_full_prompt(
+        self,
+        prompt: str,
+        include_frame_context: bool,
+        recent_memories: Optional[List[Dict[str, Any]]],
+    ) -> str:
         full_prompt = prompt
 
         if include_frame_context:
@@ -31,12 +36,19 @@ def log_method_call(func):
         if recent_memories:
             memories_context = "Recent memories and perceptions:\n"
             for memory in recent_memories:
-                memories_context += f"- {memory.get('type', 'Memory')}: {memory.get('content', '')}\n"
+                memories_context += (
+                    f"- {memory.get('type', 'Memory')}: {memory.get('content', '')}\n"
+                )
             full_prompt = f"{memories_context}\n{full_prompt}"
 
         return full_prompt
 
-    def _prepare_full_prompt(self, prompt: str, include_frame_context: bool, recent_memories: Optional[List[Dict[str, Any]]]) -> str:
+    def _prepare_full_prompt(
+        self,
+        prompt: str,
+        include_frame_context: bool,
+        recent_memories: Optional[List[Dict[str, Any]]],
+    ) -> str:
         full_prompt = prompt
 
         if include_frame_context:
@@ -52,7 +64,9 @@ def log_method_call(func):
         if recent_memories:
             memories_context = "Recent memories and perceptions:\n"
             for memory in recent_memories:
-                memories_context += f"- {memory.get('type', 'Memory')}: {memory.get('content', '')}\n"
+                memories_context += (
+                    f"- {memory.get('type', 'Memory')}: {memory.get('content', '')}\n"
+                )
             full_prompt = f"{memories_context}\n{full_prompt}"
 
         return full_prompt
@@ -157,7 +171,12 @@ class LLMService:
         """
         return self.metrics._total_cost
 
-    def _prepare_full_prompt(self, prompt: str, include_frame_context: bool, recent_memories: Optional[List[Dict[str, Any]]]) -> str:
+    def _prepare_full_prompt(
+        self,
+        prompt: str,
+        include_frame_context: bool,
+        recent_memories: Optional[List[Dict[str, Any]]],
+    ) -> str:
         full_prompt = prompt
 
         if include_frame_context:
@@ -173,7 +192,9 @@ class LLMService:
         if recent_memories:
             memories_context = "Recent memories and perceptions:\n"
             for memory in recent_memories:
-                memories_context += f"- {memory.get('type', 'Memory')}: {memory.get('content', '')}\n"
+                memories_context += (
+                    f"- {memory.get('type', 'Memory')}: {memory.get('content', '')}\n"
+                )
             full_prompt = f"{memories_context}\n{full_prompt}"
 
         return full_prompt
@@ -225,7 +246,9 @@ class LLMService:
         start_time = time.time()
 
         # Prepare the full prompt with additional context if required
-        full_prompt = self._prepare_full_prompt(prompt, include_frame_context, recent_memories)
+        full_prompt = self._prepare_full_prompt(
+            prompt, include_frame_context, recent_memories
+        )
 
         if stream:
             self.logger.debug("Streaming mode enabled")
@@ -263,10 +286,11 @@ class LLMService:
                 result = self.lmql_wrapper.get_completion(
                     lmql_prompt, config, additional_context, stream=True
                 )
-            
+
             async def stream_wrapper():
                 async for chunk in await result:
                     yield chunk
+
             return stream_wrapper()
         else:
             if use_local or (

@@ -84,7 +84,9 @@ async def test_framer_builder_create_framer_without_soul_seed(framer_builder):
 @pytest.mark.asyncio
 async def test_generate_roles_and_goals(framer_builder):
     framer = await framer_builder.build()
-    with patch.object(framer.agency, 'generate_roles_and_goals', new_callable=AsyncMock) as mock_generate:
+    with patch.object(
+        framer.agency, "generate_roles_and_goals", new_callable=AsyncMock
+    ) as mock_generate:
         mock_generate.return_value = (["Test Role"], ["Test Goal"])
         roles, goals = await framer.agency.generate_roles_and_goals()
         assert isinstance(roles, list)

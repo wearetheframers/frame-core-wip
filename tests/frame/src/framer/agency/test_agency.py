@@ -139,7 +139,12 @@ async def test_generate_roles_and_goals(agency):
 
     # Mock the generate_roles and generate_goals methods
     agency.generate_roles = AsyncMock(
-        return_value=[{"name": "Task Assistant", "description": "Assist with the given task or query."}]
+        return_value=[
+            {
+                "name": "Task Assistant",
+                "description": "Assist with the given task or query.",
+            }
+        ]
     )
     agency.generate_goals = AsyncMock(
         return_value=[{"description": "Test Goal", "priority": 1}]

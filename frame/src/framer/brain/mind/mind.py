@@ -29,7 +29,9 @@ class Mind:
         self.thoughts: List[str] = []
         self.current_thought: str = ""
         self.perceptions: List[Perception] = []
-        self.recent_memories_limit = recent_memories_limit if recent_memories_limit is not None else 5
+        self.recent_memories_limit = (
+            recent_memories_limit if recent_memories_limit is not None else 5
+        )
 
     def set_recent_memories_limit(self, limit: int):
         """
@@ -65,18 +67,20 @@ class Mind:
                     parameters={},
                     reasoning="Default decision for testing",
                     confidence=0.5,
-                    priority=5
+                    priority=5,
                 )
-            
+
             decision_data = json.loads(response) if isinstance(response, str) else {}
             action = decision_data.get("action", "default_action")
             if action not in self.brain.action_registry.actions:
-                logger.warning(f"Invalid action: {action}. Defaulting to 'default_action'.")
+                logger.warning(
+                    f"Invalid action: {action}. Defaulting to 'default_action'."
+                )
                 action = "default_action"
                 reasoning = f"Invalid action '{action}' was generated. Defaulted to 'default_action'."
             else:
                 reasoning = decision_data.get("reasoning", "No reasoning provided.")
-            
+
             decision = Decision(
                 action=action,
                 parameters=decision_data.get("parameters", {}),

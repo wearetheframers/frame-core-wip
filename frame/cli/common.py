@@ -59,10 +59,10 @@ async def generate_roles_and_goals(framer: Framer, prompt: str) -> None:
 
     # Generate roles and goals
     roles, goals = await framer.agency.generate_roles_and_goals()
-    
+
     logger.info(f"Generated roles: {pretty_log(roles)}")
     logger.info(f"Generated goals: {pretty_log(goals)}")
-    
+
     framer.agency.set_roles(roles)
     framer.agency.set_goals(goals)
 

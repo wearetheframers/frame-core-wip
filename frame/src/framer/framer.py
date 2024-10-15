@@ -54,7 +54,7 @@ class Framer:
         self._dynamic_model_choice = False
         self.observers = []
         self.can_execute = True  # Add can_execute attribute
-        
+
         # Initialize roles and goals
         self.roles = roles or []
         self.goals = goals or []
@@ -172,7 +172,7 @@ class Framer:
         elif self.roles and self.goals is None:
             new_roles, _ = await self.agency.generate_roles_and_goals()
             self.roles.extend(new_roles)
-        
+
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
 

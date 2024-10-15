@@ -1,5 +1,6 @@
 from typing import Tuple, List, Dict, Any
 
+
 def generate_roles_and_goals(self) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """
     Generate roles and goals for the Framer.

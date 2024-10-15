@@ -183,7 +183,7 @@ async def test_get_dspy_completion_error_handling(dspy_adapter):
                 dspy_adapter.get_completion("Test prompt", config),
                 timeout=5,  # Set a timeout of 5 seconds
             )
-        
+
         if isinstance(exc_info.value, asyncio.TimeoutError):
             pytest.skip("Test skipped due to timeout")
         else:

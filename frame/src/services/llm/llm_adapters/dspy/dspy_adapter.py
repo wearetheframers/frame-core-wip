@@ -139,7 +139,9 @@ class DSPyAdapter(LLMAdapterInterface):
         self, prompt: str, config: DSPyConfig, model: str
     ) -> AsyncGenerator[str, None]:
         try:
-            async for chunk in await self._get_dspy_completion_stream(prompt, config, model):
+            async for chunk in await self._get_dspy_completion_stream(
+                prompt, config, model
+            ):
                 yield chunk.strip()
         except Exception as e:
             logger.error(f"Error in DSPyAdapter._stream_completion: {str(e)}")

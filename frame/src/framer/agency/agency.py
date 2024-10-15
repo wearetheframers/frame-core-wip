@@ -261,13 +261,25 @@ class Agency:
             logger.debug(f"Role generation response: {response}")
             role = json.loads(response)
             if not role:
-                logger.warning("Received empty response while generating role. Using default role.")
-                return [{"name": "Task Assistant", "description": "Assist with the given task or query."}]
+                logger.warning(
+                    "Received empty response while generating role. Using default role."
+                )
+                return [
+                    {
+                        "name": "Task Assistant",
+                        "description": "Assist with the given task or query.",
+                    }
+                ]
             return [role] if isinstance(role, dict) else role
         except Exception as e:
             logger.error(f"Error generating role: {str(e)}", exc_info=True)
             logger.error(f"Prompt used for role generation: {prompt}")
-            return [{"name": "Task Assistant", "description": "Assist with the given task or query."}]
+            return [
+                {
+                    "name": "Task Assistant",
+                    "description": "Assist with the given task or query.",
+                }
+            ]
 
     async def generate_goals(self) -> List[Dict[str, Any]]:
         """
@@ -293,15 +305,29 @@ class Agency:
             logger.debug(f"Goal generation response: {response}")
             goal = json.loads(response)
             if not goal:
-                logger.warning("Received empty response while generating goal. Using default goal.")
-                return [{"description": "Assist users based on the given input.", "priority": 50.0}]
+                logger.warning(
+                    "Received empty response while generating goal. Using default goal."
+                )
+                return [
+                    {
+                        "description": "Assist users based on the given input.",
+                        "priority": 50.0,
+                    }
+                ]
             return [goal] if isinstance(goal, dict) else goal
         except Exception as e:
             logger.error(f"Error generating goal: {e}", exc_info=True)
             logger.error(f"Prompt used for goal generation: {prompt}")
-            return [{"description": "Assist users to the best of my abilities", "priority": 1}]
+            return [
+                {
+                    "description": "Assist users to the best of my abilities",
+                    "priority": 1,
+                }
+            ]
 
-    async def generate_roles_and_goals(self) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    async def generate_roles_and_goals(
+        self,
+    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """
         Generate roles and goals for the Framer.
 

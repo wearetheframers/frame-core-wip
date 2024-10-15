@@ -17,12 +17,12 @@ class Soul:
         """
         if seed is None:
             seed = "You are a helpful AI assistant."
-        
+
         if isinstance(seed, str):
             seed = {"text": seed}
         elif isinstance(seed, dict) and "seed" in seed:
             seed = {"text": seed["seed"]}
-        
+
         self.model = SoulModel(
             essence=seed.get("text", "You are a helpful AI assistant."),
             notes={k: v for k, v in seed.items() if k != "text"},
@@ -157,11 +157,15 @@ class Soul:
         """
         return Soul(seed={"text": self.model.essence, **self.model.notes})
 
+
 def test_empty_initialization():
     soul = Soul()
     assert soul.seed == {"text": "You are a helpful AI assistant."}
+
+
 def test_soul_initialization(sample_soul):
     assert sample_soul.seed["text"] == "Test seed"
+
 
 def test_soul_seed_initialization():
     soul = Soul(seed={"text": "Test soul seed"})

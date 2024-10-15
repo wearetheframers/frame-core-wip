@@ -181,7 +181,10 @@ async def test_framer_initialize_with_provided_values():
     workflow_manager = Mock(spec=WorkflowManager)
 
     # Test case 1: Roles are provided, goals are None
-    agency.generate_roles_and_goals.return_value = (["Generated Role"], ["Generated Goal"])
+    agency.generate_roles_and_goals.return_value = (
+        ["Generated Role"],
+        ["Generated Goal"],
+    )
     framer = Framer(
         config=config,
         llm_service=llm_service,
@@ -198,7 +201,10 @@ async def test_framer_initialize_with_provided_values():
 
     # Test case 2: Roles are empty, goals are None
     agency.generate_roles_and_goals.reset_mock()
-    agency.generate_roles_and_goals.return_value = (["Generated Role"], ["Generated Goal"])
+    agency.generate_roles_and_goals.return_value = (
+        ["Generated Role"],
+        ["Generated Goal"],
+    )
     framer = Framer(
         config=config,
         llm_service=llm_service,
@@ -216,7 +222,10 @@ async def test_framer_initialize_with_provided_values():
 
     # Test case 3: Goals are provided, roles are None
     agency.generate_roles_and_goals.reset_mock()
-    agency.generate_roles_and_goals.return_value = (["Generated Role"], ["Generated Goal"])
+    agency.generate_roles_and_goals.return_value = (
+        ["Generated Role"],
+        ["Generated Goal"],
+    )
     framer = Framer(
         config=config,
         llm_service=llm_service,
@@ -250,7 +259,10 @@ async def test_framer_initialize_with_provided_values():
 
     # Test case 5: Roles are not empty, goals are None
     agency.generate_roles_and_goals.reset_mock()
-    agency.generate_roles_and_goals.return_value = (["Generated Role"], ["Generated Goal"])
+    agency.generate_roles_and_goals.return_value = (
+        ["Generated Role"],
+        ["Generated Goal"],
+    )
     framer = Framer(
         config=config,
         llm_service=llm_service,

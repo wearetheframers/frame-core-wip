@@ -4,11 +4,13 @@ from frame.src.framer.agency.actions.create_new_agent import create_new_agent
 from frame.src.framer.config import FramerConfig
 from frame.src.framer.agency.execution_context import ExecutionContext
 
+
 @pytest.fixture
 def mock_framer():
     framer = Mock()
     framer.create_framer = Mock()
     return framer
+
 
 def test_create_new_agent(mock_framer):
     config = {"name": "Test Framer", "model": "gpt-3.5-turbo"}

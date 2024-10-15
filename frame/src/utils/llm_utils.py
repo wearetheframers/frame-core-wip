@@ -5,7 +5,9 @@ import logging
 
 class LLMMetrics:
     def __init__(self):
-        self._metrics: Dict[str, Dict[str, Union[int, float]]] = defaultdict(lambda: {"calls": 0, "cost": 0.0})
+        self._metrics: Dict[str, Dict[str, Union[int, float]]] = defaultdict(
+            lambda: {"calls": 0, "cost": 0.0}
+        )
         self._total_calls: int = 0
         self._total_cost: float = 0.0
 

@@ -79,10 +79,14 @@ class Framed:
     async def initialize(self):
         """Initialize the Framed instance."""
         if self.agency.roles is None and self.agency.goals is None:
-            self.agency.roles, self.agency.goals = await self.agency.generate_roles_and_goals()
+            self.agency.roles, self.agency.goals = (
+                await self.agency.generate_roles_and_goals()
+            )
         elif self.agency.roles == [] and self.agency.goals is None:
             _, self.agency.goals = await self.agency.generate_roles_and_goals()
         elif self.agency.goals == [] and self.agency.roles is None:
             self.agency.roles, _ = await self.agency.generate_roles_and_goals()
         elif self.agency.roles == [] and self.agency.goals == []:
-            self.agency.roles, self.agency.goals = await self.agency.generate_roles_and_goals()
+            self.agency.roles, self.agency.goals = (
+                await self.agency.generate_roles_and_goals()
+            )

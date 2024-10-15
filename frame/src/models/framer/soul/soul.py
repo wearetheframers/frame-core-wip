@@ -51,8 +51,8 @@ class Soul(BaseModel):
 
     def __init__(self, **data):
         super().__init__(**data)
-        if 'seed' in data:
-            self._process_seed(data['seed'])
+        if "seed" in data:
+            self._process_seed(data["seed"])
         else:
             self.seed = {"text": "You are a helpful AI assistant."}
 
@@ -61,17 +61,19 @@ class Soul(BaseModel):
             self.essence = seed
             self.seed = {"text": seed}
         elif isinstance(seed, dict):
-            self.essence = seed.get('text', seed.get('essence', self.essence))
+            self.essence = seed.get("text", seed.get("essence", self.essence))
             self.seed = {"text": self.essence}
-            self.notes.update({k: v for k, v in seed.items() if k not in ['text', 'essence']})
+            self.notes.update(
+                {k: v for k, v in seed.items() if k not in ["text", "essence"]}
+            )
         else:
             raise ValueError("Seed must be either a string or a dictionary.")
-        
-        if 'text' not in self.seed:
-            self.seed['text'] = self.essence
+
+        if "text" not in self.seed:
+            self.seed["text"] = self.essence
 
     @classmethod
-    def from_seed(cls, seed: Union[str, Dict[str, Any]]) -> 'Soul':
+    def from_seed(cls, seed: Union[str, Dict[str, Any]]) -> "Soul":
         """
         Create a Soul instance from a seed.
 

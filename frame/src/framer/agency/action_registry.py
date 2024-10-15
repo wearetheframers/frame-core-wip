@@ -8,6 +8,7 @@ from frame.src.framer.agency.default_actions import (
 )
 from frame.src.framer.agency.execution_context import ExecutionContext
 
+
 class ActionRegistry:
     def __init__(self, execution_context: Optional[ExecutionContext] = None):
         self.execution_context = execution_context
@@ -45,8 +46,10 @@ class ActionRegistry:
         if not (1 <= priority <= 10):
             raise ValueError("Priority must be between 1 and 10")
         if not asyncio.iscoroutinefunction(action_func):
+
             async def wrapper(*args, **kwargs):
                 return action_func(*args, **kwargs)
+
             action_func = wrapper
         self.actions[name] = {
             "action_func": action_func,
