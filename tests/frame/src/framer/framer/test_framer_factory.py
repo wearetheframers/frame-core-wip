@@ -1,10 +1,11 @@
 import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import Mock, AsyncMock, patch
 from frame.src.framed.framed_factory import FramedFactory
 from frame.src.framer.framer_factory import FramerBuilder
 from frame.src.framer.config import FramerConfig
 from frame.src.services.llm.main import LLMService
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 
 @pytest.fixture

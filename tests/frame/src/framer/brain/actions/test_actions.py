@@ -1,5 +1,6 @@
 import pytest
 from frame.src.framer.agency.action_registry import ActionRegistry
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 
 @pytest.fixture

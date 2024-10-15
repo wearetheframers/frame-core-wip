@@ -1,5 +1,6 @@
 import pytest
 from frame.src.framer.brain.memory.memory_adapters.mem0.mem0_adapter import Mem0Adapter
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 
 @pytest.fixture

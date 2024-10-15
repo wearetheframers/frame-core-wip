@@ -1,7 +1,9 @@
 import pytest
+from unittest.mock import AsyncMock
 from frame.frame import Frame
 from frame.src.services.llm.main import LLMService
 from frame.src.framer.config import FramerConfig
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 
 @pytest.fixture

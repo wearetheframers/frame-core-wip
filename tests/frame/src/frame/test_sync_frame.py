@@ -4,6 +4,7 @@ import logging
 from unittest.mock import Mock, patch, AsyncMock
 from frame.sync_frame import SyncFrame, sync_frame
 from frame.frame import Frame
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

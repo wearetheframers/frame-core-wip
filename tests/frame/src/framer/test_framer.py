@@ -13,6 +13,7 @@ from frame.src.framer.brain.brain import Brain
 from frame.src.framer.soul.soul import Soul
 from unittest.mock import Mock, AsyncMock, patch
 import logging
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 logger = logging.getLogger(__name__)
 

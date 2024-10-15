@@ -1,12 +1,13 @@
 import pytest
 from click.testing import CliRunner
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 from frame.frame import Frame
 from frame.src.services.llm.main import LLMService
 from frame.cli import cli as cli_app
 from frame.frame import Frame
 import re
 from frame.src.framer.agency.agency import Agency
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 
 @pytest.fixture

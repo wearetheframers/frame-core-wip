@@ -4,6 +4,7 @@ from unittest.mock import Mock, AsyncMock
 from frame.src.framer.brain.mind.mind import Mind
 from frame.src.framer.brain.decision import Decision
 from frame.src.models.framer.brain.mind.perception import Perception
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 
 @pytest.fixture

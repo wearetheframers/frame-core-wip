@@ -11,6 +11,7 @@ from frame.src.services.llm.main import LLMService
 from frame.src.framer.agency import Agency
 from frame.src.framer.brain import Brain
 from frame.src.framer.soul import Soul
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 logger = get_logger(__name__)
 
