@@ -111,7 +111,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         self.goals = goals or []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
-        self.default_model = llm_service.default_model
+        self.default_model = self.llm_service.default_model
 
     def add_role(self, role: Dict[str, Any]) -&gt; None:
         &#34;&#34;&#34;

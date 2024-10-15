@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.brain.Brain"><code class="flex name class">
 <span>class <span class="ident">Brain</span></span>
-<span>(</span><span>execution_context: <a title="frame.src.framer.agency.execution_context.ExecutionContext" href="../agency/execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>, roles: List[Dict[str, Any]], goals: List[Dict[str, Any]], default_model: str = 'gpt-3.5-turbo', use_local_model: bool = False)</span>
+<span>(</span><span>execution_context: <a title="frame.src.framer.agency.execution_context.ExecutionContext" href="../agency/execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>, roles: List[Dict[str, Any]], goals: List[Dict[str, Any]], default_model: str = 'gpt-3.5-turbo')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Brain class represents the decision-making component of the Framer.</p>
@@ -55,8 +55,6 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
 <dd>Initial goals for the Brain.</dd>
 <dt><strong><code>default_model</code></strong> :&ensp;<code>str</code></dt>
 <dd>The default language model to use.</dd>
-<dt><strong><code>use_local_model</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Whether to use a local language model.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -78,7 +76,6 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         roles: List[Dict[str, Any]],
         goals: List[Dict[str, Any]],
         default_model: str = &#34;gpt-3.5-turbo&#34;,
-        use_local_model: bool = False,
     ):
         &#34;&#34;&#34;
         Initialize the Brain with the necessary components.
@@ -88,20 +85,18 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
             roles (List[Dict[str, Any]]): Initial roles for the Brain.
             goals (List[Dict[str, Any]]): Initial goals for the Brain.
             default_model (str): The default language model to use.
-            use_local_model (bool): Whether to use a local language model.
         &#34;&#34;&#34;
         self.execution_context = execution_context
         self.llm_service = execution_context.llm_service
         self.default_model = default_model
         self.roles = roles
         self.goals = goals
-        self.use_local_model = use_local_model
 
         self.mind = Mind(self)
 
         memory_config = {
             &#34;llm&#34;: {
-                &#34;provider&#34;: get_llm_provider(self.use_local_model, self.default_model),
+                &#34;provider&#34;: get_llm_provider(self.default_model),
                 &#34;config&#34;: {
                     &#34;model&#34;: self.default_model,
                 },
