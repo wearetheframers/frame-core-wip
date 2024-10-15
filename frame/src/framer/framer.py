@@ -160,18 +160,20 @@ class Framer:
         4. If both roles and goals are provided (not None), use the provided values.
         """
         if self.roles is None and self.goals is None:
-            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+            generated_roles, generated_goals = await self.agency.generate_roles_and_goals()
+            self.roles = [{"name": role, "description": f"{role} description"} for role in generated_roles]
+            self.goals = [{"description": goal, "priority": 1} for goal in generated_goals]
         elif self.roles == []:
             self.goals = []
         elif self.goals is None and self.roles:
-            _, new_goals = await self.agency.generate_roles_and_goals()
-            self.goals = new_goals
+            _, generated_goals = await self.agency.generate_roles_and_goals()
+            self.goals = [{"description": goal, "priority": 1} for goal in generated_goals]
         elif self.roles and self.goals is None:
             new_roles, _ = await self.agency.generate_roles_and_goals()
-            self.roles.extend(new_roles)
+            self.roles.extend([{"name": role, "description": f"{role} description"} for role in new_roles])
 
         if not self.roles:
-            self.roles = [{"name": "Default Role", "description": "A generated Role"}]
+            self.roles = [{"name": "Default Role", "description": "Default role description"}]
         if not self.goals:
             self.goals = [{"description": "Assist users to the best of my abilities", "priority": 1}]
 

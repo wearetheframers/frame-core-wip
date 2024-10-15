@@ -3,6 +3,7 @@ import logging
 import ast
 import time
 import asyncio
+import re
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 from frame.src.framer.agency import Agency
 from frame.src.framer.brain.perception import Perception
@@ -92,6 +93,9 @@ class Brain:
             priority=5
         )
 
+        # Update the agency's action_registry
+        self.agency.action_registry = self.action_registry
+
     async def _execute_think_action(self, decision: Decision) -> Dict[str, Any]:
         """
         Execute the 'think' action, which involves pondering on various aspects and potentially creating new tasks.
@@ -124,6 +128,9 @@ class Brain:
             Any: The parsed JSON data or an error dictionary.
         """
         try:
+            # Remove trailing commas from the response
+            response = re.sub(r',\s*}', '}', response)
+            response = re.sub(r',\s*]', ']', response)
             return json.loads(response)
         except json.JSONDecodeError as e:
             logger.error(f"JSON parsing error: {e}")
@@ -133,6 +140,9 @@ class Brain:
             if response.startswith("```") and response.endswith("```"):
                 cleaned_response = "\n".join(response.split("\n")[1:-1])
                 try:
+                    # Remove trailing commas from the cleaned response
+                    cleaned_response = re.sub(r',\s*}', '}', cleaned_response)
+                    cleaned_response = re.sub(r',\s*]', ']', cleaned_response)
                     return json.loads(cleaned_response)
                 except json.JSONDecodeError:
                     pass  # If this also fails, continue to the error return
@@ -258,10 +268,12 @@ class Brain:
                     raise ValueError(f"Action '{decision.action}' not found in registry.")
                 
                 # For 'respond' action, ensure 'content' is passed correctly
-                if decision.action == "respond" and "content" in decision.parameters:
-                    result = await self.action_registry.execute_action(
-                        decision.action, {"content": decision.parameters["content"]}
-                    )
+                if decision.action == "respond":
+                    # For 'respond' action, we'll use the agency's perform_task method directly
+                    result = await self.agency.perform_task({
+                        "description": decision.parameters.get("content", ""),
+                        "workflow_id": "default"
+                    })
                 else:
                     result = await self.action_registry.execute_action(
                         decision.action, decision.parameters

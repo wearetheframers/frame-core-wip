@@ -14,7 +14,7 @@ from frame.src.framer.agency.execution_context import ExecutionContext
 
 
 class ActionRegistry:
-    def __init__(self, execution_context: Optional[ExecutionContext] = None):
+    def __init__(self, execution_context: ExecutionContext):
         self.actions: Dict[str, Dict[str, Any]] = {}
         self.execution_context = execution_context
         self._register_default_actions()
