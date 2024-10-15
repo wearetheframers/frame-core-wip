@@ -100,7 +100,7 @@ hljs.highlightAll();
         self._dynamic_model_choice = False
         self.observers = []
         self.can_execute = True  # Add can_execute attribute
-        
+
         # Initialize roles and goals
         self.roles = roles or []
         self.goals = goals or []
@@ -176,13 +176,14 @@ hljs.highlightAll();
         # if roles is None or goals is None:
         #     roles, goals = await agency.generate_roles_and_goals()
 
+        soul = Soul(seed=soul_seed)
         brain = Brain(
             llm_service=llm_service,
             default_model=config.default_model,
             roles=roles,
             goals=goals,
+            soul=soul,
         )
-        soul = Soul(seed=soul_seed if soul_seed else &#34;You are a helpful AI assistant.&#34;)
         workflow_manager = WorkflowManager()
 
         return cls(
@@ -218,7 +219,7 @@ hljs.highlightAll();
         elif self.roles and self.goals is None:
             new_roles, _ = await self.agency.generate_roles_and_goals()
             self.roles.extend(new_roles)
-        
+
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
 
@@ -385,10 +386,10 @@ hljs.highlightAll();
 </dd>
 <dt id="frame.src.framer.FramerConfig"><code class="flex name class">
 <span>class <span class="ident">FramerConfig</span></span>
-<span>(</span><span>name: str, model: Optional[str] = None, description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-3.5-turbo', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = &lt;factory&gt;, goals: Optional[List[Dict[str, Any]]] = &lt;factory&gt;)</span>
+<span>(</span><span>name: str, model: Optional[str] = None, description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-3.5-turbo', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = &lt;factory&gt;, goals: Optional[List[Dict[str, Any]]] = &lt;factory&gt;, recent_memories_limit: Optional[int] = 5)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>FramerConfig(name: str, model: Optional[str] = None, description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-3.5-turbo', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = <factory>, goals: Optional[List[Dict[str, Any]]] = <factory>)</p></div>
+<div class="desc"><p>FramerConfig(name: str, model: Optional[str] = None, description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-3.5-turbo', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = <factory>, goals: Optional[List[Dict[str, Any]]] = <factory>, recent_memories_limit: Optional[int] = 5)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -434,18 +435,23 @@ class FramerConfig:
     is_multi_modal: Optional[bool] = False
     roles: Optional[List[Dict[str, str]]] = field(default_factory=list)
     goals: Optional[List[Dict[str, Any]]] = field(default_factory=list)
+    recent_memories_limit: Optional[int] = 5
 
     async def initialize(self):
         &#34;&#34;&#34;Initialize the Framer with roles and goals.&#34;&#34;&#34;
         if self.agency.roles is None and self.agency.goals is None:
-            self.agency.roles, self.agency.goals = await self.agency.generate_roles_and_goals()
+            self.agency.roles, self.agency.goals = (
+                await self.agency.generate_roles_and_goals()
+            )
         elif self.agency.roles == [] and self.agency.goals is None:
             _, self.agency.goals = await self.agency.generate_roles_and_goals()
         elif self.agency.goals == [] and self.agency.roles is None:
             self.agency.roles, _ = await self.agency.generate_roles_and_goals()
         elif self.agency.roles == [] and self.agency.goals == []:
-            self.agency.roles, self.agency.goals = await self.agency.generate_roles_and_goals()
-        
+            self.agency.roles, self.agency.goals = (
+                await self.agency.generate_roles_and_goals()
+            )
+
         # Ensure goals are generated if they are None
         if self.agency.goals is None:
             _, self.agency.goals = await self.agency.generate_roles_and_goals()
@@ -541,6 +547,10 @@ It uses the FramerConfigModel to validate and set default values for the configu
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.framer.FramerConfig.recent_memories_limit"><code class="name">var <span class="ident">recent_memories_limit</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.framer.FramerConfig.roles"><code class="name">var <span class="ident">roles</span> : Optional[List[Dict[str, str]]]</code></dt>
 <dd>
 <div class="desc"></div>
@@ -617,17 +627,20 @@ ensuring that all necessary components are properly initialized.</p>
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
     ) -&gt; Framer:
-        agency = Agency(self.llm_service, context=None)
-        # Initialize the Agency component with the LLM service
+        execution_context = ExecutionContext(llm_service=self.llm_service)
+        agency = Agency(llm_service=self.llm_service, context=None)
+        # Initialize the Agency component
         # Generate roles and goals
         roles, goals = await agency.generate_roles_and_goals()
 
+        execution_context = ExecutionContext(llm_service=self.llm_service)
         brain = Brain(
-            # Initialize the Brain component with default model, roles, and goals
-            execution_context=ExecutionContext(llm_service=self.llm_service),
+            # Initialize the Brain component with roles, goals, and default model
+            llm_service=self.llm_service,
             roles=roles,
             goals=goals,
             default_model=self.config.default_model,
+            execution_context=execution_context,
         )
 
         if soul_seed is None:
@@ -635,10 +648,7 @@ ensuring that all necessary components are properly initialized.</p>
             soul_seed = &#34;You are a helpful AI assistant.&#34;
 
         soul = Soul(
-            seed=(
-                soul_seed if isinstance(soul_seed, dict)
-                else {&#34;text&#34;: soul_seed}
-            )
+            seed=(soul_seed if isinstance(soul_seed, dict) else {&#34;text&#34;: soul_seed})
         )
         # Initialize the Soul component with the provided or default seed
         workflow_manager = WorkflowManager()
@@ -756,6 +766,7 @@ ensuring that all necessary components are properly initialized.</p>
 <li><code><a title="frame.src.framer.FramerConfig.model" href="#frame.src.framer.FramerConfig.model">model</a></code></li>
 <li><code><a title="frame.src.framer.FramerConfig.multi_modal_model" href="#frame.src.framer.FramerConfig.multi_modal_model">multi_modal_model</a></code></li>
 <li><code><a title="frame.src.framer.FramerConfig.name" href="#frame.src.framer.FramerConfig.name">name</a></code></li>
+<li><code><a title="frame.src.framer.FramerConfig.recent_memories_limit" href="#frame.src.framer.FramerConfig.recent_memories_limit">recent_memories_limit</a></code></li>
 <li><code><a title="frame.src.framer.FramerConfig.roles" href="#frame.src.framer.FramerConfig.roles">roles</a></code></li>
 <li><code><a title="frame.src.framer.FramerConfig.singleton" href="#frame.src.framer.FramerConfig.singleton">singleton</a></code></li>
 </ul>

@@ -60,7 +60,8 @@ The behavior for role and goal generation is as follows:
 - If both roles and goals are None, they will be generated using `generate_roles_and_goals()`.
 - If roles is an empty list `[]`, no roles or goals will be assigned, as the Agency has no roles to base goals on.
 - If goals is an empty list `[]` and roles is None, only goals will be generated.
-- If both roles and goals are empty lists `[]`, no roles or goals will be assigned.
+- If both roles and goals are empty lists `[]`, both will be generated.
+- If roles are None or an empty list and goals are provided, roles will be generated and new goals will be added to the existing ones.
 - If either roles or goals is provided (not None or empty list), the provided value will be used.
 
 ## Extending Agency with New Actions

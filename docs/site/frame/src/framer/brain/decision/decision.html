@@ -192,32 +192,12 @@ validated to form a valid model.</p>
             action_registry (Any): The action registry containing available actions.
 
         Returns:
-            Any: The result of executing the action.
+            Dict[str, Any]: The result of executing the action.
         &#34;&#34;&#34;
         if self.action not in action_registry.actions:
             raise ValueError(f&#34;Action &#39;{self.action}&#39; not found in action registry&#34;)
 
-        action_func = action_registry.actions[self.action][&#34;func&#34;]
-        try:
-            result = await action_func(**self.parameters)
-            return {&#34;result&#34;: result, &#34;error&#34;: None}
-        except Exception as e:
-            return {&#34;result&#34;: None, &#34;error&#34;: str(e)}
-
-    async def execute(self, action_registry: Any) -&gt; Dict[str, Any]:
-        &#34;&#34;&#34;
-        Execute the decision using the provided action registry.
-
-        Args:
-            action_registry (Any): The action registry containing available actions.
-
-        Returns:
-            Any: The result of executing the action.
-        &#34;&#34;&#34;
-        if self.action not in action_registry.actions:
-            raise ValueError(f&#34;Action &#39;{self.action}&#39; not found in action registry&#34;)
-
-        action_func = action_registry.actions[self.action][&#34;func&#34;]
+        action_func = action_registry.actions[self.action][&#34;action_func&#34;]
         try:
             result = await action_func(**self.parameters)
             return {&#34;result&#34;: result, &#34;error&#34;: None}
@@ -313,7 +293,7 @@ validated to form a valid model.</p>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Any</code></dt>
+<dt><code>Dict[str, Any]</code></dt>
 <dd>The result of executing the action.</dd>
 </dl></div>
 </dd>

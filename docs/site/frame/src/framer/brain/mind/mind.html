@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.mind.mind.Mind"><code class="flex name class">
 <span>class <span class="ident">Mind</span></span>
-<span>(</span><span>brain: Any, recent_perceptions_limit: int = 5)</span>
+<span>(</span><span>brain: Any, recent_memories_limit: int = 5)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Mind class represents the cognitive processes of a Framer.
@@ -47,8 +47,8 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
 <dl>
 <dt><strong><code>brain</code></strong> :&ensp;<code>Any</code></dt>
 <dd>The Brain instance associated with this Mind.</dd>
-<dt><strong><code>recent_perceptions_limit</code></strong> :&ensp;<code>int</code></dt>
-<dd>The number of recent perceptions to keep. Defaults to 5.</dd>
+<dt><strong><code>recent_memories_limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of recent memories/perceptions to keep. Defaults to 5.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -60,19 +60,28 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
     It manages thoughts, decision-making processes, perceptions, and interacts with the Brain and Soul components.
     &#34;&#34;&#34;
 
-    def __init__(self, brain: Any, recent_perceptions_limit: int = 5):
+    def __init__(self, brain: Any, recent_memories_limit: int = 5):
         &#34;&#34;&#34;
         Initialize the Mind instance.
 
         Args:
             brain (Any): The Brain instance associated with this Mind.
-            recent_perceptions_limit (int): The number of recent perceptions to keep. Defaults to 5.
+            recent_memories_limit (int): The number of recent memories/perceptions to keep. Defaults to 5.
         &#34;&#34;&#34;
         self.brain = brain
-        self.thoughts: List[str] = []
-        self.current_thought: str = &#34;&#34;
+        self.thoughts: List[Dict[str, Any]] = []
+        self.current_thought: Dict[str, Any] = {}
         self.perceptions: List[Perception] = []
-        self.recent_perceptions_limit = recent_perceptions_limit
+        self.recent_memories_limit = recent_memories_limit
+
+    def set_recent_memories_limit(self, limit: int):
+        &#34;&#34;&#34;
+        Set the limit for recent memories/perceptions.
+
+        Args:
+            limit (int): The new limit for recent memories/perceptions.
+        &#34;&#34;&#34;
+        self.recent_memories_limit = limit
 
     async def make_decision(self, perception: Perception) -&gt; Decision:
         &#34;&#34;&#34;
@@ -99,18 +108,20 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
                     parameters={},
                     reasoning=&#34;Default decision for testing&#34;,
                     confidence=0.5,
-                    priority=5
+                    priority=5,
                 )
-            
+
             decision_data = json.loads(response) if isinstance(response, str) else {}
             action = decision_data.get(&#34;action&#34;, &#34;default_action&#34;)
             if action not in self.brain.action_registry.actions:
-                logger.warning(f&#34;Invalid action: {action}. Defaulting to &#39;default_action&#39;.&#34;)
+                logger.warning(
+                    f&#34;Invalid action: {action}. Defaulting to &#39;default_action&#39;.&#34;
+                )
                 action = &#34;default_action&#34;
                 reasoning = f&#34;Invalid action &#39;{action}&#39; was generated. Defaulted to &#39;default_action&#39;.&#34;
             else:
                 reasoning = decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
-            
+
             decision = Decision(
                 action=action,
                 parameters=decision_data.get(&#34;parameters&#34;, {}),
@@ -138,14 +149,12 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
         Args:
             thought (str): The thought to add.
         &#34;&#34;&#34;
-        &#34;&#34;&#34;
-        Add a new thought to the Mind.
-
-        Args:
-            thought (str): The thought to add.
-        &#34;&#34;&#34;
-        self.thoughts.append(thought)
-        self.current_thought = thought
+        new_thought = {
+            &#34;content&#34;: thought,
+            &#34;timestamp&#34;: datetime.now()
+        }
+        self.thoughts.append(new_thought)
+        self.current_thought = new_thought
         logger.debug(f&#34;New thought: {thought}&#34;)
 
     def generate_thoughts(self) -&gt; None:
@@ -162,45 +171,30 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
         # TODO: Implement thought generation logic
         pass
 
-    def get_current_thought(self) -&gt; str:
+    def get_current_thought(self) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Get the current thought of the Mind.
 
         Returns:
-            str: The current thought.
-        &#34;&#34;&#34;
-        &#34;&#34;&#34;
-        Get the current thought of the Mind.
-
-        Returns:
-            str: The current thought.
+            Dict[str, Any]: The current thought with its timestamp.
         &#34;&#34;&#34;
         return self.current_thought
 
-    def get_all_thoughts(self) -&gt; List[str]:
+    def get_all_thoughts(self) -&gt; List[Dict[str, Any]]:
         &#34;&#34;&#34;
         Get all thoughts stored in the Mind.
 
         Returns:
-            List[str]: All thoughts.
+            List[Dict[str, Any]]: All thoughts with their timestamps.
         &#34;&#34;&#34;
-        &#34;&#34;&#34;
-        Get all thoughts stored in the Mind.
-
-        Returns:
-            List[str]: All thoughts.
-        &#34;&#34;&#34;
-        return self.thoughts
+        return sorted(self.thoughts, key=lambda x: x[&#39;timestamp&#39;], reverse=True)
 
     def clear_thoughts(self) -&gt; None:
         &#34;&#34;&#34;
         Clear all thoughts from the Mind.
         &#34;&#34;&#34;
-        &#34;&#34;&#34;
-        Clear all thoughts from the Mind.
-        &#34;&#34;&#34;
         self.thoughts.clear()
-        self.current_thought = &#34;&#34;
+        self.current_thought = {}
         logger.debug(&#34;Thoughts cleared&#34;)
 
     async def process_perception(self, perception: Perception) -&gt; Decision:
@@ -253,25 +247,25 @@ This method should be implemented to interact with the Soul's memory
 and the Brain's decision-making processes.</p></div>
 </dd>
 <dt id="frame.src.framer.brain.mind.mind.Mind.get_all_thoughts"><code class="name flex">
-<span>def <span class="ident">get_all_thoughts</span></span>(<span>self) ‑> List[str]</span>
+<span>def <span class="ident">get_all_thoughts</span></span>(<span>self) ‑> List[Dict[str, Any]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get all thoughts stored in the Mind.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>List[str]</code></dt>
-<dd>All thoughts.</dd>
+<dt><code>List[Dict[str, Any]]</code></dt>
+<dd>All thoughts with their timestamps.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.mind.mind.Mind.get_current_thought"><code class="name flex">
-<span>def <span class="ident">get_current_thought</span></span>(<span>self) ‑> str</span>
+<span>def <span class="ident">get_current_thought</span></span>(<span>self) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the current thought of the Mind.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>str</code></dt>
-<dd>The current thought.</dd>
+<dt><code>Dict[str, Any]</code></dt>
+<dd>The current thought with its timestamp.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.mind.mind.Mind.get_recent_perceptions"><code class="name flex">
@@ -322,6 +316,17 @@ and the Brain's decision-making processes.</p></div>
 <dd>The decision made based on the perception.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.framer.brain.mind.mind.Mind.set_recent_memories_limit"><code class="name flex">
+<span>def <span class="ident">set_recent_memories_limit</span></span>(<span>self, limit: int)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the limit for recent memories/perceptions.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>The new limit for recent memories/perceptions.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.framer.brain.mind.mind.Mind.think"><code class="name flex">
 <span>def <span class="ident">think</span></span>(<span>self, thought: str) ‑> None</span>
 </code></dt>
@@ -360,6 +365,7 @@ and the Brain's decision-making processes.</p></div>
 <li><code><a title="frame.src.framer.brain.mind.mind.Mind.get_recent_perceptions" href="#frame.src.framer.brain.mind.mind.Mind.get_recent_perceptions">get_recent_perceptions</a></code></li>
 <li><code><a title="frame.src.framer.brain.mind.mind.Mind.make_decision" href="#frame.src.framer.brain.mind.mind.Mind.make_decision">make_decision</a></code></li>
 <li><code><a title="frame.src.framer.brain.mind.mind.Mind.process_perception" href="#frame.src.framer.brain.mind.mind.Mind.process_perception">process_perception</a></code></li>
+<li><code><a title="frame.src.framer.brain.mind.mind.Mind.set_recent_memories_limit" href="#frame.src.framer.brain.mind.mind.Mind.set_recent_memories_limit">set_recent_memories_limit</a></code></li>
 <li><code><a title="frame.src.framer.brain.mind.mind.Mind.think" href="#frame.src.framer.brain.mind.mind.Mind.think">think</a></code></li>
 </ul>
 </li>

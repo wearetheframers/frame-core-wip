@@ -27,13 +27,6 @@ hljs.highlightAll();
 <section id="section-intro">
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
-<dl>
-<dt><code class="name"><a title="frame.src.framer.agency.actions.observe" href="observe.html">frame.src.framer.agency.actions.observe</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 </section>
 <section>
 </section>
@@ -74,14 +67,32 @@ hljs.highlightAll();
 <dd>A tuple containing the generated roles and goals.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.framer.agency.actions.observe"><code class="name flex">
+<span>def <span class="ident">observe</span></span>(<span>framer: Optional[ForwardRef('Framer')] = None, observation: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Process an observation and generate insights or actions.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>framer</code></strong> :&ensp;<code>Optional[Framer]</code></dt>
+<dd>The current Framer instance.</dd>
+<dt><strong><code>observation</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The observation to process.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Insights or actions based on the observation, or an error message if inputs are missing.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.framer.agency.actions.research"><code class="name flex">
-<span>async def <span class="ident">research</span></span>(<span>execution_context: <a title="frame.src.framer.agency.execution_context.ExecutionContext" href="../execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>, research_topic: str) ‑> str</span>
+<span>async def <span class="ident">research</span></span>(<span>execution_context: Optional[<a title="frame.src.framer.agency.execution_context.ExecutionContext" href="../execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>], research_topic: str) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Perform research on a given topic and summarize findings.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
 <dd>The execution context containing necessary services.</dd>
 <dt><strong><code>research_topic</code></strong> :&ensp;<code>str</code></dt>
 <dd>The research topic.</dd>
@@ -144,15 +155,11 @@ This action is only necessary if a new prompt should be generated with new prete
 <li><code><a title="frame.src.framer.agency" href="../index.html">frame.src.framer.agency</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="frame.src.framer.agency.actions.observe" href="observe.html">frame.src.framer.agency.actions.observe</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="frame.src.framer.agency.actions.create_new_agent" href="#frame.src.framer.agency.actions.create_new_agent">create_new_agent</a></code></li>
 <li><code><a title="frame.src.framer.agency.actions.generate_roles_and_goals" href="#frame.src.framer.agency.actions.generate_roles_and_goals">generate_roles_and_goals</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.observe" href="#frame.src.framer.agency.actions.observe">observe</a></code></li>
 <li><code><a title="frame.src.framer.agency.actions.research" href="#frame.src.framer.agency.actions.research">research</a></code></li>
 <li><code><a title="frame.src.framer.agency.actions.respond" href="#frame.src.framer.agency.actions.respond">respond</a></code></li>
 <li><code><a title="frame.src.framer.agency.actions.think" href="#frame.src.framer.agency.actions.think">think</a></code></li>

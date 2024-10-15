@@ -140,7 +140,9 @@ generating completions with retry logic for handling exceptions.</p>
         self, prompt: str, config: DSPyConfig, model: str
     ) -&gt; AsyncGenerator[str, None]:
         try:
-            async for chunk in await self._get_dspy_completion_stream(prompt, config, model):
+            async for chunk in await self._get_dspy_completion_stream(
+                prompt, config, model
+            ):
                 yield chunk.strip()
         except Exception as e:
             logger.error(f&#34;Error in DSPyAdapter._stream_completion: {str(e)}&#34;)

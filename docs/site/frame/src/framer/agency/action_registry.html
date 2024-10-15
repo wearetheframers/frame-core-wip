@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry"><code class="flex name class">
 <span>class <span class="ident">ActionRegistry</span></span>
-<span>(</span><span>execution_context: <a title="frame.src.framer.agency.execution_context.ExecutionContext" href="execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>)</span>
+<span>(</span><span>execution_context: Optional[<a title="frame.src.framer.agency.execution_context.ExecutionContext" href="execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -46,7 +46,7 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ActionRegistry:
-    def __init__(self, execution_context: ExecutionContext):
+    def __init__(self, execution_context: Optional[ExecutionContext] = None):
         self.execution_context = execution_context
         self.actions: Dict[str, Dict[str, Any]] = {}
         self._register_default_actions()
@@ -83,7 +83,7 @@ hljs.highlightAll();
             raise ValueError(&#34;Priority must be between 1 and 10&#34;)
         if not asyncio.iscoroutinefunction(action_func):
             async def wrapper(*args, **kwargs):
-                return action_func(*args, **kwargs)
+                return await asyncio.to_thread(action_func, *args, **kwargs)
             action_func = wrapper
         self.actions[name] = {
             &#34;action_func&#34;: action_func,
@@ -146,7 +146,7 @@ hljs.highlightAll();
     def get_all_actions(self) -&gt; Dict[str, Dict[str, Any]]:
         return self.actions
 
-    def perform_action(
+    async def perform_action(
         self,
         name: str,
         *args,
@@ -156,8 +156,8 @@ hljs.highlightAll();
     ):
         action = self.get_action(name)
         if not action:
-            raise ValueError(f&#34;Action &#39;{name}&#39; not found.&#34;)
-        result = action[&#34;action_func&#34;](*args, **kwargs)
+            raise ValueError(f&#34;Action &#39;{name}&#39; not found&#34;)
+        result = await action[&#34;action_func&#34;](self.execution_context, *args, **kwargs)
         if callback:
             callback(result, *callback_args)
         return result
@@ -236,7 +236,7 @@ hljs.highlightAll();
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry.perform_action"><code class="name flex">
-<span>def <span class="ident">perform_action</span></span>(<span>self, name: str, *args, callback: Optional[Callable] = None, callback_args: Optional[tuple] = (), **kwargs)</span>
+<span>async def <span class="ident">perform_action</span></span>(<span>self, name: str, *args, callback: Optional[Callable] = None, callback_args: Optional[tuple] = (), **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>

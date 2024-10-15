@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.agency.Agency"><code class="flex name class">
 <span>class <span class="ident">Agency</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, context: Optional[<a title="frame.src.services.context.context_service.Context" href="../../services/context/context_service.html#frame.src.services.context.context_service.Context">Context</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, context: Optional[<a title="frame.src.services.context.context_service.Context" href="../../services/context/context_service.html#frame.src.services.context.context_service.Context">Context</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None, execution_context: Optional[<a title="frame.src.framer.agency.execution_context.ExecutionContext" href="execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Agency class represents the decision-making and task management component of a Framer.</p>
@@ -46,8 +46,8 @@ This allows the Agency to perform additional tasks and manage new workflows.
 It manages roles, goals, tasks, and workflows for the Framer.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
-<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
-<dd>The language model service.</dd>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
+<dd>The execution context containing necessary services.</dd>
 <dt><strong><code>context</code></strong> :&ensp;<code>Context</code></dt>
 <dd>The context service providing shared state and configurations.</dd>
 <dt><strong><code>roles</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
@@ -68,6 +68,8 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <dd>Initial roles for the Agency. Defaults to None.</dd>
 <dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
 <dd>Initial goals for the Agency. Defaults to None.</dd>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
+<dd>The execution context for the Agency. Defaults to None.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -82,7 +84,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
     It manages roles, goals, tasks, and workflows for the Framer.
 
     Attributes:
-        llm_service (LLMService): The language model service.
+        execution_context (ExecutionContext): The execution context containing necessary services.
         context (Context): The context service providing shared state and configurations.
         roles (List[Dict[str, Any]]): List of roles assigned to the Agency.
         goals (List[Dict[str, Any]]): List of goals for the Agency.
@@ -95,6 +97,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         context: Optional[Context] = None,
         roles: Optional[List[Dict[str, Any]]] = None,
         goals: Optional[List[Dict[str, Any]]] = None,
+        execution_context: Optional[ExecutionContext] = None,
     ):
         &#34;&#34;&#34;
         Initialize an Agency instance.
@@ -104,6 +107,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             context (Optional[Context]): The context service providing shared state and configurations. Defaults to None.
             roles (Optional[List[Dict[str, Any]]]): Initial roles for the Agency. Defaults to None.
             goals (Optional[List[Dict[str, Any]]]): Initial goals for the Agency. Defaults to None.
+            execution_context (Optional[ExecutionContext]): The execution context for the Agency. Defaults to None.
         &#34;&#34;&#34;
         self.llm_service = llm_service
         self.context = context or Context()
@@ -111,7 +115,8 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         self.goals = goals or []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
-        self.default_model = self.llm_service.default_model
+        self.default_model = getattr(self.llm_service, &#39;default_model&#39;, &#39;gpt-3.5-turbo&#39;)
+        self.execution_context = execution_context or ExecutionContext(llm_service=llm_service)
 
     def add_role(self, role: Dict[str, Any]) -&gt; None:
         &#34;&#34;&#34;
@@ -323,13 +328,25 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             logger.debug(f&#34;Role generation response: {response}&#34;)
             role = json.loads(response)
             if not role:
-                logger.warning(&#34;Received empty response while generating role. Using default role.&#34;)
-                return [{&#34;name&#34;: &#34;Task Assistant&#34;, &#34;description&#34;: &#34;Assist with the given task or query.&#34;}]
+                logger.warning(
+                    &#34;Received empty response while generating role. Using default role.&#34;
+                )
+                return [
+                    {
+                        &#34;name&#34;: &#34;Task Assistant&#34;,
+                        &#34;description&#34;: &#34;Assist with the given task or query.&#34;,
+                    }
+                ]
             return [role] if isinstance(role, dict) else role
         except Exception as e:
             logger.error(f&#34;Error generating role: {str(e)}&#34;, exc_info=True)
             logger.error(f&#34;Prompt used for role generation: {prompt}&#34;)
-            return [{&#34;name&#34;: &#34;Task Assistant&#34;, &#34;description&#34;: &#34;Assist with the given task or query.&#34;}]
+            return [
+                {
+                    &#34;name&#34;: &#34;Task Assistant&#34;,
+                    &#34;description&#34;: &#34;Assist with the given task or query.&#34;,
+                }
+            ]
 
     async def generate_goals(self) -&gt; List[Dict[str, Any]]:
         &#34;&#34;&#34;
@@ -355,15 +372,29 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             logger.debug(f&#34;Goal generation response: {response}&#34;)
             goal = json.loads(response)
             if not goal:
-                logger.warning(&#34;Received empty response while generating goal. Using default goal.&#34;)
-                return [{&#34;description&#34;: &#34;Assist users based on the given input.&#34;, &#34;priority&#34;: 50.0}]
+                logger.warning(
+                    &#34;Received empty response while generating goal. Using default goal.&#34;
+                )
+                return [
+                    {
+                        &#34;description&#34;: &#34;Assist users based on the given input.&#34;,
+                        &#34;priority&#34;: 50.0,
+                    }
+                ]
             return [goal] if isinstance(goal, dict) else goal
         except Exception as e:
             logger.error(f&#34;Error generating goal: {e}&#34;, exc_info=True)
             logger.error(f&#34;Prompt used for goal generation: {prompt}&#34;)
-            return [{&#34;description&#34;: &#34;Assist users to the best of my abilities&#34;, &#34;priority&#34;: 1}]
+            return [
+                {
+                    &#34;description&#34;: &#34;Assist users to the best of my abilities&#34;,
+                    &#34;priority&#34;: 1,
+                }
+            ]
 
-    async def generate_roles_and_goals(self) -&gt; Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    async def generate_roles_and_goals(
+        self,
+    ) -&gt; Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         &#34;&#34;&#34;
         Generate roles and goals for the Framer.
 

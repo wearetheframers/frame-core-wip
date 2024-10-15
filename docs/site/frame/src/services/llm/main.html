@@ -127,6 +127,34 @@ the specified or default model.</p>
         &#34;&#34;&#34;
         return self.metrics._total_cost
 
+    def _prepare_full_prompt(
+        self,
+        prompt: str,
+        include_frame_context: bool,
+        recent_memories: Optional[List[Dict[str, Any]]],
+    ) -&gt; str:
+        full_prompt = prompt
+
+        if include_frame_context:
+            frame_context = &#34;&#34;&#34;
+            Frame is a multi-modal cognitive agent framework designed to support fully emergent characteristics.
+            It consists of three main components: Frame, Framed, and Framer.
+            - Frame: The main interface for creating and managing Framer instances.
+            - Framer: An individual AI agent with capabilities for task management, decision-making, and interaction with language models.
+            - Framed: A collection of Framer objects working together to achieve complex tasks.
+            &#34;&#34;&#34;
+            full_prompt = f&#34;{frame_context}\n\n{full_prompt}&#34;
+
+        if recent_memories:
+            memories_context = &#34;Recent memories and perceptions:\n&#34;
+            for memory in recent_memories:
+                memories_context += (
+                    f&#34;- {memory.get(&#39;type&#39;, &#39;Memory&#39;)}: {memory.get(&#39;content&#39;, &#39;&#39;)}\n&#34;
+                )
+            full_prompt = f&#34;{memories_context}\n{full_prompt}&#34;
+
+        return full_prompt
+
     def set_default_model(self, model: str):
         &#34;&#34;&#34;
         Set the default model to be used for all operations.
@@ -147,6 +175,8 @@ the specified or default model.</p>
         expected_output: Optional[str] = None,
         use_local: bool = False,
         stream: bool = False,
+        include_frame_context: bool = False,
+        recent_memories: Optional[List[Dict[str, Any]]] = None,
     ) -&gt; Union[str, Dict[str, Any], AsyncGenerator[str, None]]:
         &#34;&#34;&#34;
         Generate a completion using the specified model or the default model.
@@ -160,6 +190,8 @@ the specified or default model.</p>
             expected_output (str, optional): Expected output format.
             use_local (bool, optional): Whether to use a local model.
             stream (bool, optional): Whether to stream the output.
+            include_frame_context (bool, optional): Whether to include context about Frame and Framers.
+            recent_memories (List[Dict[str, Any]], optional): List of recent memories/perceptions.
 
         Returns:
             Union[str, Dict[str, Any]]: The generated completion.
@@ -168,6 +200,11 @@ the specified or default model.</p>
         self.logger.debug(f&#34;Using model: {model}&#34;)
 
         start_time = time.time()
+
+        # Prepare the full prompt with additional context if required
+        full_prompt = self._prepare_full_prompt(
+            prompt, include_frame_context, recent_memories
+        )
 
         if stream:
             self.logger.debug(&#34;Streaming mode enabled&#34;)
@@ -181,14 +218,14 @@ the specified or default model.</p>
                     model=model, max_tokens=max_tokens, temperature=temperature
                 )
                 result = self.huggingface_adapter.get_completion(
-                    prompt, config, additional_context, stream=True
+                    full_prompt, config, additional_context, stream=True
                 )
             elif &#34;mistral&#34; in model.lower():
                 self.logger.debug(&#34;Using LMQL adapter for Mistral streaming&#34;)
                 config = LMQLConfig(
                     model=model, max_tokens=max_tokens, temperature=temperature
                 )
-                lmql_prompt = f&#39;&#34;&#34;&#34;{prompt}&#34;&#34;&#34;&#39;
+                lmql_prompt = f&#39;&#34;&#34;&#34;{full_prompt}&#34;&#34;&#34;&#39;
                 if expected_output:
                     lmql_prompt += f&#34;\n[RESPONSE]\n{expected_output}&#34;
                 result = self.lmql_wrapper.get_completion(
@@ -199,16 +236,17 @@ the specified or default model.</p>
                 config = LMQLConfig(
                     model=model, max_tokens=max_tokens, temperature=temperature
                 )
-                lmql_prompt = f&#39;&#34;&#34;&#34;{prompt}&#34;&#34;&#34;&#39;
+                lmql_prompt = f&#39;&#34;&#34;&#34;{full_prompt}&#34;&#34;&#34;&#39;
                 if expected_output:
                     lmql_prompt += f&#34;\n[RESPONSE]\n{expected_output}&#34;
                 result = self.lmql_wrapper.get_completion(
                     lmql_prompt, config, additional_context, stream=True
                 )
-            
+
             async def stream_wrapper():
                 async for chunk in await result:
                     yield chunk
+
             return stream_wrapper()
         else:
             if use_local or (
@@ -218,7 +256,7 @@ the specified or default model.</p>
                 config = HuggingFaceConfig(
                     model=model, max_tokens=max_tokens, temperature=temperature
                 )
-                formatted_prompt = format_huggingface_prompt(prompt)
+                formatted_prompt = format_huggingface_prompt(full_prompt)
                 result = await self.huggingface_adapter.get_completion(
                     formatted_prompt, config, additional_context
                 )
@@ -227,7 +265,7 @@ the specified or default model.</p>
                 config = DSPyConfig(
                     model=model, max_tokens=max_tokens, temperature=temperature
                 )
-                formatted_prompt = format_dspy_prompt(prompt)
+                formatted_prompt = format_dspy_prompt(full_prompt)
                 result = await self.dspy_wrapper.get_completion(
                     formatted_prompt, config, additional_context
                 )
@@ -236,7 +274,7 @@ the specified or default model.</p>
                 config = LMQLConfig(
                     model=model, max_tokens=max_tokens, temperature=temperature
                 )
-                formatted_prompt = format_lmql_prompt(prompt, expected_output)
+                formatted_prompt = format_lmql_prompt(full_prompt, expected_output)
                 result = await self.lmql_wrapper.get_completion(
                     formatted_prompt,
                     config,
@@ -282,7 +320,7 @@ the specified or default model.</p>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.services.llm.main.LLMService.get_completion"><code class="name flex">
-<span>async def <span class="ident">get_completion</span></span>(<span>self, prompt: str, model: str = None, max_tokens: int = 1024, temperature: float = 0.7, additional_context: Optional[Dict[str, Any]] = None, expected_output: Optional[str] = None, use_local: bool = False, stream: bool = False) ‑> Union[str, Dict[str, Any], AsyncGenerator[str, None]]</span>
+<span>async def <span class="ident">get_completion</span></span>(<span>self, prompt: str, model: str = None, max_tokens: int = 1024, temperature: float = 0.7, additional_context: Optional[Dict[str, Any]] = None, expected_output: Optional[str] = None, use_local: bool = False, stream: bool = False, include_frame_context: bool = False, recent_memories: Optional[List[Dict[str, Any]]] = None) ‑> Union[str, Dict[str, Any], AsyncGenerator[str, None]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate a completion using the specified model or the default model.</p>
@@ -304,6 +342,10 @@ the specified or default model.</p>
 <dd>Whether to use a local model.</dd>
 <dt><strong><code>stream</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Whether to stream the output.</dd>
+<dt><strong><code>include_frame_context</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to include context about Frame and Framers.</dd>
+<dt><strong><code>recent_memories</code></strong> :&ensp;<code>List[Dict[str, Any]]</code>, optional</dt>
+<dd>List of recent memories/perceptions.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>

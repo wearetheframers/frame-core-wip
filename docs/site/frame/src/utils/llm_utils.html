@@ -94,7 +94,7 @@ hljs.highlightAll();
 </dl></div>
 </dd>
 <dt id="frame.src.utils.llm_utils.get_llm_provider"><code class="name flex">
-<span>def <span class="ident">get_llm_provider</span></span>(<span>default_model: str) ‑> str</span>
+<span>def <span class="ident">get_llm_provider</span></span>(<span>default_model: str, use_local: bool = False) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -121,7 +121,9 @@ hljs.highlightAll();
 </summary>
 <pre><code class="python">class LLMMetrics:
     def __init__(self):
-        self._metrics: Dict[str, Dict[str, Union[int, float]]] = defaultdict(lambda: {&#34;calls&#34;: 0, &#34;cost&#34;: 0.0})
+        self._metrics: Dict[str, Dict[str, Union[int, float]]] = defaultdict(
+            lambda: {&#34;calls&#34;: 0, &#34;cost&#34;: 0.0}
+        )
         self._total_calls: int = 0
         self._total_cost: float = 0.0
 

@@ -145,17 +145,20 @@ ensuring that all necessary components are properly initialized.</p>
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
     ) -&gt; Framer:
-        agency = Agency(self.llm_service, context=None)
-        # Initialize the Agency component with the LLM service
+        execution_context = ExecutionContext(llm_service=self.llm_service)
+        agency = Agency(llm_service=self.llm_service, context=None)
+        # Initialize the Agency component
         # Generate roles and goals
         roles, goals = await agency.generate_roles_and_goals()
 
+        execution_context = ExecutionContext(llm_service=self.llm_service)
         brain = Brain(
-            # Initialize the Brain component with default model, roles, and goals
-            execution_context=ExecutionContext(llm_service=self.llm_service),
+            # Initialize the Brain component with roles, goals, and default model
+            llm_service=self.llm_service,
             roles=roles,
             goals=goals,
             default_model=self.config.default_model,
+            execution_context=execution_context,
         )
 
         if soul_seed is None:
@@ -163,10 +166,7 @@ ensuring that all necessary components are properly initialized.</p>
             soul_seed = &#34;You are a helpful AI assistant.&#34;
 
         soul = Soul(
-            seed=(
-                soul_seed if isinstance(soul_seed, dict)
-                else {&#34;text&#34;: soul_seed}
-            )
+            seed=(soul_seed if isinstance(soul_seed, dict) else {&#34;text&#34;: soul_seed})
         )
         # Initialize the Soul component with the provided or default seed
         workflow_manager = WorkflowManager()

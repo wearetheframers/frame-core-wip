@@ -37,6 +37,37 @@ The LLM Service initializes with API keys for different language model providers
 
 To use the LLM Service, initialize it with the necessary API keys and call the `get_completion` method with the desired prompt and model settings. The service will handle the request and return the generated text.
 
+### The `get_completion` Method
+
+The `get_completion` method is a crucial part of the LLM Service. It handles the generation of text completions based on the given prompt and various parameters. Here's a detailed overview of its functionality:
+
+```python
+async def get_completion(
+    self,
+    prompt: str,
+    model: str = None,
+    max_tokens: int = 1024,
+    temperature: float = 0.7,
+    additional_context: Optional[Dict[str, Any]] = None,
+    expected_output: Optional[str] = None,
+    use_local: bool = False,
+    stream: bool = False,
+    include_frame_context: bool = False,
+    recent_memories: Optional[List[Dict[str, Any]] = None,
+) -> Union[str, Dict[str, Any], AsyncGenerator[str, None]]:
+```
+
+Key features:
+- Supports various models (OpenAI, Mistral, Hugging Face)
+- Handles streaming output when `stream=True`
+- Incorporates additional context and recent memories into the prompt
+- Supports local model usage with `use_local=True`
+- Allows specifying expected output format
+
+The method prepares a full prompt by combining the input prompt with optional Frame context and recent memories. It then selects the appropriate adapter (LMQL, DSPy, or Hugging Face) based on the model and parameters, and generates the completion.
+
+When streaming is enabled, the method returns an async generator that yields chunks of the response as they become available. For non-streaming requests, it returns the full response as a string or dictionary.
+
 ## API Documentation
 
 ::: frame.src.services.llm.main.LLMService

@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.execution_context.ExecutionContext"><code class="flex name class">
 <span>class <span class="ident">ExecutionContext</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -50,11 +50,13 @@ hljs.highlightAll();
         self,
         llm_service: LLMService,
         memory_service: Optional[MemoryService] = None,
-        eq_service: Optional[EQService] = None
+        eq_service: Optional[EQService] = None,
+        soul: Optional[Soul] = None,
     ):
         self.llm_service = llm_service
         self.memory_service = memory_service
-        self.eq_service = eq_service</code></pre>
+        self.eq_service = eq_service
+        self.soul = soul</code></pre>
 </details>
 </dd>
 </dl>

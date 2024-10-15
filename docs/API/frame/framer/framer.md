@@ -30,6 +30,8 @@ The `Framer` class represents an AI agent with cognitive capabilities. It integr
   - If roles are None or an empty list and goals are provided, roles will be generated and new goals will be added to the existing ones.
   - If either roles or goals is provided (not None or empty list), the provided value will be used.
 
+- **Initialization**: The `initialize()` method is called after creating a Framer to ensure proper setup of roles and goals. This method handles various scenarios of role and goal initialization based on the provided or existing values.
+
 ## Attributes
 
 - `ignore_perceptions_while_halted`: A boolean attribute that determines whether perceptions should be ignored while the Framer is halted. Default is False.

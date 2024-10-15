@@ -90,19 +90,16 @@ are stored in the notes. The values can be of any type. If None, default values 
                 are stored in the notes. The values can be of any type. If None, default values are used.
         &#34;&#34;&#34;
         if seed is None:
-            seed = &#34;You are a helpful AI assistant.&#34;
-        
-        if isinstance(seed, str):
+            seed = {&#34;text&#34;: &#34;You are a helpful AI assistant.&#34;}
+        elif isinstance(seed, str):
             seed = {&#34;text&#34;: seed}
-        elif isinstance(seed, dict) and &#34;seed&#34; in seed:
-            seed = {&#34;text&#34;: seed[&#34;seed&#34;]}
-        
+
         self.model = SoulModel(
             essence=seed.get(&#34;text&#34;, &#34;You are a helpful AI assistant.&#34;),
             notes={k: v for k, v in seed.items() if k != &#34;text&#34;},
             state={},
         )
-        self.seed = {&#34;text&#34;: self.model.essence}
+        self.seed = seed
         self.state = self.model.state
 
     def update_state(self, key: str, value: Any) -&gt; None:
