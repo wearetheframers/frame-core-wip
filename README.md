@@ -613,13 +613,13 @@ Open the `htmlcov/index.html` file in a browser to view the coverage report.
 To run a specific test file:
 
 ```bash
-pytest tests\frame\src\frame\test_frame.py
+pytest tests/frame/src/frame/test_frame.py
 ```
 
 Or a specific test in a file:
 
 ```bash
-pytest tests\frame\src\frame\test_frame.py::test_get_completion
+pytest tests/frame/src/frame/test_frame.py::test_get_completion
 ```
 
 *Note*: Testing can take a little while as we have tests for rate limiting / retry logic, so you can exclude those (they are in the `llm_adapter` tests) if it's slow while developing others:
@@ -648,7 +648,7 @@ The project uses two tools for documentation:
 To serve both documentation systems simultaneously, run:
 
 ```bash
-python scripts\serve_docs.py
+python scripts/serve_docs.py
 ```
 
 This will start MkDocs on port 3010 and pdoc3 on port 3011.
