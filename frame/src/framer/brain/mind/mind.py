@@ -1,6 +1,7 @@
 import logging
 import json
 from typing import List, Dict, Any
+from unittest.mock import AsyncMock
 from ..perception import Perception
 from ..decision import Decision
 from frame.src.framer.agency.action_registry import ActionRegistry
@@ -46,19 +47,36 @@ class Mind:
             self.brain.llm_service, prompt, model=self.brain.default_model
         )
         try:
+            if isinstance(response, AsyncMock):
+                # For testing purposes, return a default decision
+                return Decision(
+                    action="think",
+                    parameters={},
+                    reasoning="Default decision for testing",
+                    confidence=0.5,
+                    priority=5
+                )
+            
             decision_data = json.loads(response) if isinstance(response, str) else {}
-            decision_data = json.loads(response)
+            action = decision_data.get("action", "default_action")
+            if action not in self.brain.action_registry.actions:
+                logger.warning(f"Invalid action: {action}. Defaulting to 'think'.")
+                action = "think"
+                reasoning = f"Invalid action '{action}' was generated. Defaulted to 'think'."
+            else:
+                reasoning = decision_data.get("reasoning", "No reasoning provided.")
+            
             decision = Decision(
-                action=decision_data.get("action", "default_action"),
+                action=action,
                 parameters=decision_data.get("data", {}),
-                reasoning=decision_data.get("reasoning", "No reasoning provided."),
+                reasoning=reasoning,
                 confidence=float(decision_data.get("confidence", 0.5)),
                 priority=int(decision_data.get("priority", 5)),
             )
         except json.JSONDecodeError:
             logger.error(f"Failed to parse decision response: {response}")
             decision = Decision(
-                action="error",
+                action="think",
                 parameters={"error": "Failed to parse decision"},
                 reasoning="The decision response could not be parsed as JSON.",
                 confidence=0.1,

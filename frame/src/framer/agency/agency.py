@@ -34,9 +34,11 @@ class Agency:
         context: Context,
         default_model: str = "gpt-3.5-turbo",
         use_local_model: bool = False,
-        roles: Optional[List[Dict[str, Any]]] = [],
-        goals: Optional[List[Dict[str, Any]]] = [],
+        roles: Optional[List[Dict[str, Any]]] = None,
+        goals: Optional[List[Dict[str, Any]]] = None,
     ):
+        self.roles = roles or []
+        self.goals = goals or []
         """
         Initialize an Agency instance.
 
@@ -45,14 +47,15 @@ class Agency:
             context (Context): The context service providing shared state and configurations.
             default_model (str, optional): The default model to use for operations. Defaults to "gpt-3.5-turbo".
             use_local_model (bool, optional): Whether to use a local model. Defaults to False.
-            brain (Optional['Brain']): The Brain instance associated with this Agency.
+            roles (Optional[List[Dict[str, Any]]]): Initial roles for the Agency. Defaults to None.
+            goals (Optional[List[Dict[str, Any]]]): Initial goals for the Agency. Defaults to None.
         """
         self.llm_service = llm_service
         self.context = context
         self.default_model = default_model
         self.use_local_model = use_local_model
-        self.roles = roles
-        self.goals = goals
+        self.roles = roles or []
+        self.goals = goals or []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
 
