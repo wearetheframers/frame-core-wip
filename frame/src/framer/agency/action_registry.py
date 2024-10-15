@@ -110,7 +110,7 @@ class ActionRegistry:
     def get_all_actions(self) -> Dict[str, Dict[str, Any]]:
         return self.actions
 
-    def perform_action(
+    async def perform_action(
         self,
         name: str,
         *args,
@@ -120,8 +120,8 @@ class ActionRegistry:
     ):
         action = self.get_action(name)
         if not action:
-            raise ValueError(f"Action '{name}' not found.")
-        result = action["action_func"](*args, **kwargs)
+            raise ValueError(f"Action '{name}' not found")
+        result = await action["action_func"](self.execution_context, *args, **kwargs)
         if callback:
             callback(result, *callback_args)
         return result

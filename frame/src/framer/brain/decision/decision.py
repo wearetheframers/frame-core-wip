@@ -129,32 +129,12 @@ class Decision(DecisionModel):
             action_registry (Any): The action registry containing available actions.
 
         Returns:
-            Any: The result of executing the action.
+            Dict[str, Any]: The result of executing the action.
         """
         if self.action not in action_registry.actions:
             raise ValueError(f"Action '{self.action}' not found in action registry")
 
-        action_func = action_registry.actions[self.action]["func"]
-        try:
-            result = await action_func(**self.parameters)
-            return {"result": result, "error": None}
-        except Exception as e:
-            return {"result": None, "error": str(e)}
-
-    async def execute(self, action_registry: Any) -> Dict[str, Any]:
-        """
-        Execute the decision using the provided action registry.
-
-        Args:
-            action_registry (Any): The action registry containing available actions.
-
-        Returns:
-            Any: The result of executing the action.
-        """
-        if self.action not in action_registry.actions:
-            raise ValueError(f"Action '{self.action}' not found in action registry")
-
-        action_func = action_registry.actions[self.action]["func"]
+        action_func = action_registry.actions[self.action]["action_func"]
         try:
             result = await action_func(**self.parameters)
             return {"result": result, "error": None}

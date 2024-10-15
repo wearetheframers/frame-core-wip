@@ -4,6 +4,8 @@ from .actions import generate_roles_and_goals
 from .actions import research
 from .actions import respond
 from .actions import think
+from .actions import observe
+from .actions import observe  # Import the observe function
 
 
 def extend_valid_actions(new_actions: Dict[str, Dict[str, Any]]) -> None:
@@ -65,17 +67,17 @@ VALID_ACTIONS: Dict[str, Dict[str, Any]] = {
         "priority": 2,
     },
     "use": {
-        "func": None,
+        "func": lambda *args, **kwargs: None,
         "description": "Use a specific tool or resource to accomplish a task.",
         "priority": 5,
     },
     "observe": {
-        "func": None,
+        "func": observe,
         "description": "Observe and analyze the current situation or environment.",
         "priority": 5,
     },
     "error": {
-        "func": None,
+        "func": lambda *args, **kwargs: {"error": "An error occurred"},
         "description": "Handle error situations and provide appropriate responses.",
         "priority": 1,
     },

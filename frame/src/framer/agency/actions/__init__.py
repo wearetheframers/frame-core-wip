@@ -3,6 +3,7 @@ from .generate_roles_and_goals import generate_roles_and_goals
 from .research import research
 from .respond import respond
 from .think import think
+from .observe import observe
 
 __all__ = [
     "create_new_agent",
@@ -10,4 +11,5 @@ __all__ = [
     "research",
     "respond",
     "think",
+    "observe",
 ]

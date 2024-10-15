@@ -263,7 +263,7 @@ class Brain:
             Any: The result of the think action.
         """
         # Gather context for thinking
-        soul_context = self.action_registry.execution_context.soul.get_current_state() if self.action_registry.execution_context.soul else {}
+        soul_context = self.execution_context.soul.get_current_state() if self.execution_context.soul else {}
         roles_and_goals = {"roles": self.roles, "goals": self.goals}
         recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
         recent_perceptions = self.mind.get_recent_perceptions(5)  # Use a fixed number instead of recent_perceptions_limit
