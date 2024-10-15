@@ -57,15 +57,14 @@ async def generate_roles_and_goals(framer: Framer, prompt: str) -> None:
         logger.error("Framer brain is None before generating roles and goals")
         raise ValueError("Framer brain is not initialized")
 
-    # Generate roles
-    roles = await framer.llm_service.get_completion(
-        f"Generate roles for a framer based on this prompt: {prompt}",
-        model=framer.config.default_model,
-    )
+    # Generate roles and goals
+    roles, goals = await framer.agency.generate_roles_and_goals()
+    
     logger.info(f"Generated roles: {pretty_log(roles)}")
-    # Access expected_output_format_strict from the appropriate component if needed
-    # logger.debug(f"Expected output format strict: {framer.action_registry.expected_output_format_strict}")
+    logger.info(f"Generated goals: {pretty_log(goals)}")
+    
     framer.agency.set_roles(roles)
+    framer.agency.set_goals(goals)
 
     if framer.brain is None:
         logger.error("Framer brain is None after generating roles and goals")

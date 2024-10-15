@@ -116,17 +116,11 @@ class Framer:
     ) -> "Framer":
         agency = Agency(llm_service=llm_service, context=None)
 
-        # Generate roles and goals if they are None or empty lists
+        # Generate roles and goals if they are None
         roles = config.roles
         goals = config.goals
 
-        if roles is None and goals is None:
-            roles, goals = await agency.generate_roles_and_goals()
-        elif roles == [] and goals is None:
-            roles, _ = await agency.generate_roles_and_goals()
-        elif goals == [] and roles is None:
-            _, goals = await agency.generate_roles_and_goals()
-        elif roles == [] and goals == []:
+        if roles is None or goals is None:
             roles, goals = await agency.generate_roles_and_goals()
 
         brain = Brain(

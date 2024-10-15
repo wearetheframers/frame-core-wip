@@ -51,12 +51,15 @@ class FramerFactory:
     ) -> Framer:
         agency = Agency(llm_service=self.llm_service, context=None)
         # Initialize the Agency component with the LLM service
+        # Generate roles and goals
+        roles, goals = await agency.generate_roles_and_goals()
+
         brain = Brain(
             # Initialize the Brain component with default model, roles, and goals
             llm_service=self.llm_service,
             default_model=self.config.default_model,
-            roles=[],
-            goals=[],
+            roles=roles,
+            goals=goals,
         )
 
         if soul_seed is None:

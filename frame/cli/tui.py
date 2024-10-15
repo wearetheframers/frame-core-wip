@@ -238,6 +238,11 @@ class FramerTUI(App):
             use_local_model=False,
         )
 
+        # Generate roles and goals
+        roles, goals = await self.framer.agency.generate_roles_and_goals()
+        self.framer.agency.set_roles(roles)
+        self.framer.agency.set_goals(goals)
+
         logger.info(f"Running Framer: {self.framer.config.name}")
         logger.info(f"Using model: {self.framer.config.default_model}")
         logger.info(
@@ -246,8 +251,8 @@ class FramerTUI(App):
         logger.info(f"Max length: {self._max_len}")
         logger.info(f"Debug mode: {self._debug}")
         logger.info(f"Soul seed: {self._soul_seed}")
-        logger.info(f"Framer roles: {self.framer.agency.roles}")
-        logger.info(f"Framer goals: {self.framer.agency.goals}")
+        logger.info(f"Framer roles: {roles}")
+        logger.info(f"Framer goals: {goals}")
 
         # Update the UI with the current settings
         self.query_one("#framer_name_label").update(f"Framer: {self._name}")
