@@ -19,6 +19,7 @@ class Soul:
             ValueError: If the seed is not a string, dictionary, or None.
         """
         self.model = SoulModel(seed=seed)
+        self.seed = seed
 
     def update_state(self, key: str, value: Any) -> None:
         """

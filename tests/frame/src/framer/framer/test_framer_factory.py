@@ -32,7 +32,7 @@ async def test_create_framer(framer_builder):
 async def test_create_framer_without_soul_seed(framer_builder):
     framer = await framer_builder.build()
 
-    assert framer.soul.seed["text"] == "You are a helpful AI assistant."
+    assert framer.soul.model.seed["text"] == "You are a helpful AI assistant."
 
     # Test perform_task
     task = {
@@ -78,7 +78,7 @@ async def test_framer_builder_create_framer_without_soul_seed(framer_builder):
     framer = await framer_builder.build()
 
     assert framer.soul.seed is not None
-    assert framer.soul.seed["text"] == "You are a helpful AI assistant."
+    assert framer.soul.model.seed["text"] == "You are a helpful AI assistant."
 
 
 @pytest.mark.asyncio
