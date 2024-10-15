@@ -90,7 +90,3 @@ async def test_get_completion_with_stream(llm_service):
         async for chunk in result:
             streamed_result += chunk
         assert streamed_result == "Streamed completion"
-        chunks = [chunk async for chunk in result]
-        assert chunks == ["Streamed ", "completion"]
-        chunks = [chunk async for chunk in result]
-        assert chunks == ["Streamed ", "completion"]

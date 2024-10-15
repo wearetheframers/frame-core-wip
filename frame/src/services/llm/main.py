@@ -182,6 +182,11 @@ class LLMService:
                 result = self.lmql_wrapper.get_completion(
                     lmql_prompt, config, additional_context, stream=True
                 )
+            
+            async def stream_wrapper():
+                async for chunk in await result:
+                    yield chunk
+            return stream_wrapper()
         else:
             if use_local or (
                 self.huggingface_adapter.api_key and "huggingface" in model.lower()

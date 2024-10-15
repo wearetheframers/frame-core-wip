@@ -266,18 +266,13 @@ class Agency:
             logger.debug(f"Role generation response: {response}")
             role = json.loads(response)
             if not role:
-                logger.error("Received None response while generating role.")
-                logger.error(
-                    f"Soul: {json.dumps(self.context.soul, indent=2)}\n"
-                    f"Raw response: {response}"
-                )
-                logger.debug("Attempting to use default role due to None response.")
-                return []
-            return [role] if isinstance(role, dict) else []
+                logger.warning("Received empty response while generating role. Using default role.")
+                return [{"name": "Assistant", "description": "A helpful AI assistant"}]
+            return [role] if isinstance(role, dict) else role
         except Exception as e:
             logger.error(f"Error generating role: {str(e)}", exc_info=True)
             logger.error(f"Prompt used for role generation: {prompt}")
-            return []
+            return [{"name": "Assistant", "description": "A helpful AI assistant"}]
 
     async def generate_goals(self) -> List[Dict[str, Any]]:
         """
@@ -303,25 +298,13 @@ class Agency:
             logger.debug(f"Goal generation response: {response}")
             goal = json.loads(response)
             if not goal:
-                logger.error("Received None response while generating goal.")
-                logger.error(f"Soul: {json.dumps(self.context.soul, indent=2)}")
-                logger.debug("Attempting to use default goal due to None response.")
-                return [
-                    {
-                        "description": "Assist users based on the given input.",
-                        "priority": 50.0,
-                    }
-                ]
-            return [goal] if isinstance(goal, dict) else goal[:]
+                logger.warning("Received empty response while generating goal. Using default goal.")
+                return [{"description": "Assist users based on the given input.", "priority": 50.0}]
+            return [goal] if isinstance(goal, dict) else goal
         except Exception as e:
             logger.error(f"Error generating goal: {e}", exc_info=True)
             logger.error(f"Prompt used for goal generation: {prompt}")
-            return [
-                {
-                    "description": "Assist users based on the given input.",
-                    "priority": 50.0,
-                }
-            ]
+            return [{"description": "Assist users based on the given input.", "priority": 50.0}]
 
     async def generate_roles_and_goals(
         self,
@@ -338,10 +321,8 @@ class Agency:
         """
         roles = await self.generate_roles()
         goals = await self.generate_goals()
-        if self.roles is None:
-            self.roles = roles
-        if self.goals is None:
-            self.goals = goals
+        self.roles = roles if roles else [{"name": "Assistant", "description": "A helpful AI assistant"}]
+        self.goals = goals if goals else [{"description": "Assist users based on the given input.", "priority": 50.0}]
         return self.roles, self.goals
         """
         Generate tasks based on a prompt using the LLM service.

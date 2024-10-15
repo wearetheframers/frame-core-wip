@@ -106,18 +106,18 @@ class DSPyAdapter(LLMAdapterInterface):
         Raises:
             ValueError: If streaming is requested, as DSPy does not support it.
         """
-        logger.debug(f"get_completion called with prompt: {prompt}, model: {model}")
-        if stream:
-            raise ValueError("DSPy does not support streaming mode.")
-        tokens_required = config.max_tokens or 500  # Default to 500 if not set
-
-        await self._wait_for_token_bucket(tokens_required)
-
-        model = model or self.default_model
-        if config.supported_models and model not in config.supported_models:
-            raise ValueError(f"Unsupported model: {model}")
-
         try:
+            logger.debug(f"get_completion called with prompt: {prompt}, model: {model}")
+            if stream:
+                raise ValueError("DSPy does not support streaming mode.")
+            tokens_required = await self._get_tokens_required(prompt)
+
+            await self._wait_for_token_bucket(tokens_required)
+
+            model = model or self.default_model
+            if config.supported_models and model not in config.supported_models:
+                raise ValueError(f"Unsupported model: {model}")
+
             logger.debug(f"Attempting to get DSPy completion for model: {model}")
             response = await self._get_dspy_completion(prompt, config, model)
             logger.debug(f"Received response: {response}")
@@ -130,15 +130,29 @@ class DSPyAdapter(LLMAdapterInterface):
         while not self.token_bucket.consume(tokens_required):
             await asyncio.sleep(0.1)  # Reduced sleep time
 
+    async def _get_tokens_required(self, prompt: str) -> int:
+        # Implement a method to estimate the number of tokens required
+        # This is a simple estimation, you might want to use a more accurate method
+        return len(prompt.split()) + 20  # Add some buffer for safety
+
     async def _stream_completion(
         self, prompt: str, config: DSPyConfig, model: str
     ) -> AsyncGenerator[str, None]:
         try:
-            async for chunk in self._get_dspy_completion_stream(prompt, config, model):
+            async for chunk in await self._get_dspy_completion_stream(prompt, config, model):
                 yield chunk.strip()
         except Exception as e:
             logger.error(f"Error in DSPyAdapter._stream_completion: {str(e)}")
             raise
+
+    async def _get_dspy_completion_stream(
+        self, prompt: str, config: DSPyConfig, model: str
+    ) -> AsyncGenerator[str, None]:
+        # Implement the actual streaming logic here
+        # This is a placeholder implementation
+        yield "Streaming "
+        yield "response "
+        yield "from DSPy"
 
     async def _get_dspy_completion_stream(
         self, prompt: str, config: DSPyConfig, model_name: str
