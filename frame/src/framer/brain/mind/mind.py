@@ -7,6 +7,7 @@ from ..decision import Decision
 from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.framer.agency.tasks import TaskStatusModel
 from frame.src.utils.llm_utils import get_completion
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -17,21 +18,19 @@ class Mind:
     It manages thoughts, decision-making processes, perceptions, and interacts with the Brain and Soul components.
     """
 
-    def __init__(self, brain: Any, recent_memories_limit: Optional[int] = None):
+    def __init__(self, brain: Any, recent_memories_limit: int = 5):
         """
         Initialize the Mind instance.
 
         Args:
             brain (Any): The Brain instance associated with this Mind.
-            recent_memories_limit (Optional[int]): The number of recent memories/perceptions to keep. If None, defaults to 5.
+            recent_memories_limit (int): The number of recent memories/perceptions to keep. Defaults to 5.
         """
         self.brain = brain
-        self.thoughts: List[str] = []
-        self.current_thought: str = ""
+        self.thoughts: List[Dict[str, Any]] = []
+        self.current_thought: Dict[str, Any] = {}
         self.perceptions: List[Perception] = []
-        self.recent_memories_limit = (
-            recent_memories_limit if recent_memories_limit is not None else 5
-        )
+        self.recent_memories_limit = recent_memories_limit
 
     def set_recent_memories_limit(self, limit: int):
         """
@@ -108,14 +107,12 @@ class Mind:
         Args:
             thought (str): The thought to add.
         """
-        """
-        Add a new thought to the Mind.
-
-        Args:
-            thought (str): The thought to add.
-        """
-        self.thoughts.append(thought)
-        self.current_thought = thought
+        new_thought = {
+            "content": thought,
+            "timestamp": datetime.now()
+        }
+        self.thoughts.append(new_thought)
+        self.current_thought = new_thought
         logger.debug(f"New thought: {thought}")
 
     def generate_thoughts(self) -> None:
@@ -132,45 +129,30 @@ class Mind:
         # TODO: Implement thought generation logic
         pass
 
-    def get_current_thought(self) -> str:
+    def get_current_thought(self) -> Dict[str, Any]:
         """
         Get the current thought of the Mind.
 
         Returns:
-            str: The current thought.
-        """
-        """
-        Get the current thought of the Mind.
-
-        Returns:
-            str: The current thought.
+            Dict[str, Any]: The current thought with its timestamp.
         """
         return self.current_thought
 
-    def get_all_thoughts(self) -> List[str]:
+    def get_all_thoughts(self) -> List[Dict[str, Any]]:
         """
         Get all thoughts stored in the Mind.
 
         Returns:
-            List[str]: All thoughts.
+            List[Dict[str, Any]]: All thoughts with their timestamps.
         """
-        """
-        Get all thoughts stored in the Mind.
-
-        Returns:
-            List[str]: All thoughts.
-        """
-        return self.thoughts
+        return sorted(self.thoughts, key=lambda x: x['timestamp'], reverse=True)
 
     def clear_thoughts(self) -> None:
         """
         Clear all thoughts from the Mind.
         """
-        """
-        Clear all thoughts from the Mind.
-        """
         self.thoughts.clear()
-        self.current_thought = ""
+        self.current_thought = {}
         logger.debug("Thoughts cleared")
 
     async def process_perception(self, perception: Perception) -> Decision:

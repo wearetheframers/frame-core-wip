@@ -46,10 +46,8 @@ class ActionRegistry:
         if not (1 <= priority <= 10):
             raise ValueError("Priority must be between 1 and 10")
         if not asyncio.iscoroutinefunction(action_func):
-
             async def wrapper(*args, **kwargs):
-                return action_func(*args, **kwargs)
-
+                return await asyncio.to_thread(action_func, *args, **kwargs)
             action_func = wrapper
         self.actions[name] = {
             "action_func": action_func,

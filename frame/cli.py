@@ -127,6 +127,10 @@ def run_framer(ctx, json_input, sync, stream):
             f"Running Framer: {name} - {description or 'No description'} with model {model}"
         )
 
+        if framed.soul is None:
+            logger.error("Error: Framer's Soul is null. Initializing with default values.")
+            framed.soul = Soul()
+
         if perception:
             result = await framed.sense(perception)
         elif prompt:

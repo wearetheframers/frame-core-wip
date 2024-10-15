@@ -33,6 +33,7 @@ class Agency:
         context: Optional[Context] = None,
         roles: Optional[List[Dict[str, Any]]] = None,
         goals: Optional[List[Dict[str, Any]]] = None,
+        execution_context: Optional[ExecutionContext] = None,
     ):
         """
         Initialize an Agency instance.
@@ -42,6 +43,7 @@ class Agency:
             context (Optional[Context]): The context service providing shared state and configurations. Defaults to None.
             roles (Optional[List[Dict[str, Any]]]): Initial roles for the Agency. Defaults to None.
             goals (Optional[List[Dict[str, Any]]]): Initial goals for the Agency. Defaults to None.
+            execution_context (Optional[ExecutionContext]): The execution context for the Agency. Defaults to None.
         """
         self.llm_service = llm_service
         self.context = context or Context()
@@ -49,7 +51,8 @@ class Agency:
         self.goals = goals or []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
-        self.default_model = self.llm_service.default_model
+        self.default_model = getattr(self.llm_service, 'default_model', 'gpt-3.5-turbo')
+        self.execution_context = execution_context or ExecutionContext(llm_service=llm_service)
 
     def add_role(self, role: Dict[str, Any]) -> None:
         """

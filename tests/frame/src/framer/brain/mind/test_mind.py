@@ -21,35 +21,49 @@ def mind(brain):
 
 def test_mind_initialization(mind):
     assert mind.thoughts == []
-    assert mind.current_thought == ""
+    assert mind.current_thought == {}
     assert mind.perceptions == []
 
+
+import time
+from datetime import datetime, timedelta
 
 def test_think(mind):
     thought = "This is a test thought"
     mind.think(thought)
-    assert mind.thoughts == [thought]
-    assert mind.current_thought == thought
+    assert len(mind.thoughts) == 1
+    assert mind.thoughts[0]['content'] == thought
+    assert isinstance(mind.thoughts[0]['timestamp'], datetime)
+    assert mind.current_thought['content'] == thought
 
 
 def test_get_current_thought(mind):
     thought = "Current thought"
     mind.think(thought)
-    assert mind.get_current_thought() == thought
+    current_thought = mind.get_current_thought()
+    assert current_thought['content'] == thought
+    assert isinstance(current_thought['timestamp'], datetime)
 
 
 def test_get_all_thoughts(mind):
     thoughts = ["Thought 1", "Thought 2", "Thought 3"]
     for thought in thoughts:
         mind.think(thought)
-    assert mind.get_all_thoughts() == thoughts
+        # Add a small delay to ensure different timestamps
+        time.sleep(0.001)
+    all_thoughts = mind.get_all_thoughts()
+    assert len(all_thoughts) == 3
+    assert [t['content'] for t in all_thoughts] == thoughts[::-1]  # Reverse order due to sorting
+    assert all(isinstance(t['timestamp'], datetime) for t in all_thoughts)
+    # Check if thoughts are sorted by timestamp in descending order
+    assert all(all_thoughts[i]['timestamp'] >= all_thoughts[i+1]['timestamp'] for i in range(len(all_thoughts)-1))
 
 
 def test_clear_thoughts(mind):
     mind.think("Test thought")
     mind.clear_thoughts()
     assert mind.thoughts == []
-    assert mind.current_thought == ""
+    assert mind.current_thought == {}
 
 
 @pytest.mark.asyncio
@@ -58,15 +72,13 @@ async def test_process_perception(mind, mocker):
         mind.brain.llm_service,
         "get_completion",
         new_callable=AsyncMock,
-    ).return_value = asyncio.Future()
-    mind.brain.llm_service.get_completion.return_value = (
-        '{"action": "default_action", "parameters": {}}'
     )
+    mind.brain.llm_service.get_completion.return_value = '{"action": "default_action", "parameters": {}}'
     perception = Perception(type="test", data={"key": "value"})
     await mind.process_perception(perception)
     assert len(mind.perceptions) == 1
     assert mind.perceptions[0] == perception
-    assert mind.get_current_thought() == "Processed perception: test"
+    assert mind.get_current_thought()["content"] == "Processed perception: test"
 
 
 @pytest.mark.asyncio
@@ -110,8 +122,8 @@ def test_multiple_thoughts(mind):
     thoughts = ["Thought 1", "Thought 2", "Thought 3"]
     for thought in thoughts:
         mind.think(thought)
-    assert mind.thoughts == thoughts
-    assert mind.current_thought == thoughts[-1]
+    assert [t["content"] for t in mind.thoughts] == thoughts
+    assert mind.current_thought["content"] == thoughts[-1]
 
 
 @pytest.mark.asyncio
@@ -162,7 +174,7 @@ def test_clear_thoughts_multiple_times(mind):
     mind.think("Thought 2")
     mind.clear_thoughts()
     assert mind.thoughts == []
-    assert mind.current_thought == ""
+    assert mind.current_thought == {}
 
 
 @pytest.mark.asyncio
@@ -180,4 +192,4 @@ async def test_process_multiple_perceptions(mind, mocker):
     for perception in perceptions:
         await mind.process_perception(perception)
     assert len(mind.perceptions) == 3
-    assert mind.get_current_thought() == f"Processed perception: {perceptions[-1].type}"
+    assert mind.get_current_thought()["content"] == f"Processed perception: {perceptions[-1].type}"

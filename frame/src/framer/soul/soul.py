@@ -16,19 +16,16 @@ class Soul:
                 are stored in the notes. The values can be of any type. If None, default values are used.
         """
         if seed is None:
-            seed = "You are a helpful AI assistant."
-
-        if isinstance(seed, str):
+            seed = {"text": "You are a helpful AI assistant."}
+        elif isinstance(seed, str):
             seed = {"text": seed}
-        elif isinstance(seed, dict) and "seed" in seed:
-            seed = {"text": seed["seed"]}
 
         self.model = SoulModel(
             essence=seed.get("text", "You are a helpful AI assistant."),
             notes={k: v for k, v in seed.items() if k != "text"},
             state={},
         )
-        self.seed = {"text": self.model.essence}
+        self.seed = seed
         self.state = self.model.state
 
     def update_state(self, key: str, value: Any) -> None:

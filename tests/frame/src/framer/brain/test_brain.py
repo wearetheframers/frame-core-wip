@@ -14,14 +14,13 @@ from unittest.mock import Mock
 
 @pytest.fixture
 def brain():
-    mock_execution_context = Mock()
-    mock_execution_context.llm_service = AsyncMock()
-    mock_execution_context.llm_service.default_model = "gpt-3.5-turbo"
+    mock_llm_service = AsyncMock()
+    mock_llm_service.default_model = "gpt-3.5-turbo"
     default_model = "gpt-3.5-turbo"
     roles = []
     goals = []
     return Brain(
-        execution_context=mock_execution_context,
+        llm_service=mock_llm_service,
         roles=roles,
         goals=goals,
         default_model=default_model,
@@ -94,7 +93,6 @@ async def test_make_decision_invalid_action(brain, caplog):
     assert decision.action == "error"
     assert "Invalid action 'invalid_action' was generated" in decision.reasoning
     assert "Defaulted to 'error'" in decision.reasoning
-    assert "invalid_action" in decision.reasoning and "error" in decision.reasoning
     assert isinstance(decision.parameters, dict)
 
 
@@ -117,14 +115,14 @@ def test_retrieve_memory(brain):
 @pytest.mark.asyncio
 async def test_think(brain):
     brain.mind.think("This is a test thought")
-    assert brain.mind.thoughts[-1] == "This is a test thought"
+    assert brain.mind.thoughts[-1]["content"] == "This is a test thought"
 
 
 @pytest.mark.asyncio
 async def test_get_current_thought(brain):
     brain.mind.think("This is a test thought")
     current_thought = brain.mind.get_current_thought()
-    assert current_thought == "This is a test thought"
+    assert current_thought["content"] == "This is a test thought"
 
 
 @pytest.mark.asyncio
@@ -132,14 +130,14 @@ async def test_get_all_thoughts(brain):
     thoughts = ["Thought 1", "Thought 2", "Thought 3"]
     for thought in thoughts:
         brain.mind.think(thought)
-    assert brain.mind.get_all_thoughts() == thoughts
+    assert [t["content"] for t in brain.mind.get_all_thoughts()] == thoughts
 
 
 def test_clear_thoughts(brain):
     brain.mind.think("This is a test thought")
     brain.mind.clear_thoughts()
     assert brain.mind.get_all_thoughts() == []
-    assert brain.mind.get_current_thought() == ""
+    assert brain.mind.get_current_thought() == {}
 
 
 @pytest.mark.asyncio
@@ -233,20 +231,16 @@ async def test_execute_decision_think_action(brain):
     )
 
     with patch.object(
-        brain, "_generate_new_query", new_callable=AsyncMock
-    ) as mock_generate_new_query, patch.object(
-        brain, "process_perception", new_callable=AsyncMock
-    ) as mock_process_perception:
-        mock_generate_new_query.return_value = "What are the latest advancements in AI?"
-        await brain.execute_decision(decision)
-        mock_generate_new_query.assert_called_once_with(decision)
-        mock_process_perception.assert_called_once()
-        called_perception = mock_process_perception.call_args[0][0]
-        assert isinstance(called_perception, Perception)
-        assert called_perception.type == "thought"
-        assert called_perception.data == {
-            "query": "What are the latest advancements in AI?"
+        brain, "_execute_think_action", new_callable=AsyncMock
+    ) as mock_execute_think_action:
+        mock_execute_think_action.return_value = {
+            "analysis": "AI is advancing rapidly",
+            "new_tasks": [],
+            "generate_new_prompt": False,
+            "new_prompt": ""
         }
+        await brain.execute_decision(decision)
+        mock_execute_think_action.assert_called_once_with(decision)
 
 
 @pytest.mark.asyncio

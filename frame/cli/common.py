@@ -17,6 +17,7 @@ from frame.src.services.context.context_service import Context
 from frame.src.framer.framer import Framer
 from frame.frame import Frame
 from frame.src.framer.brain.decision import Decision
+from frame.src.framer.soul.soul import Soul
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +121,13 @@ async def setup_framer(
     framer_factory = FramerFactory(config, frame.llm_service)
     framer = await framer_factory.create_framer()
     logger.debug(f"Framer brain after build: {framer.brain}")
-    framer.soul.seed = soul_seed  # Explicitly set the soul seed
+    
+    if framer.soul is None:
+        logger.warning("Framer's Soul is null. Initializing with default values.")
+        framer.soul = Soul(seed=soul_seed)
+    else:
+        framer.soul.seed = soul_seed  # Explicitly set the soul seed
+    
     context = Context()  # Create a new Context
     framer.agency = Agency(
         llm_service=frame.llm_service,

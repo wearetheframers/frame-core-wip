@@ -14,11 +14,10 @@ from frame.src.utils.llm_utils import get_llm_provider, get_completion
 from frame.src.services.llm.main import LLMService
 from asyncio import Future
 from frame.src.services.llm.llm_adapters.lmql.lmql_adapter import LMQLConfig
+from frame.src.framer.soul.soul import Soul
+from frame.src.framer.agency.execution_context import ExecutionContext
 
 logger = logging.getLogger(__name__)
-
-
-from frame.src.framer.agency.execution_context import ExecutionContext
 
 
 class Brain:
@@ -38,7 +37,8 @@ class Brain:
         goals: List[Dict[str, Any]],
         default_model: str = "gpt-3.5-turbo",
         recent_memories_limit: int = 5,
-        execution_context: ExecutionContext = None,
+        execution_context: Optional[ExecutionContext] = None,
+        soul: Optional[Soul] = None,
     ):
         """
         Initialize the Brain with the necessary components.
@@ -49,12 +49,14 @@ class Brain:
             goals (List[Dict[str, Any]]): Initial goals for the Brain.
             default_model (str): The default language model to use.
             recent_memories_limit (int): The number of recent memories to keep. Defaults to 5.
-            execution_context (ExecutionContext): The execution context for actions.
+            execution_context (Optional[ExecutionContext]): The execution context for actions.
+            soul (Optional[Soul]): The Soul instance for the Brain.
         """
         self.llm_service = llm_service
         self.default_model = default_model
         self.roles = roles
         self.goals = goals
+        self.soul = soul
 
         self.mind = Mind(self, recent_memories_limit)
 
@@ -68,12 +70,32 @@ class Brain:
         }
         self.memory = Memory(memory_config)
 
-        # Initialize ActionRegistry
-        self.action_registry = ActionRegistry(
-            execution_context or ExecutionContext(llm_service=self.llm_service)
+        # Initialize ExecutionContext if not provided
+        self.execution_context = execution_context or ExecutionContext(
+            llm_service=self.llm_service,
+            soul=self.soul
         )
 
-        self.agency = Agency(llm_service=self.llm_service, context=None)
+        # Initialize ActionRegistry
+        self.action_registry = ActionRegistry(self.execution_context)
+
+        self.agency = Agency(llm_service=self.llm_service, context=None, execution_context=self.execution_context)
+
+    async def _execute_think_action(self, decision: Decision):
+        """
+        Execute the 'think' action, which involves pondering on various aspects and potentially creating new tasks.
+
+        Args:
+            decision (Decision): The decision to execute.
+
+        Returns:
+            Any: The result of the think action.
+        """
+        # Gather context for thinking
+        soul_context = self.execution_context.soul.get_current_state() if self.execution_context.soul else {}
+        roles_and_goals = {"roles": self.roles, "goals": self.goals}
+        recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
+        recent_perceptions = self.mind.get_recent_perceptions(5)  # Use a fixed number instead of recent_perceptions_limit
 
     def parse_json_response(self, response: str) -> Any:
         """
@@ -241,12 +263,10 @@ class Brain:
             Any: The result of the think action.
         """
         # Gather context for thinking
-        soul_context = self.framer.soul.get_current_state()
+        soul_context = self.action_registry.execution_context.soul.get_current_state() if self.action_registry.execution_context.soul else {}
         roles_and_goals = {"roles": self.roles, "goals": self.goals}
         recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
-        recent_perceptions = self.mind.get_recent_perceptions(
-            self.mind.recent_perceptions_limit
-        )
+        recent_perceptions = self.mind.get_recent_perceptions(5)  # Use a fixed number instead of recent_perceptions_limit
 
         # Prepare the prompt for the LLM
         prompt = f"""

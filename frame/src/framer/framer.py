@@ -130,13 +130,14 @@ class Framer:
         # if roles is None or goals is None:
         #     roles, goals = await agency.generate_roles_and_goals()
 
+        soul = Soul(seed=soul_seed)
         brain = Brain(
             llm_service=llm_service,
             default_model=config.default_model,
             roles=roles,
             goals=goals,
+            soul=soul,
         )
-        soul = Soul(seed=soul_seed if soul_seed else "You are a helpful AI assistant.")
         workflow_manager = WorkflowManager()
 
         return cls(

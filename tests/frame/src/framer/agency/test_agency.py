@@ -22,7 +22,7 @@ def mock_llm_service():
 def agency(mock_llm_service):
     mock_execution_context = Mock()
     mock_execution_context.llm_service = mock_llm_service
-    return Agency(execution_context=mock_execution_context, context={})
+    return Agency(llm_service=mock_llm_service, context={}, execution_context=mock_execution_context)
 
 
 def test_agency_initialization(agency, mock_llm_service):
