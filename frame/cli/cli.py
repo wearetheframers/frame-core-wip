@@ -460,9 +460,16 @@ async def run_async(
                         f"Executed Task '{task.description}' Result: {task_result}"
                     )
             logger.info(f"Decision reasoning: {decision.reasoning}")
-            roles = pretty_log(framer.agency.get_roles())
-            goals = pretty_log(framer.agency.get_goals())
-            logger.info(f"Roles: {roles}, Goals: {goals}")
+            # _roles = pretty_log(framer.agency.get_roles())
+            # _goals = pretty_log(framer.agency.get_goals())
+            _roles = framer.agency.get_roles()
+            _goals = framer.agency.get_goals()
+            for role in _roles:
+                if role.json() not in _roles:
+                    logger.info(f"Updated role: {role}")
+            for goal in _goals:
+                if goal.json() not in _goals:
+                    logger.info(f"Updated goal: {goal}")
             logger.info(f"Decision: {pretty_log(decision)}")
         return framer
     except AttributeError as e:
