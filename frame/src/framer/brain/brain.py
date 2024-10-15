@@ -56,7 +56,7 @@ class Brain:
 
         memory_config = {
             "llm": {
-                "provider": get_llm_provider(self.use_local_model, self.default_model),
+                "provider": get_llm_provider(self.default_model),
                 "config": {
                     "model": self.default_model,
                 },

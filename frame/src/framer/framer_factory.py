@@ -50,7 +50,7 @@ class FramerFactory:
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
     ) -> Framer:
-        agency = Agency(llm_service=self.llm_service, context=None)
+        agency = Agency(self.llm_service, context=None)
         # Initialize the Agency component with the LLM service
         # Generate roles and goals
         roles, goals = await agency.generate_roles_and_goals()
@@ -61,7 +61,6 @@ class FramerFactory:
             roles=roles,
             goals=goals,
             default_model=self.config.default_model,
-            use_local_model=False,
         )
 
         if soul_seed is None:

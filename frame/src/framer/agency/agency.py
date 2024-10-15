@@ -3,6 +3,7 @@ from frame.src.framer.agency.tasks.task import Task, TaskStatus
 from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services.llm.main import LLMService
 from frame.src.services.context.context_service import Context
+from frame.src.framer.agency.execution_context import ExecutionContext
 import json
 import logging
 import time
@@ -28,7 +29,7 @@ class Agency:
 
     def __init__(
         self,
-        execution_context: ExecutionContext,
+        llm_service: LLMService,
         context: Optional[Context] = None,
         roles: Optional[List[Dict[str, Any]]] = None,
         goals: Optional[List[Dict[str, Any]]] = None,
@@ -37,13 +38,12 @@ class Agency:
         Initialize an Agency instance.
 
         Args:
-            execution_context (ExecutionContext): The execution context containing necessary services.
+            llm_service (LLMService): The language model service.
             context (Optional[Context]): The context service providing shared state and configurations. Defaults to None.
             roles (Optional[List[Dict[str, Any]]]): Initial roles for the Agency. Defaults to None.
             goals (Optional[List[Dict[str, Any]]]): Initial goals for the Agency. Defaults to None.
         """
-        self.execution_context = execution_context
-        self.llm_service = execution_context.llm_service
+        self.llm_service = llm_service
         self.context = context or Context()
         self.roles = roles or []
         self.goals = goals or []
