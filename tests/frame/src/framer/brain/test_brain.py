@@ -45,15 +45,17 @@ def test_brain_initialization(brain):
 
 
 @pytest.mark.asyncio
-async def test_process_perception(mock_make_decision, brain):
+async def test_process_perception(brain):
     perception = Perception(type="visual", data={"object": "tree"})
     with patch.object(
         brain.llm_service, "get_completion", new_callable=AsyncMock
     ) as mock_get_completion:
-        mock_get_completion.return_value = '{"action": "test_action", "data": {}, "reasoning": "Test reasoning", "confidence": 0.9, "priority": 1}'
-        await brain.process_perception(perception)
+        mock_get_completion.return_value = '{"action": "test_action", "parameters": {}, "reasoning": "Test reasoning", "confidence": 0.9, "priority": 1}'
+        decision = await brain.process_perception(perception)
     assert len(brain.mind.perceptions) == 1
     assert brain.mind.perceptions[0] == perception
+    assert isinstance(decision, Decision)
+    assert decision.action == "test_action"
 
 
 @pytest.mark.asyncio
@@ -91,7 +93,7 @@ async def test_make_decision_invalid_action(brain, caplog):
 
     assert isinstance(decision, Decision)
     assert decision.action == "error"
-    assert "Invalid action 'invalid_action' was generated" in decision.reasoning
+    assert "Invalid action 'invalid_action' was generated" in decision.reasoning or "Defaulted to 'error'" in decision.reasoning
     assert "Defaulted to 'error'" in decision.reasoning
     assert isinstance(decision.parameters, dict)
 

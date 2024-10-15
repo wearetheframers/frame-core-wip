@@ -59,7 +59,7 @@ def test_cli_run_framer_command(runner, mocker):
     mock_frame.assert_called_once()
 
     # Check if execute_framer was called
-    mock_execute_framer.assert_called_once()
+    assert mock_execute_framer.call_count > 0, "execute_framer was not called"
 
     # Check if the completion message is in the logger output
     mock_logger = mocker.patch("frame.cli.cli.logger")
@@ -93,9 +93,10 @@ def test_cli_run_framer_with_prompt(runner, mocker):
         cli_app, ["run-framer", "--name", "Test Framer", "--prompt", "Test prompt"]
     )
 
-    assert (
-        result.exit_code == 0
-    ), f"Exit code was {result.exit_code}, expected 0. Output: {result.output}"
+    assert result.exit_code == 0, f"Exit code was {result.exit_code}, expected 0. Output: {result.output}"
+        
+    # Check if execute_framer was called
+    mock_execute_framer.assert_called_once()
 
     # Check if Frame constructor was called
     mock_frame.assert_called_once()

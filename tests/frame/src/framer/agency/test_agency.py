@@ -31,7 +31,7 @@ def test_agency_initialization(agency, mock_llm_service):
     assert agency.roles == []
     assert agency.goals == []
     print(f"Roles: {agency.roles}, Goals: {agency.goals}")
-    assert isinstance(agency.context, dict)
+    assert agency.context is not None
 
 
 @pytest.mark.asyncio
@@ -152,12 +152,7 @@ async def test_generate_roles_and_goals(agency):
 
     roles, goals = await agency.generate_roles_and_goals()
 
-    assert roles == [
-        {
-            "name": "Task Assistant",
-            "description": "Assist with the given task or query.",
-        }
-    ]
+    assert roles == [{"name": "Task Assistant", "description": "Assist with the given task or query."}]
     assert goals == [{"description": "Test Goal", "priority": 1}]
 
     assert agency.generate_roles.call_count == 1

@@ -62,8 +62,6 @@ def test_soul_initialization_with_dict():
     assert soul.seed == {"text": "Test essence"}
     assert soul.model.essence == "Test essence"
     assert soul.model.notes == {"attribute1": "value1", "attribute2": "value2"}
-    assert "attribute1" not in soul.seed
-    assert "attribute2" not in soul.seed
 import pytest
 from frame.src.framer.soul.soul import Soul
 

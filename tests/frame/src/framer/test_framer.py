@@ -82,8 +82,8 @@ async def test_framer_initialize():
         workflow_manager=workflow_manager,
     )
     await framer.initialize()
-    assert framer.agency.roles == ["Generated Role"]
-    assert framer.agency.goals == ["Generated Goal"]
+    assert framer.roles == [{"name": "Generated Role", "description": "Generated role description"}]
+    assert framer.goals == [{"description": "Generated Goal", "priority": 1}]
     assert agency.generate_roles_and_goals.call_count == 1
 
     # Test case 2: Both roles and goals are empty lists

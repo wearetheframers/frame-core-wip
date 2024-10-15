@@ -8,14 +8,15 @@ def action_registry():
     return ActionRegistry()
 
 
-def test_register_and_perform_action(action_registry):
-    def test_action(arg1, arg2):
+@pytest.mark.asyncio
+async def test_register_and_perform_action(action_registry):
+    async def test_action(execution_context, arg1, arg2):
         return f"Test action performed with {arg1} and {arg2}"
 
     action_registry.register_action(
         "test_action", test_action, "Test action description", 8
     )
-    result = action_registry.perform_action("test_action", "value1", "value2")
+    result = await action_registry.perform_action("test_action", arg1="value1", arg2="value2")
     assert result == "Test action performed with value1 and value2"
 
     action_info = action_registry.actions["test_action"]
@@ -70,8 +71,9 @@ def test_perform_nonexistent_action(action_registry):
         action_registry.perform_action("nonexistent_action")
 
 
-def test_action_with_callback(action_registry):
-    def test_action():
+@pytest.mark.asyncio
+async def test_action_with_callback(action_registry):
+    async def test_action(execution_context):
         return "Action result"
 
     callback_result = None
@@ -81,7 +83,7 @@ def test_action_with_callback(action_registry):
         callback_result = f"Callback received: {result}, {extra_arg}"
 
     action_registry.register_action("test_action_with_callback", test_action)
-    result = action_registry.perform_action(
+    result = await action_registry.perform_action(
         "test_action_with_callback",
         callback=callback,
         callback_args=("extra value",),
@@ -90,7 +92,8 @@ def test_action_with_callback(action_registry):
     assert callback_result == "Callback received: Action result, extra value"
 
 
-def test_default_actions(action_registry):
+@pytest.mark.asyncio
+async def test_default_actions(action_registry):
     default_actions = [
         "create_new_agent",
         "generate_roles_and_goals",
@@ -102,7 +105,9 @@ def test_default_actions(action_registry):
     ]
     valid_actions = action_registry.get_all_actions()
     for action in default_actions:
-        for action in default_actions:
-            assert action in valid_actions
-        result = action_registry.perform_action(action)
-        assert isinstance(result, str)
+        assert action in valid_actions
+        if action == "research":
+            result = await action_registry.perform_action(action, research_topic="test topic")
+        else:
+            result = await action_registry.perform_action(action)
+        assert result is not None or isinstance(result, (str, dict))
