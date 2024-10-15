@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>frame.cli.tui API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>frame.cli.tui</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="frame.cli.tui.run_tui"><code class="name flex">
+<span>def <span class="ident">run_tui</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Run the TUI application.</p></div>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.cli.tui.FramerTUI"><code class="flex name class">
+<span>class <span class="ident">FramerTUI</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>A Text-based User Interface (TUI) for interacting with the Framer.</p>
+<p>This TUI allows users to configure and interact with a Framer instance.
+It provides inputs for the following parameters:</p>
+<ol>
+<li>Framer name (optional): A name for the Framer instance.</li>
+<li>Model (required): The AI model to be used by the Framer.</li>
+<li>Description (optional): A brief description of the Framer's purpose.</li>
+<li>Soul seed (optional): A seed phrase to initialize the Framer's "soul" or base personality.
+If left empty, the Framer will start with the default seed "You are a helpful assistant."</li>
+<li>Prompt (required): The main input or question for the Framer to respond to.</li>
+</ol>
+<p>The interface also includes options for enabling debug logging and clearing conversation history.</p>
+<p>Create an instance of an app.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>driver_class</code></strong></dt>
+<dd>Driver class or <code>None</code> to auto-detect.
+This will be used by some Textual tools.</dd>
+<dt><strong><code>css_path</code></strong></dt>
+<dd>Path to CSS or <code>None</code> to use the <code>CSS_PATH</code> class variable.
+To load multiple CSS files, pass a list of strings or paths which
+will be loaded in order.</dd>
+<dt><strong><code>watch_css</code></strong></dt>
+<dd>Reload CSS if the files changed. This is set automatically if
+you are using <code>textual run</code> with the <code>dev</code> switch.</dd>
+<dt><strong><code>ansi_color</code></strong></dt>
+<dd>Allow ANSI colors if <code>True</code>, or convert ANSI colors to to RGB if <code>False</code>.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>CssPathError</code></dt>
+<dd>When the supplied CSS path(s) are an unexpected type.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FramerTUI(App):
+    &#34;&#34;&#34;
+    A Text-based User Interface (TUI) for interacting with the Framer.
+
+    This TUI allows users to configure and interact with a Framer instance.
+    It provides inputs for the following parameters:
+
+    1. Framer name (optional): A name for the Framer instance.
+    2. Model (required): The AI model to be used by the Framer.
+    3. Description (optional): A brief description of the Framer&#39;s purpose.
+    4. Soul seed (optional): A seed phrase to initialize the Framer&#39;s &#34;soul&#34; or base personality.
+       If left empty, the Framer will start with the default seed &#34;You are a helpful assistant.&#34;
+    5. Prompt (required): The main input or question for the Framer to respond to.
+
+    The interface also includes options for enabling debug logging and clearing conversation history.
+    &#34;&#34;&#34;
+
+    BINDINGS = [(&#34;q&#34;, &#34;quit&#34;, &#34;Quit&#34;), (&#34;d&#34;, &#34;toggle_debug&#34;, &#34;Toggle Debug&#34;)]
+
+    CSS = &#34;&#34;&#34;
+    #response {
+        height: 1fr;
+        width: 100%;
+        border: solid green;
+    }
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        self._debug = False
+        super().__init__()
+        # Set up file logging
+        file_handler = logging.FileHandler(&#34;framer_tui.log&#34;)
+        file_handler.setLevel(logging.DEBUG)
+        file_formatter = logging.Formatter(
+            &#34;%(asctime)s - %(name)s - %(levelname)s - %(message)s&#34;
+        )
+        file_handler.setFormatter(file_formatter)
+        logger.addHandler(file_handler)
+        self._name = None
+        self._model = AVAILABLE_MODELS[0]
+        self._description = &#34;&#34;
+        self._prompt = &#34;&#34;
+        self._soul_seed = &#34;&#34;
+        self._framer = None
+        self._expected_output_format_strict = &#34;&#34;
+        self._history = []
+        self.response = Static(id=&#34;response&#34;, expand=True)
+        self.response_container = ScrollableContainer(self.response)
+        self.debug_checkbox = Checkbox(&#34;Enable Debug Logging&#34;, id=&#34;debug_checkbox&#34;)
+
+    @property
+    def debug(self):
+        return self._debug
+
+    @debug.setter
+    def debug(self, value):
+        self._debug = value
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def model(self):
+        return self._model
+
+    @model.setter
+    def model(self, value):
+        self._model = value
+
+    @property
+    def max_len(self):
+        return self._max_len
+
+    @property
+    def framer(self):
+        return self._framer
+
+    @framer.setter
+    def framer(self, value):
+        self._framer = value
+
+    def compose(self) -&gt; ComposeResult:
+        &#34;&#34;&#34;Create child widgets for the app.&#34;&#34;&#34;
+        yield Header()
+        yield Container(
+            Vertical(
+                Input(
+                    placeholder=&#34;Enter Framer name (optional, default: Default Framer)&#34;,
+                    id=&#34;name_input&#34;,
+                ),
+                self.response_container,
+                Label(id=&#34;framer_name_label&#34;),
+                Label(&#34;Model (required):&#34;, id=&#34;model_label&#34;),
+                Select(
+                    [(model, model) for model in AVAILABLE_MODELS],
+                    value=&#34;gpt-3.5-turbo&#34;,
+                    id=&#34;model_select&#34;,
+                ),
+                Label(&#34;Description (optional):&#34;, id=&#34;description_label&#34;),
+                Input(
+                    placeholder=&#34;Enter Framer description (optional)&#34;,
+                    id=&#34;description_input&#34;,
+                ),
+                Input(
+                    placeholder=&#34;Enter soul seed (optional)&#34;,
+                    id=&#34;soul_seed_input&#34;,
+                ),
+                self.debug_checkbox,
+                Button(&#34;Clear History&#34;, id=&#34;clear_history_button&#34;),
+                Label(&#34;Debug: Disabled&#34;, id=&#34;debug_label&#34;),
+            ),
+            Static(&#34;Enter your prompt (required):&#34;, id=&#34;prompt_label&#34;),
+            Input(placeholder=&#34;Type your prompt here... (required)&#34;, id=&#34;prompt_input&#34;),
+            Button(&#34;Submit&#34;, id=&#34;submit_button&#34;),
+            Static(&#34;Conversation History:&#34;, id=&#34;history_label&#34;),
+            Static(id=&#34;history_area&#34;),
+            id=&#34;main_container&#34;,
+        )
+        yield Footer()
+
+    def on_mount(self) -&gt; None:
+        &#34;&#34;&#34;Set up initial UI state when the app is mounted.&#34;&#34;&#34;
+        self.query_one(&#34;#name_input&#34;).focus()
+        self._model = self.query_one(&#34;#model_select&#34;).value
+        self._max_len = 512
+        self._debug = False
+        self.debug_checkbox.value = self._debug
+
+        self.update_logging()
+
+    def on_input_submitted(self, event: Input.Submitted) -&gt; None:
+        &#34;&#34;&#34;Handle input submission event.&#34;&#34;&#34;
+        if event.input.id == &#34;name_input&#34;:
+            self._name = event.value if event.value else &#34;Default Framer&#34;
+            self.query_one(&#34;#framer_name_label&#34;).update(f&#34;Framer: {self._name}&#34;)
+            self.query_one(&#34;#prompt_input&#34;).focus()
+            # Set up the Framer after the name is entered
+            asyncio.create_task(self.setup_framer())
+        elif event.input.id == &#34;description_input&#34;:
+            self._description = event.value
+            self.query_one(&#34;#prompt_input&#34;).focus()
+        elif event.input.id == &#34;soul_seed_input&#34;:
+            self._soul_seed = event.value
+            self.query_one(&#34;#prompt_input&#34;).focus()
+        elif event.input.id == &#34;prompt_input&#34;:
+            asyncio.create_task(self.submit_prompt())
+
+    def on_select_changed(self, event: Select.Changed) -&gt; None:
+        &#34;&#34;&#34;Handle changes in the model selection.&#34;&#34;&#34;
+        if event.select.id == &#34;model_select&#34;:
+            self.model = event.value
+            model_label = self.query_one(&#34;Label#model_label&#34;)
+            model_label.update(f&#34;Model: {self.model}&#34;)
+
+    def on_checkbox_changed(self, event: Checkbox.Changed) -&gt; None:
+        &#34;&#34;&#34;Handle changes in the debug checkbox.&#34;&#34;&#34;
+        if event.checkbox.id == &#34;debug_checkbox&#34;:
+            self._debug = event.value
+            self.update_logging()
+
+    def update_logging(self) -&gt; None:
+        &#34;&#34;&#34;Update logging based on the debug checkbox state.&#34;&#34;&#34;
+        log_level = logging.DEBUG if self._debug else logging.INFO
+        logging.basicConfig(level=log_level)
+        logger.setLevel(log_level)
+        if self._debug:
+            logger.debug(&#34;Debug logging enabled&#34;)
+        else:
+            logger.info(&#34;Debug logging disabled&#34;)
+
+    async def setup_framer(self) -&gt; None:
+        &#34;&#34;&#34;Set up the Framer instance.&#34;&#34;&#34;
+        from frame.src.framer.config import FramerConfig
+        from frame.src.framer.framer import Framer
+        from frame.frame import Frame
+
+        config = FramerConfig(
+            description=self._description,
+            name=(
+                self._name
+                if self._name
+                else f&#34;TUI_Framer_{datetime.now().strftime(&#39;%Y%m%d_%H%M%S&#39;)}&#34;
+            ),
+            default_model=self._model,
+        )
+
+        # Create a Frame instance
+        frame = Frame()
+
+        # Use FramerFactory to create the Framer
+        from frame.src.framer.framer_factory import FramerFactory
+
+        framer_factory = FramerFactory(config, frame.llm_service)
+        self.framer = await framer_factory.create_framer()
+
+        # Set up the soul seed
+        self.framer.soul.seed = self._soul_seed
+
+        # Set up the agency
+        from frame.src.framer.agency import Agency
+        from frame.src.services.context.context_service import Context
+
+        context = Context()
+        self.framer.agency = Agency(
+            llm_service=frame.llm_service,
+            context=context,
+            use_local_model=False,
+        )
+
+        logger.info(f&#34;Running Framer: {self.framer.config.name}&#34;)
+        logger.info(f&#34;Using model: {self.framer.config.default_model}&#34;)
+        logger.info(
+            f&#34;Expected output format strict: {self._expected_output_format_strict}&#34;
+        )
+        logger.info(f&#34;Max length: {self._max_len}&#34;)
+        logger.info(f&#34;Debug mode: {self._debug}&#34;)
+        logger.info(f&#34;Soul seed: {self._soul_seed}&#34;)
+        logger.info(f&#34;Framer roles: {self.framer.agency.roles}&#34;)
+        logger.info(f&#34;Framer goals: {self.framer.agency.goals}&#34;)
+
+        # Update the UI with the current settings
+        self.query_one(&#34;#framer_name_label&#34;).update(f&#34;Framer: {self._name}&#34;)
+        self.query_one(&#34;#model_label&#34;).update(f&#34;Model: {self._model}&#34;)
+        self.query_one(&#34;#max_len_label&#34;).update(f&#34;Max Length: {self._max_len}&#34;)
+        self.query_one(&#34;#debug_label&#34;).update(
+            f&#34;Debug: {&#39;Enabled&#39; if self._debug else &#39;Disabled&#39;}&#34;
+        )
+
+    def on_button_pressed(self, event: Button.Pressed) -&gt; None:
+        &#34;&#34;&#34;Handle button press event.&#34;&#34;&#34;
+        if event.button.id == &#34;submit_button&#34;:
+            asyncio.create_task(self.submit_prompt())
+        elif event.button.id == &#34;clear_history_button&#34;:
+            self.clear_history()
+
+    async def submit_prompt(self) -&gt; None:
+        &#34;&#34;&#34;Submit the prompt and get a response.&#34;&#34;&#34;
+        prompt = self.query_one(&#34;#prompt_input&#34;).value.strip()
+        if not prompt:
+            logger.warning(&#34;Empty prompt submitted. Ignoring.&#34;)
+            self.update_response(&#34;Error: Empty prompt. Please enter a valid prompt.&#34;)
+            return
+
+        self._prompt = prompt
+        logger.debug(f&#34;Submitting prompt: {prompt}&#34;)
+        logger.debug(
+            f&#34;Current Framer state: name={self._name}, model={self._model}, max_len={self._max_len}&#34;
+        )
+        self._history.append(f&#34;User: {prompt}&#34;)
+        self.update_history()
+
+        if not is_model_supported(self._model):
+            logger.error(f&#34;Unsupported model: {self._model}&#34;)
+            self.update_response(
+                f&#34;Error: Unsupported model &#39;{self._model}&#39;. Please select a supported model.&#34;
+            )
+            return
+
+        # Ensure Framer is set up before getting a response
+        if self.framer is None:
+            logger.debug(&#34;Framer not initialized. Setting up now.&#34;)
+            await self.setup_framer()
+
+        # Proceed to get a response if Framer is initialized
+        if self.framer is not None:
+            await self.get_framer_response(prompt)
+        else:
+            logger.error(&#34;Failed to initialize Framer&#34;)
+            self.update_response(&#34;Error: Failed to initialize Framer&#34;)
+
+    async def get_framer_response(self, prompt: str) -&gt; None:
+        &#34;&#34;&#34;Get a response from the Framer and update the UI.&#34;&#34;&#34;
+        self.update_response(&#34;Processing...&#34;)
+
+        logger.debug(f&#34;Getting Framer response for prompt: {prompt}&#34;)
+
+        try:
+            # Create a perception from the prompt
+            perception_data = {&#34;type&#34;: &#34;input&#34;, &#34;description&#34;: prompt}
+
+            # Use the Framer&#39;s sense method to process the perception
+            decision = await self.framer.sense(perception_data)
+
+            if decision:
+                self.update_response(f&#34;Decision: {decision.action}&#34;)
+                self.update_response(f&#34;Reasoning: {decision.reasoning}&#34;)
+
+                # Process workflows and tasks
+                for workflow in self.framer.workflow_manager.workflows:
+                    self.update_response(f&#34;Workflow: {workflow.name}&#34;)
+                    for task in workflow.tasks:
+                        self.update_response(f&#34;Task: {task.description}&#34;)
+                        result = await self.framer.perform_task(task)
+                        logger.debug(f&#34;Raw task result: {result}&#34;)
+                        processed_result = (
+                            result.output if hasattr(result, &#34;output&#34;) else str(result)
+                        )
+                        logger.info(f&#34;Task results: {processed_result}&#34;)
+                        self.update_response(f&#34;- Result: {processed_result}&#34;)
+            else:
+                logger.warning(&#34;No decision was made.&#34;)
+                self.update_response(&#34;No decision was made based on the prompt.&#34;)
+
+        except Exception as e:
+            logger.error(f&#34;An error occurred: {str(e)}&#34;)
+            logger.exception(&#34;Detailed traceback:&#34;)
+            self.update_response(f&#34;An error occurred: {str(e)}&#34;)
+        finally:
+            self._history.append(f&#34;AI: {self.response.renderable}&#34;)
+            self.update_history()
+            self.update_response(&#34;Response received.&#34;)
+
+    def update_response(self, text: str) -&gt; None:
+        &#34;&#34;&#34;Update the response area with new text.&#34;&#34;&#34;
+        response = self.query_one(&#34;#response&#34;, Static)
+        if response:
+            # Wrap the text to fit within the response widget
+            wrapped_text = &#34;\n&#34;.join(
+                textwrap.wrap(text, width=self.response.size.width - 2)
+            )
+            response.update(wrapped_text)
+            logger.info(f&#34;Updated response: {text}&#34;)
+            self.update_history()
+        else:
+            logger.warning(&#34;Response element not found. Creating it.&#34;)
+            new_response = Static(text, id=&#34;response&#34;, expand=True)
+            self.mount(new_response)
+
+    def update_history(self) -&gt; None:
+        &#34;&#34;&#34;Update the conversation history display.&#34;&#34;&#34;
+        history_area = self.query_one(&#34;#history_area&#34;)
+        history_text = &#34;\n\n&#34;.join(self._history[-5:])  # Show last 5 interactions
+        history_area.update(history_text)
+
+    def clear_history(self) -&gt; None:
+        &#34;&#34;&#34;Clear the conversation history.&#34;&#34;&#34;
+        self._history = []
+        self.update_history()
+
+    def action_toggle_debug(self) -&gt; None:
+        &#34;&#34;&#34;Toggle debug mode.&#34;&#34;&#34;
+        self._debug = not self._debug
+        self.debug_checkbox.value = self._debug
+        self.update_logging()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>textual.app.App</li>
+<li>typing.Generic</li>
+<li>textual.dom.DOMNode</li>
+<li>textual.message_pump.MessagePump</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.cli.tui.FramerTUI.BINDINGS"><code class="name">var <span class="ident">BINDINGS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.CSS"><code class="name">var <span class="ident">CSS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="frame.cli.tui.FramerTUI.debug"><code class="name">prop <span class="ident">debug</span></code></dt>
+<dd>
+<div class="desc"><p>Is debug mode enabled?</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def debug(self):
+    return self._debug</code></pre>
+</details>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.framer"><code class="name">prop <span class="ident">framer</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def framer(self):
+    return self._framer</code></pre>
+</details>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.max_len"><code class="name">prop <span class="ident">max_len</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def max_len(self):
+    return self._max_len</code></pre>
+</details>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.model"><code class="name">prop <span class="ident">model</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def model(self):
+    return self._model</code></pre>
+</details>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.name"><code class="name">prop <span class="ident">name</span></code></dt>
+<dd>
+<div class="desc"><p>The name of the node.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def name(self):
+    return self._name</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.cli.tui.FramerTUI.action_toggle_debug"><code class="name flex">
+<span>def <span class="ident">action_toggle_debug</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Toggle debug mode.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.clear_history"><code class="name flex">
+<span>def <span class="ident">clear_history</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clear the conversation history.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.compose"><code class="name flex">
+<span>def <span class="ident">compose</span></span>(<span>self) ‑> Iterable[textual.widget.Widget]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create child widgets for the app.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.get_framer_response"><code class="name flex">
+<span>async def <span class="ident">get_framer_response</span></span>(<span>self, prompt: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get a response from the Framer and update the UI.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.on_button_pressed"><code class="name flex">
+<span>def <span class="ident">on_button_pressed</span></span>(<span>self, event: textual.widgets._button.Button.Pressed) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Handle button press event.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.on_checkbox_changed"><code class="name flex">
+<span>def <span class="ident">on_checkbox_changed</span></span>(<span>self, event: textual.widgets._checkbox.Checkbox.Changed) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Handle changes in the debug checkbox.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.on_input_submitted"><code class="name flex">
+<span>def <span class="ident">on_input_submitted</span></span>(<span>self, event: textual.widgets._input.Input.Submitted) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Handle input submission event.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.on_mount"><code class="name flex">
+<span>def <span class="ident">on_mount</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set up initial UI state when the app is mounted.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.on_select_changed"><code class="name flex">
+<span>def <span class="ident">on_select_changed</span></span>(<span>self, event: textual.widgets._select.Select.Changed) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Handle changes in the model selection.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.setup_framer"><code class="name flex">
+<span>async def <span class="ident">setup_framer</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set up the Framer instance.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.submit_prompt"><code class="name flex">
+<span>async def <span class="ident">submit_prompt</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Submit the prompt and get a response.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.update_history"><code class="name flex">
+<span>def <span class="ident">update_history</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Update the conversation history display.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.update_logging"><code class="name flex">
+<span>def <span class="ident">update_logging</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Update logging based on the debug checkbox state.</p></div>
+</dd>
+<dt id="frame.cli.tui.FramerTUI.update_response"><code class="name flex">
+<span>def <span class="ident">update_response</span></span>(<span>self, text: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Update the response area with new text.</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="frame.cli" href="index.html">frame.cli</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="frame.cli.tui.run_tui" href="#frame.cli.tui.run_tui">run_tui</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.cli.tui.FramerTUI" href="#frame.cli.tui.FramerTUI">FramerTUI</a></code></h4>
+<ul class="two-column">
+<li><code><a title="frame.cli.tui.FramerTUI.BINDINGS" href="#frame.cli.tui.FramerTUI.BINDINGS">BINDINGS</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.CSS" href="#frame.cli.tui.FramerTUI.CSS">CSS</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.action_toggle_debug" href="#frame.cli.tui.FramerTUI.action_toggle_debug">action_toggle_debug</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.clear_history" href="#frame.cli.tui.FramerTUI.clear_history">clear_history</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.compose" href="#frame.cli.tui.FramerTUI.compose">compose</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.debug" href="#frame.cli.tui.FramerTUI.debug">debug</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.framer" href="#frame.cli.tui.FramerTUI.framer">framer</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.get_framer_response" href="#frame.cli.tui.FramerTUI.get_framer_response">get_framer_response</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.max_len" href="#frame.cli.tui.FramerTUI.max_len">max_len</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.model" href="#frame.cli.tui.FramerTUI.model">model</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.name" href="#frame.cli.tui.FramerTUI.name">name</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.on_button_pressed" href="#frame.cli.tui.FramerTUI.on_button_pressed">on_button_pressed</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.on_checkbox_changed" href="#frame.cli.tui.FramerTUI.on_checkbox_changed">on_checkbox_changed</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.on_input_submitted" href="#frame.cli.tui.FramerTUI.on_input_submitted">on_input_submitted</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.on_mount" href="#frame.cli.tui.FramerTUI.on_mount">on_mount</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.on_select_changed" href="#frame.cli.tui.FramerTUI.on_select_changed">on_select_changed</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.setup_framer" href="#frame.cli.tui.FramerTUI.setup_framer">setup_framer</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.submit_prompt" href="#frame.cli.tui.FramerTUI.submit_prompt">submit_prompt</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.update_history" href="#frame.cli.tui.FramerTUI.update_history">update_history</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.update_logging" href="#frame.cli.tui.FramerTUI.update_logging">update_logging</a></code></li>
+<li><code><a title="frame.cli.tui.FramerTUI.update_response" href="#frame.cli.tui.FramerTUI.update_response">update_response</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>

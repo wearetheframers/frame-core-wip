@@ -1,0 +1,16 @@
+[project]
+name = "frame"
+version = "0.1.0"
+description = "A multi-modal cognitive agent framework."
+authors = [
+    { name = "Frame Team", email = "team@frame.dev" }
+]
+license = { text = "MIT" }
+dependencies = []
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+frame-cli = "frame.cli:main"

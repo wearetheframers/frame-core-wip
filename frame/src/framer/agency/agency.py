@@ -1,0 +1,411 @@
+from typing import List, Dict, Any, Optional, Tuple
+from frame.src.framer.agency.tasks.task import Task, TaskStatus
+from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
+from frame.src.services.llm.main import LLMService
+from frame.src.services.context.context_service import Context
+import json
+import logging
+import time
+
+logger = logging.getLogger(__name__)
+
+
+class Agency:
+    """
+    The Agency class represents the decision-making and task management component of a Framer.
+
+    To extend the Agency's capabilities, you can add new actions to the ActionRegistry.
+    This allows the Agency to perform additional tasks and manage new workflows.
+    It manages roles, goals, tasks, and workflows for the Framer.
+
+    Attributes:
+        llm_service (LLMService): The LLM service used for language model interactions.
+        context (Context): The context service providing shared state and configurations.
+        default_model (str): The default model to use for operations.
+        roles (List[Dict[str, Any]]): List of roles assigned to the Agency.
+        goals (List[Dict[str, Any]]): List of goals for the Agency.
+        workflow_manager (WorkflowManager): Manages workflows and tasks.
+        use_local_model (bool): Whether to use a local model or not.
+    """
+
+    def __init__(
+        self,
+        llm_service: LLMService,
+        context: Context,
+        default_model: str = "gpt-3.5-turbo",
+        use_local_model: bool = False,
+        roles: Optional[List[Dict[str, Any]]] = [],
+        goals: Optional[List[Dict[str, Any]]] = [],
+    ):
+        """
+        Initialize an Agency instance.
+
+        Args:
+            llm_service (LLMService): The LLMService instance to use for completions.
+            context (Context): The context service providing shared state and configurations.
+            default_model (str, optional): The default model to use for operations. Defaults to "gpt-3.5-turbo".
+            use_local_model (bool, optional): Whether to use a local model. Defaults to False.
+            brain (Optional['Brain']): The Brain instance associated with this Agency.
+        """
+        self.llm_service = llm_service
+        self.context = context
+        self.default_model = default_model
+        self.use_local_model = use_local_model
+        self.roles = roles
+        self.goals = goals
+        self.workflow_manager = WorkflowManager()
+        self.completion_calls = {}
+
+    def add_role(self, role: Dict[str, Any]) -> None:
+        """
+        Add a new role to the Agency.
+
+        Args:
+            role (Dict[str, Any]): The role to be added.
+        """
+        self.roles.append(role)
+
+    def set_roles(self, roles: Optional[List[Dict[str, Any]]] = None) -> None:
+        """
+        Set the roles for the Agency.
+
+        Args:
+            roles (Optional[List[Dict[str, Any]]]): List of role dictionaries.
+        """
+        self.roles = roles if roles is not None else []
+
+    def set_goals(self, goals: Optional[List[Dict[str, Any]]] = None):
+        """
+        Set the goals for the Agency.
+
+        Args:
+            goals (Optional[List[Dict[str, Any]]]): List of goal dictionaries.
+        """
+        self.goals = goals if goals is not None else []
+
+    def add_goal(self, goal: Dict[str, Any]) -> None:
+        """
+        Add a new goal to the Agency.
+
+        Args:
+            goal (Dict[str, Any]): The goal to be added.
+        """
+        self.goals.append(goal)
+
+    def get_roles(self) -> List[Dict[str, Any]]:
+        """
+        Get all roles of the Agency.
+
+        Returns:
+            List[Dict[str, Any]]: List of all roles.
+        """
+        return self.roles
+
+    def get_goals(self) -> List[Dict[str, Any]]:
+        """
+        Get all goals of the Agency.
+
+        Returns:
+            List[Dict[str, Any]]: List of all goals.
+        """
+        return self.goals
+
+    def create_task(
+        self, description: str, priority: float = 50.0, workflow_id: str = "default"
+    ) -> Task:
+        """
+        Create a new task with the given description and priority.
+
+        Args:
+            description (str): The description of the task.
+            priority (float, optional): The priority of the task. Defaults to 50.0.
+            workflow_id (str, optional): The ID of the workflow this task belongs to. Defaults to "default".
+
+        Returns:
+            Task: The created Task object.
+        """
+        return Task(description=description, priority=priority, workflow_id=workflow_id)
+
+    def add_task(self, task: Task, workflow_id: str = "default") -> None:
+        """
+        Add a new task to a specified workflow.
+
+        Args:
+            task (Task): The task to add.
+            workflow_id (str, optional): The ID of the workflow to add the task to. Defaults to "default".
+        """
+        self.workflow_manager.add_task(workflow_id, task)
+
+    def get_next_task(self, workflow_id: str = "default") -> Optional[Task]:
+        """
+        Get the next pending task with the highest priority from a specified workflow.
+
+        Args:
+            workflow_id (str, optional): The ID of the workflow to get the task from. Defaults to "default".
+
+        Returns:
+            Optional[Task]: The next task to be executed, or None if no pending tasks.
+        """
+        workflow = self.workflow_manager.get_workflow(workflow_id)
+        if workflow is None:
+            return None
+        pending_tasks = [
+            task for task in workflow.tasks if task.status == TaskStatus.PENDING
+        ]
+        return max(pending_tasks, key=lambda x: x.priority) if pending_tasks else None
+
+    def complete_task(self, task: Task, result: Any) -> None:
+        """
+        Mark a task as completed and set its result.
+
+        Args:
+            task (Task): The task to be marked as completed.
+            result (Any): The result of the completed task.
+        """
+        task.update_status(TaskStatus.COMPLETED)
+        task.set_result(result)
+
+    def fail_task(self, task: Task, reason: str) -> None:
+        """
+        Mark a task as failed and set the failure reason.
+
+        Args:
+            task (Task): The task to be marked as failed.
+            reason (str): The reason for the task failure.
+        """
+        task.update_status(TaskStatus.FAILED)
+        task.set_result(reason)
+
+    def create_workflow(self, name: str, is_async: bool = False) -> Workflow:
+        """
+        Create a new workflow.
+
+        Args:
+            name (str): The name of the workflow.
+            is_async (bool, optional): Whether the workflow is asynchronous. Defaults to False.
+
+        Returns:
+            Workflow: The created Workflow object.
+        """
+        return self.workflow_manager.create_workflow(name, is_async)
+
+    def set_final_task_for_workflow(self, workflow_name: str, task: Task) -> None:
+        """
+        Set the final task for a specified workflow.
+
+        Args:
+            workflow_name (str): The name of the workflow.
+            task (Task): The task to be set as the final task.
+        """
+        self.workflow_manager.set_final_task_for_workflow(workflow_name, task)
+
+    def get_all_tasks(self) -> List[Dict[str, Any]]:
+        """
+        Get all tasks from all workflows.
+
+        Returns:
+            List[Dict[str, Any]]: A list of all tasks as dictionaries.
+        """
+        all_tasks = []
+        for workflow in self.workflow_manager.workflows.values():
+            all_tasks.extend([task.to_dict() for task in workflow.tasks])
+        return all_tasks
+
+    async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Perform a task asynchronously.
+
+        Args:
+            task (Dict[str, Any]): Dictionary containing task details.
+
+        Returns:
+            Dict[str, Any]: Result of the task execution.
+        """
+        logger.debug(f"perform_task called with task: {task}")
+        task_obj = task if isinstance(task, Task) else Task(**task)
+        return await self._perform_task(task_obj)
+
+    async def _perform_task(self, task: Task) -> Dict[str, Any]:
+        """
+        Internal method to perform a task asynchronously.
+
+        Args:
+            task (Task): Task object to be performed.
+
+        Returns:
+            Dict[str, Any]: Result of the task execution.
+        """
+        logger.debug(f"_perform_task called with task: {task.description}")
+        start_time = time.time()
+
+        if task.workflow_id not in self.completion_calls:
+            self.completion_calls[task.workflow_id] = {}
+        if task.id not in self.completion_calls[task.workflow_id]:
+            self.completion_calls[task.workflow_id][task.id] = 0
+
+    async def generate_roles(self) -> List[Dict[str, Any]]:
+        """
+        Generate roles based on the Framer's context.
+
+        Returns:
+            List[Dict[str, Any]]: A list of generated roles.
+        """
+        soul = getattr(self.context, "soul", {})
+        prompt = f"""Generate a role that aligns with the Framer's current context. 
+        The role should be clear, relevant, and directly related to the given information.
+        Avoid creating complex scenarios. Keep it simple and focused.
+        
+        Soul: {json.dumps(soul, indent=2)}
+        
+        Respond with a JSON object containing 'name' and 'description' fields for the role."""
+        logger.debug(f"Role generation prompt: {prompt}")
+        try:
+            response = await self.llm_service.get_completion(
+                prompt, model=self.default_model, max_tokens=150, temperature=0.5
+            )
+            logger.debug(f"Role generation response: {response}")
+            role = json.loads(response)
+            if not role:
+                logger.error("Received None response while generating role.")
+                logger.error(
+                    f"Soul: {json.dumps(self.context.soul, indent=2)}\n"
+                    f"Raw response: {response}"
+                )
+                logger.debug("Attempting to use default role due to None response.")
+                return []
+            return [role] if isinstance(role, dict) else []
+        except Exception as e:
+            logger.error(f"Error generating role: {str(e)}", exc_info=True)
+            logger.error(f"Prompt used for role generation: {prompt}")
+            return []
+
+    async def generate_goals(self) -> List[Dict[str, Any]]:
+        """
+        Generate goals based on the Framer's context.
+
+        Returns:
+            List[Dict[str, Any]]: A list of generated goals.
+        """
+        soul = getattr(self.context, "soul", {})
+        prompt = f"""Generate a goal that aligns with the Framer's current context. 
+        The goal should be clear, relevant, and directly related to the given information.
+        Avoid creating complex scenarios. Keep it simple and focused.
+        
+        Soul: {json.dumps(soul, indent=2)}
+        
+        Respond with a JSON object containing 'description' and 'priority' fields for the goal."""
+
+        logger.debug(f"Goal generation prompt: {prompt}")
+        try:
+            response = await self.llm_service.get_completion(
+                prompt, model=self.default_model, max_tokens=150, temperature=0.5
+            )
+            logger.debug(f"Goal generation response: {response}")
+            goal = json.loads(response)
+            if not goal:
+                logger.error("Received None response while generating goal.")
+                logger.error(f"Soul: {json.dumps(self.context.soul, indent=2)}")
+                logger.debug("Attempting to use default goal due to None response.")
+                return [
+                    {
+                        "description": "Assist users based on the given input.",
+                        "priority": 50.0,
+                    }
+                ]
+            return [goal] if isinstance(goal, dict) else goal[:]
+        except Exception as e:
+            logger.error(f"Error generating goal: {e}", exc_info=True)
+            logger.error(f"Prompt used for goal generation: {prompt}")
+            return [
+                {
+                    "description": "Assist users based on the given input.",
+                    "priority": 50.0,
+                }
+            ]
+
+    async def generate_roles_and_goals(
+        self,
+    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        """
+        Generate roles and goals for the Framer.
+
+        This method first generates roles using the LLM service and then uses
+        those roles to generate corresponding goals.
+
+        Returns:
+            Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]: A tuple containing
+            the generated roles and goals.
+        """
+        roles = await self.generate_roles()
+        goals = await self.generate_goals()
+        if self.roles is None:
+            self.roles = roles
+        if self.goals is None:
+            self.goals = goals
+        return self.roles, self.goals
+        """
+        Generate tasks based on a prompt using the LLM service.
+
+        Args:
+            prompt (str): The prompt to generate tasks from.
+
+        Returns:
+            List[Task]: A list of generated tasks.
+        """
+        prompt = "Generate tasks based on the current context."
+        response = await self.llm_service.get_completion(
+            prompt,
+            model=self.default_model,
+            max_tokens=200,
+            temperature=0.7,
+        )
+        tasks = []
+        try:
+            task_list = json.loads(response)
+            for task_data in task_list:
+                task = Task(
+                    description=task_data.get("description", ""),
+                    priority=task_data.get("priority", 50.0),
+                    workflow_id=task_data.get("workflow_id", "default"),
+                )
+                tasks.append(task)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse tasks from LLM response: {response}")
+            logger.error(f"JSONDecodeError: {e}")
+        return tasks
+
+    async def execute_task(self, task: Task) -> str:
+        """
+        Execute a task using the LLM service.
+
+        Args:
+            task (Task): The task to execute.
+
+        Returns:
+            str: The result of the task execution.
+        """
+        prompt = f"Execute the following task: {task.description}"
+        initial_calls = self.llm_service.get_total_calls()
+        initial_cost = self.llm_service.get_total_cost()
+
+        response = await self.llm_service.get_completion(
+            prompt,
+            model=self.default_model,
+            max_tokens=200,
+            temperature=0.7,
+        )
+
+        final_calls = self.llm_service.get_total_calls()
+        final_cost = self.llm_service.get_total_cost()
+
+        task.update_status(TaskStatus.COMPLETED)
+        task.set_result(response)
+
+        calls_made = final_calls - initial_calls
+        cost_incurred = final_cost - initial_cost
+
+        logger.debug(f"Task '{task.description}' completed.")
+        logger.debug(f"Calls made: {calls_made}")
+        logger.debug(f"Cost incurred: ${cost_incurred:.4f}")
+
+        return response

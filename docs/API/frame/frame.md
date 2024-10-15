@@ -1,0 +1,87 @@
+# Frame
+
+## Overview
+
+Frame is the main interface for creating and managing Framer instances in the Frame cognitive agent framework. It acts as the central hub for initializing and orchestrating the various components of the framework, providing a flexible and powerful platform for building multi-modal cognitive agents with emergent behaviors.
+
+## Related Components
+
+- [[framer]]: Individual AI agents created and managed by Frame.
+- [[framed]]: A collection of Framer objects working together to achieve complex tasks.
+
+## Key Features
+
+- Creation and management of Framer and Framed instances
+- Extensible architecture with plugin engine
+
+### Attributes
+
+- `openai_api_key` (Optional[str]): API key for OpenAI services. Default is None.
+- `mistral_api_key` (Optional[str]): API key for Mistral services. Default is None.
+- `huggingface_api_key` (Optional[str]): API key for Hugging Face services. Default is None.
+- `default_model` (Optional[str]): The default language model to use. Default is gpt-3.5-turbo.
+- `llm_service` (Optional[LLMService]): A custom LLMService instance. If not provided, a default one will be created that checks for the API keys in the environment.
+- `_dynamic_model_choice` (bool): Determines if the Framer should dynamically choose the best model based on token size. Default is False.
+
+## Usage Example
+
+```python
+from frame import Frame
+from frame.src.framer.config import FramerConfig
+
+# Initialize Frame
+frame = Frame(openai_api_key="your_api_key_here")
+
+# Create a Framer
+config = FramerConfig(
+    name="Research Assistant",
+    description="An AI assistant specialized in conducting research",
+    default_model="gpt-3.5-turbo"
+)
+
+framer = await frame.create_framer(
+    config=config,
+    roles=[
+        {"name": "Researcher", "description": "Conducts in-depth research on various topics"}
+    ],
+    goals=[
+        {"description": "Provide accurate and comprehensive information", "priority": 1.0}
+    ],
+    soul_seed={"personality": "curious and analytical"}
+)
+
+# Use the Framer
+result = await framer.sense({"hear": "Tell me about the latest advancements in AI"})
+print(result)
+
+# Get a completion directly from Frame
+completion = await frame.get_completion("Summarize the key features of Frame")
+print(completion)
+
+# Create a Framed group
+framed_group = frame.create_framed([framer])
+```
+
+This example demonstrates how to initialize a Frame instance, create a Framer with specific configuration, roles, goals, and soul seed, use the Framer to process a query, directly get a completion from the Frame, and create a Framed group.
+
+## Additional Features
+
+### Multi-modal Support
+
+Frame supports multi-modal cognitive agents, allowing for processing of various input types such as text, images, and potentially other modalities. This feature enables the creation of versatile AI agents capable of understanding and responding to diverse forms of information. Note: DSPy does not support streaming mode.
+
+### Memory Management
+
+Frame incorporates complex memory mechanics, including support for global and multi-user memory storage through the Mem0 system. This advanced memory management allows Framers to maintain context, learn from past interactions, and make more informed decisions.
+
+### Plugin System
+
+The framework includes an extensible architecture with a plugin engine, allowing developers to add custom functionality and extend the capabilities of Framers. For more information on creating and using plugins, refer to the [[plugins]].
+
+### CLI and TUI
+
+Frame provides both a Command Line Interface (CLI) and a Text-based User Interface (TUI) with graphical elements, offering flexible ways to interact with and manage Framers.
+
+## API Documentation
+
+::: frame.Frame

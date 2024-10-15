@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>frame.src.framer.framer_factory API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>frame.src.framer.framer_factory</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.src.framer.framer_factory.FramerBuilder"><code class="flex name class">
+<span>class <span class="ident">FramerBuilder</span></span>
+<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Builder class for constructing Framer instances.</p>
+<p>This class provides a flexible interface for configuring and
+creating Framer objects using the FramerFactory.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FramerBuilder:
+    &#34;&#34;&#34;
+    Builder class for constructing Framer instances.
+
+    This class provides a flexible interface for configuring and
+    creating Framer objects using the FramerFactory.
+    &#34;&#34;&#34;
+
+    def __init__(self, config: FramerConfig, llm_service: LLMService):
+        if not isinstance(config, FramerConfig):
+            raise ValueError(&#34;Config must be an instance of FramerConfig&#34;)
+        self.config = config
+        if not isinstance(llm_service, LLMService):
+            raise ValueError(&#34;llm_service must be an instance of LLMService&#34;)
+        self.llm_service = llm_service
+
+    async def build(self) -&gt; Framer:
+        &#34;&#34;&#34;
+        Asynchronously build a Framer instance.
+
+        Returns:
+            Framer: A new Framer instance, fully configured and ready to use.
+        &#34;&#34;&#34;
+        factory = FramerFactory(self.config, self.llm_service)
+        return await factory.create_framer()</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.framer_factory.FramerBuilder.build"><code class="name flex">
+<span>async def <span class="ident">build</span></span>(<span>self) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Asynchronously build a Framer instance.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Framer</code></dt>
+<dd>A new Framer instance, fully configured and ready to use.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.framer_factory.FramerFactory"><code class="flex name class">
+<span>class <span class="ident">FramerFactory</span></span>
+<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Factory class for creating Framer instances.</p>
+<p>This class encapsulates the logic for constructing Framer objects,
+ensuring that all necessary components are properly initialized.</p>
+<p>Initialize the FramerBuilder with configuration and LLM service.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong> :&ensp;<code>FramerConfig</code></dt>
+<dd>Configuration for the Framer.</dd>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>Language model service for text generation.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FramerFactory:
+    &#34;&#34;&#34;
+    Factory class for creating Framer instances.
+
+    This class encapsulates the logic for constructing Framer objects,
+    ensuring that all necessary components are properly initialized.
+    &#34;&#34;&#34;
+
+    def __init__(self, config: FramerConfig, llm_service: LLMService):
+        &#34;&#34;&#34;
+        Initialize the FramerBuilder with configuration and LLM service.
+
+        Args:
+            config (FramerConfig): Configuration for the Framer.
+            llm_service (LLMService): Language model service for text generation.
+        &#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Initialize the FramerFactory with configuration and LLM service.
+
+        Args:
+            config (FramerConfig): Configuration for the Framer.
+            llm_service (LLMService): Language model service for text generation.
+        &#34;&#34;&#34;
+        if not isinstance(config, FramerConfig):
+            raise TypeError(&#34;config must be an instance of FramerConfig&#34;)
+        if not isinstance(llm_service, LLMService):
+            raise TypeError(&#34;llm_service must be an instance of LLMService&#34;)
+        self.config = config
+        self.llm_service = llm_service
+        self.plugins: Dict[str, Any] = {}
+
+    async def create_framer(
+        self,
+        soul_seed: Optional[Dict[str, str]] = None,
+        memory_service: Optional[MemoryService] = None,
+        eq_service: Optional[EQService] = None,
+    ) -&gt; Framer:
+        agency = Agency(llm_service=self.llm_service, context=None)
+        # Initialize the Agency component with the LLM service
+        brain = Brain(
+            # Initialize the Brain component with default model, roles, and goals
+            llm_service=self.llm_service,
+            default_model=self.config.default_model,
+            roles=[],
+            goals=[],
+        )
+
+        if soul_seed is None:
+            # Generate a default soul seed if none is provided
+            soul_seed = f&#34;Default seed for {self.config.name}&#34;
+
+        soul = Soul(
+            seed=(
+                {&#34;seed&#34;: soul_seed.get(&#34;seed&#34;)}
+                if isinstance(soul_seed, dict)
+                else {&#34;seed&#34;: soul_seed}
+            )
+        )
+        # Initialize the Soul component with the provided or default seed
+        workflow_manager = WorkflowManager()
+        # Initialize the WorkflowManager component
+
+        from frame.src.framer.framer import Framer  # Import Framer within the function
+
+        framer = Framer(
+            # Create the Framer instance with all initialized components
+            config=self.config,
+            llm_service=self.llm_service,
+            agency=agency,
+            brain=brain,
+            soul=soul,
+            workflow_manager=workflow_manager,
+            memory_service=memory_service,
+            eq_service=eq_service,
+        )
+
+        return framer
+
+    def get_plugin(self, plugin_name: str) -&gt; Any:
+        &#34;&#34;&#34;
+        Retrieve a plugin by name.
+
+        Args:
+            plugin_name (str): The name of the plugin to retrieve.
+
+        Returns:
+            Any: The plugin object if found, otherwise None.
+        &#34;&#34;&#34;
+        return self.plugins.get(plugin_name)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.framer_factory.FramerFactory.create_framer"><code class="name flex">
+<span>async def <span class="ident">create_framer</span></span>(<span>self, soul_seed: Optional[Dict[str, str]] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.framer_factory.FramerFactory.get_plugin"><code class="name flex">
+<span>def <span class="ident">get_plugin</span></span>(<span>self, plugin_name: str) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve a plugin by name.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>plugin_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the plugin to retrieve.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Any</code></dt>
+<dd>The plugin object if found, otherwise None.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="frame.src.framer" href="index.html">frame.src.framer</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.src.framer.framer_factory.FramerBuilder" href="#frame.src.framer.framer_factory.FramerBuilder">FramerBuilder</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.framer_factory.FramerBuilder.build" href="#frame.src.framer.framer_factory.FramerBuilder.build">build</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.framer_factory.FramerFactory" href="#frame.src.framer.framer_factory.FramerFactory">FramerFactory</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.framer_factory.FramerFactory.create_framer" href="#frame.src.framer.framer_factory.FramerFactory.create_framer">create_framer</a></code></li>
+<li><code><a title="frame.src.framer.framer_factory.FramerFactory.get_plugin" href="#frame.src.framer.framer_factory.FramerFactory.get_plugin">get_plugin</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>

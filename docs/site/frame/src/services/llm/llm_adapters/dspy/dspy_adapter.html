@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>frame.src.services.llm.llm_adapters.dspy.dspy_adapter API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>frame.src.services.llm.llm_adapters.dspy.dspy_adapter</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyAdapter"><code class="flex name class">
+<span>class <span class="ident">DSPyAdapter</span></span>
+<span>(</span><span>openai_api_key: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adapter for DSPy operations with rate limiting.</p>
+<p>This class provides methods to interact with DSPy models, including
+generating completions with retry logic for handling exceptions.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>config</code></strong> :&ensp;<code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig">DSPyConfig</a></code></dt>
+<dd>Configuration for DSPy operations.</dd>
+<dt><strong><code>token_bucket</code></strong> :&ensp;<code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket">TokenBucket</a></code></dt>
+<dd>Token bucket for rate limiting.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DSPyAdapter(LLMAdapterInterface):
+    &#34;&#34;&#34;
+    Adapter for DSPy operations with rate limiting.
+
+    This class provides methods to interact with DSPy models, including
+    generating completions with retry logic for handling exceptions.
+
+    Attributes:
+        config (DSPyConfig): Configuration for DSPy operations.
+        token_bucket (TokenBucket): Token bucket for rate limiting.
+    &#34;&#34;&#34;
+
+    def __init__(self, openai_api_key: str):
+        self.openai_api_key = openai_api_key
+        self.default_model = &#34;gpt-3.5-turbo&#34;
+        self.token_bucket = TokenBucket(
+            capacity=60, fill_rate=1
+        )  # 60 requests per minute
+        # Defer configuration to when it&#39;s actually needed
+
+    def set_default_model(self, model: str):
+        self.default_model = model
+
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(5),
+        wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
+        retry=tenacity.retry_if_exception_type((asyncio.TimeoutError, Exception)),
+        reraise=True,
+    )
+    async def get_completion(
+        self,
+        prompt: str,
+        config: DSPyConfig,
+        additional_context: Optional[Dict[str, Any]] = None,
+        model: Optional[str] = None,
+        stream: bool = False,
+    ) -&gt; Union[str, AsyncGenerator[str, None]]:
+        &#34;&#34;&#34;
+        Generate a completion using the DSPy model with retry logic.
+
+        Args:
+            prompt (str): The input prompt for the model.
+            config (DSPyConfig): Configuration for the DSPy model.
+            additional_context (Optional[Dict[str, Any]], optional): Additional context for the model.
+            model (Optional[str], optional): The model to use. If None, uses the default model.
+            stream (bool, optional): Whether to stream the output. Defaults to False.
+
+        Returns:
+            Union[str, AsyncGenerator[str, None]]: The generated completion or a stream of completions.
+
+        Raises:
+            ValueError: If streaming is requested, as DSPy does not support it.
+        &#34;&#34;&#34;
+        logger.debug(f&#34;get_completion called with prompt: {prompt}, model: {model}&#34;)
+        if stream:
+            raise ValueError(&#34;DSPy does not support streaming mode.&#34;)
+        tokens_required = config.max_tokens or 500  # Default to 500 if not set
+
+        await self._wait_for_token_bucket(tokens_required)
+
+        model = model or self.default_model
+        if config.supported_models and model not in config.supported_models:
+            raise ValueError(f&#34;Unsupported model: {model}&#34;)
+
+        try:
+            logger.debug(f&#34;Attempting to get DSPy completion for model: {model}&#34;)
+            response = await self._get_dspy_completion(prompt, config, model)
+            logger.debug(f&#34;Received response: {response}&#34;)
+            return response.strip()
+        except Exception as e:
+            logger.error(f&#34;Error in DSPyAdapter.get_completion: {str(e)}&#34;)
+            raise
+
+    async def _wait_for_token_bucket(self, tokens_required: int):
+        while not self.token_bucket.consume(tokens_required):
+            await asyncio.sleep(0.1)  # Reduced sleep time
+
+    async def _stream_completion(
+        self, prompt: str, config: DSPyConfig, model: str
+    ) -&gt; AsyncGenerator[str, None]:
+        try:
+            async for chunk in self._get_dspy_completion_stream(prompt, config, model):
+                yield chunk.strip()
+        except Exception as e:
+            logger.error(f&#34;Error in DSPyAdapter._stream_completion: {str(e)}&#34;)
+            raise
+
+    async def _get_dspy_completion_stream(
+        self, prompt: str, config: DSPyConfig, model_name: str
+    ) -&gt; AsyncGenerator[str, None]:
+        # class Completion(dspy.Signature):
+        #     &#34;&#34;&#34;Complete the given prompt.&#34;&#34;&#34;
+
+        #     prompt = dspy.InputField()
+        #     completion = dspy.OutputField()
+
+        # lm = dspy.OpenAI(model=model_name)
+        # completion_module = dspy.Module(Completion)
+
+        # async for token in completion_module.generate_stream(
+        #     prompt=prompt,
+        #     config=dspy.Config(
+        #         max_tokens=config.max_tokens,
+        #         temperature=config.temperature,
+        #     ),
+        # ):
+        #     yield token
+        # DSpy does not support streaming mode
+        raise ValueError(&#34;DSPy does not support streaming mode.&#34;)
+
+    async def _get_dspy_completion(
+        self, prompt: str, config: DSPyConfig, model_name: str
+    ) -&gt; str:
+        class Completion(dspy.Signature):
+            &#34;&#34;&#34;Complete the given prompt.&#34;&#34;&#34;
+
+            prompt = dspy.InputField()
+            completion = dspy.OutputField()
+
+        lm = dspy.OpenAI(model=model_name)
+        completion_module = dspy.Module(Completion)
+
+        result = await completion_module(
+            prompt=prompt,
+            config=dspy.Config(
+                max_tokens=config.max_tokens,
+                temperature=config.temperature,
+            ),
+        )
+        return result.completion
+
+    async def _get_dspy_completion(
+        self, prompt: str, config: DSPyConfig, model_name: str
+    ) -&gt; str:
+        if not hasattr(self, &#34;_lm&#34;):
+            self._lm = dspy.OpenAI(api_key=self.openai_api_key)
+            dspy.settings.configure(lm=self._lm)
+        else:
+            self._lm.api_key = self.openai_api_key
+
+        tokens_required = config.max_tokens or 500  # Default to 500 if not set
+        if not self.token_bucket.consume(tokens_required):
+            await asyncio.sleep(0.1)  # Reduced sleep time
+
+        try:
+            result = await asyncio.to_thread(
+                self._lm.complete,
+                prompt=prompt,
+                max_tokens=tokens_required,
+                temperature=config.temperature,
+            )
+            return result.strip()
+        except Exception as e:
+            logger.error(f&#34;Error in DSPyAdapter._get_dspy_completion: {str(e)}&#34;)
+            raise</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.services.llm.llm_adapter_interface.LLMAdapterInterface" href="../../llm_adapter_interface.html#frame.src.services.llm.llm_adapter_interface.LLMAdapterInterface">LLMAdapterInterface</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyAdapter.get_completion"><code class="name flex">
+<span>async def <span class="ident">get_completion</span></span>(<span>self, prompt: str, config: <a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig">DSPyConfig</a>, additional_context: Optional[Dict[str, Any]] = None, model: Optional[str] = None, stream: bool = False) ‑> Union[str, AsyncGenerator[str, None]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a completion using the DSPy model with retry logic.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>prompt</code></strong> :&ensp;<code>str</code></dt>
+<dd>The input prompt for the model.</dd>
+<dt><strong><code>config</code></strong> :&ensp;<code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig">DSPyConfig</a></code></dt>
+<dd>Configuration for the DSPy model.</dd>
+<dt><strong><code>additional_context</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code>, optional</dt>
+<dd>Additional context for the model.</dd>
+<dt><strong><code>model</code></strong> :&ensp;<code>Optional[str]</code>, optional</dt>
+<dd>The model to use. If None, uses the default model.</dd>
+<dt><strong><code>stream</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to stream the output. Defaults to False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Union[str, AsyncGenerator[str, None]]</code></dt>
+<dd>The generated completion or a stream of completions.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If streaming is requested, as DSPy does not support it.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyAdapter.set_default_model"><code class="name flex">
+<span>def <span class="ident">set_default_model</span></span>(<span>self, model: str)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig"><code class="flex name class">
+<span>class <span class="ident">DSPyConfig</span></span>
+<span>(</span><span>model: str, max_tokens: Optional[int] = None, temperature: float = 0.7, supported_models: Optional[List[str]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>DSPyConfig(model: str, max_tokens: Optional[int] = None, temperature: float = 0.7, supported_models: Optional[List[str]] = None)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class DSPyConfig:
+    model: str
+    max_tokens: Optional[int] = None
+    temperature: float = 0.7
+    supported_models: Optional[List[str]] = None</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig.max_tokens"><code class="name">var <span class="ident">max_tokens</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig.model"><code class="name">var <span class="ident">model</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig.supported_models"><code class="name">var <span class="ident">supported_models</span> : Optional[List[str]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig.temperature"><code class="name">var <span class="ident">temperature</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket"><code class="flex name class">
+<span>class <span class="ident">TokenBucket</span></span>
+<span>(</span><span>capacity: int = 60, fill_rate: float = 1.0)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Implements token bucket algorithm for rate limiting.</p>
+<p>This class is used to control the rate of requests to the DSPy service.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TokenBucket:
+    &#34;&#34;&#34;
+    Implements token bucket algorithm for rate limiting.
+
+    This class is used to control the rate of requests to the DSPy service.
+    &#34;&#34;&#34;
+
+    def __init__(self, capacity: int = 60, fill_rate: float = 1.0):
+        self.capacity = capacity
+        self.fill_rate = fill_rate
+        self.tokens = capacity
+        self.last_fill = time.time()
+
+    def _fill(self):
+        now = time.time()
+        delta = now - self.last_fill
+        self.tokens = min(self.capacity, self.tokens + delta * self.fill_rate)
+        self.last_fill = now
+
+    def consume(self, tokens: int) -&gt; bool:
+        self._fill()
+        if tokens &lt;= self.tokens:
+            self.tokens -= tokens
+            return True
+        return False
+
+    def reset(self):
+        self.tokens = self.capacity
+        self.last_fill = time.time()
+
+    def get_tokens(self) -&gt; float:
+        self._fill()
+        return round(self.tokens, 2)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket.consume"><code class="name flex">
+<span>def <span class="ident">consume</span></span>(<span>self, tokens: int) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket.get_tokens"><code class="name flex">
+<span>def <span class="ident">get_tokens</span></span>(<span>self) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket.reset"><code class="name flex">
+<span>def <span class="ident">reset</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="frame.src.services.llm.llm_adapters.dspy" href="index.html">frame.src.services.llm.llm_adapters.dspy</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyAdapter" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyAdapter">DSPyAdapter</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyAdapter.get_completion" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyAdapter.get_completion">get_completion</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyAdapter.set_default_model" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyAdapter.set_default_model">set_default_model</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig">DSPyConfig</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig.max_tokens" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig.max_tokens">max_tokens</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig.model" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig.model">model</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig.supported_models" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig.supported_models">supported_models</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig.temperature" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.DSPyConfig.temperature">temperature</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket">TokenBucket</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket.consume" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket.consume">consume</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket.get_tokens" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket.get_tokens">get_tokens</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket.reset" href="#frame.src.services.llm.llm_adapters.dspy.dspy_adapter.TokenBucket.reset">reset</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>

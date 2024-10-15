@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>frame.src.framer.brain.brain API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>frame.src.framer.brain.brain</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.src.framer.brain.brain.Brain"><code class="flex name class">
+<span>class <span class="ident">Brain</span></span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, roles: List[Dict[str, Any]], goals: List[Dict[str, Any]], default_model: str = 'gpt-3.5-turbo', use_local_model: bool = False, valid_actions: Optional[List[str]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The Brain class represents the decision-making component of the Framer.</p>
+<p>It processes perceptions, makes decisions, and executes actions based on those decisions.
+The Brain uses a set of VALID_ACTIONS to determine which actions can be executed.
+VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
+<p>Initialize the Brain with the necessary components.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>The language model service to use.</dd>
+<dt><strong><code>roles</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>Initial roles for the Brain.</dd>
+<dt><strong><code>goals</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>Initial goals for the Brain.</dd>
+<dt><strong><code>default_model</code></strong> :&ensp;<code>str</code></dt>
+<dd>The default language model to use.</dd>
+<dt><strong><code>use_local_model</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to use a local language model.</dd>
+<dt><strong><code>valid_actions</code></strong> :&ensp;<code>Optional[List[str]]</code></dt>
+<dd>A list of valid actions that the Brain can execute.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Brain:
+    &#34;&#34;&#34;
+    The Brain class represents the decision-making component of the Framer.
+
+    It processes perceptions, makes decisions, and executes actions based on those decisions.
+    The Brain uses a set of VALID_ACTIONS to determine which actions can be executed.
+    VALID_ACTIONS are derived from the ActionRegistry and default actions.
+    &#34;&#34;&#34;
+
+    # Initialize VALID_ACTIONS from ActionRegistry and default actions
+    VALID_ACTIONS = ActionRegistry().actions
+
+    def __init__(
+        self,
+        llm_service: LLMService,
+        roles: List[Dict[str, Any]],
+        goals: List[Dict[str, Any]],
+        default_model: str = &#34;gpt-3.5-turbo&#34;,
+        use_local_model: bool = False,
+        valid_actions: Optional[List[str]] = None,
+    ):
+        &#34;&#34;&#34;
+        Initialize the Brain with the necessary components.
+
+        Args:
+            llm_service (LLMService): The language model service to use.
+            roles (List[Dict[str, Any]]): Initial roles for the Brain.
+            goals (List[Dict[str, Any]]): Initial goals for the Brain.
+            default_model (str): The default language model to use.
+            use_local_model (bool): Whether to use a local language model.
+            valid_actions (Optional[List[str]]): A list of valid actions that the Brain can execute.
+        &#34;&#34;&#34;
+        self.llm_service = llm_service
+        self.default_model = default_model
+        self.roles = roles
+        self.goals = goals
+        self.use_local_model = use_local_model
+
+        self.mind = Mind(self)
+
+        memory_config = {
+            &#34;llm&#34;: {
+                &#34;provider&#34;: get_llm_provider(self.use_local_model, self.default_model),
+                &#34;config&#34;: {
+                    &#34;model&#34;: self.default_model,
+                },
+            }
+        }
+        self.memory = Memory(memory_config)
+        
+        # Initialize ActionRegistry and VALID_ACTIONS
+        self.action_registry = ActionRegistry()
+        self.valid_actions = valid_actions or self.VALID_ACTIONS
+
+        self.agency = Agency(llm_service=llm_service, context=None)
+
+    def parse_json_response(self, response: str) -&gt; Any:
+        &#34;&#34;&#34;
+        Parse JSON response and handle potential errors.
+
+        Args:
+            response (str): The JSON response string to parse.
+
+        Returns:
+            Any: The parsed JSON data or an error dictionary.
+        &#34;&#34;&#34;
+        try:
+            return json.loads(response)
+        except json.JSONDecodeError as e:
+            logger.error(f&#34;JSON parsing error: {e}&#34;)
+            logger.error(f&#34;Raw response: {response}&#34;)
+
+            # Check if the response is wrapped in a code block and remove it if present
+            if response.startswith(&#34;```&#34;) and response.endswith(&#34;```&#34;):
+                cleaned_response = &#34;\n&#34;.join(response.split(&#34;\n&#34;)[1:-1])
+                try:
+                    return json.loads(cleaned_response)
+                except json.JSONDecodeError:
+                    pass  # If this also fails, continue to the error return
+
+            return {
+                &#34;action&#34;: &#34;error&#34;,
+                &#34;parameters&#34;: {
+                    &#34;error&#34;: &#34;Invalid JSON response&#34;,
+                    &#34;raw_response&#34;: response,
+                },
+                &#34;reasoning&#34;: &#34;Failed to parse the decision data.&#34;,
+                &#34;confidence&#34;: 0.0,
+                &#34;priority&#34;: 1,
+            }
+
+    def set_roles(self, roles: List[Dict[str, Any]]) -&gt; None:
+        &#34;&#34;&#34;
+        Set the roles for the Agency.
+
+        Args:
+            roles (List[Dict[str, Any]]): List of role dictionaries to set.
+        &#34;&#34;&#34;
+        self.roles = roles
+        self.agency.set_roles(roles)
+
+    async def process_perception(
+        self, perception: Perception, goals: Optional[List[Dict[str, Any]]] = None
+    ) -&gt; Decision:
+        &#34;&#34;&#34;
+        Process a perception and make a decision based on it.
+
+        Args:
+            perception (Perception): The perception to process.
+            goals (Optional[List[Dict[str, Any]]]): List of goal dictionaries to set.
+
+        Returns:
+            Decision: The decision made based on the perception.
+        &#34;&#34;&#34;
+        if goals is not None:
+            self.goals = goals
+            self.agency.set_goals(goals)
+
+        self.mind.perceptions.append(perception)
+        decision = await self.make_decision(perception)
+        if hasattr(self, &#34;framer&#34;) and getattr(self.framer, &#34;can_execute&#34;, False):
+            await self.execute_decision(decision)
+        return decision
+
+    async def make_decision(self, perception: Optional[Perception] = None) -&gt; Decision:
+        &#34;&#34;&#34;
+        Make a decision on what action to take next based on the current state and perception.
+
+        Args:
+            perception (Optional[Perception]): The current perception of the environment.
+
+        Returns:
+            Decision: The decision made based on the current state and perception,
+                      including the action to take, parameters, reasoning, confidence,
+                      and priority (1-10 scale).
+        &#34;&#34;&#34;
+        if perception is None:
+            return Decision(action=&#34;no_action&#34;, reasoning=&#34;No perception provided&#34;)
+
+        response = await self._get_decision_prompt(perception)
+        decision_data = self.parse_json_response(response)
+
+        logger.debug(f&#34;Decision data received: {decision_data}&#34;)
+
+        if decision_data.get(&#34;action&#34;) == &#34;error&#34;:
+            logger.error(
+                f&#34;Error in decision making: {decision_data.get(&#39;parameters&#39;, {}).get(&#39;error&#39;)}&#34;
+            )
+            return Decision(**decision_data)
+
+        action = decision_data.get(&#34;action&#34;, &#34;no_action&#34;).lower()
+        valid_actions = [action.lower() for action in self.action_registry.actions.keys()]
+        
+        if action not in valid_actions:
+            logger.warning(
+                f&#34;Invalid action &#39;{action}&#39; generated. &#34;
+                f&#34;Valid actions are: {&#39;, &#39;.join(valid_actions)}&#34;
+            )
+            logger.info(f&#34;Attempting to execute action &#39;{action}&#39; anyway.&#34;)
+        else:
+            logger.info(f&#34;Valid action &#39;{action}&#39; generated: {decision_data}&#34;)
+
+        parameters = decision_data.get(&#34;parameters&#34;, {})
+        if &#34;topic&#34; in parameters:
+            parameters[&#34;research_topic&#34;] = parameters.pop(&#34;topic&#34;)
+        if not isinstance(parameters, dict):
+            parameters = {&#34;value&#34;: parameters}
+
+        reasoning = decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
+
+        return Decision(
+            action=action,
+            parameters=parameters,
+            reasoning=reasoning,
+            confidence=float(decision_data.get(&#34;confidence&#34;, 0.5)),
+            priority=int(decision_data.get(&#34;priority&#34;, 5)),
+        )
+
+    async def execute_decision(self, decision: Decision):
+        &#34;&#34;&#34;
+        Execute the decision made by the brain.
+
+        Args:
+            decision (Decision): The decision to execute.
+        &#34;&#34;&#34;
+        logger.debug(f&#34;Executing decision: {decision.action}&#34;)
+        logger.debug(f&#34;Decision parameters: {decision.parameters}&#34;)
+
+        try:
+            action_info = self.action_registry.get_action(decision.action)
+            if action_info:
+                action_func = action_info.get(&#34;action_func&#34;)
+                if action_func:
+                    if asyncio.iscoroutinefunction(action_func):
+                        result = await action_func(self, **decision.parameters)
+                    else:
+                        result = action_func(self, **decision.parameters)
+                    logger.info(f&#34;Executed action: {decision.action}&#34;)
+                    logger.debug(f&#34;Action result: {result}&#34;)
+                else:
+                    logger.warning(f&#34;No function found for action: {decision.action}&#34;)
+            else:
+                logger.warning(f&#34;Unknown action: {decision.action}&#34;)
+
+            logger.info(f&#34;Executed decision: {decision.action}&#34;)
+            logger.debug(f&#34;Decision reasoning: {decision.reasoning}&#34;)
+
+        except Exception as e:
+            logger.error(f&#34;Error executing decision: {e}&#34;)
+            logger.exception(&#34;Detailed traceback:&#34;)
+
+        if decision.action == &#34;think&#34;:
+            await self._generate_new_query(decision)
+
+    async def _generate_new_query(self, decision: Decision) -&gt; str:
+        &#34;&#34;&#34;
+        Generate a new query based on the decision.
+
+        Args:
+            decision (Decision): The decision to base the new query on.
+
+        Returns:
+            str: The generated query.
+        &#34;&#34;&#34;
+        prompt = (
+            f&#34;Based on the following decision, generate a new query or thought:\n\n&#34;
+            f&#34;Decision: {decision.to_dict()}\n\nNew query:&#34;
+        )
+        response = await self.llm_service.get_completion(
+            prompt, model=self.default_model
+        )
+        return response.strip()
+
+    async def _get_decision_prompt(self, perception: Optional[Perception]) -&gt; str:
+        &#34;&#34;&#34;
+        Generate a decision prompt based on the current perception and context.
+
+        Args:
+            perception (Optional[Perception]): The current perception.
+
+        Returns:
+            str: The generated decision prompt.
+        &#34;&#34;&#34;
+        valid_actions = [
+            action.lower() for action in self.action_registry.actions.keys()
+        ]
+        action_descriptions = &#34;\n&#34;.join(
+            [
+                f&#34;- {name.lower()}: {info[&#39;description&#39;]}&#34;
+                for name, info in self.action_registry.actions.items()
+            ]
+        )
+
+        valid_actions_list = list(self.action_registry.actions.keys())
+        prompt = f&#34;&#34;&#34;Given the following perception, decide on the most appropriate action to take.
+        Perception: {perception}
+        Current roles: {self.roles}
+        Current goals: {self.goals}
+
+        Consider the following possible actions:
+        {action_descriptions}
+
+        Valid actions are:
+        {json.dumps({action.lower(): self.action_registry.actions[action][&#39;description&#39;] for action in self.action_registry.actions}, indent=2)}
+
+        For each perception, carefully evaluate:
+        - The type and content of the perception
+        - The urgency and importance of the information
+        - The current goals and roles of the system
+        - Whether immediate action, further research, or no action is most appropriate
+
+        Respond with a JSON object containing the following fields:
+        - action: The action to take (must be EXACTLY one of the valid action names listed above)
+        - parameters: Any relevant parameters for the action (e.g., new roles, goals, tasks, research topic, or response content)
+        - reasoning: Your reasoning for this decision
+        - confidence: A float between 0 and 1 indicating your confidence in this decision
+        - priority: A number between 1-10 indicating the priority of this decision
+
+        Ensure your decision is well-reasoned, aligns with the current goals and roles, and uses only the valid actions provided.
+        &#34;&#34;&#34;
+
+        response = await self.llm_service.get_completion(
+            prompt,
+            model=self.default_model,
+            additional_context={&#34;valid_actions&#34;: valid_actions},
+            expected_output=f&#34;&#34;&#34;
+            {{
+                &#34;action&#34;: str where str in {valid_actions_list},
+                &#34;parameters&#34;: dict,
+                &#34;reasoning&#34;: str,
+                &#34;confidence&#34;: float where 0 &lt;= float &lt;= 1,
+                &#34;priority&#34;: int where 1 &lt;= int &lt;= 10
+            }}
+            &#34;&#34;&#34;,
+        )
+        logger.debug(f&#34;Raw LLM response: {response}&#34;)
+
+        if response is None:
+            logger.error(&#34;Received None response from LLM service.&#34;)
+            return json.dumps(
+                {
+                    &#34;action&#34;: &#34;think&#34;,
+                    &#34;parameters&#34;: {
+                        &#34;thought&#34;: &#34;Error: Received no response from language model.&#34;
+                    },
+                    &#34;reasoning&#34;: &#34;Failed to generate a valid decision due to no response&#34;,
+                    &#34;confidence&#34;: 0.0,
+                    &#34;priority&#34;: 1,
+                }
+            )
+
+        # Check if ```json is in the response and remove it if present
+        if (
+            isinstance(response, str)
+            and response.startswith(&#34;```json&#34;)
+            and response.endswith(&#34;```&#34;)
+        ):
+            cleaned_response = &#34;\n&#34;.join(response.split(&#34;\n&#34;)[1:-1])
+            try:
+                return cleaned_response
+            except json.JSONDecodeError:
+                pass
+
+        # Parse the response
+        try:
+            decision_data = (
+                json.loads(response) if isinstance(response, str) else response
+            )
+
+            # Ensure &#39;respond&#39; is used instead of &#39;generate_response&#39;
+            if decision_data.get(&#34;action&#34;) == &#34;generate_response&#34;:
+                decision_data[&#34;action&#34;] = &#34;respond&#34;
+            if (
+                &#34;parameters&#34; in decision_data
+                and &#34;response_content&#34; in decision_data[&#34;parameters&#34;]
+            ):
+                decision_data[&#34;parameters&#34;][&#34;content&#34;] = decision_data[
+                    &#34;parameters&#34;
+                ].pop(&#34;response_content&#34;)
+
+            # Double-check that the action is valid
+            if decision_data[&#34;action&#34;] not in self.action_registry.actions:
+                logger.warning(
+                    f&#34;Invalid action: {decision_data[&#39;action&#39;]}. Defaulting to &#39;think&#39;.&#34;
+                )
+                decision_data[&#34;action&#34;] = &#34;think&#34;
+                decision_data[&#34;reasoning&#34;] = (
+                    f&#34;Invalid action &#39;{decision_data[&#39;action&#39;]}&#39; was generated. &#34;
+                    f&#34;Defaulted to &#39;think&#39;.&#34;
+                )
+
+            # Ensure the decision_data is properly formatted
+            decision_data = {
+                &#34;action&#34;: decision_data.get(&#34;action&#34;, &#34;respond&#34;),
+                &#34;parameters&#34;: decision_data.get(&#34;parameters&#34;, {}),
+                &#34;reasoning&#34;: decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;),
+                &#34;confidence&#34;: float(decision_data.get(&#34;confidence&#34;, 0.5)),
+                &#34;priority&#34;: int(decision_data.get(&#34;priority&#34;, 5)),
+            }
+
+            return json.dumps(decision_data)
+        except Exception as e:
+            logger.error(f&#34;Error parsing decision: {e}&#34;)
+            logger.error(f&#34;Raw response that caused the error: {response}&#34;)
+            return json.dumps(
+                {
+                    &#34;action&#34;: &#34;think&#34;,
+                    &#34;parameters&#34;: {
+                        &#34;thought&#34;: f&#34;Error: {str(e)}. Unable to process the request.&#34;
+                    },
+                    &#34;reasoning&#34;: &#34;Failed to generate a valid decision&#34;,
+                    &#34;confidence&#34;: 0.0,
+                    &#34;priority&#34;: 1,
+                }
+            )</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.brain.brain.Brain.VALID_ACTIONS"><code class="name">var <span class="ident">VALID_ACTIONS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.brain.brain.Brain.execute_decision"><code class="name flex">
+<span>async def <span class="ident">execute_decision</span></span>(<span>self, decision: <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute the decision made by the brain.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>decision</code></strong> :&ensp;<code>Decision</code></dt>
+<dd>The decision to execute.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.brain.Brain.make_decision"><code class="name flex">
+<span>async def <span class="ident">make_decision</span></span>(<span>self, perception: Optional[<a title="frame.src.framer.brain.perception.perception.Perception" href="perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Make a decision on what action to take next based on the current state and perception.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>perception</code></strong> :&ensp;<code>Optional[Perception]</code></dt>
+<dd>The current perception of the environment.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Decision</code></dt>
+<dd>The decision made based on the current state and perception,
+including the action to take, parameters, reasoning, confidence,
+and priority (1-10 scale).</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.brain.Brain.parse_json_response"><code class="name flex">
+<span>def <span class="ident">parse_json_response</span></span>(<span>self, response: str) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parse JSON response and handle potential errors.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>response</code></strong> :&ensp;<code>str</code></dt>
+<dd>The JSON response string to parse.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Any</code></dt>
+<dd>The parsed JSON data or an error dictionary.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.brain.Brain.process_perception"><code class="name flex">
+<span>async def <span class="ident">process_perception</span></span>(<span>self, perception: <a title="frame.src.framer.brain.perception.perception.Perception" href="perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>, goals: Optional[List[Dict[str, Any]]] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Process a perception and make a decision based on it.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>perception</code></strong> :&ensp;<code>Perception</code></dt>
+<dd>The perception to process.</dd>
+<dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
+<dd>List of goal dictionaries to set.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Decision</code></dt>
+<dd>The decision made based on the perception.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.brain.Brain.set_roles"><code class="name flex">
+<span>def <span class="ident">set_roles</span></span>(<span>self, roles: List[Dict[str, Any]]) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the roles for the Agency.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>roles</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>List of role dictionaries to set.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="frame.src.framer.brain" href="index.html">frame.src.framer.brain</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.src.framer.brain.brain.Brain" href="#frame.src.framer.brain.brain.Brain">Brain</a></code></h4>
+<ul class="two-column">
+<li><code><a title="frame.src.framer.brain.brain.Brain.VALID_ACTIONS" href="#frame.src.framer.brain.brain.Brain.VALID_ACTIONS">VALID_ACTIONS</a></code></li>
+<li><code><a title="frame.src.framer.brain.brain.Brain.execute_decision" href="#frame.src.framer.brain.brain.Brain.execute_decision">execute_decision</a></code></li>
+<li><code><a title="frame.src.framer.brain.brain.Brain.make_decision" href="#frame.src.framer.brain.brain.Brain.make_decision">make_decision</a></code></li>
+<li><code><a title="frame.src.framer.brain.brain.Brain.parse_json_response" href="#frame.src.framer.brain.brain.Brain.parse_json_response">parse_json_response</a></code></li>
+<li><code><a title="frame.src.framer.brain.brain.Brain.process_perception" href="#frame.src.framer.brain.brain.Brain.process_perception">process_perception</a></code></li>
+<li><code><a title="frame.src.framer.brain.brain.Brain.set_roles" href="#frame.src.framer.brain.brain.Brain.set_roles">set_roles</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,154 @@
+site_name: "Frame Docs"
+site_url: https://frame.dev
+# repo_url: 
+# repo_name:
+nav:
+  - Installation: installation.md
+  - Architecture: Architecture/_main_/main.md
+  - API:
+    - API Reference: API/api_reference.md
+    - Frame: API/frame/frame.md
+    - Framer: API/frame/framer/framer.md
+    - Framed: API/frame/framed/framed.md
+  - Usage / Quick Start Guide: Usage/basic/basic.md
+  - Plugins: plugins.md
+  - CLI: CLI.md
+  - Glossary: glossary.md
+docs_dir: ./docs
+site_dir: ./docs/site
+theme:
+  logo: ../frame-logo-no-text-transparent.png
+  homepage: 
+  favicon: ../favicon.ico
+  name: "material"
+  icon:
+    previous: fontawesome/solid/angle-left
+    next: fontawesome/solid/angle-right
+  font:
+    code: Roboto
+  palette: 
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - content.footnote.tooltips
+    - content.footnote.backlink
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.prune 
+    - navigation.indexes
+    - toc.follow
+    - toc.integrate
+    - navigation.top
+plugins:
+  - search
+  - exclude-search:
+      exclude:
+        - .git
+        - .venv/
+        - venv/
+        - coverage_html/
+        - assets/
+        - htmlcov/
+  - git-latest-changes
+  - git-revision-date-localized:
+      enable_creation_date: true
+      fallback_to_build_date: true
+  - mkdocs-nav-weight:
+      section_renamed: false
+      index_weight: -10
+      warning: true
+      reverse: false
+      headless_included: false
+  - coverage:
+      page_path: coverage
+      html_report_dir: docs/htmlcov
+  - mkdocs-add-teaser
+  - pub-social
+  - autorefs
+  - open-in-new-tab
+  - toggle-sidebar
+  # - swagger-ui-tag:
+  #     background: White
+  #     docExpansion: none
+  #     filter: ""
+  #     syntaxHighlightTheme: monokai
+  #     tryItOutEnabled: true
+  - roamlinks
+  - pub-meta:
+      enabled: false
+  - section-index
+  - pagetree
+  - mkdocs-video
+  - htmlproofer
+  - link-marker
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            paths: [..frame, ..frame\src]
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+          remove_comments: true
+      cache_safe: true
+
+markdown_extensions:
+  - footnotes
+  - attr_list
+  - md_in_html
+  - mkdocs-click
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+      - name: mermaid
+        class: mermaid
+        format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.magiclink
+  - pymdownx.details
+  - pymdownx.superfences
+  - abbr
+  - pymdownx.snippets
+  - mdx_truly_sane_lists
+  - mkdocs-click
+  - markdown_captions
+  - markdown_checklist.extension

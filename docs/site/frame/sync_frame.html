@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>frame.sync_frame API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>frame.sync_frame</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.sync_frame.SyncFrame"><code class="flex name class">
+<span>class <span class="ident">SyncFrame</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>A synchronous wrapper for the asynchronous Frame class.</p>
+<p>This class provides a synchronous interface to the asynchronous operations
+of the Frame class, making it easier to use in synchronous contexts.</p>
+<p>Initialize the SyncFrame with an asynchronous Frame and event loop.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SyncFrame:
+    &#34;&#34;&#34;
+    A synchronous wrapper for the asynchronous Frame class.
+
+    This class provides a synchronous interface to the asynchronous operations
+    of the Frame class, making it easier to use in synchronous contexts.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;
+        Initialize the SyncFrame with an asynchronous Frame and event loop.
+        &#34;&#34;&#34;
+        self.async_frame = Frame()
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+
+    async def create_framer(self, **kwargs: Any) -&gt; &#34;Framer&#34;:
+        &#34;&#34;&#34;
+        Create a new Framer instance.
+
+        Args:
+            **kwargs: Keyword arguments to pass to the Frame.create_framer method.
+
+        Returns:
+            The created Framer instance.
+        &#34;&#34;&#34;
+        return await self.async_frame.create_framer(**kwargs)
+
+    async def perform_task(self, framer: Any, task: Dict[str, Any]) -&gt; Any:
+        &#34;&#34;&#34;
+        Perform a task using the given Framer.
+
+        Args:
+            framer: The Framer instance to use.
+            task: The task to perform.
+
+        Returns:
+            The result of the task.
+        &#34;&#34;&#34;
+        return await framer.perform_task(task)
+
+    def generate_tasks_from_perception(
+        self,
+        framer: Any,
+        perception: Dict[str, Any],
+        max_len: int = 2048,
+        timeout: int = 30,
+    ) -&gt; List[Dict[str, Any]]:
+        &#34;&#34;&#34;
+        Generate tasks from a given perception.
+
+        Args:
+            framer: The Framer instance to use.
+            perception: The perception to generate tasks from.
+            max_len: The maximum length of the generated tasks.
+            timeout: The maximum time to wait for task generation.
+
+        Returns:
+            A list of generated tasks or an empty list if timeout occurs.
+        &#34;&#34;&#34;
+        logger.info(f&#34;Starting generate_tasks_from_perception with timeout {timeout}&#34;)
+        start_time = time.time()
+        try:
+            logger.debug(&#34;Calling generate_tasks_from_perception coroutine&#34;)
+            result = self.run_async(
+                asyncio.wait_for(
+                    framer.generate_tasks_from_perception(perception, max_len=max_len),
+                    timeout=timeout,
+                )
+            )
+            logger.debug(&#34;generate_tasks_from_perception coroutine completed&#34;)
+            logger.info(
+                f&#34;Task generation completed in {time.time() - start_time:.2f} seconds&#34;
+            )
+            return result
+        except asyncio.TimeoutError:
+            logger.error(
+                f&#34;Task generation timed out after {time.time() - start_time:.2f} seconds&#34;
+            )
+            return []
+        except Exception as e:
+            logger.error(f&#34;Error in generate_tasks_from_perception: {str(e)}&#34;)
+            return []
+
+    async def sense(self, framer: Any, perceptions: List[Dict[str, Any]]) -&gt; Any:
+        &#34;&#34;&#34;
+        Process perceptions using the given Framer.
+
+        Args:
+            framer: The Framer instance to use.
+            perceptions: The perceptions to process.
+
+        Returns:
+            The result of processing the perceptions.
+        &#34;&#34;&#34;
+        return await framer.sense(perceptions)
+
+    def process_perception(self, framer: Any, perception: Dict[str, Any]) -&gt; Any:
+        &#34;&#34;&#34;
+        Synchronously process perceptions using the given Framer.
+
+        Args:
+            framer: The Framer instance to use.
+            perception: The perception to process.
+
+        Returns:
+            The result of processing the perception.
+        &#34;&#34;&#34;
+        return self.run_async(framer.sense(perception))
+
+    def run_async(self, coroutine: asyncio.Future) -&gt; Any:
+        &#34;&#34;&#34;
+        Run an asynchronous coroutine in the synchronous context.
+
+        Args:
+            coroutine: The asynchronous coroutine to run.
+
+        Returns:
+            The result of the coroutine.
+        &#34;&#34;&#34;
+        logger.info(&#34;Starting run_async&#34;)
+        start_time = time.time()
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                logger.info(&#34;Loop is already running, using run_coroutine_threadsafe&#34;)
+                result = asyncio.run_coroutine_threadsafe(coroutine, loop).result()
+            else:
+                logger.info(&#34;Loop is not running, using run_until_complete&#34;)
+                result = loop.run_until_complete(
+                    asyncio.wait_for(coroutine, timeout=60)
+                )
+            logger.info(
+                f&#34;run_async completed in {time.time() - start_time:.2f} seconds&#34;
+            )
+            return result
+        except RuntimeError:
+            logger.warning(&#34;RuntimeError occurred, creating new event loop&#34;)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            result = loop.run_until_complete(coroutine)
+            logger.info(
+                f&#34;run_async completed in {time.time() - start_time:.2f} seconds&#34;
+            )
+            return result
+        except Exception as e:
+            logger.error(f&#34;Error in run_async: {str(e)}&#34;)
+            raise
+
+    def close(self):
+        &#34;&#34;&#34;
+        Close the event loop associated with this SyncFrame.
+        &#34;&#34;&#34;
+        self.loop.close()
+
+    # Add more synchronous wrapper methods as needed</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.sync_frame.SyncFrame.close"><code class="name flex">
+<span>def <span class="ident">close</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Close the event loop associated with this SyncFrame.</p></div>
+</dd>
+<dt id="frame.sync_frame.SyncFrame.create_framer"><code class="name flex">
+<span>async def <span class="ident">create_framer</span></span>(<span>self, **kwargs: Any) ‑> <a title="frame.src.framer.framer.Framer" href="src/framer/framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new Framer instance.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Keyword arguments to pass to the Frame.create_framer method.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The created Framer instance.</p></div>
+</dd>
+<dt id="frame.sync_frame.SyncFrame.generate_tasks_from_perception"><code class="name flex">
+<span>def <span class="ident">generate_tasks_from_perception</span></span>(<span>self, framer: Any, perception: Dict[str, Any], max_len: int = 2048, timeout: int = 30) ‑> List[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate tasks from a given perception.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>framer</code></strong></dt>
+<dd>The Framer instance to use.</dd>
+<dt><strong><code>perception</code></strong></dt>
+<dd>The perception to generate tasks from.</dd>
+<dt><strong><code>max_len</code></strong></dt>
+<dd>The maximum length of the generated tasks.</dd>
+<dt><strong><code>timeout</code></strong></dt>
+<dd>The maximum time to wait for task generation.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A list of generated tasks or an empty list if timeout occurs.</p></div>
+</dd>
+<dt id="frame.sync_frame.SyncFrame.perform_task"><code class="name flex">
+<span>async def <span class="ident">perform_task</span></span>(<span>self, framer: Any, task: Dict[str, Any]) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Perform a task using the given Framer.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>framer</code></strong></dt>
+<dd>The Framer instance to use.</dd>
+<dt><strong><code>task</code></strong></dt>
+<dd>The task to perform.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The result of the task.</p></div>
+</dd>
+<dt id="frame.sync_frame.SyncFrame.process_perception"><code class="name flex">
+<span>def <span class="ident">process_perception</span></span>(<span>self, framer: Any, perception: Dict[str, Any]) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Synchronously process perceptions using the given Framer.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>framer</code></strong></dt>
+<dd>The Framer instance to use.</dd>
+<dt><strong><code>perception</code></strong></dt>
+<dd>The perception to process.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The result of processing the perception.</p></div>
+</dd>
+<dt id="frame.sync_frame.SyncFrame.run_async"><code class="name flex">
+<span>def <span class="ident">run_async</span></span>(<span>self, coroutine: _asyncio.Future) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Run an asynchronous coroutine in the synchronous context.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>coroutine</code></strong></dt>
+<dd>The asynchronous coroutine to run.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The result of the coroutine.</p></div>
+</dd>
+<dt id="frame.sync_frame.SyncFrame.sense"><code class="name flex">
+<span>async def <span class="ident">sense</span></span>(<span>self, framer: Any, perceptions: List[Dict[str, Any]]) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Process perceptions using the given Framer.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>framer</code></strong></dt>
+<dd>The Framer instance to use.</dd>
+<dt><strong><code>perceptions</code></strong></dt>
+<dd>The perceptions to process.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The result of processing the perceptions.</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="frame" href="index.html">frame</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.sync_frame.SyncFrame" href="#frame.sync_frame.SyncFrame">SyncFrame</a></code></h4>
+<ul class="">
+<li><code><a title="frame.sync_frame.SyncFrame.close" href="#frame.sync_frame.SyncFrame.close">close</a></code></li>
+<li><code><a title="frame.sync_frame.SyncFrame.create_framer" href="#frame.sync_frame.SyncFrame.create_framer">create_framer</a></code></li>
+<li><code><a title="frame.sync_frame.SyncFrame.generate_tasks_from_perception" href="#frame.sync_frame.SyncFrame.generate_tasks_from_perception">generate_tasks_from_perception</a></code></li>
+<li><code><a title="frame.sync_frame.SyncFrame.perform_task" href="#frame.sync_frame.SyncFrame.perform_task">perform_task</a></code></li>
+<li><code><a title="frame.sync_frame.SyncFrame.process_perception" href="#frame.sync_frame.SyncFrame.process_perception">process_perception</a></code></li>
+<li><code><a title="frame.sync_frame.SyncFrame.run_async" href="#frame.sync_frame.SyncFrame.run_async">run_async</a></code></li>
+<li><code><a title="frame.sync_frame.SyncFrame.sense" href="#frame.sync_frame.SyncFrame.sense">sense</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>

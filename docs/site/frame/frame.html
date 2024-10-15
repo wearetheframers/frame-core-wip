@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>frame.frame API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>frame.frame</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.frame.Frame"><code class="flex name class">
+<span>class <span class="ident">Frame</span></span>
+<span>(</span><span>openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None, huggingface_api_key: Optional[str] = None, default_model: Optional[str] = 'gpt-3.5-turbo')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Frame is the main interface for creating and managing Framer instances.</p>
+<p>It acts as the central hub for initializing and orchestrating the various
+components of the Frame framework, including language model services and
+Framer creation.</p>
+<p>The Frame class is responsible for:
+1. Initializing and managing the language model service.
+2. Creating new Framer instances with specified configurations.
+3. Setting and managing the default language model.
+4. Providing a high-level interface for language model completions.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>_default_model</code></strong> :&ensp;<code>str</code></dt>
+<dd>The default language model to use.</dd>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>The language model service instance.</dd>
+</dl>
+<p>Initialize the Frame instance.</p>
+<p>This constructor sets up the Frame with the necessary API keys and
+initializes the language model service. It also sets the default
+model to be used for completions.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>openai_api_key</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>API key for OpenAI services.</dd>
+<dt><strong><code>mistral_api_key</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>API key for Mistral services.</dd>
+<dt><strong><code>huggingface_api_key</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>API key for Hugging Face services.</dd>
+<dt><strong><code>default_model</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The default language model to use.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Frame:
+    &#34;&#34;&#34;
+    Frame is the main interface for creating and managing Framer instances.
+
+    It acts as the central hub for initializing and orchestrating the various
+    components of the Frame framework, including language model services and
+    Framer creation.
+
+    The Frame class is responsible for:
+    1. Initializing and managing the language model service.
+    2. Creating new Framer instances with specified configurations.
+    3. Setting and managing the default language model.
+    4. Providing a high-level interface for language model completions.
+
+    Attributes:
+        _default_model (str): The default language model to use.
+        llm_service (LLMService): The language model service instance.
+    &#34;&#34;&#34;
+
+    def reset_metrics(self):
+        &#34;&#34;&#34;Reset the metrics for the Frame instance.&#34;&#34;&#34;
+        self.llm_service.reset_metrics()
+
+    def __init__(
+        self,
+        openai_api_key: Optional[str] = None,
+        mistral_api_key: Optional[str] = None,
+        huggingface_api_key: Optional[str] = None,
+        default_model: Optional[str] = &#34;gpt-3.5-turbo&#34;,
+    ):
+        &#34;&#34;&#34;
+        Initialize the Frame instance.
+
+        This constructor sets up the Frame with the necessary API keys and
+        initializes the language model service. It also sets the default
+        model to be used for completions.
+
+        Args:
+            openai_api_key (Optional[str]): API key for OpenAI services.
+            mistral_api_key (Optional[str]): API key for Mistral services.
+            huggingface_api_key (Optional[str]): API key for Hugging Face services.
+            default_model (Optional[str]): The default language model to use.
+        &#34;&#34;&#34;
+        self._default_model = default_model
+        # Initialize the language model service with provided API keys
+        self.llm_service = LLMService(
+            openai_api_key=openai_api_key,
+            mistral_api_key=mistral_api_key,
+            huggingface_api_key=huggingface_api_key,
+            default_model=self._default_model,
+        )
+
+    async def create_framer(self, config: FramerConfig, **kwargs: Any) -&gt; &#34;Framer&#34;:
+        &#34;&#34;&#34;
+        Create a new Framer instance.
+
+        This method uses the FramerBuilder to construct a new Framer based on
+        the provided configuration. It encapsulates the complexity of Framer
+        creation and ensures that each Framer is properly initialized with
+        the current language model service.
+
+        Args:
+            config (FramerConfig): Configuration for the new Framer.
+            **kwargs: Additional keyword arguments to pass to the FramerBuilder.
+
+        Returns:
+            Framer: A new Framer instance, fully configured and ready to use.
+        &#34;&#34;&#34;
+        framer_builder = FramerBuilder(config, self.llm_service, **kwargs)
+        return await framer_builder.build()
+
+    async def create_framed(self, config: FramerConfig, **kwargs: Any) -&gt; &#34;Framed&#34;:
+        &#34;&#34;&#34;
+        Create a new Framed instance.
+
+        This method uses the FramedBuilder to construct a new Framed based on
+        the provided configuration. It encapsulates the complexity of Framed
+        creation and ensures that each Framed is properly initialized with
+        the current language model service.
+
+        Args:
+            config (FramerConfig): Configuration for the new Framed.
+            **kwargs: Additional keyword arguments to pass to the FramedBuilder.
+
+        Returns:
+            Framed: A new Framed instance, fully configured and ready to use.
+        &#34;&#34;&#34;
+        framed_builder = FramedBuilder(config, self.llm_service, **kwargs)
+        return await framed_builder.build()
+
+    @property
+    def default_model(self) -&gt; Optional[str]:
+        &#34;&#34;&#34;
+        Get the current default model.
+
+        Returns:
+            Optional[str]: The name of the current default language model.
+        &#34;&#34;&#34;
+        return self._default_model
+
+    def set_default_model(self, model: str):
+        &#34;&#34;&#34;
+        Set the default language model.
+
+        This method updates both the Frame instance and the LLMService
+        with the new default model. This ensures consistency across
+        the entire Frame ecosystem.
+
+        Args:
+            model (str): The name of the model to set as default.
+        &#34;&#34;&#34;
+        self._default_model = model
+        self.llm_service.default_model = model
+
+    async def get_completion(self, prompt: str, **kwargs):
+        &#34;&#34;&#34;
+        Get a completion from the language model.
+
+        This method is a high-level wrapper around the LLMService&#39;s get_completion
+        method. It ensures that all necessary parameters are included and provides
+        a consistent interface for getting completions across the Frame framework.
+
+        Args:
+            prompt (str): The prompt to send to the language model.
+            **kwargs: Additional keyword arguments for the language model.
+
+        Returns:
+            The completion result from the language model.
+
+        Note:
+            This method always includes the &#39;stream&#39; parameter with a default
+            value of False. This can be overridden by passing &#39;stream=True&#39;
+            in the kwargs.
+        &#34;&#34;&#34;
+        # Ensure &#39;stream&#39; parameter is included with a default value of False
+        kwargs.setdefault(&#34;stream&#34;, False)
+        model = kwargs.get(&#34;model&#34;, self.default_model)
+        result = await self.llm_service.get_completion(prompt, **kwargs)
+
+        # Calculate tokens used (you may need to implement this based on your LLM service)
+        tokens_used = self.calculate_tokens_used(prompt, result)
+
+        from frame.src.utils.llm_utils import track_llm_usage
+
+        track_llm_usage(model, tokens_used)
+
+        return result
+
+    def calculate_tokens_used(self, prompt: str, result: str) -&gt; int:
+        # Implement token calculation logic here
+        # This is a simple estimation, you may want to use a more accurate method
+        return len(prompt.split()) + len(result.split())
+
+    def get_metrics(self) -&gt; Dict[str, Dict[str, float]]:
+        &#34;&#34;&#34;
+        Get the current LLM usage metrics.
+
+        Returns:
+            A dictionary containing the call count and cost for each model,
+            as well as the total calls and total cost.
+        &#34;&#34;&#34;
+        metrics = {
+            &#34;models&#34;: {
+                model: {&#34;calls&#34;: count, &#34;cost&#34;: llm_metrics.cost.get(model, 0)}
+                for model, count in llm_metrics.call_count.items()
+            },
+            &#34;total_calls&#34;: llm_metrics.get_total_calls(),
+            &#34;total_cost&#34;: llm_metrics.get_total_cost(),
+        }
+        return metrics</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="frame.frame.Frame.default_model"><code class="name">prop <span class="ident">default_model</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"><p>Get the current default model.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Optional[str]</code></dt>
+<dd>The name of the current default language model.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def default_model(self) -&gt; Optional[str]:
+    &#34;&#34;&#34;
+    Get the current default model.
+
+    Returns:
+        Optional[str]: The name of the current default language model.
+    &#34;&#34;&#34;
+    return self._default_model</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.frame.Frame.calculate_tokens_used"><code class="name flex">
+<span>def <span class="ident">calculate_tokens_used</span></span>(<span>self, prompt: str, result: str) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.frame.Frame.create_framed"><code class="name flex">
+<span>async def <span class="ident">create_framed</span></span>(<span>self, config: <a title="frame.src.framer.config.FramerConfig" href="src/framer/config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, **kwargs: Any) ‑> <a title="frame.src.framed.framed.Framed" href="src/framed/framed.html#frame.src.framed.framed.Framed">Framed</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new Framed instance.</p>
+<p>This method uses the FramedBuilder to construct a new Framed based on
+the provided configuration. It encapsulates the complexity of Framed
+creation and ensures that each Framed is properly initialized with
+the current language model service.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong> :&ensp;<code>FramerConfig</code></dt>
+<dd>Configuration for the new Framed.</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Additional keyword arguments to pass to the FramedBuilder.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Framed</code></dt>
+<dd>A new Framed instance, fully configured and ready to use.</dd>
+</dl></div>
+</dd>
+<dt id="frame.frame.Frame.create_framer"><code class="name flex">
+<span>async def <span class="ident">create_framer</span></span>(<span>self, config: <a title="frame.src.framer.config.FramerConfig" href="src/framer/config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, **kwargs: Any) ‑> <a title="frame.src.framer.framer.Framer" href="src/framer/framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new Framer instance.</p>
+<p>This method uses the FramerBuilder to construct a new Framer based on
+the provided configuration. It encapsulates the complexity of Framer
+creation and ensures that each Framer is properly initialized with
+the current language model service.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong> :&ensp;<code>FramerConfig</code></dt>
+<dd>Configuration for the new Framer.</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Additional keyword arguments to pass to the FramerBuilder.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Framer</code></dt>
+<dd>A new Framer instance, fully configured and ready to use.</dd>
+</dl></div>
+</dd>
+<dt id="frame.frame.Frame.get_completion"><code class="name flex">
+<span>async def <span class="ident">get_completion</span></span>(<span>self, prompt: str, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get a completion from the language model.</p>
+<p>This method is a high-level wrapper around the LLMService's get_completion
+method. It ensures that all necessary parameters are included and provides
+a consistent interface for getting completions across the Frame framework.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>prompt</code></strong> :&ensp;<code>str</code></dt>
+<dd>The prompt to send to the language model.</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Additional keyword arguments for the language model.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The completion result from the language model.</p>
+<h2 id="note">Note</h2>
+<p>This method always includes the 'stream' parameter with a default
+value of False. This can be overridden by passing 'stream=True'
+in the kwargs.</p></div>
+</dd>
+<dt id="frame.frame.Frame.get_metrics"><code class="name flex">
+<span>def <span class="ident">get_metrics</span></span>(<span>self) ‑> Dict[str, Dict[str, float]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the current LLM usage metrics.</p>
+<h2 id="returns">Returns</h2>
+<p>A dictionary containing the call count and cost for each model,
+as well as the total calls and total cost.</p></div>
+</dd>
+<dt id="frame.frame.Frame.reset_metrics"><code class="name flex">
+<span>def <span class="ident">reset_metrics</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Reset the metrics for the Frame instance.</p></div>
+</dd>
+<dt id="frame.frame.Frame.set_default_model"><code class="name flex">
+<span>def <span class="ident">set_default_model</span></span>(<span>self, model: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the default language model.</p>
+<p>This method updates both the Frame instance and the LLMService
+with the new default model. This ensures consistency across
+the entire Frame ecosystem.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the model to set as default.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="frame" href="index.html">frame</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.frame.Frame" href="#frame.frame.Frame">Frame</a></code></h4>
+<ul class="">
+<li><code><a title="frame.frame.Frame.calculate_tokens_used" href="#frame.frame.Frame.calculate_tokens_used">calculate_tokens_used</a></code></li>
+<li><code><a title="frame.frame.Frame.create_framed" href="#frame.frame.Frame.create_framed">create_framed</a></code></li>
+<li><code><a title="frame.frame.Frame.create_framer" href="#frame.frame.Frame.create_framer">create_framer</a></code></li>
+<li><code><a title="frame.frame.Frame.default_model" href="#frame.frame.Frame.default_model">default_model</a></code></li>
+<li><code><a title="frame.frame.Frame.get_completion" href="#frame.frame.Frame.get_completion">get_completion</a></code></li>
+<li><code><a title="frame.frame.Frame.get_metrics" href="#frame.frame.Frame.get_metrics">get_metrics</a></code></li>
+<li><code><a title="frame.frame.Frame.reset_metrics" href="#frame.frame.Frame.reset_metrics">reset_metrics</a></code></li>
+<li><code><a title="frame.frame.Frame.set_default_model" href="#frame.frame.Frame.set_default_model">set_default_model</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>

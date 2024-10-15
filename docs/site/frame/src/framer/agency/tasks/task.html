@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>frame.src.framer.agency.tasks.task API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>frame.src.framer.agency.tasks.task</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.src.framer.agency.tasks.task.Task"><code class="flex name class">
+<span>class <span class="ident">Task</span></span>
+<span>(</span><span>description: str, workflow_id: str, priority: float = 50.0, expected_results: Optional[List[Any]] = None, dependencies: List[str] = None, parent_task_id: Optional[str] = None, assigned_to: Optional[str] = None, estimated_duration: Optional[float] = None, tags: List[str] = None, type: Optional[str] = None, data: Optional[Dict[str, Any]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a task within the Frame-Core system.</p>
+<p>A Task is an actionable item that Framers work on. It includes a description
+of the action to be performed, a priority level, a status, and can store
+results and metadata.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Task(TaskModel):
+    &#34;&#34;&#34;
+    Represents a task within the Frame-Core system.
+
+    A Task is an actionable item that Framers work on. It includes a description
+    of the action to be performed, a priority level, a status, and can store
+    results and metadata.
+    &#34;&#34;&#34;
+
+    workflow_metrics: Dict[str, Dict[str, Any]] = {}
+    cancel_callback: Optional[Callable[[], None]] = None
+
+    def __init__(
+        self,
+        description: str,
+        workflow_id: str,
+        priority: float = 50.0,
+        expected_results: Optional[List[Any]] = None,
+        dependencies: List[str] = None,
+        parent_task_id: Optional[str] = None,
+        assigned_to: Optional[str] = None,
+        estimated_duration: Optional[float] = None,
+        tags: List[str] = None,
+        type: Optional[str] = None,
+        data: Optional[Dict[str, Any]] = None,
+    ):
+        task_id = generate_id()
+        super().__init__(
+            id=task_id,
+            description=description,
+            priority=priority,
+            workflow_id=workflow_id,
+            expected_results=expected_results or [],
+            dependencies=dependencies or [],
+            parent_task_id=parent_task_id,
+            assigned_to=assigned_to,
+            estimated_duration=estimated_duration,
+            tags=tags or [],
+            type=type,
+            data=data or {},
+        )
+        logger.info(
+            f&#34;Created new task with ID: {self.id} and expected results: {self.expected_results}&#34;
+        )
+        self._execute_callback: Optional[Callable[[], Any]] = None
+
+    def update_status(self, new_status: TaskStatus) -&gt; None:
+        &#34;&#34;&#34;
+        Update the status of the task.
+
+        Args:
+            new_status (TaskStatus): The new status to set for the task.
+        &#34;&#34;&#34;
+        self.status = new_status
+        self.updated_at = datetime.now()
+        if new_status == TaskStatus.COMPLETED:
+            self.completed_at = datetime.now()
+
+    def set_result(self, result: Any) -&gt; None:
+        &#34;&#34;&#34;
+        Set the result of the task execution.
+
+        Args:
+            result (Any): The result of the task execution.
+        &#34;&#34;&#34;
+        self.result = result
+        self.updated_at = datetime.now()
+
+    def add_subtask(self, subtask: &#34;Task&#34;) -&gt; None:
+        &#34;&#34;&#34;
+        Add a subtask to this task.
+
+        Args:
+            subtask (Task): The subtask to add.
+        &#34;&#34;&#34;
+        self.subtasks.append(subtask)
+        subtask.parent_task_id = self.id
+
+    def set_actual_duration(self, duration: float) -&gt; None:
+        &#34;&#34;&#34;
+        Set the actual duration of the task execution.
+
+        Args:
+            duration (float): The actual duration of the task execution.
+        &#34;&#34;&#34;
+        self.actual_duration = duration
+        self.updated_at = datetime.now()
+
+    def set_execute_callback(self, callback: Callable[[], Any]) -&gt; None:
+        &#34;&#34;&#34;
+        Set the execute callback for the task.
+
+        Args:
+            callback (Callable[[], Any]): The callback function to be called when the task is executed.
+        &#34;&#34;&#34;
+        self._execute_callback = callback
+
+    def set_cancel_callback(self, callback: Callable[[], None]) -&gt; None:
+        &#34;&#34;&#34;
+        Set the cancel callback for the task.
+
+        Args:
+            callback (Callable[[], None]): The callback function to be called when the task is cancelled.
+        &#34;&#34;&#34;
+        self.cancel_callback = callback
+
+    async def execute(self) -&gt; Any:
+        &#34;&#34;&#34;
+        Execute the task.
+
+        Returns:
+            Any: The result of the task execution.
+        &#34;&#34;&#34;
+        if self._execute_callback:
+            self.result = await self._execute_callback()
+            self.status = TaskStatus.COMPLETED
+            return self.result
+        else:
+            raise NotImplementedError(&#34;Task execution not implemented&#34;)
+
+    def cancel(self) -&gt; None:
+        &#34;&#34;&#34;
+        Cancel the task.
+        &#34;&#34;&#34;
+        if self.cancel_callback:
+            self.cancel_callback()
+        self.status = TaskStatus.CANCELED
+
+    def log_workflow_metrics(self, workflow_id: str) -&gt; None:
+        &#34;&#34;&#34;
+        Log and save the completion call metrics for a completed workflow.
+
+        Args:
+            workflow_id (str): The ID of the completed workflow.
+        &#34;&#34;&#34;
+        metrics = {&#34;total_tasks&#34;: 5, &#34;completed_tasks&#34;: 3, &#34;total_time&#34;: 10.5}
+        logger.info(f&#34;Workflow {workflow_id} completed.&#34;)
+        logger.info(f&#34;Workflow metrics: {metrics}&#34;)
+
+        # Save metrics
+        self.workflow_metrics[workflow_id] = metrics
+
+        for task_id, task_metric in metrics.get(&#34;tasks&#34;, {}).items():
+            logger.info(f&#34;  Task {task_id}: {task_metric}&#34;)
+
+    def get_workflow(self, workflow_id: str):
+        &#34;&#34;&#34;
+        Placeholder method to get a workflow. In a real implementation, this would
+        retrieve the workflow from some storage or management system.
+        &#34;&#34;&#34;
+        return None
+
+    def get_workflow_metrics(self, workflow_id: str) -&gt; Optional[Dict[str, Any]]:
+        &#34;&#34;&#34;
+        Retrieve the metrics for a completed workflow.
+
+        Args:
+            workflow_id (str): The ID of the completed workflow.
+
+        Returns:
+            Optional[Dict[str, Any]]: The metrics for the workflow, or None if not found.
+        &#34;&#34;&#34;
+        return self.workflow_metrics.get(workflow_id)
+
+    def get_all_workflow_metrics(self) -&gt; Dict[str, Dict[str, Any]]:
+        &#34;&#34;&#34;
+        Retrieve metrics for all completed workflows.
+
+        Returns:
+            Dict[str, Dict[str, Any]]: A dictionary of all workflow metrics.
+        &#34;&#34;&#34;
+        return self.workflow_metrics
+
+    def to_dict(self) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Convert the Task object to a dictionary representation.
+
+        Returns:
+            Dict[str, Any]: A dictionary representation of the Task.
+        &#34;&#34;&#34;
+        return {
+            &#34;id&#34;: self.id,
+            &#34;description&#34;: self.description,
+            &#34;workflow_id&#34;: self.workflow_id,
+            &#34;priority&#34;: self.priority,
+            &#34;status&#34;: self.status.value,
+            &#34;result&#34;: self.result,
+            &#34;expected_results&#34;: self.expected_results,
+            &#34;created_at&#34;: self.created_at.isoformat(),
+            &#34;updated_at&#34;: self.updated_at.isoformat(),
+            &#34;completed_at&#34;: (
+                self.completed_at.isoformat() if self.completed_at else None
+            ),
+            &#34;metadata&#34;: self.metadata,
+            &#34;dependencies&#34;: self.dependencies,
+            &#34;subtasks&#34;: [subtask.to_dict() for subtask in self.subtasks],
+            &#34;parent_task_id&#34;: self.parent_task_id,
+            &#34;assigned_to&#34;: self.assigned_to,
+            &#34;estimated_duration&#34;: self.estimated_duration,
+            &#34;actual_duration&#34;: self.actual_duration,
+            &#34;tags&#34;: self.tags,
+        }</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.models.framer.agency.tasks.task.TaskModel" href="../../../models/framer/agency/tasks/task.html#frame.src.models.framer.agency.tasks.task.TaskModel">TaskModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.agency.tasks.task.Task.cancel_callback"><code class="name">var <span class="ident">cancel_callback</span> : Optional[Callable[[], None]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.workflow_metrics"><code class="name">var <span class="ident">workflow_metrics</span> : Dict[str, Dict[str, Any]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.tasks.task.Task.add_subtask"><code class="name flex">
+<span>def <span class="ident">add_subtask</span></span>(<span>self, subtask: <a title="frame.src.framer.agency.tasks.task.Task" href="#frame.src.framer.agency.tasks.task.Task">Task</a>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a subtask to this task.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>subtask</code></strong> :&ensp;<code><a title="frame.src.framer.agency.tasks.task.Task" href="#frame.src.framer.agency.tasks.task.Task">Task</a></code></dt>
+<dd>The subtask to add.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.cancel"><code class="name flex">
+<span>def <span class="ident">cancel</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Cancel the task.</p></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute the task.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Any</code></dt>
+<dd>The result of the task execution.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.get_all_workflow_metrics"><code class="name flex">
+<span>def <span class="ident">get_all_workflow_metrics</span></span>(<span>self) ‑> Dict[str, Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve metrics for all completed workflows.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Dict[str, Dict[str, Any]]</code></dt>
+<dd>A dictionary of all workflow metrics.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.get_workflow"><code class="name flex">
+<span>def <span class="ident">get_workflow</span></span>(<span>self, workflow_id: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Placeholder method to get a workflow. In a real implementation, this would
+retrieve the workflow from some storage or management system.</p></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.get_workflow_metrics"><code class="name flex">
+<span>def <span class="ident">get_workflow_metrics</span></span>(<span>self, workflow_id: str) ‑> Optional[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve the metrics for a completed workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>workflow_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ID of the completed workflow.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Optional[Dict[str, Any]]</code></dt>
+<dd>The metrics for the workflow, or None if not found.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.log_workflow_metrics"><code class="name flex">
+<span>def <span class="ident">log_workflow_metrics</span></span>(<span>self, workflow_id: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Log and save the completion call metrics for a completed workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>workflow_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ID of the completed workflow.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.set_actual_duration"><code class="name flex">
+<span>def <span class="ident">set_actual_duration</span></span>(<span>self, duration: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the actual duration of the task execution.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>duration</code></strong> :&ensp;<code>float</code></dt>
+<dd>The actual duration of the task execution.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.set_cancel_callback"><code class="name flex">
+<span>def <span class="ident">set_cancel_callback</span></span>(<span>self, callback: Callable[[], None]) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the cancel callback for the task.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>callback</code></strong> :&ensp;<code>Callable[[], None]</code></dt>
+<dd>The callback function to be called when the task is cancelled.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.set_execute_callback"><code class="name flex">
+<span>def <span class="ident">set_execute_callback</span></span>(<span>self, callback: Callable[[], Any]) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the execute callback for the task.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>callback</code></strong> :&ensp;<code>Callable[[], Any]</code></dt>
+<dd>The callback function to be called when the task is executed.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.set_result"><code class="name flex">
+<span>def <span class="ident">set_result</span></span>(<span>self, result: Any) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the result of the task execution.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>result</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The result of the task execution.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self) ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert the Task object to a dictionary representation.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Dict[str, Any]</code></dt>
+<dd>A dictionary representation of the Task.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.update_status"><code class="name flex">
+<span>def <span class="ident">update_status</span></span>(<span>self, new_status: <a title="frame.src.models.framer.agency.tasks.task.TaskStatus" href="../../../models/framer/agency/tasks/task.html#frame.src.models.framer.agency.tasks.task.TaskStatus">TaskStatus</a>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Update the status of the task.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>new_status</code></strong> :&ensp;<code>TaskStatus</code></dt>
+<dd>The new status to set for the task.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="frame.src.framer.agency.tasks" href="index.html">frame.src.framer.agency.tasks</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.src.framer.agency.tasks.task.Task" href="#frame.src.framer.agency.tasks.task.Task">Task</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.add_subtask" href="#frame.src.framer.agency.tasks.task.Task.add_subtask">add_subtask</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.cancel" href="#frame.src.framer.agency.tasks.task.Task.cancel">cancel</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.cancel_callback" href="#frame.src.framer.agency.tasks.task.Task.cancel_callback">cancel_callback</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.execute" href="#frame.src.framer.agency.tasks.task.Task.execute">execute</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.get_all_workflow_metrics" href="#frame.src.framer.agency.tasks.task.Task.get_all_workflow_metrics">get_all_workflow_metrics</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.get_workflow" href="#frame.src.framer.agency.tasks.task.Task.get_workflow">get_workflow</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.get_workflow_metrics" href="#frame.src.framer.agency.tasks.task.Task.get_workflow_metrics">get_workflow_metrics</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.log_workflow_metrics" href="#frame.src.framer.agency.tasks.task.Task.log_workflow_metrics">log_workflow_metrics</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.model_computed_fields" href="#frame.src.framer.agency.tasks.task.Task.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.model_config" href="#frame.src.framer.agency.tasks.task.Task.model_config">model_config</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.model_fields" href="#frame.src.framer.agency.tasks.task.Task.model_fields">model_fields</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.set_actual_duration" href="#frame.src.framer.agency.tasks.task.Task.set_actual_duration">set_actual_duration</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.set_cancel_callback" href="#frame.src.framer.agency.tasks.task.Task.set_cancel_callback">set_cancel_callback</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.set_execute_callback" href="#frame.src.framer.agency.tasks.task.Task.set_execute_callback">set_execute_callback</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.set_result" href="#frame.src.framer.agency.tasks.task.Task.set_result">set_result</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.to_dict" href="#frame.src.framer.agency.tasks.task.Task.to_dict">to_dict</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.update_status" href="#frame.src.framer.agency.tasks.task.Task.update_status">update_status</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.workflow_metrics" href="#frame.src.framer.agency.tasks.task.Task.workflow_metrics">workflow_metrics</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>

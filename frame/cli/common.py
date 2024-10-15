@@ -1,0 +1,193 @@
+"""
+Common utilities for the Frame CLI.
+
+This module provides common functions and utilities used across the Frame CLI
+commands, including logging, role and goal generation, and perception processing.
+
+Attributes:
+    logger (Logger): Logger instance for logging common activities.
+"""
+
+import logging
+from typing import Any, Dict, List, Optional
+from frame.src.framer.config import FramerConfig
+from frame.src.framer.framer_factory import FramerFactory
+from frame.src.framer.agency import Agency
+from frame.src.services.context.context_service import Context
+from frame.src.framer.framer import Framer
+from frame.frame import Frame
+from frame.src.framer.brain.decision import Decision
+
+logger = logging.getLogger(__name__)
+
+
+def pretty_log(obj: Any) -> str:
+    """
+    Convert an object to a pretty string for logging.
+
+    Args:
+        obj (Any): The object to convert.
+
+    Returns:
+        str: A formatted string representation of the object.
+    """
+    if isinstance(obj, dict):
+        return "\n" + "\n".join(f"  {k}: {v}" for k, v in obj.items())
+    elif isinstance(obj, list):
+        return "\n" + "\n".join(f"  - {item}" for item in obj)
+    else:
+        return str(obj)
+
+
+async def generate_roles_and_goals(framer: Framer, prompt: str) -> None:
+    """
+    Generate roles and goals for a Framer based on a prompt.
+
+    This function uses the Framer's language model service to generate roles
+    and goals from a given prompt and updates the Framer's configuration.
+
+    Args:
+        framer (Framer): The Framer instance to update.
+        prompt (str): The prompt to generate roles and goals from.
+    """
+    logger.debug(f"Generating roles and goals for prompt: {prompt}")
+    logger.debug(f"Framer brain before generating roles and goals: {framer.brain}")
+
+    if framer.brain is None:
+        logger.error("Framer brain is None before generating roles and goals")
+        raise ValueError("Framer brain is not initialized")
+
+    # Generate roles
+    roles = await framer.llm_service.get_completion(
+        f"Generate roles for a framer based on this prompt: {prompt}",
+        model=framer.config.default_model,
+    )
+    logger.info(f"Generated roles: {pretty_log(roles)}")
+    # Access expected_output_format_strict from the appropriate component if needed
+    # logger.debug(f"Expected output format strict: {framer.action_registry.expected_output_format_strict}")
+    framer.agency.set_roles(roles)
+
+    if framer.brain is None:
+        logger.error("Framer brain is None after generating roles and goals")
+        raise ValueError("Framer brain became None during role and goal generation")
+
+
+async def process_perception_and_log(
+    framer: Framer, perception: Dict[str, Any]
+) -> Decision:
+    """
+    Process a perception and log the resulting decision.
+
+    This function processes a perception using the Framer's sense method and
+    logs the resulting decision.
+
+    Args:
+        framer (Framer): The Framer instance to use.
+        perception (Dict[str, Any]): The perception data to process.
+
+    Returns:
+        Decision: The decision made based on the perception.
+    """
+    logger.debug(f"Processing perception: {perception}")
+    decision = await framer.sense(perception)
+    logger.info(f"Decision: {pretty_log(decision)}")
+    return decision
+
+
+async def setup_framer(
+    frame: Frame, name: str, description: str, model: str, soul_seed: str
+) -> Framer:
+    """
+    Set up a Framer instance with the given configuration.
+
+    This function initializes a Framer with the specified name, description,
+    model, and soul seed, and sets up its agency and context.
+
+    Args:
+        frame (Frame): Frame instance for managing Framer operations.
+        name (str): Name of the Framer.
+        description (str): Description of the Framer's purpose.
+        model (str): AI model to use for the Framer.
+        soul_seed (str): Seed phrase to initialize the Framer's soul.
+
+    Returns:
+        Framer: The initialized Framer instance.
+    """
+    config = FramerConfig(
+        name=name,
+        description=description,
+        default_model=model,
+    )
+    framer_factory = FramerFactory(config, frame.llm_service)
+    framer = await framer_factory.create_framer()
+    logger.debug(f"Framer brain after build: {framer.brain}")
+    framer.soul.seed = soul_seed  # Explicitly set the soul seed
+    context = Context()  # Create a new Context
+    framer.agency = Agency(
+        llm_service=frame.llm_service,
+        context=context,
+        use_local_model=False,
+        brain=framer.brain,
+    )
+    logger.info(f"Using model: {model}")
+    return framer
+
+
+async def execute_framer(
+    framer: Framer, prompt: str, max_len: int
+) -> Optional[Decision]:
+    """
+    Execute a Framer with a given prompt and log the results.
+
+    This function generates roles and goals, processes a perception, and logs
+    the execution summary, including workflows and tasks.
+
+    Args:
+        framer (Framer): The Framer instance to execute.
+        prompt (str): The prompt to process.
+        max_len (int): Maximum length for task generation.
+
+    Returns:
+        Optional[Decision]: The decision made based on the prompt, or None if an error occurs.
+    """
+    try:
+        await generate_roles_and_goals(framer, prompt)
+        perception_data = {"type": "input", "description": prompt}
+        decision = await framer.sense(perception_data)
+        if decision:
+            # Log the summary
+            logger.info("Execution Summary:")
+            total_workflows = len(framer.workflow_manager.workflows)
+            total_tasks = sum(
+                len(workflow.tasks) for workflow in framer.workflow_manager.workflows
+            )
+            logger.info(f"Total Workflows created: {total_workflows}")
+            logger.info(f"Total Tasks created: {total_tasks}")
+            for workflow in framer.workflow_manager.workflows:
+                logger.info(f"Workflow has {len(workflow.tasks)} tasks.")
+                for task in workflow.tasks:
+                    logger.info(
+                        f"Task Name: {task.description}, Task Priority: {task.priority}"
+                    )
+            logger.info(f"Decision reasoning: {decision.reasoning}")
+        if decision:
+            # Log the summary
+            logger.info("Execution Summary:")
+            total_workflows = len(framer.workflow_manager.workflows)
+            total_tasks = sum(
+                len(workflow.tasks) for workflow in framer.workflow_manager.workflows
+            )
+            logger.info(f"Total Workflows created: {total_workflows}")
+            logger.info(f"Total Tasks created: {total_tasks}")
+            for workflow in framer.workflow_manager.workflows:
+                logger.info(f"Workflow has {len(workflow.tasks)} tasks.")
+                for task in workflow.tasks:
+                    logger.info(
+                        f"Task Name: {task.description}, Task Priority: {task.priority}"
+                    )
+            logger.info(f"Decision reasoning: {decision.reasoning}")
+        return decision
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        logger.exception("Detailed traceback:")
+        return None

@@ -1,0 +1,174 @@
+import logging
+import json
+from typing import List, Dict, Any
+from ..perception import Perception
+from ..decision import Decision
+from frame.src.framer.agency.action_registry import ActionRegistry
+from frame.src.framer.agency.tasks import TaskStatusModel
+from frame.src.utils.llm_utils import get_completion
+
+logger = logging.getLogger(__name__)
+
+
+class Mind:
+    """
+    The Mind class represents the cognitive processes of a Framer.
+    It manages thoughts, decision-making processes, perceptions, and interacts with the Brain and Soul components.
+    """
+
+    def __init__(self, brain: Any):
+        """
+        Initialize the Mind instance.
+
+        Args:
+            brain (Any): The Brain instance associated with this Mind.
+        """
+        self.brain = brain
+        self.thoughts: List[str] = []
+        self.current_thought: str = ""
+        self.perceptions: List[Perception] = []
+
+    async def make_decision(self, perception: Perception) -> Decision:
+        """
+        Make a decision based on the current perceptions and thoughts.
+
+        Args:
+            perception (Perception): The perception to base the decision on.
+
+        Returns:
+            Decision: The decision made.
+        """
+        # Get the decision prompt from the brain
+        prompt = self.brain._get_decision_prompt(perception)
+
+        # Use the LLM service to get a decision
+        response = await get_completion(
+            self.brain.llm_service, prompt, model=self.brain.default_model
+        )
+        try:
+            decision_data = json.loads(response) if isinstance(response, str) else {}
+            decision_data = json.loads(response)
+            decision = Decision(
+                action=decision_data.get("action", "default_action"),
+                parameters=decision_data.get("data", {}),
+                reasoning=decision_data.get("reasoning", "No reasoning provided."),
+                confidence=float(decision_data.get("confidence", 0.5)),
+                priority=int(decision_data.get("priority", 5)),
+            )
+        except json.JSONDecodeError:
+            logger.error(f"Failed to parse decision response: {response}")
+            decision = Decision(
+                action="error",
+                parameters={"error": "Failed to parse decision"},
+                reasoning="The decision response could not be parsed as JSON.",
+                confidence=0.1,
+                priority=1,
+            )
+
+        logger.debug(f"Decision made: {decision}")
+        return decision
+
+    def think(self, thought: str) -> None:
+        """
+        Add a new thought to the Mind.
+
+        Args:
+            thought (str): The thought to add.
+        """
+        """
+        Add a new thought to the Mind.
+
+        Args:
+            thought (str): The thought to add.
+        """
+        self.thoughts.append(thought)
+        self.current_thought = thought
+        logger.debug(f"New thought: {thought}")
+
+    def generate_thoughts(self) -> None:
+        """
+        Generate new thoughts based on current perceptions and memories.
+        This method should be implemented to interact with the Soul's memory
+        and the Brain's decision-making processes.
+        """
+        """
+        Generate new thoughts based on current perceptions and memories.
+        This method should be implemented to interact with the Soul's memory
+        and the Brain's decision-making processes.
+        """
+        # TODO: Implement thought generation logic
+        pass
+
+    def get_current_thought(self) -> str:
+        """
+        Get the current thought of the Mind.
+
+        Returns:
+            str: The current thought.
+        """
+        """
+        Get the current thought of the Mind.
+
+        Returns:
+            str: The current thought.
+        """
+        return self.current_thought
+
+    def get_all_thoughts(self) -> List[str]:
+        """
+        Get all thoughts stored in the Mind.
+
+        Returns:
+            List[str]: All thoughts.
+        """
+        """
+        Get all thoughts stored in the Mind.
+
+        Returns:
+            List[str]: All thoughts.
+        """
+        return self.thoughts
+
+    def clear_thoughts(self) -> None:
+        """
+        Clear all thoughts from the Mind.
+        """
+        """
+        Clear all thoughts from the Mind.
+        """
+        self.thoughts.clear()
+        self.current_thought = ""
+        logger.debug("Thoughts cleared")
+
+    async def process_perception(self, perception: Perception) -> Decision:
+        """
+        Process a perception and generate thoughts based on it.
+
+        Args:
+            perception (Perception): The perception to process.
+
+        Returns:
+            Decision: The decision made based on the perception.
+        """
+        self.perceptions.append(perception)
+        perception_type = perception.type
+        if perception_type:
+            thought = f"Processed perception: {perception_type}"
+        else:
+            thought = "Processed perception without type"
+        self.think(thought)
+        return await self.make_decision(perception)
+
+    def get_recent_perceptions(self, n: int = 5) -> List[Perception]:
+        """
+        Get the n most recent perceptions.
+
+        Args:
+            n (int): The number of recent perceptions to retrieve.
+
+        Returns:
+            List[Perception]: The n most recent perceptions.
+        """
+        if n <= 0:
+            return []
+        return self.perceptions[-n:]

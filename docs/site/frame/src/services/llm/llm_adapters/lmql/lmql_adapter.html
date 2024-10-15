@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>frame.src.services.llm.llm_adapters.lmql.lmql_adapter API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>frame.src.services.llm.llm_adapters.lmql.lmql_adapter</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.lmql_adapter"><code class="name flex">
+<span>def <span class="ident">lmql_adapter</span></span>(<span>openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None) ‑> <a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter">LMQLAdapter</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Factory function to create an LMQLAdapter instance.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>openai_api_key</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The OpenAI API key.</dd>
+<dt><strong><code>mistral_api_key</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The Mistral API key.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter">LMQLAdapter</a></code></dt>
+<dd>An instance of the LMQLAdapter.</dd>
+</dl></div>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol"><code class="flex name class">
+<span>class <span class="ident">AsyncOpenAIProtocol</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for protocol classes.</p>
+<p>Protocol classes are defined as::</p>
+<pre><code>class Proto(Protocol):
+    def meth(self) -&gt; int:
+        ...
+</code></pre>
+<p>Such classes are primarily used with static type checkers that recognize
+structural subtyping (static duck-typing).</p>
+<p>For example::</p>
+<pre><code>class C:
+    def meth(self) -&gt; int:
+        return 0
+
+def func(x: Proto) -&gt; int:
+    return x.meth()
+
+func(C())  # Passes static type check
+</code></pre>
+<p>See PEP 544 for details. Protocol classes decorated with
+@typing.runtime_checkable act as simple-minded runtime protocols that check
+only the presence of given attributes, ignoring their type signatures.
+Protocol classes can be generic, they are defined as::</p>
+<pre><code>class GenProto[T](Protocol):
+    def meth(self) -&gt; T:
+        ...
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@runtime_checkable
+class AsyncOpenAIProtocol(Protocol):
+    async def chat_completions_create(self, **kwargs): ...</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>typing.Protocol</li>
+<li>typing.Generic</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol.chat_completions_create"><code class="name flex">
+<span>async def <span class="ident">chat_completions_create</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter"><code class="flex name class">
+<span>class <span class="ident">LMQLAdapter</span></span>
+<span>(</span><span>openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None, openai_client: Optional[<a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol">AsyncOpenAIProtocol</a>] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adapter for LMQL operations with rate limiting.</p>
+<p>This class provides methods to interact with LMQL models, including
+setting the default model and generating completions with retry logic.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>openai_client</code></strong> :&ensp;<code>AsyncOpenAI</code></dt>
+<dd>Client for OpenAI API operations.</dd>
+<dt><strong><code>mistral_client</code></strong> :&ensp;<code>Any</code></dt>
+<dd>Client for Mistral API operations (to be implemented).</dd>
+<dt><strong><code>default_model</code></strong> :&ensp;<code>str</code></dt>
+<dd>The default model to use for completions.</dd>
+<dt><strong><code>token_bucket</code></strong> :&ensp;<code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.TokenBucket" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.TokenBucket">TokenBucket</a></code></dt>
+<dd>Token bucket for rate limiting.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LMQLAdapter(LLMAdapterInterface):
+    &#34;&#34;&#34;
+    Adapter for LMQL operations with rate limiting.
+
+    This class provides methods to interact with LMQL models, including
+    setting the default model and generating completions with retry logic.
+
+    Attributes:
+        openai_client (AsyncOpenAI): Client for OpenAI API operations.
+        mistral_client (Any): Client for Mistral API operations (to be implemented).
+        default_model (str): The default model to use for completions.
+        token_bucket (TokenBucket): Token bucket for rate limiting.
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        openai_api_key: Optional[str] = None,
+        mistral_api_key: Optional[str] = None,
+        openai_client: Optional[AsyncOpenAIProtocol] = None,
+    ):
+        self.openai_client = (
+            openai_client
+            if openai_client is not None
+            else (AsyncOpenAI(api_key=openai_api_key) if openai_api_key else None)
+        )
+        self.mistral_client = (
+            MistralClient(api_key=mistral_api_key) if mistral_api_key else None
+        )
+        self.default_model = &#34;gpt-3.5-turbo&#34;
+        self.token_bucket = TokenBucket(
+            capacity=60, fill_rate=1
+        )  # 60 requests per minute
+
+    def get_api_key(self, model: Optional[str] = None) -&gt; Optional[str]:
+        &#34;&#34;&#34;
+        Get the API key for the current client.
+
+        Args:
+            model (Optional[str]): The model name to get the API key for.
+
+        Returns:
+            Optional[str]: The API key if available, None otherwise.
+
+        Raises:
+            NotImplementedError: If Mistral client integration is not yet implemented.
+        &#34;&#34;&#34;
+        if self.openai_client and (model is None or model.startswith(&#34;gpt&#34;)):
+            return (
+                self.openai_client.api_key
+                if hasattr(self.openai_client, &#34;api_key&#34;)
+                else &#34;test_key&#34;
+            )
+        elif self.mistral_client and (model is None or model.startswith(&#34;mistral&#34;)):
+            if hasattr(self.mistral_client, &#34;api_key&#34;):
+                return self.mistral_client.api_key
+            else:
+                raise NotImplementedError(
+                    &#34;Mistral client integration is not yet implemented.&#34;
+                )
+        elif model and model.startswith(&#34;mistral&#34;):
+            raise NotImplementedError(
+                &#34;Mistral client integration is not yet implemented.&#34;
+            )
+        return None
+
+    def set_default_model(self, model: str):
+        &#34;&#34;&#34;
+        Set the default model for LQML operations.
+
+        Args:
+            model (str): The model to set as default.
+        &#34;&#34;&#34;
+        self.default_model = model
+
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(5),
+        wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
+        retry=tenacity.retry_if_exception_type((asyncio.TimeoutError, Exception)),
+        reraise=True,
+    )
+    async def get_completion(
+        self,
+        prompt: str,
+        config: LMQLConfig,
+        model: Optional[Union[str, Dict[str, Any]]] = None,
+        additional_context: Optional[Dict[str, Any]] = None,
+    ) -&gt; str:
+        &#34;&#34;&#34;
+        Generate a completion using the LQML model with retry logic.
+
+        Args:
+            prompt (str): The input prompt for the model.
+            config (LMQLConfig): Configuration for the LQML model.
+            model (Optional[Union[str, Dict[str, Any]]], optional): The model to use. If None, uses the default model.
+            additional_context (Optional[Dict[str, Any]], optional): Additional context for the model.
+
+        Returns:
+            str: The generated completion.
+        &#34;&#34;&#34;
+        model_name = model if isinstance(model, str) else self.default_model
+
+        if not self.token_bucket.consume(1):
+            await asyncio.sleep(1)  # Wait for a token to become available
+
+        try:
+            lmql_prompt = f&#34;&#34;&#34;
+            sample(temperature={config.temperature})
+            &#34;{prompt}&#34;
+            [RESPONSE]
+            &#34;&#34;&#34;
+            if model_name.startswith(&#34;gpt&#34;):
+                response = await self._get_openai_completion(
+                    lmql_prompt, config, model_name
+                )
+            elif model_name.startswith(&#34;mistral&#34;):
+                response = await self._get_mistral_completion(
+                    lmql_prompt, config, model_name
+                )
+            else:
+                raise ValueError(f&#34;Unsupported model: {model_name}&#34;)
+
+            if isinstance(response, str):
+                # If the response is a string, try to parse it as JSON
+                try:
+                    import json
+
+                    json_response = json.loads(response.strip())
+                    return json.dumps(
+                        json_response
+                    )  # Return a properly formatted JSON string
+                except json.JSONDecodeError:
+                    # If it&#39;s not valid JSON, return the original string
+                    return response.strip()
+            elif hasattr(response, &#34;choices&#34;) and len(response.choices) &gt; 0:
+                content = response.choices[0].message.content.strip()
+                # Try to parse the content as JSON
+                try:
+                    import json
+
+                    json_content = json.loads(content)
+                    return json.dumps(
+                        json_content
+                    )  # Return a properly formatted JSON string
+                except json.JSONDecodeError:
+                    # If it&#39;s not valid JSON, return the original content
+                    return content
+            else:
+                raise ValueError(f&#34;Unexpected response format: {response}&#34;)
+        except (AuthenticationError, APIStatusError) as e:
+            error_message = f&#34;API error in get_completion: {e}&#34;
+            logger.error(error_message)
+            raise ValueError(error_message)
+        except StopAsyncIteration:
+            error_message = &#34;Reached end of response stream unexpectedly&#34;
+            logger.error(error_message)
+            raise StopAsyncIteration(error_message)
+        except Exception as e:
+            error_message = f&#34;Unexpected error in get_completion: {e}&#34;
+            logger.error(error_message)
+            raise  # Re-raise the original exception
+
+    async def _get_mistral_completion(
+        self, prompt: str, config: LMQLConfig, model_name: str
+    ) -&gt; str:
+        if self.mistral_client is None:
+            raise ValueError(&#34;Mistral client is not initialized&#34;)
+        # TODO: Implement Mistral API call here
+        # This is a placeholder and should be replaced with actual Mistral API integration
+        logger.warning(&#34;Mistral API integration not yet implemented&#34;)
+        return f&#34;Mistral completion for prompt: {prompt}&#34;
+
+    async def _get_openai_completion(
+        self, prompt: str, config: LMQLConfig, model_name: str
+    ) -&gt; str:
+        if self.openai_client is None:
+            raise ValueError(&#34;OpenAI client is not initialized&#34;)
+
+        if not isinstance(self.openai_client, AsyncOpenAI):
+            raise ValueError(&#34;OpenAI client is not correctly initialized&#34;)
+
+        try:
+            response = await self.openai_client.chat.completions.create(
+                model=model_name,
+                messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: prompt}],
+                max_tokens=config.max_tokens,
+                temperature=config.temperature,
+                top_p=config.top_p,
+                frequency_penalty=config.frequency_penalty,
+                presence_penalty=config.presence_penalty,
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            logger.error(f&#34;Error in OpenAI API call: {e}&#34;)
+            raise</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.services.llm.llm_adapter_interface.LLMAdapterInterface" href="../../llm_adapter_interface.html#frame.src.services.llm.llm_adapter_interface.LLMAdapterInterface">LLMAdapterInterface</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_api_key"><code class="name flex">
+<span>def <span class="ident">get_api_key</span></span>(<span>self, model: Optional[str] = None) ‑> Optional[str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the API key for the current client.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The model name to get the API key for.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Optional[str]</code></dt>
+<dd>The API key if available, None otherwise.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>NotImplementedError</code></dt>
+<dd>If Mistral client integration is not yet implemented.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_completion"><code class="name flex">
+<span>async def <span class="ident">get_completion</span></span>(<span>self, prompt: str, config: <a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig">LMQLConfig</a>, model: Union[str, Dict[str, Any], ForwardRef(None)] = None, additional_context: Optional[Dict[str, Any]] = None) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a completion using the LQML model with retry logic.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>prompt</code></strong> :&ensp;<code>str</code></dt>
+<dd>The input prompt for the model.</dd>
+<dt><strong><code>config</code></strong> :&ensp;<code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig">LMQLConfig</a></code></dt>
+<dd>Configuration for the LQML model.</dd>
+<dt><strong><code>model</code></strong> :&ensp;<code>Optional[Union[str, Dict[str, Any]]]</code>, optional</dt>
+<dd>The model to use. If None, uses the default model.</dd>
+<dt><strong><code>additional_context</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code>, optional</dt>
+<dd>Additional context for the model.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The generated completion.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.set_default_model"><code class="name flex">
+<span>def <span class="ident">set_default_model</span></span>(<span>self, model: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the default model for LQML operations.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model</code></strong> :&ensp;<code>str</code></dt>
+<dd>The model to set as default.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig"><code class="flex name class">
+<span>class <span class="ident">LMQLConfig</span></span>
+<span>(</span><span>model: str, max_tokens: int = 1024, temperature: float = 0.7, top_p: float = 1.0, frequency_penalty: float = 0.0, presence_penalty: float = 0.0, output_format: str = 'json')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>LMQLConfig(model: str, max_tokens: int = 1024, temperature: float = 0.7, top_p: float = 1.0, frequency_penalty: float = 0.0, presence_penalty: float = 0.0, output_format: str = 'json')</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class LMQLConfig:
+    model: str
+    max_tokens: int = 1024
+    temperature: float = 0.7
+    top_p: float = 1.0
+    frequency_penalty: float = 0.0
+    presence_penalty: float = 0.0
+    output_format: str = &#34;json&#34;  # Specify JSON output format</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.frequency_penalty"><code class="name">var <span class="ident">frequency_penalty</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.max_tokens"><code class="name">var <span class="ident">max_tokens</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.model"><code class="name">var <span class="ident">model</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.output_format"><code class="name">var <span class="ident">output_format</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.presence_penalty"><code class="name">var <span class="ident">presence_penalty</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.temperature"><code class="name">var <span class="ident">temperature</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.top_p"><code class="name">var <span class="ident">top_p</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient"><code class="flex name class">
+<span>class <span class="ident">MistralClient</span></span>
+<span>(</span><span>api_key: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MistralClient:
+    def __init__(self, api_key: Optional[str] = None):
+        self.api_key = api_key</code></pre>
+</details>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.TokenBucket"><code class="flex name class">
+<span>class <span class="ident">TokenBucket</span></span>
+<span>(</span><span>capacity: int, fill_rate: float)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Implements token bucket algorithm for rate limiting.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TokenBucket:
+    &#34;&#34;&#34;
+    Implements token bucket algorithm for rate limiting.
+    &#34;&#34;&#34;
+
+    def __init__(self, capacity: int, fill_rate: float):
+        self.capacity = capacity
+        self.fill_rate = fill_rate
+        self.tokens = capacity
+        self.last_fill = time.time()
+
+    def _fill(self):
+        now = time.time()
+        delta = now - self.last_fill
+        self.tokens = min(self.capacity, self.tokens + delta * self.fill_rate)
+        self.last_fill = now
+
+    def consume(self, tokens: int) -&gt; bool:
+        self._fill()
+        if tokens &lt;= self.tokens:
+            self.tokens -= tokens
+            return True
+        return False</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.TokenBucket.consume"><code class="name flex">
+<span>def <span class="ident">consume</span></span>(<span>self, tokens: int) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql" href="index.html">frame.src.services.llm.llm_adapters.lmql</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.lmql_adapter" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.lmql_adapter">lmql_adapter</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol">AsyncOpenAIProtocol</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol.chat_completions_create" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol.chat_completions_create">chat_completions_create</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter">LMQLAdapter</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_api_key" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_api_key">get_api_key</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_completion" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_completion">get_completion</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.set_default_model" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.set_default_model">set_default_model</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig">LMQLConfig</a></code></h4>
+<ul class="two-column">
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.frequency_penalty" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.frequency_penalty">frequency_penalty</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.max_tokens" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.max_tokens">max_tokens</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.model" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.model">model</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.output_format" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.output_format">output_format</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.presence_penalty" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.presence_penalty">presence_penalty</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.temperature" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.temperature">temperature</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.top_p" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.top_p">top_p</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient">MistralClient</a></code></h4>
+</li>
+<li>
+<h4><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.TokenBucket" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.TokenBucket">TokenBucket</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.TokenBucket.consume" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.TokenBucket.consume">consume</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>
