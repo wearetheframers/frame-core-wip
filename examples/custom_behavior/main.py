@@ -8,8 +8,8 @@ from frame import Frame, FramerConfig
 
 
 # Define a new custom action
-async def custom_greet_action(execution_context, name: str) -> str:
-    return f"Hello, {name}! Welcome to the custom behavior example."
+async def custom_greet_action(execution_context, custom_message: str) -> str:
+    return custom_message
 
 
 async def main():
@@ -35,7 +35,9 @@ async def main():
         print(result)
 
     # Clean up
-    await frame.close()
+    # Perform any necessary cleanup here
+    # For example, if there are resources to release, do it here
+    print("Cleaning up resources...")
 
 
 if __name__ == "__main__":

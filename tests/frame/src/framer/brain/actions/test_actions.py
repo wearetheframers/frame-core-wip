@@ -5,7 +5,7 @@ from frame.src.framer.agency.execution_context import ExecutionContext
 
 @pytest.fixture
 def action_registry():
-    return ActionRegistry()
+    return ActionRegistry(execution_context=ExecutionContext())
 
 
 @pytest.mark.asyncio

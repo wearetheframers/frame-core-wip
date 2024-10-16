@@ -12,7 +12,7 @@ The Config module provides configuration settings for the [[framer|Framer]], all
 ## Key Features
 
 - **Customizable Settings**: Define settings for [[agency|roles]], [[agency|goals]], models, and more.
-- **Flexible Initialization**: Use configuration settings to initialize [[framer|Framers]] with specific attributes and behaviors.
+- **Flexible Initialization**: Use configuration settings to initialize [[framer|Framers]] with specific attributes and behaviors, excluding soul seed.
 
 ## Usage
 
@@ -26,6 +26,17 @@ config = FramerConfig(
     description="A sample Framer for demonstration purposes",
     default_model="gpt-3.5-turbo"
 )
+```
+
+## Closing the Framer
+
+The `close` method is used to optimize and clear all memory for the Framer. It ensures that all tasks and workflows are closed properly, and any resources or memory used by the Framer are released. This method should be called when the Framer is no longer needed to prevent memory leaks and ensure optimal performance.
+
+```python
+framer = Framer(config, llm_service, agency, brain, soul, workflow_manager)
+# Perform tasks with the Framer
+# ...
+await framer.close()  # Optimize and clear memory
 ```
 
 ## Related Components

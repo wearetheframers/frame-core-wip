@@ -25,7 +25,11 @@ The Framer class represents an individual AI agent within the Frame cognitive ag
 - [[soul]]: Represents the core essence and personality of a Framer.
 - [[mind]]: Represents the cognitive processes of a Framer.
 
-## Key Features
+## Initialization and Key Features
+
+### Initialization
+
+To initialize a `Framer` with roles and goals, use the `initialize()` method. This method will automatically call `act()`, enabling the `Framer` to start processing perceptions and making decisions. If you need to stop the `Framer` from acting or making new tasks, use the `halt()` method.
 
 - Task Management: Create and manage tasks efficiently.
 - Decision Making: Utilize advanced decision-making processes to guide actions.

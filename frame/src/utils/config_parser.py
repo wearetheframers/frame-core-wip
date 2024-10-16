@@ -25,20 +25,15 @@ def parse_markdown_config(file_path: str) -> FramerConfig:
         else:
             config_data[key] = value.strip()
 
-    # Check for a Python script in the same directory
-    dir_path = os.path.dirname(file_path)
-    py_files = [f for f in os.listdir(dir_path) if f.endswith('.py') and f != '__init__.py']
-    if py_files:
-        config_data['custom_script'] = os.path.join(dir_path, py_files[0])
+    # # Check for a Python script in the same directory
+    # dir_path = os.path.dirname(file_path)
+    # py_files = [f for f in os.listdir(dir_path) if f.endswith('.py') and f != '__init__.py']
+    # if py_files:
+    #     config_data['custom_script'] = os.path.join(dir_path, py_files[0])
 
     return FramerConfig(**config_data)
 
-def load_framer_from_file(file_path: str) -> FramerConfig:
-    if file_path.endswith('.json'):
-        return parse_json_config(file_path)
-    elif file_path.endswith('.md'):
-        return parse_markdown_config(file_path)
-    else:
+    if not file_path.endswith(('.json', '.md')):
         raise ValueError("Unsupported file format. Please use .json or .md files.")
 
 

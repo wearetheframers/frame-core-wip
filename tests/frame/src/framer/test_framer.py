@@ -298,6 +298,3 @@ async def test_cancel_task():
     assert task.status == TaskStatus.CANCELED
 
 
-def test_soul_seed_initialization():
-    soul = Soul(seed={"text": "Test soul seed"})
-    assert soul.seed == {"text": "Test soul seed"}

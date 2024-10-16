@@ -1,14 +1,14 @@
 import unittest
 from unittest.mock import MagicMock, patch
 from frame.src.framer.framer import Framer
-from frame.src.utils.config_parser import load_framer_from_file
+from frame.src.utils.config_parser import parse_json_config, parse_markdown_config
 
 class TestFramerIO(unittest.TestCase):
 
     @patch('frame.src.utils.config_parser.load_framer_from_file')
     def test_load_framer_from_file(self, mock_load):
         mock_load.return_value = MagicMock()
-        framer = load_framer_from_file('dummy_path')
+        framer = parse_json_config('dummy_path')
         self.assertIsNotNone(framer)
 
     @patch('builtins.open', new_callable=unittest.mock.mock_open)

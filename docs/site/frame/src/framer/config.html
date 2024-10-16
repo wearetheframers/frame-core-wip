@@ -37,10 +37,10 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.config.FramerConfig"><code class="flex name class">
 <span>class <span class="ident">FramerConfig</span></span>
-<span>(</span><span>name: str, model: Optional[str] = None, description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-3.5-turbo', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = &lt;factory&gt;, goals: Optional[List[Dict[str, Any]]] = &lt;factory&gt;, recent_memories_limit: Optional[int] = 5)</span>
+<span>(</span><span>name: str, model: Optional[str] = None, soul_seed: Union[str, Dict[str, Any], ForwardRef(None)] = 'You are a helpful AI assistant.', description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-3.5-turbo', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = &lt;factory&gt;, goals: Optional[List[Dict[str, Any]]] = &lt;factory&gt;, recent_memories_limit: Optional[int] = 5)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>FramerConfig(name: str, model: Optional[str] = None, description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-3.5-turbo', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = <factory>, goals: Optional[List[Dict[str, Any]]] = <factory>, recent_memories_limit: Optional[int] = 5)</p></div>
+<div class="desc"><p>FramerConfig(name: str, model: Optional[str] = None, soul_seed: Union[str, Dict[str, Any], NoneType] = 'You are a helpful AI assistant.', description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-3.5-turbo', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = <factory>, goals: Optional[List[Dict[str, Any]]] = <factory>, recent_memories_limit: Optional[int] = 5)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -49,6 +49,7 @@ hljs.highlightAll();
 class FramerConfig:
     name: str
     model: Optional[str] = field(default=None)
+    soul_seed: Optional[Union[str, Dict[str, Any]]] = &#34;You are a helpful AI assistant.&#34;
     &#34;&#34;&#34;
     Configuration class for Framer instances.
 
@@ -86,30 +87,7 @@ class FramerConfig:
     is_multi_modal: Optional[bool] = False
     roles: Optional[List[Dict[str, str]]] = field(default_factory=list)
     goals: Optional[List[Dict[str, Any]]] = field(default_factory=list)
-    recent_memories_limit: Optional[int] = 5
-
-    async def initialize(self):
-        &#34;&#34;&#34;Initialize the Framer with roles and goals.&#34;&#34;&#34;
-        if self.agency.roles is None and self.agency.goals is None:
-            self.agency.roles, self.agency.goals = (
-                await self.agency.generate_roles_and_goals()
-            )
-        elif self.agency.roles == [] and self.agency.goals is None:
-            _, self.agency.goals = await self.agency.generate_roles_and_goals()
-        elif self.agency.goals == [] and self.agency.roles is None:
-            self.agency.roles, _ = await self.agency.generate_roles_and_goals()
-        elif self.agency.roles == [] and self.agency.goals == []:
-            self.agency.roles, self.agency.goals = (
-                await self.agency.generate_roles_and_goals()
-            )
-
-        # Ensure goals are generated if they are None
-        if self.agency.goals is None:
-            _, self.agency.goals = await self.agency.generate_roles_and_goals()
-
-        # Ensure roles are generated if they are None
-        if self.agency.roles is None:
-            self.agency.roles, _ = await self.agency.generate_roles_and_goals()</code></pre>
+    recent_memories_limit: Optional[int] = 5</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -155,6 +133,30 @@ class FramerConfig:
 </dd>
 <dt id="frame.src.framer.config.FramerConfig.model"><code class="name">var <span class="ident">model</span> : Optional[str]</code></dt>
 <dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.config.FramerConfig.multi_modal_model"><code class="name">var <span class="ident">multi_modal_model</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.config.FramerConfig.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.config.FramerConfig.recent_memories_limit"><code class="name">var <span class="ident">recent_memories_limit</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.config.FramerConfig.roles"><code class="name">var <span class="ident">roles</span> : Optional[List[Dict[str, str]]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.config.FramerConfig.singleton"><code class="name">var <span class="ident">singleton</span> : Optional[bool]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.config.FramerConfig.soul_seed"><code class="name">var <span class="ident">soul_seed</span> : Union[str, Dict[str, Any], ForwardRef(None)]</code></dt>
+<dd>
 <div class="desc"><p>Configuration class for Framer instances.</p>
 <p>This class initializes a Framer configuration based on a dictionary of settings.
 It uses the FramerConfigModel to validate and set default values for the configuration.</p>
@@ -190,35 +192,6 @@ It uses the FramerConfigModel to validate and set default values for the configu
 <dd>The goals for the Framer.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.config.FramerConfig.multi_modal_model"><code class="name">var <span class="ident">multi_modal_model</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.config.FramerConfig.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.config.FramerConfig.recent_memories_limit"><code class="name">var <span class="ident">recent_memories_limit</span> : Optional[int]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.config.FramerConfig.roles"><code class="name">var <span class="ident">roles</span> : Optional[List[Dict[str, str]]]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.config.FramerConfig.singleton"><code class="name">var <span class="ident">singleton</span> : Optional[bool]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-<h3>Methods</h3>
-<dl>
-<dt id="frame.src.framer.config.FramerConfig.initialize"><code class="name flex">
-<span>async def <span class="ident">initialize</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Initialize the Framer with roles and goals.</p></div>
-</dd>
 </dl>
 </dd>
 </dl>
@@ -243,7 +216,6 @@ It uses the FramerConfigModel to validate and set default values for the configu
 <li><code><a title="frame.src.framer.config.FramerConfig.description" href="#frame.src.framer.config.FramerConfig.description">description</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.gender" href="#frame.src.framer.config.FramerConfig.gender">gender</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.goals" href="#frame.src.framer.config.FramerConfig.goals">goals</a></code></li>
-<li><code><a title="frame.src.framer.config.FramerConfig.initialize" href="#frame.src.framer.config.FramerConfig.initialize">initialize</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.is_multi_modal" href="#frame.src.framer.config.FramerConfig.is_multi_modal">is_multi_modal</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.llm_frequency_penalty" href="#frame.src.framer.config.FramerConfig.llm_frequency_penalty">llm_frequency_penalty</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.llm_max_tokens" href="#frame.src.framer.config.FramerConfig.llm_max_tokens">llm_max_tokens</a></code></li>
@@ -256,6 +228,7 @@ It uses the FramerConfigModel to validate and set default values for the configu
 <li><code><a title="frame.src.framer.config.FramerConfig.recent_memories_limit" href="#frame.src.framer.config.FramerConfig.recent_memories_limit">recent_memories_limit</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.roles" href="#frame.src.framer.config.FramerConfig.roles">roles</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.singleton" href="#frame.src.framer.config.FramerConfig.singleton">singleton</a></code></li>
+<li><code><a title="frame.src.framer.config.FramerConfig.soul_seed" href="#frame.src.framer.config.FramerConfig.soul_seed">soul_seed</a></code></li>
 </ul>
 </li>
 </ul>

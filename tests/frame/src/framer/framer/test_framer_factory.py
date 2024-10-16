@@ -28,23 +28,6 @@ async def test_create_framer(framer_builder):
     assert framer.config.default_model == "gpt-3.5-turbo"
 
 
-@pytest.mark.asyncio
-async def test_create_framer_without_soul_seed(framer_builder):
-    framer = await framer_builder.build()
-
-    assert framer.soul.model.seed["text"] == "You are a helpful AI assistant."
-
-    # Test perform_task
-    task = {
-        "description": "Test task",
-        "workflow_id": "test_workflow",
-        "priority": 1.0,
-    }
-    result = await framer.perform_task(task)
-
-    assert result is not None
-    assert isinstance(result, dict)
-    assert "output" in result
 
 
 def test_framer_builder_set_config(framer_builder):

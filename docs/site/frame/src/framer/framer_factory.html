@@ -141,7 +141,6 @@ ensuring that all necessary components are properly initialized.</p>
 
     async def create_framer(
         self,
-        soul_seed: Optional[Union[str, Dict[str, Any]]] = None,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
     ) -&gt; Framer:
@@ -161,13 +160,7 @@ ensuring that all necessary components are properly initialized.</p>
             execution_context=execution_context,
         )
 
-        if soul_seed is None:
-            # Generate a default soul seed if none is provided
-            soul_seed = &#34;You are a helpful AI assistant.&#34;
-
-        soul = Soul(
-            seed=(soul_seed if isinstance(soul_seed, dict) else {&#34;text&#34;: soul_seed})
-        )
+        soul = Soul(seed={&#34;text&#34;: &#34;You are a helpful AI assistant.&#34;})
         # Initialize the Soul component with the provided or default seed
         workflow_manager = WorkflowManager()
         # Initialize the WorkflowManager component
@@ -206,7 +199,7 @@ ensuring that all necessary components are properly initialized.</p>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.framer_factory.FramerFactory.create_framer"><code class="name flex">
-<span>async def <span class="ident">create_framer</span></span>(<span>self, soul_seed: Union[str, Dict[str, Any], ForwardRef(None)] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>

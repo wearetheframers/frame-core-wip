@@ -6,7 +6,7 @@ from frame.src.utils.log_manager import get_logger
 logger = get_logger(__name__)
 
 
-def close_logger_handlers(logger=None):
+def close_logger_handlers(logger):
     """Close all handlers for the given logger."""
     if logger is None:
         logger = logging.getLogger()

@@ -47,7 +47,6 @@ class FramerFactory:
 
     async def create_framer(
         self,
-        soul_seed: Optional[Union[str, Dict[str, Any]]] = None,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
     ) -> Framer:
@@ -67,13 +66,7 @@ class FramerFactory:
             execution_context=execution_context,
         )
 
-        if soul_seed is None:
-            # Generate a default soul seed if none is provided
-            soul_seed = "You are a helpful AI assistant."
-
-        soul = Soul(
-            seed=(soul_seed if isinstance(soul_seed, dict) else {"text": soul_seed})
-        )
+        soul = Soul(seed={"text": "You are a helpful AI assistant."})
         # Initialize the Soul component with the provided or default seed
         workflow_manager = WorkflowManager()
         # Initialize the WorkflowManager component

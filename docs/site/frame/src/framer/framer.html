@@ -71,6 +71,7 @@ hljs.highlightAll();
         self._dynamic_model_choice = False
         self.observers = []
         self.can_execute = True  # Add can_execute attribute
+        self.acting = False
 
         # Initialize roles and goals
         self.roles = roles
@@ -117,85 +118,38 @@ hljs.highlightAll();
         await framer.initialize()
         return framer
 
-    @classmethod
-    def load_from_file(cls, file_path: str, llm_service: LLMService, memory_service: Optional[MemoryService] = None, eq_service: Optional[EQService] = None) -&gt; &#34;Framer&#34;:
-        &#34;&#34;&#34;
-        Load a Framer configuration from a file.
-
-        This method allows importing a Framer agent from a JSON or markdown file,
-        enabling the reconstruction of the agent&#39;s state and configuration. This
-        functionality is crucial for restoring Framer agents from saved states,
-        ensuring continuity and consistency across different sessions or environments.
-
-        Args:
-            file_path (str): The path to the configuration file.
-            llm_service (LLMService): Language model service.
-            memory_service (Optional[MemoryService]): Memory service for the Framer.
-            eq_service (Optional[EQService]): Emotional intelligence service for the Framer.
-
-        Returns:
-            Framer: A new Framer instance configured from the file.
-        &#34;&#34;&#34;
-        config = load_framer_from_file(file_path)
-        return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
+    def act(self):
+        &#34;&#34;&#34;Enable the Framer to process perceptions and make decisions.&#34;&#34;&#34;
+        self.acting = True
 
     async def initialize(self):
-        &#34;&#34;&#34;
-        Initialize the Framer by generating or updating roles and goals.
-
-        This method ensures that the Framer has valid roles and goals:
-        1. If both roles and goals are None, generate new roles and goals.
-        2. If roles are an empty list, set both roles and goals to empty lists.
-        3. If goals are None and roles are provided (not None or empty), generate new goals.
-        4. If both roles and goals are provided (not None), use the provided values.
-        &#34;&#34;&#34;
-        if self.roles is None and self.goals is None:
-            generated_roles, generated_goals = (
-                await self.agency.generate_roles_and_goals()
-            )
-            self.roles = [
-                {&#34;name&#34;: role, &#34;description&#34;: f&#34;{role} description&#34;}
-                for role in generated_roles
-            ]
-            self.goals = [
-                {&#34;description&#34;: goal, &#34;priority&#34;: 1} for goal in generated_goals
-            ]
-        elif self.roles == []:
-            self.goals = []
-        elif self.goals is None and self.roles:
-            _, generated_goals = await self.agency.generate_roles_and_goals()
-            self.goals = [
-                {&#34;description&#34;: goal, &#34;priority&#34;: 1} for goal in generated_goals
-            ]
-        elif self.roles and self.goals is None:
-            new_roles, _ = await self.agency.generate_roles_and_goals()
-            self.roles.extend(
-                [
-                    {&#34;name&#34;: role, &#34;description&#34;: f&#34;{role} description&#34;}
-                    for role in new_roles
-                ]
-            )
+        &#34;&#34;&#34;Initialize the Framer with roles and goals.&#34;&#34;&#34;
+        self.act()  # Start acting after initialization
 
         if not self.roles:
-            self.roles = [
-                {&#34;name&#34;: &#34;Default Role&#34;, &#34;description&#34;: &#34;Default role description&#34;}
-            ]
+            self.roles, _ = await self.agency.generate_roles_and_goals()
         if not self.goals:
-            self.goals = [
-                {
-                    &#34;description&#34;: &#34;Assist users to the best of my abilities&#34;,
-                    &#34;priority&#34;: 1,
-                }
-            ]
+            _, self.goals = await self.agency.generate_roles_and_goals()
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
+        &#34;&#34;&#34;Disable the Framer from processing perceptions and making decisions.&#34;&#34;&#34;
+        self.acting = False
 
-        # Ensure the agency has the roles and goals attributes
-        self.agency.roles = self.roles
-        self.agency.goals = self.goals
+    def export_to_markdown(self, file_path: str) -&gt; None:
+        &#34;&#34;&#34;
+        Export the Framer configuration to a Markdown file.
 
-    def export_to_json(self, file_path: str) -&gt; None:
+        This method allows the Framer agent to be fully exported into a Markdown format,
+        making it portable and easy to use inside a prompt to any other LLM. This
+        portability enables the Framer agents to be shared and consumed by other
+        systems, facilitating interoperability and reuse.
+
+        Args:
+            file_path (str): The path to the file where the Markdown will be saved.
+        &#34;&#34;&#34;
+        from frame.src.utils.config_parser import export_config_to_markdown
+        export_config_to_markdown(self.config, file_path)
         &#34;&#34;&#34;
         Export the Framer configuration to a JSON file.
 
@@ -234,7 +188,7 @@ hljs.highlightAll();
         Returns:
             Framer: A new Framer instance configured from the file.
         &#34;&#34;&#34;
-        config = load_framer_from_file(file_path)
+        config = parse_json_config(file_path)
         return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
 
     def export_to_json(self, file_path: str) -&gt; None:
@@ -268,7 +222,15 @@ hljs.highlightAll();
             Dict[str, Any]: Result of the task execution.
         &#34;&#34;&#34;
         logger.debug(f&#34;perform_task called with task: {task}&#34;)
-        task_obj = Task(**task)
+        valid_task_keys = Task.__annotations__.keys()
+        task_filtered = {k: v for k, v in task.items() if k in valid_task_keys}
+        # Ensure required fields are present
+        if &#39;description&#39; not in task_filtered:
+            task_filtered[&#39;description&#39;] = &#39;Default Task Description&#39;
+        if &#39;workflow_id&#39; not in task_filtered:
+            task_filtered[&#39;workflow_id&#39;] = &#39;default&#39;
+
+        task_obj = Task(**task_filtered)
         result = await self.agency.perform_task(task_obj)
         return result if result is not None else {&#34;output&#34;: &#34;No result returned&#34;}
 
@@ -282,7 +244,9 @@ hljs.highlightAll();
         Returns:
             Decision: The decision made based on the perception.
         &#34;&#34;&#34;
-        if isinstance(perception, dict):
+        if not self.acting:
+            logger.warning(&#34;Framer is not acting. Cannot process perceptions.&#34;)
+            return Decision(action=&#34;error&#34;, parameters={}, reasoning=&#34;Framer is halted.&#34;)
             perception = Perception.from_dict(perception)
         decision = await self.brain.process_perception(
             perception, self.agency.get_goals()
@@ -327,21 +291,34 @@ hljs.highlightAll();
                 if hasattr(plugin, &#34;on_decision_made&#34;):
                     plugin.on_decision_made(decision)
 
-    def notify_task_completion(self, task: Task) -&gt; None:
+    async def close(self) -&gt; None:
         &#34;&#34;&#34;
-        Notify all observers and plugins about task completion.
+        Optimize and clear all memory for the Framer.
 
-        Args:
-            task (Task): The task that was completed.
+        This method ensures that all tasks and workflows are closed properly,
+        and any resources or memory used by the Framer are released. It is
+        important to call this method when the Framer is no longer needed to
+        prevent memory leaks and ensure optimal performance.
         &#34;&#34;&#34;
+        # Close all workflows
+        for workflow in self.workflow_manager.workflows.values():
+            workflow.set_final_task(None)  # Clear final tasks
+            for task in workflow.tasks:
+                task.update_status(TaskStatus.COMPLETED)  # Mark tasks as completed
+
+        # Clear memory
+        if self.memory_service:
+            self.memory_service.clear()
+
+        # Notify observers and plugins about closure
         for observer in self.observers:
-            if hasattr(observer, &#34;on_task_completed&#34;):
-                observer.on_task_completed(task)
+            if hasattr(observer, &#34;on_framer_closed&#34;):
+                observer.on_framer_closed(self)
 
         if hasattr(self, &#34;plugins&#34;):
             for plugin in self.plugins.values():
-                if hasattr(plugin, &#34;on_task_completed&#34;):
-                    plugin.on_task_completed(task)</code></pre>
+                if hasattr(plugin, &#34;on_framer_closed&#34;):
+                    plugin.on_framer_closed(self)</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>
@@ -380,6 +357,12 @@ ensuring continuity and consistency across different sessions or environments.</
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="frame.src.framer.framer.Framer.act"><code class="name flex">
+<span>def <span class="ident">act</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Enable the Framer to process perceptions and make decisions.</p></div>
+</dd>
 <dt id="frame.src.framer.framer.Framer.add_observer"><code class="name flex">
 <span>def <span class="ident">add_observer</span></span>(<span>self, observer: Callable[[<a title="frame.src.framer.brain.decision.decision.Decision" href="brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>], None]) ‑> None</span>
 </code></dt>
@@ -390,6 +373,16 @@ ensuring continuity and consistency across different sessions or environments.</
 <dt><strong><code>observer</code></strong> :&ensp;<code>Observer</code></dt>
 <dd>The observer function to add.</dd>
 </dl></div>
+</dd>
+<dt id="frame.src.framer.framer.Framer.close"><code class="name flex">
+<span>async def <span class="ident">close</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Optimize and clear all memory for the Framer.</p>
+<p>This method ensures that all tasks and workflows are closed properly,
+and any resources or memory used by the Framer are released. It is
+important to call this method when the Framer is no longer needed to
+prevent memory leaks and ensure optimal performance.</p></div>
 </dd>
 <dt id="frame.src.framer.framer.Framer.export_to_json"><code class="name flex">
 <span>def <span class="ident">export_to_json</span></span>(<span>self, file_path: str) ‑> None</span>
@@ -406,16 +399,26 @@ systems, facilitating interoperability and reuse.</p>
 <dd>The path to the file where the JSON will be saved.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.framer.framer.Framer.export_to_markdown"><code class="name flex">
+<span>def <span class="ident">export_to_markdown</span></span>(<span>self, file_path: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Export the Framer configuration to a Markdown file.</p>
+<p>This method allows the Framer agent to be fully exported into a Markdown format,
+making it portable and easy to use inside a prompt to any other LLM. This
+portability enables the Framer agents to be shared and consumed by other
+systems, facilitating interoperability and reuse.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>The path to the file where the Markdown will be saved.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.framer.framer.Framer.initialize"><code class="name flex">
 <span>async def <span class="ident">initialize</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Initialize the Framer by generating or updating roles and goals.</p>
-<p>This method ensures that the Framer has valid roles and goals:
-1. If both roles and goals are None, generate new roles and goals.
-2. If roles are an empty list, set both roles and goals to empty lists.
-3. If goals are None and roles are provided (not None or empty), generate new goals.
-4. If both roles and goals are provided (not None), use the provided values.</p></div>
+<div class="desc"><p>Initialize the Framer with roles and goals.</p></div>
 </dd>
 <dt id="frame.src.framer.framer.Framer.notify_observers"><code class="name flex">
 <span>def <span class="ident">notify_observers</span></span>(<span>self, decision: <a title="frame.src.framer.brain.decision.decision.Decision" href="brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>) ‑> None</span>
@@ -426,17 +429,6 @@ systems, facilitating interoperability and reuse.</p>
 <dl>
 <dt><strong><code>decision</code></strong> :&ensp;<code>Decision</code></dt>
 <dd>The decision to notify observers about.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.framer.Framer.notify_task_completion"><code class="name flex">
-<span>def <span class="ident">notify_task_completion</span></span>(<span>self, task: <a title="frame.src.framer.agency.tasks.task.Task" href="agency/tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Notify all observers and plugins about task completion.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>task</code></strong> :&ensp;<code>Task</code></dt>
-<dd>The task that was completed.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.framer.Framer.perform_task"><code class="name flex">
@@ -501,14 +493,16 @@ systems, facilitating interoperability and reuse.</p>
 <ul>
 <li>
 <h4><code><a title="frame.src.framer.framer.Framer" href="#frame.src.framer.framer.Framer">Framer</a></code></h4>
-<ul class="">
+<ul class="two-column">
+<li><code><a title="frame.src.framer.framer.Framer.act" href="#frame.src.framer.framer.Framer.act">act</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.add_observer" href="#frame.src.framer.framer.Framer.add_observer">add_observer</a></code></li>
+<li><code><a title="frame.src.framer.framer.Framer.close" href="#frame.src.framer.framer.Framer.close">close</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.create" href="#frame.src.framer.framer.Framer.create">create</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.export_to_json" href="#frame.src.framer.framer.Framer.export_to_json">export_to_json</a></code></li>
+<li><code><a title="frame.src.framer.framer.Framer.export_to_markdown" href="#frame.src.framer.framer.Framer.export_to_markdown">export_to_markdown</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.initialize" href="#frame.src.framer.framer.Framer.initialize">initialize</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.load_from_file" href="#frame.src.framer.framer.Framer.load_from_file">load_from_file</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.notify_observers" href="#frame.src.framer.framer.Framer.notify_observers">notify_observers</a></code></li>
-<li><code><a title="frame.src.framer.framer.Framer.notify_task_completion" href="#frame.src.framer.framer.Framer.notify_task_completion">notify_task_completion</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.perform_task" href="#frame.src.framer.framer.Framer.perform_task">perform_task</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.remove_observer" href="#frame.src.framer.framer.Framer.remove_observer">remove_observer</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.sense" href="#frame.src.framer.framer.Framer.sense">sense</a></code></li>

@@ -1,15 +1,11 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 from dataclasses import dataclass, field
-
-
-from dataclasses import dataclass, field
-from typing import Optional
-
 
 @dataclass
 class FramerConfig:
     name: str
     model: Optional[str] = field(default=None)
+    soul_seed: Optional[Union[str, Dict[str, Any]]] = "You are a helpful AI assistant."
     """
     Configuration class for Framer instances.
 
@@ -49,25 +45,3 @@ class FramerConfig:
     goals: Optional[List[Dict[str, Any]]] = field(default_factory=list)
     recent_memories_limit: Optional[int] = 5
 
-    async def initialize(self):
-        """Initialize the Framer with roles and goals."""
-        if self.agency.roles is None and self.agency.goals is None:
-            self.agency.roles, self.agency.goals = (
-                await self.agency.generate_roles_and_goals()
-            )
-        elif self.agency.roles == [] and self.agency.goals is None:
-            _, self.agency.goals = await self.agency.generate_roles_and_goals()
-        elif self.agency.goals == [] and self.agency.roles is None:
-            self.agency.roles, _ = await self.agency.generate_roles_and_goals()
-        elif self.agency.roles == [] and self.agency.goals == []:
-            self.agency.roles, self.agency.goals = (
-                await self.agency.generate_roles_and_goals()
-            )
-
-        # Ensure goals are generated if they are None
-        if self.agency.goals is None:
-            _, self.agency.goals = await self.agency.generate_roles_and_goals()
-
-        # Ensure roles are generated if they are None
-        if self.agency.roles is None:
-            self.agency.roles, _ = await self.agency.generate_roles_and_goals()
