@@ -264,10 +264,9 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         action = decision_data.get(&#34;action&#34;, &#34;respond&#34;).lower()
         valid_actions = [
             action.lower() for action in self.action_registry.actions.keys()
-        ] + [
-            &#34;test_action&#34;
-        ]  # Add &#34;test_action&#34; for testing purposes
+        ]
 
+        # Check if the action is valid
         if action not in valid_actions:
             invalid_action = action
             action = &#34;respond&#34;

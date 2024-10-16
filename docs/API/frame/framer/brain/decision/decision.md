@@ -17,7 +17,7 @@ The Decision class represents the outcome of the decision-making process in the 
 - **Parameter Storage**: Stores relevant parameters for the chosen action.
 - **Reasoning Capture**: Records the reasoning behind the decision.
 - **Confidence Measurement**: Indicates the confidence level of the decision.
-- **Priority Assignment**: Assigns a priority level to the decision.
+- **Priority Assignment**: Assigns a priority level to the decision, influencing the preference of actions during decision-making.
 
 ## Usage
 

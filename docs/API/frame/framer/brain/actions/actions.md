@@ -14,7 +14,7 @@ To add a new action, follow these steps:
 
 2. **Define the Action Function**: Implement the action logic in a function. This function should accept any necessary parameters and return the result of the action.
 
-3. **Register the Action**: Use the `ActionRegistry` to register your action. Provide a name, the function, a description, and a priority level.
+3. **Register the Action**: Use the `ActionRegistry` to register your action. Provide a name, the function, a description, and a priority level. Setting a higher priority makes the action more preferable over others during decision-making.
 
 4. **Bind Variables to Action Callbacks**: When registering the action, you can bind additional variables to the action function using keyword arguments.
 

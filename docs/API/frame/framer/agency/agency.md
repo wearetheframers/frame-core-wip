@@ -18,6 +18,8 @@ The Agency class represents the decision-making and task management component of
 - **Task Management**: Create, assign, and complete tasks.
 - **Workflow Management**: Organize tasks into workflows to achieve specific objectives.
 - **Automatic Role and Goal Generation**: Generate roles and goals when they are not provided or are empty.
+- **Action Priority**: Assign priorities to actions to control their execution order and preference.
+- **Action Priority**: Actions can be assigned priorities to ensure that more important actions are executed first.
 - **Execution Context**: Utilize a centralized execution context for consistent access to services across actions.
 
 ## Usage

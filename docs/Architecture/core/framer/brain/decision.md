@@ -11,6 +11,8 @@ The Decision component represents a decision made by the Brain component of a Fr
 
 ## Key Features
 
+- **Priority Management**: Actions can be prioritized to influence decision-making, ensuring that more critical actions are preferred.
+
 - Action representation.
 - Decision parameters and reasoning.
 - Confidence and priority management.
