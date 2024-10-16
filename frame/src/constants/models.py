@@ -16,6 +16,8 @@ AVAILABLE_MODELS = [
 def is_model_supported(model: str) -> bool:
     """Check if the given model is supported."""
     return model in AVAILABLE_MODELS
+
+
 import os
 from dotenv import load_dotenv
 

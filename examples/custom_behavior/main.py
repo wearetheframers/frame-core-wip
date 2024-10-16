@@ -9,7 +9,9 @@ from frame import Frame, FramerConfig
 
 
 # Define a new custom action
-async def custom_greet_action(execution_context, custom_message: str, name: Optional[str] = "User") -> str:
+async def custom_greet_action(
+    execution_context, custom_message: str, name: Optional[str] = "User"
+) -> str:
     return f"{custom_message} Nice to meet you, {name}!"
 
 
@@ -26,7 +28,7 @@ async def main():
         "custom_greet",
         custom_greet_action,
         description="Greet a user with a custom message",
-        priority=10, # High priority to ensure preference over default actions
+        priority=10,  # High priority to ensure preference over default actions
     )
 
     # Example usage of the custom action

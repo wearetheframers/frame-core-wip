@@ -162,7 +162,11 @@ class Agency:
         pending_tasks = [
             task for task in workflow.tasks if task.status == TaskStatus.PENDING
         ]
-        return max(pending_tasks, key=lambda task: task.priority) if pending_tasks else None
+        return (
+            max(pending_tasks, key=lambda task: task.priority)
+            if pending_tasks
+            else None
+        )
 
     def complete_task(self, task: Task, result: Any) -> None:
         """

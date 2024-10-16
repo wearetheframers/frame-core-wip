@@ -191,13 +191,17 @@ class Framer:
         with open(file_path, "w") as file:
             json.dump(
                 {
-                    "config": self.config.to_dict() if hasattr(self.config, "to_dict") else self.config,
+                    "config": (
+                        self.config.to_dict()
+                        if hasattr(self.config, "to_dict")
+                        else self.config
+                    ),
                     "roles": self.roles,
                     "goals": self.goals,
                 },
                 file,
                 indent=4,
-                default=str  # Use default=str to handle non-serializable objects
+                default=str,  # Use default=str to handle non-serializable objects
             )
 
     def export_to_json(self, file_path: str) -> None:
@@ -217,13 +221,17 @@ class Framer:
         with open(file_path, "w") as file:
             json.dump(
                 {
-                    "config": self.config.to_dict() if hasattr(self.config, "to_dict") else self.config,
+                    "config": (
+                        self.config.to_dict()
+                        if hasattr(self.config, "to_dict")
+                        else self.config
+                    ),
                     "roles": self.roles,
                     "goals": self.goals,
                 },
                 file,
                 indent=4,
-                default=str  # Use default=str to handle non-serializable objects
+                default=str,  # Use default=str to handle non-serializable objects
             )
 
     @classmethod
