@@ -1,11 +1,20 @@
+import json
 import pytest
 from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.framer.agency.execution_context import ExecutionContext
+from unittest.mock import Mock
+from frame.src.services.llm.main import LLMService
 
 
 @pytest.fixture
 def action_registry():
-    return ActionRegistry(execution_context=ExecutionContext())
+    llm_service = Mock(spec=LLMService)
+    llm_service.get_completion.return_value = json.dumps({
+        "name": "Role1",
+        "description": "A test role",
+        "priority": "medium",
+    })
+    return ActionRegistry(execution_context=ExecutionContext(llm_service=llm_service))
 
 
 @pytest.mark.asyncio
@@ -26,7 +35,8 @@ async def test_register_and_perform_action(action_registry):
     assert action_info["priority"] == 8
 
 
-def test_get_valid_actions(action_registry):
+@pytest.mark.asyncio
+async def test_get_valid_actions(action_registry):
     # Register default actions if not already registered
     default_actions = [
         "create_new_agent",
@@ -67,11 +77,10 @@ def test_register_action_with_invalid_priority(action_registry):
             "invalid_priority_action", test_action, "Invalid priority", 0
         )
 
-
-def test_perform_nonexistent_action(action_registry):
-    with pytest.raises(ValueError):
-        action_registry.perform_action("nonexistent_action")
-
+@pytest.mark.asyncio
+async def test_perform_nonexistent_action(action_registry):
+    with pytest.raises(ValueError, match="Action 'nonexistent_action' not found"):
+        await action_registry.perform_action("nonexistent_action")
 
 @pytest.mark.asyncio
 async def test_action_with_callback(action_registry):

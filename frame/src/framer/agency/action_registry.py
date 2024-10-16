@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import json
 from typing import Dict, Any, Callable, Optional
 from frame.src.framer.agency.actions.observe import observe
 from frame.src.framer.agency.actions.think import think
@@ -43,7 +44,7 @@ class ActionRegistry:
         if not asyncio.iscoroutinefunction(action_func):
 
             async def wrapper(*args, **kwargs):
-                return await asyncio.to_thread(action_func, *args, **kwargs)
+                return action_func(*args, **kwargs)
 
             action_func = wrapper
         self.actions[name] = {
@@ -120,10 +121,11 @@ class ActionRegistry:
             raise ValueError(f"Action '{name}' not found")
         if self.execution_context is None:
             raise ValueError("Execution context is not set")
-        result = await action["action_func"](self.execution_context, *args, **kwargs)
+        response = await action["action_func"](*args, execution_context=self.execution_context, **kwargs)
+        role = response if isinstance(response, dict) else response
         if callback:
-            callback(result, *callback_args)
-        return result
+            callback(response, *callback_args)
+        return response
 
     def get_action(self, name: str) -> Optional[Dict[str, Any]]:
         """

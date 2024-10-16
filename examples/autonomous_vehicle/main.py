@@ -66,7 +66,7 @@ async def main():
         await asyncio.sleep(1)
 
     # Clean up
-    await frame.close()
+    await framer.close()
 
 
 # Run the example

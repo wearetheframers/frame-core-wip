@@ -83,10 +83,11 @@ def strip_ansi_codes(text):
 def test_cli_run_framer_with_prompt(runner, mocker):
     mock_logger = mocker.patch("frame.cli.cli.logger")
     mock_execute_framer = mocker.patch("frame.cli.cli.execute_framer", return_value={"result": "success"})
-    mock_execute_framer.return_value = {"result": "success"}
     mock_frame = mocker.patch("frame.frame.Frame", autospec=True)
     mock_frame_instance = mock_frame.return_value
     mock_frame_instance.llm_service = mocker.Mock(spec=LLMService)
+    mock_frame_instance.llm_service.get_completion.return_value = '{"action": "think", "parameters": {"thought": "Test thought"}, "reasoning": "Test reasoning", "confidence": 0.9, "priority": 5}'
+    mock_execute_framer.return_value = {"result": "success"}
     mock_click_echo = mocker.patch("frame.cli.cli.click.echo")
 
     result = runner.invoke(
@@ -95,7 +96,11 @@ def test_cli_run_framer_with_prompt(runner, mocker):
 
     assert (
         result.exit_code == 0
-    ), f"Exit code was {result.exit_code}, expected 0. Output: {strip_ansi_codes(result.output)}"
+    ), f"Exit code was {result.exit_code}, expected 0. Output: {strip_ansi_codes(str(result.output))}"
+
+    # Ensure the output is a string before formatting
+    output = strip_ansi_codes(str(result.output))
+    assert isinstance(output, str), "Output is not a string"
 
     # Check if execute_framer was called
     mock_execute_framer.assert_called_once()

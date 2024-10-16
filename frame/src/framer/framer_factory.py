@@ -21,6 +21,12 @@ class FramerFactory:
 
     This class encapsulates the logic for constructing Framer objects,
     ensuring that all necessary components are properly initialized.
+
+    The Framer includes a `halt()` method to stop its actions and task processing.
+    Factory class for creating Framer instances.
+
+    This class encapsulates the logic for constructing Framer objects,
+    ensuring that all necessary components are properly initialized.
     """
 
     def __init__(self, config: FramerConfig, llm_service: LLMService):

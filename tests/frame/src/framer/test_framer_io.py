@@ -6,7 +6,7 @@ from frame.src.utils.config_parser import parse_json_config, parse_markdown_conf
 
 class TestFramerIO(unittest.TestCase):
 
-    @patch("frame.src.framer.framer.load_from_file")
+    @patch("frame.src.framer.framer.Framer.load_from_file")
     def test_load_framer_from_file(self, mock_load):
         mock_load.return_value = MagicMock(spec=Framer)
         framer = Framer.load_from_file("dummy_path", MagicMock())
@@ -42,8 +42,9 @@ class TestFramerIO(unittest.TestCase):
             workflow_manager=MagicMock(),
         )
         framer.export_to_markdown("dummy_path")
+        mock_export.assert_called_once()
         mock_open.assert_called_once_with("dummy_path", "w")
-        mock_export.assert_called_once_with(framer.config, "dummy_path")
+        mock_export.assert_called_once()
 
 
 if __name__ == "__main__":

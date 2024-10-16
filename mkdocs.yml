@@ -12,7 +12,7 @@ nav:
   - API:
       - API Reference: API/api_reference.md
       - Frame:
-          - Overview: API/frame/frame/frame.md
+          - Overview: API/frame/frame.md
           - Frame:
             - Framer:
                 - Framer: API/frame/framer/framer.md

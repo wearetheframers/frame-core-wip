@@ -100,8 +100,6 @@ class Framer:
         # Initialize roles and goals
         self.roles = roles
         self.goals = goals
-
-        # Start acting by default
         self.act()
 
     @classmethod
@@ -171,8 +169,6 @@ class Framer:
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
-        """Disable the Framer from processing perceptions and making decisions."""
-        self.acting = False
 
     def export_to_json(self, file_path: str) -> None:
         """

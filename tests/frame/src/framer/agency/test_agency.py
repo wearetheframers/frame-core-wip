@@ -40,17 +40,21 @@ def test_agency_initialization(agency, mock_llm_service):
 
 @pytest.mark.asyncio
 async def test_generate_roles_with_numeric_priority(agency):
-    agency.llm_service.get_completion.return_value = (
-        '{"name": "Role1", "description": "A test role", "priority": 9}'
-    )
+    agency.llm_service.get_completion.return_value = {
+        "name": "Role1",
+        "description": "A test role",
+        "priority": 9
+    }
     roles = await agency.generate_roles()
     assert roles[0]["priority"] == 9
 
 
 async def test_generate_roles_with_string_priority(agency):
-    agency.llm_service.get_completion.return_value = (
-        '{"name": "Role1", "description": "A test role", "priority": "medium"}'
-    )
+    agency.llm_service.get_completion.return_value = {
+        "name": "Role1",
+        "description": "A test role",
+        "priority": "medium"
+    }
     roles = await agency.generate_roles()
     assert roles[0]["priority"] == 5
     mock_roles = [{"name": "Test Role", "description": "A test role"}]
@@ -124,7 +128,7 @@ def test_add_task(agency, task_data, workflow_name):
     assert workflow is not None
     tasks = [t for t in workflow.tasks if t.description == task_data["description"]]
     assert len(tasks) == 1
-    assert tasks[0].priority == task_data.get("priority", 50.0)
+    assert tasks[0].priority == task_data.get("priority", 5)  # Default priority is 5
 
 
 @pytest.mark.asyncio
@@ -202,7 +206,7 @@ async def test_generate_roles_and_goals_empty_response(agency):
 
     roles, goals = await agency.generate_roles_and_goals()
 
-    assert roles == [{"name": "Task Assistant"}]
+    assert roles == [{"name": "Task Assistant", "description": "Assist with the given task or query."}]
     assert goals == [{"description": "Assist users to the best of my abilities"}]
 
     agency.generate_roles.assert_called_once()

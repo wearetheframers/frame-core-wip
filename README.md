@@ -10,7 +10,7 @@
 Frame consists of three main components: `Frame`, `Framed`, and `Framer`.
 
 - **Frame**: The main interface for creating and managing Framer instances.
-- **Framer**: Represents an individual AI agent equipped with advanced capabilities for task management, decision-making, and interaction with language models. The Soul and Agency components are integral to a Framer's flexibility and customization, making it adaptable for a wide range of applications. These components are the primary interfaces through which users will interact with the API.
+- **Framer**: Represents an individual AI agent equipped with advanced capabilities for task management, decision-making, and interaction with language models. The Soul and Agency components are integral to a Framer's flexibility and customization, making it adaptable for a wide range of applications. These components are the primary interfaces through which users will interact with the API. The `halt()` method can be used to stop the Framer from acting, providing control over its activity.
 - **Framed**: A collection of Framer objects working together to achieve complex tasks.
 
 ## Table of Contents
