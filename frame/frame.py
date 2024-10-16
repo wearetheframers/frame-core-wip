@@ -7,7 +7,7 @@ from .src.framed.framed_factory import FramedBuilder
 from .src.framer.config import FramerConfig
 from .src.services.llm.main import LLMService
 from .src.utils.llm_utils import LLMMetrics, llm_metrics, track_llm_usage
-
+from frame.src.utils.llm_utils import track_llm_usage
 
 class Frame:
     """
@@ -153,8 +153,6 @@ class Frame:
 
         # Calculate tokens used (you may need to implement this based on your LLM service)
         tokens_used = self.calculate_tokens_used(prompt, result)
-
-        from frame.src.utils.llm_utils import track_llm_usage
 
         track_llm_usage(model, tokens_used)
 

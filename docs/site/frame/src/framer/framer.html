@@ -259,13 +259,17 @@ processing perceptions, making decisions, and executing tasks.</p>
         with open(file_path, &#34;w&#34;) as file:
             json.dump(
                 {
-                    &#34;config&#34;: self.config.to_dict() if hasattr(self.config, &#34;to_dict&#34;) else self.config,
+                    &#34;config&#34;: (
+                        self.config.to_dict()
+                        if hasattr(self.config, &#34;to_dict&#34;)
+                        else self.config
+                    ),
                     &#34;roles&#34;: self.roles,
                     &#34;goals&#34;: self.goals,
                 },
                 file,
                 indent=4,
-                default=str  # Use default=str to handle non-serializable objects
+                default=str,  # Use default=str to handle non-serializable objects
             )
 
     def export_to_json(self, file_path: str) -&gt; None:
@@ -285,13 +289,17 @@ processing perceptions, making decisions, and executing tasks.</p>
         with open(file_path, &#34;w&#34;) as file:
             json.dump(
                 {
-                    &#34;config&#34;: self.config.to_dict() if hasattr(self.config, &#34;to_dict&#34;) else self.config,
+                    &#34;config&#34;: (
+                        self.config.to_dict()
+                        if hasattr(self.config, &#34;to_dict&#34;)
+                        else self.config
+                    ),
                     &#34;roles&#34;: self.roles,
                     &#34;goals&#34;: self.goals,
                 },
                 file,
                 indent=4,
-                default=str  # Use default=str to handle non-serializable objects
+                default=str,  # Use default=str to handle non-serializable objects
             )
 
     @classmethod
