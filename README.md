@@ -1,7 +1,9 @@
 # Frame
 
-![Frame Logo](path/to/logo.png)
-*Frame is a multi-modal cognitive agent framework designed to support fully emergent characteristics and efficiently automating tasks.*
+<div align="center">
+  <img src="docs/frame-logo-transparent.png" alt="Frame Logo" width="320"/>
+  <p>Frame is a multi-modal cognitive agent framework designed to support fully emergent characteristics and efficiently automating tasks.</p>
+</div>
 
 Frame consists of three main components: `Frame`, `Framed`, and `Framer`.
 
