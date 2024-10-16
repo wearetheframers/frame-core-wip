@@ -1,6 +1,9 @@
 # Frame
 
-Frame is a multi-modal cognitive agent framework designed to support fully emergent characteristics. It consists of three main components: `Frame`, `Framed`, and `Framer`.
+![Frame Logo](path/to/logo.png)
+*Frame is a multi-modal cognitive agent framework designed to support fully emergent characteristics and efficiently automating tasks.*
+
+Frame consists of three main components: `Frame`, `Framed`, and `Framer`.
 
 - **Frame**: The main interface for creating and managing Framer instances.
 - **Framer**: Represents an individual AI agent with capabilities for task management, decision-making, and interaction with language models.
