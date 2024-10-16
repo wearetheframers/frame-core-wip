@@ -10,7 +10,7 @@
 Frame consists of three main components: `Frame`, `Framed`, and `Framer`.
 
 - **Frame**: The main interface for creating and managing Framer instances.
-- **Framer**: Represents an individual AI agent with capabilities for task management, decision-making, and interaction with language models. The Soul and Agency components are what allow a Framer to be truly flexible and customizable for any occasion. Agency and Soul are the two components a user will be using the API the most.
+- **Framer**: Represents an individual AI agent equipped with advanced capabilities for task management, decision-making, and interaction with language models. The Soul and Agency components are integral to a Framer's flexibility and customization, making it adaptable for a wide range of applications. These components are the primary interfaces through which users will interact with the API.
 - **Framed**: A collection of Framer objects working together to achieve complex tasks.
 
 ## Table of Contents
@@ -87,7 +87,7 @@ await framer.close()
 Frame is built on a modular architecture that allows for flexible and emergent AI agent behavior. The main components are:
 
 - **Frame**: The main interface for creating and managing Framer instances.
-- **Framer**: An AI agent with agency and soul capabilities. The Soul and Agency components are what allow a Framer to be truly flexible and customizable for any occasion. Agency and Soul are the two components a user will be using the API the most.
+- **Framer**: An AI agent equipped with agency and soul capabilities. The Soul and Agency components are crucial for ensuring a Framer's adaptability and customization across various scenarios. These components are the primary interfaces for user interaction with the API.
 - **Framed**: A group of Framer objects working together.
 - **Agency**: Manages roles, goals, and task management.
 - **Soul**: Manages memory, emotional states, and intrinsic characteristics.
@@ -138,11 +138,11 @@ Services
 
 ### SDK Usage
 
-Frame provides a comprehensive SDK for building and managing AI agents. For detailed examples and explanations, see the [SDK Usage](docs/SDK_Usage.md) documentation.
+Frame provides a comprehensive SDK for building and managing AI agents. For detailed examples and explanations, see the [SDK Usage](docs/Usage/SDK_Usage.md) documentation.
 
 ### CLI Usage
 
-Frame's CLI supports both JSON input and traditional CLI arguments for flexible configuration. For more details, see the [CLI Usage](docs/CLI_Usage.md) documentation.
+Frame's CLI supports both JSON input and traditional CLI arguments for flexible configuration. For more details, see the [CLI Usage](docs/Usage/CLI_Usage.md) documentation.
 
 ## Plugins and Actions
 
@@ -160,11 +160,32 @@ pytest
 
 ### Documentation
 
-The project uses MkDocs for documentation. To build and serve the documentation, use:
+The project uses MkDocs and can also use pdoc3 for documentation. The MkDocs config is in `docs/`, and HTML output is also in `docs/`.
+
+To build and serve MkDocs documentation, run:
 
 ```bash
-mkdocs serve
+mkdocs serve --config-file ./mkdocs.yml
 ```
+
+To serve both MkDocs and pdoc3 simultaneously, use:
+
+```bash
+python scripts\serve_docs.py
+```
+
+This runs MkDocs on port 3010 and pdoc3 on port 3011. This script runs both with live reloading, runs unit tests on initialization and generates a coverage report, and also parses and converts link references automatically (see below).
+
+#### Roam Links Converter
+
+The `roam_links_converter.py` script in `scripts` converts roam-style links (e.g., `[[Link Text]]`) to standard Markdown links. Use it before generating final docs to improve navigation.
+
+### Using MkDocs
+
+**Add new documentation**:
+- Add markdown files in `docs`.
+- Update `mkdocs.yml` for navigation.
+- API docs will be populated automatically from docstrings if you specify the class entrypoint in the markdown file.
 
 ### Linting
 
@@ -176,7 +197,11 @@ black .
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is dual-licensed under the GNU Affero General Public License version 3 (AGPLv3) and a proprietary license. See the [LICENSE](LICENSE) file for details.
+
+## Custom Enterprise Support
+
+For custom enterprise support, development of features, or plugins, please contact our team at [team@frame.dev] or visit our website at [Frame.dev].
 
 ## Contributing
 

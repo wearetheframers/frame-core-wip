@@ -12,7 +12,7 @@ The `Framer` class represents an AI agent with cognitive capabilities. It integr
 
 ## Key Features
 
-The Soul and Agency components are what allow a Framer to be truly flexible and customizable for any occasion. Agency and Soul are the two components a user will be using the API the most.
+The Soul and Agency components are essential for providing a Framer with the flexibility and customization needed for diverse applications. These components are the primary interfaces through which users will engage with the API.
 
 - **Initialization, Acting, and Halting**: Framers are initialized using the `initialize()` method, which automatically calls `act()`, allowing them to make decisions from new perceptions. To stop the Framer from acting or making new tasks, use the `halt()` method. When halted, perceptions are still registered and can be considered in future decisions unless `ignore_perceptions_while_halted` is set to True.
 

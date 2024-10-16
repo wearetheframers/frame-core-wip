@@ -98,7 +98,11 @@ We welcome contributions to the Frame project. Please see our [[contributing]] g
 
 ## License
 
-Frame is released under the MIT License. See the [LICENSE](https://github.com/your-repo-link/LICENSE) file for more details.
+This project is dual-licensed under the GNU Affero General Public License version 3 (AGPLv3) and a proprietary license. See the [LICENSE](https://github.com/your-repo-link/LICENSE) file for more details.
+
+## Custom Enterprise Support
+
+For custom enterprise support, development of features, or plugins, please contact our team at [team@frame.dev] or visit our website at [Frame.dev].
 
 ## Support and Community
 
