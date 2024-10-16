@@ -12,30 +12,30 @@ nav:
   - API:
       - API Reference: API/api_reference.md
       - Frame:
-          - Overview: API/frame/overview.md
-          - Frame: API/frame/frame.md
-          - Framer:
-              - Framer: API/frame/framer/framer.md
-              - Framer Factory: API/frame/framer/framer_factory.md
-              - Agency: API/frame/framer/agency/agency.md
-              - Action Registry: API/frame/framer/agency/action_registry.md
-              - Tasks:
-                  - Task: API/frame/framer/agency/tasks/task.md
-                  - Workflow: API/frame/framer/agency/tasks/workflow/workflow.md
-                  - Workflow Manager: API/frame/framer/agency/tasks/workflow/workflow_manager.md
-              - Brain:
-                  - Brain: API/frame/framer/brain/brain.md
-                  - Perception: API/frame/framer/brain/perception/perception.md
-                  - Decision: API/frame/framer/brain/decision/decision.md
-                  - Mind: API/frame/framer/brain/mind/mind.md
-                  - Memory: API/frame/framer/brain/memory/memory.md
-                  - Memory Adapter: API/frame/framer/brain/memory/memory_adapters/mem0/mem0_adapter.md
-              - Soul: API/frame/framer/soul/soul.md
-              - Config: API/frame/framer/config.md
-          - Framed:
-              - Framed: API/frame/framed/framed.md
-              - Framed Factory: API/frame/framed/framed_factory.md
-              - Config: API/frame/framed/config.md
+          - Overview: API/frame/frame/frame.md
+          - Frame:
+            - Framer:
+                - Framer: API/frame/framer/framer.md
+                - Framer Factory: API/frame/framer/framer_factory.md
+                - Agency: API/frame/framer/agency/agency.md
+                - Action Registry: API/frame/framer/agency/action_registry.md
+                - Tasks:
+                    - Task: API/frame/framer/agency/tasks/task.md
+                    - Workflow: API/frame/framer/agency/tasks/workflow/workflow.md
+                    - Workflow Manager: API/frame/framer/agency/tasks/workflow/workflow_manager.md
+                - Brain:
+                    - Brain: API/frame/framer/brain/brain.md
+                    - Perception: API/frame/framer/brain/perception/perception.md
+                    - Decision: API/frame/framer/brain/decision/decision.md
+                    - Mind: API/frame/framer/brain/mind/mind.md
+                    - Memory: API/frame/framer/brain/memory/memory.md
+                    - Memory Adapter: API/frame/framer/brain/memory/memory_adapters/mem0/mem0_adapter.md
+                - Soul: API/frame/framer/soul/soul.md
+                - Config: API/frame/framer/config.md
+            - Framed:
+                - Framed: API/frame/framed/framed.md
+                - Framed Factory: API/frame/framed/framed_factory.md
+                - Config: API/frame/framed/config.md
       - Services:
           - LLM:
               - Main: API/frame/services/llm/main.md
