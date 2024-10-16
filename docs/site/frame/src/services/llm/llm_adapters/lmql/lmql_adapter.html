@@ -112,7 +112,7 @@ class AsyncOpenAIProtocol(Protocol):
 </dd>
 <dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter"><code class="flex name class">
 <span>class <span class="ident">LMQLAdapter</span></span>
-<span>(</span><span>openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None, openai_client: Optional[<a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol">AsyncOpenAIProtocol</a>] = None)</span>
+<span>(</span><span>openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None, openai_client: Optional[<a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol">AsyncOpenAIProtocol</a>] = None, mistral_client: Optional[Any] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Adapter for LMQL operations with rate limiting.</p>
@@ -152,7 +152,9 @@ setting the default model and generating completions with retry logic.</p>
         openai_api_key: Optional[str] = None,
         mistral_api_key: Optional[str] = None,
         openai_client: Optional[AsyncOpenAIProtocol] = None,
+        mistral_client: Optional[Any] = None,
     ):
+        self.mistral_client = mistral_client
         self.openai_client = (
             openai_client
             if openai_client is not None
@@ -299,10 +301,23 @@ setting the default model and generating completions with retry logic.</p>
     ) -&gt; str:
         if self.mistral_client is None:
             raise ValueError(&#34;Mistral client is not initialized&#34;)
-        # TODO: Implement Mistral API call here
-        # This is a placeholder and should be replaced with actual Mistral API integration
-        logger.warning(&#34;Mistral API integration not yet implemented&#34;)
-        return f&#34;Mistral completion for prompt: {prompt}&#34;
+        if self.mistral_client is None:
+            raise ValueError(&#34;Mistral client is not initialized&#34;)
+
+        try:
+            response = await self.mistral_client.generate_completion(
+                prompt=prompt,
+                model=model_name,
+                max_tokens=config.max_tokens,
+                temperature=config.temperature,
+                top_p=config.top_p,
+                frequency_penalty=config.frequency_penalty,
+                presence_penalty=config.presence_penalty,
+            )
+            return response.strip()
+        except Exception as e:
+            logger.error(f&#34;Error in Mistral API call: {e}&#34;)
+            raise
 
     async def _get_openai_completion(
         self, prompt: str, config: LMQLConfig, model_name: str
@@ -455,8 +470,40 @@ class LMQLConfig:
 </summary>
 <pre><code class="python">class MistralClient:
     def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key</code></pre>
+        self.api_key = api_key
+
+    async def generate_completion(
+        self,
+        prompt: str,
+        model: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+        frequency_penalty: float,
+        presence_penalty: float,
+    ) -&gt; str:
+        # Mock implementation of the Mistral API call
+        # Mock implementation of the Mistral API call
+        return json.dumps({
+            &#34;action&#34;: &#34;respond&#34;,
+            &#34;parameters&#34;: {
+                &#34;text&#34;: &#34;This is a mock response from Mistral.&#34;,
+                &#34;analysis&#34;: &#34;Mock analysis content.&#34;
+            },
+            &#34;reasoning&#34;: &#34;Mock reasoning for the response.&#34;,
+            &#34;confidence&#34;: 0.9,
+            &#34;priority&#34;: 5
+        })</code></pre>
 </details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient.generate_completion"><code class="name flex">
+<span>async def <span class="ident">generate_completion</span></span>(<span>self, prompt: str, model: str, max_tokens: int, temperature: float, top_p: float, frequency_penalty: float, presence_penalty: float) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 </dd>
 <dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.TokenBucket"><code class="flex name class">
 <span>class <span class="ident">TokenBucket</span></span>
@@ -550,6 +597,9 @@ class LMQLConfig:
 </li>
 <li>
 <h4><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient">MistralClient</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient.generate_completion" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient.generate_completion">generate_completion</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.TokenBucket" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.TokenBucket">TokenBucket</a></code></h4>

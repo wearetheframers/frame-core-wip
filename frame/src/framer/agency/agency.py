@@ -300,9 +300,12 @@ class Agency:
                     }
                 ]
             if isinstance(role, dict) and 'priority' in role:
+                if isinstance(role['priority'], str):
+                    priority_map = {"low": 3, "medium": 5, "high": 8}
+                    role['priority'] = priority_map.get(role['priority'].lower(), 5)
                 role['priority'] = max(1, min(10, int(role['priority'])))
-            return [role] if isinstance(role, dict) else [
-                {**r, 'priority': max(1, min(10, int(r.get('priority', 5))))} for r in role
+            return [{"action": "role", "parameters": role}] if isinstance(role, dict) else [
+                {"action": "role", "parameters": {**r, 'priority': max(1, min(10, int(r.get('priority', 5))))}} for r in role
             ]
         except Exception as e:
             logger.error(f"Error generating role: {str(e)}", exc_info=True)
@@ -348,7 +351,9 @@ class Agency:
                         "priority": 5,
                     }
                 ]
-            return [goal] if isinstance(goal, dict) else goal
+            return [{"action": "goal", "parameters": goal}] if isinstance(goal, dict) else [
+                {"action": "goal", "parameters": g} for g in goal
+            ]
         except Exception as e:
             logger.error(f"Error generating goal: {e}", exc_info=True)
             logger.error(f"Prompt used for goal generation: {prompt}")
@@ -438,16 +443,9 @@ class Agency:
             Tuple[List[str], List[str]]: A tuple containing
             the final roles and goals as strings.
         """
-        new_roles = await self.generate_roles()
-        new_goals = await self.generate_goals()
-
-        if not new_roles:
-            new_roles = ["Task Assistant"]
-
-        if not new_goals:
-            new_goals = ["Assist users to the best of my abilities"]
-
-        return new_roles, new_goals
+        roles = await self.generate_roles()
+        goals = await self.generate_goals()
+        return roles, goals
 
     async def execute_task(self, task: Task) -> str:
         """

@@ -360,9 +360,12 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                     }
                 ]
             if isinstance(role, dict) and &#39;priority&#39; in role:
+                if isinstance(role[&#39;priority&#39;], str):
+                    priority_map = {&#34;low&#34;: 3, &#34;medium&#34;: 5, &#34;high&#34;: 8}
+                    role[&#39;priority&#39;] = priority_map.get(role[&#39;priority&#39;].lower(), 5)
                 role[&#39;priority&#39;] = max(1, min(10, int(role[&#39;priority&#39;])))
-            return [role] if isinstance(role, dict) else [
-                {**r, &#39;priority&#39;: max(1, min(10, int(r.get(&#39;priority&#39;, 5))))} for r in role
+            return [{&#34;action&#34;: &#34;role&#34;, &#34;parameters&#34;: role}] if isinstance(role, dict) else [
+                {&#34;action&#34;: &#34;role&#34;, &#34;parameters&#34;: {**r, &#39;priority&#39;: max(1, min(10, int(r.get(&#39;priority&#39;, 5))))}} for r in role
             ]
         except Exception as e:
             logger.error(f&#34;Error generating role: {str(e)}&#34;, exc_info=True)
@@ -408,7 +411,9 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                         &#34;priority&#34;: 5,
                     }
                 ]
-            return [goal] if isinstance(goal, dict) else goal
+            return [{&#34;action&#34;: &#34;goal&#34;, &#34;parameters&#34;: goal}] if isinstance(goal, dict) else [
+                {&#34;action&#34;: &#34;goal&#34;, &#34;parameters&#34;: g} for g in goal
+            ]
         except Exception as e:
             logger.error(f&#34;Error generating goal: {e}&#34;, exc_info=True)
             logger.error(f&#34;Prompt used for goal generation: {prompt}&#34;)
@@ -498,16 +503,9 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             Tuple[List[str], List[str]]: A tuple containing
             the final roles and goals as strings.
         &#34;&#34;&#34;
-        new_roles = await self.generate_roles()
-        new_goals = await self.generate_goals()
-
-        if not new_roles:
-            new_roles = [&#34;Task Assistant&#34;]
-
-        if not new_goals:
-            new_goals = [&#34;Assist users to the best of my abilities&#34;]
-
-        return new_roles, new_goals
+        roles = await self.generate_roles()
+        goals = await self.generate_goals()
+        return roles, goals
 
     async def execute_task(self, task: Task) -&gt; str:
         &#34;&#34;&#34;

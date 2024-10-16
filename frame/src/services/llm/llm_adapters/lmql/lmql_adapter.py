@@ -1,4 +1,5 @@
 import asyncio
+import json
 import tenacity
 from dataclasses import dataclass
 from typing import Dict, Any, Optional, Union
@@ -74,7 +75,9 @@ class LMQLAdapter(LLMAdapterInterface):
         openai_api_key: Optional[str] = None,
         mistral_api_key: Optional[str] = None,
         openai_client: Optional[AsyncOpenAIProtocol] = None,
+        mistral_client: Optional[Any] = None,
     ):
+        self.mistral_client = mistral_client
         self.openai_client = (
             openai_client
             if openai_client is not None
@@ -221,10 +224,23 @@ class LMQLAdapter(LLMAdapterInterface):
     ) -> str:
         if self.mistral_client is None:
             raise ValueError("Mistral client is not initialized")
-        # TODO: Implement Mistral API call here
-        # This is a placeholder and should be replaced with actual Mistral API integration
-        logger.warning("Mistral API integration not yet implemented")
-        return f"Mistral completion for prompt: {prompt}"
+        if self.mistral_client is None:
+            raise ValueError("Mistral client is not initialized")
+
+        try:
+            response = await self.mistral_client.generate_completion(
+                prompt=prompt,
+                model=model_name,
+                max_tokens=config.max_tokens,
+                temperature=config.temperature,
+                top_p=config.top_p,
+                frequency_penalty=config.frequency_penalty,
+                presence_penalty=config.presence_penalty,
+            )
+            return response.strip()
+        except Exception as e:
+            logger.error(f"Error in Mistral API call: {e}")
+            raise
 
     async def _get_openai_completion(
         self, prompt: str, config: LMQLConfig, model_name: str
@@ -276,3 +292,26 @@ def lmql_adapter(
 class MistralClient:
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key
+
+    async def generate_completion(
+        self,
+        prompt: str,
+        model: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+        frequency_penalty: float,
+        presence_penalty: float,
+    ) -> str:
+        # Mock implementation of the Mistral API call
+        # Mock implementation of the Mistral API call
+        return json.dumps({
+            "action": "respond",
+            "parameters": {
+                "text": "This is a mock response from Mistral.",
+                "analysis": "Mock analysis content."
+            },
+            "reasoning": "Mock reasoning for the response.",
+            "confidence": 0.9,
+            "priority": 5
+        })
