@@ -3,7 +3,7 @@ title: Home
 weight: -30
 ---
 
-Welcome to the Frame documentation. Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are also fully equipped for task automation and for working together collaboratively. This documentation provides detailed information about the framework's components, usage, and API.
+Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are also fully equipped for task automation and for working together collaboratively.
 
 ## Core Components
 

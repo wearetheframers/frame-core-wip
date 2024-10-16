@@ -17,7 +17,11 @@ The Decision component represents a decision made by the Brain component of a Fr
 - Decision parameters and reasoning.
 - Confidence and priority management.
 
+## Task Creation
+
+The Decision component plays a crucial role in task creation by evaluating perceptions and determining the appropriate actions. Once a decision is made, it can result in the creation of tasks that are then managed by the Action component. This process ensures that the Framer can effectively respond to its environment and achieve its objectives.
+
 ## Related Components
 
-- [[brain]]: Handles decision-making processes for the Framer.
-- [[action]]: Represents actionable items for Framers to work on.
+- [[brain]]: Handles decision-making processes for the Framer, which can lead to task creation.
+- [[action]]: Represents actionable items for Framers to work on, created as a result of decisions.

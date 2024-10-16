@@ -70,8 +70,7 @@ creating Framer objects using the FramerFactory.</p></div>
         Returns:
             Framer: A new Framer instance, fully configured and ready to use.
         &#34;&#34;&#34;
-        factory = FramerFactory(self.config, self.llm_service)
-        return await factory.create_framer()</code></pre>
+        return await FramerFactory(self.config, self.llm_service).create_framer()</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -96,6 +95,10 @@ creating Framer objects using the FramerFactory.</p></div>
 <div class="desc"><p>Factory class for creating Framer instances.</p>
 <p>This class encapsulates the logic for constructing Framer objects,
 ensuring that all necessary components are properly initialized.</p>
+<p>The Framer includes a <code>halt()</code> method to stop its actions and task processing.
+Factory class for creating Framer instances.</p>
+<p>This class encapsulates the logic for constructing Framer objects,
+ensuring that all necessary components are properly initialized.</p>
 <p>Initialize the FramerBuilder with configuration and LLM service.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -110,6 +113,12 @@ ensuring that all necessary components are properly initialized.</p>
 </summary>
 <pre><code class="python">class FramerFactory:
     &#34;&#34;&#34;
+    Factory class for creating Framer instances.
+
+    This class encapsulates the logic for constructing Framer objects,
+    ensuring that all necessary components are properly initialized.
+
+    The Framer includes a `halt()` method to stop its actions and task processing.
     Factory class for creating Framer instances.
 
     This class encapsulates the logic for constructing Framer objects,

@@ -75,7 +75,7 @@ hljs.highlightAll();
         if not asyncio.iscoroutinefunction(action_func):
 
             async def wrapper(*args, **kwargs):
-                return await asyncio.to_thread(action_func, *args, **kwargs)
+                return action_func(*args, **kwargs)
 
             action_func = wrapper
         self.actions[name] = {
@@ -152,10 +152,11 @@ hljs.highlightAll();
             raise ValueError(f&#34;Action &#39;{name}&#39; not found&#34;)
         if self.execution_context is None:
             raise ValueError(&#34;Execution context is not set&#34;)
-        result = await action[&#34;action_func&#34;](self.execution_context, *args, **kwargs)
+        response = await action[&#34;action_func&#34;](*args, execution_context=self.execution_context, **kwargs)
+        role = response if isinstance(response, dict) else response
         if callback:
-            callback(result, *callback_args)
-        return result
+            callback(response, *callback_args)
+        return response
 
     def get_action(self, name: str) -&gt; Optional[Dict[str, Any]]:
         &#34;&#34;&#34;

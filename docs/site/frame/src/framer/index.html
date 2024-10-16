@@ -195,8 +195,6 @@ processing perceptions, making decisions, and executing tasks.</p>
         # Initialize roles and goals
         self.roles = roles
         self.goals = goals
-
-        # Start acting by default
         self.act()
 
     @classmethod
@@ -266,8 +264,6 @@ processing perceptions, making decisions, and executing tasks.</p>
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
-        &#34;&#34;&#34;Disable the Framer from processing perceptions and making decisions.&#34;&#34;&#34;
-        self.acting = False
 
     def export_to_json(self, file_path: str) -&gt; None:
         &#34;&#34;&#34;
@@ -1031,6 +1027,10 @@ It uses the FramerConfigModel to validate and set default values for the configu
 <div class="desc"><p>Factory class for creating Framer instances.</p>
 <p>This class encapsulates the logic for constructing Framer objects,
 ensuring that all necessary components are properly initialized.</p>
+<p>The Framer includes a <code>halt()</code> method to stop its actions and task processing.
+Factory class for creating Framer instances.</p>
+<p>This class encapsulates the logic for constructing Framer objects,
+ensuring that all necessary components are properly initialized.</p>
 <p>Initialize the FramerBuilder with configuration and LLM service.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -1045,6 +1045,12 @@ ensuring that all necessary components are properly initialized.</p>
 </summary>
 <pre><code class="python">class FramerFactory:
     &#34;&#34;&#34;
+    Factory class for creating Framer instances.
+
+    This class encapsulates the logic for constructing Framer objects,
+    ensuring that all necessary components are properly initialized.
+
+    The Framer includes a `halt()` method to stop its actions and task processing.
     Factory class for creating Framer instances.
 
     This class encapsulates the logic for constructing Framer objects,

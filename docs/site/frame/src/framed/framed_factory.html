@@ -204,7 +204,7 @@ ensuring that all necessary components are properly initialized.</p>
         self.llm_service = llm_service
         self.plugins: Dict[str, Any] = {}
 
-    async def create_framer(
+    async def create_framed(
         self,
         soul_seed: Optional[str] = None,
         memory_service: Optional[MemoryService] = None,
@@ -212,15 +212,13 @@ ensuring that all necessary components are properly initialized.</p>
         roles: Optional[List[Dict[str, Any]]] = None,
         goals: Optional[List[Dict[str, Any]]] = None,
     ) -&gt; Framed:
-        builder = FramedBuilder(self.config, self.llm_service)
-        builder.with_soul_seed(soul_seed)
-        builder.with_memory_service(memory_service)
-        builder.with_eq_service(eq_service)
-        builder.with_roles(roles)
-        builder.with_goals(goals)
-        framed = await builder.build()
-        await framed.initialize()
-        return framed
+        return await FramedFactory(self.config, self.llm_service).create_framed(
+            soul_seed=soul_seed,
+            memory_service=memory_service,
+            eq_service=eq_service,
+            roles=roles,
+            goals=goals,
+        )
 
     async def create_framed(
         self,
@@ -256,12 +254,6 @@ ensuring that all necessary components are properly initialized.</p>
 <dl>
 <dt id="frame.src.framed.framed_factory.FramedFactory.create_framed"><code class="name flex">
 <span>async def <span class="ident">create_framed</span></span>(<span>self, soul_seed: Optional[str] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None) ‑> <a title="frame.src.framed.framed.Framed" href="framed.html#frame.src.framed.framed.Framed">Framed</a></span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framed.framed_factory.FramedFactory.create_framer"><code class="name flex">
-<span>async def <span class="ident">create_framer</span></span>(<span>self, soul_seed: Optional[str] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None) ‑> <a title="frame.src.framed.framed.Framed" href="framed.html#frame.src.framed.framed.Framed">Framed</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -314,7 +306,6 @@ ensuring that all necessary components are properly initialized.</p>
 <h4><code><a title="frame.src.framed.framed_factory.FramedFactory" href="#frame.src.framed.framed_factory.FramedFactory">FramedFactory</a></code></h4>
 <ul class="">
 <li><code><a title="frame.src.framed.framed_factory.FramedFactory.create_framed" href="#frame.src.framed.framed_factory.FramedFactory.create_framed">create_framed</a></code></li>
-<li><code><a title="frame.src.framed.framed_factory.FramedFactory.create_framer" href="#frame.src.framed.framed_factory.FramedFactory.create_framer">create_framer</a></code></li>
 <li><code><a title="frame.src.framed.framed_factory.FramedFactory.get_plugin" href="#frame.src.framed.framed_factory.FramedFactory.get_plugin">get_plugin</a></code></li>
 </ul>
 </li>

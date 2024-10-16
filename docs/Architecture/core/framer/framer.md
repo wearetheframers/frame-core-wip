@@ -29,7 +29,7 @@ The Framer class represents an individual AI agent within the Frame cognitive ag
 
 ### Initialization
 
-To initialize a `Framer` with roles and goals, use the `initialize()` method. This method will automatically call `act()`, enabling the `Framer` to start processing perceptions and making decisions. The `act()` method sets the Framer to an active state, allowing it to respond to perceptions and execute tasks. If you need to stop the `Framer` from acting or making new tasks, use the `halt()` method.
+To initialize a `Framer` with roles and goals, use the `initialize()` method. This method will automatically call `act()`, enabling the `Framer` to start processing perceptions and making decisions. The `act()` method sets the Framer to an active state, allowing it to respond to perceptions and execute tasks. If you need to stop the `Framer` from acting or making new tasks, use the `halt()` method. The `halt()` method is crucial for pausing the Framer's activities without shutting it down completely.
 
 - Task Management: Create and manage tasks efficiently.
 - Decision Making: Utilize advanced decision-making processes to guide actions.
