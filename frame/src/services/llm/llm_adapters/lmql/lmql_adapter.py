@@ -1,11 +1,15 @@
 import asyncio
 import json
 import tenacity
+import os
+from transformers import AutoTokenizer
+from frame.src.constants.api_keys import HUGGINGFACE_API_KEY
 from dataclasses import dataclass
 from typing import Dict, Any, Optional, Union
 import time
 import logging
 from openai import AsyncOpenAI, AuthenticationError, APIStatusError
+import lmql
 from typing import Protocol, List
 from frame.src.services.llm.llm_adapter_interface import LLMAdapterInterface
 
@@ -76,7 +80,9 @@ class LMQLAdapter(LLMAdapterInterface):
         mistral_api_key: Optional[str] = None,
         openai_client: Optional[AsyncOpenAIProtocol] = None,
         mistral_client: Optional[Any] = None,
+        hf_token: Optional[str] = None,
     ):
+        self.hf_token = hf_token or HUGGINGFACE_API_KEY
         self.mistral_client = mistral_client
         self.openai_client = (
             openai_client
@@ -84,7 +90,7 @@ class LMQLAdapter(LLMAdapterInterface):
             else (AsyncOpenAI(api_key=openai_api_key) if openai_api_key else None)
         )
         self.mistral_client = (
-            MistralClient(api_key=mistral_api_key) if mistral_api_key else None
+            MistralClient(api_key=mistral_api_key, hf_token=self.hf_token) if mistral_api_key else None
         )
         self.default_model = "gpt-3.5-turbo"
         self.token_bucket = TokenBucket(
@@ -182,8 +188,6 @@ class LMQLAdapter(LLMAdapterInterface):
             if isinstance(response, str):
                 # If the response is a string, try to parse it as JSON
                 try:
-                    import json
-
                     json_response = json.loads(response.strip())
                     return json.dumps(
                         json_response
@@ -195,8 +199,6 @@ class LMQLAdapter(LLMAdapterInterface):
                 content = response.choices[0].message.content.strip()
                 # Try to parse the content as JSON
                 try:
-                    import json
-
                     json_content = json.loads(content)
                     return json.dumps(
                         json_content
@@ -222,11 +224,6 @@ class LMQLAdapter(LLMAdapterInterface):
     async def _get_mistral_completion(
         self, prompt: str, config: LMQLConfig, model_name: str
     ) -> str:
-        if self.mistral_client is None:
-            raise ValueError("Mistral client is not initialized")
-        if self.mistral_client is None:
-            raise ValueError("Mistral client is not initialized")
-
         try:
             response = await self.mistral_client.generate_completion(
                 prompt=prompt,
@@ -268,7 +265,7 @@ class LMQLAdapter(LLMAdapterInterface):
 
 
 def lmql_adapter(
-    openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None
+    openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None, hf_token: Optional[str] = None
 ) -> LMQLAdapter:
     """
     Factory function to create an LMQLAdapter instance.
@@ -286,11 +283,12 @@ def lmql_adapter(
     if openai_client and not isinstance(openai_client, AsyncOpenAI):
         raise ValueError("OpenAI client is incorrectly initialized")
 
-    return LMQLAdapter(openai_api_key=openai_api_key, mistral_api_key=mistral_api_key)
+    return LMQLAdapter(openai_api_key=openai_api_key, mistral_api_key=mistral_api_key, hf_token=hf_token)
 
 
 class MistralClient:
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, hf_token: Optional[str] = None):
+        self.hf_token = hf_token
         self.api_key = api_key
 
     async def generate_completion(
@@ -303,15 +301,16 @@ class MistralClient:
         frequency_penalty: float,
         presence_penalty: float,
     ) -> str:
-        # Mock implementation of the Mistral API call
-        # Mock implementation of the Mistral API call
-        return json.dumps({
-            "action": "respond",
-            "parameters": {
-                "text": "This is a mock response from Mistral.",
-                "analysis": "Mock analysis content."
-            },
-            "reasoning": "Mock reasoning for the response.",
-            "confidence": 0.9,
-            "priority": 5
-        })
+        tokenizer = AutoTokenizer.from_pretrained(model, use_auth_token=self.hf_token, trust_remote_code=True)
+        model_instance = lmql.model(model, tokenizer=tokenizer, use_auth_token=self.hf_token, trust_remote_code=True)
+        if not model_instance:
+            raise ValueError(f"Model {model} could not be loaded. Please check the model identifier and ensure it is available on Hugging Face.")
+        if asyncio.get_event_loop().is_running():
+            response = await model_instance.generate(prompt, max_tokens=max_tokens)
+        else:
+            response = asyncio.run(model_instance.generate(prompt, max_tokens=max_tokens))
+        
+        if response:
+            return response.strip()
+        else:
+            raise ValueError("No response from LMQL model")

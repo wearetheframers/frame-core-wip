@@ -34,7 +34,7 @@ hljs.highlightAll();
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.lmql_adapter"><code class="name flex">
-<span>def <span class="ident">lmql_adapter</span></span>(<span>openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None) ‑> <a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter">LMQLAdapter</a></span>
+<span>def <span class="ident">lmql_adapter</span></span>(<span>openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None, hf_token: Optional[str] = None) ‑> <a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter">LMQLAdapter</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Factory function to create an LMQLAdapter instance.</p>
@@ -112,7 +112,7 @@ class AsyncOpenAIProtocol(Protocol):
 </dd>
 <dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter"><code class="flex name class">
 <span>class <span class="ident">LMQLAdapter</span></span>
-<span>(</span><span>openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None, openai_client: Optional[<a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol">AsyncOpenAIProtocol</a>] = None, mistral_client: Optional[Any] = None)</span>
+<span>(</span><span>openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None, openai_client: Optional[<a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol">AsyncOpenAIProtocol</a>] = None, mistral_client: Optional[Any] = None, hf_token: Optional[str] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Adapter for LMQL operations with rate limiting.</p>
@@ -153,7 +153,9 @@ setting the default model and generating completions with retry logic.</p>
         mistral_api_key: Optional[str] = None,
         openai_client: Optional[AsyncOpenAIProtocol] = None,
         mistral_client: Optional[Any] = None,
+        hf_token: Optional[str] = None,
     ):
+        self.hf_token = hf_token or HUGGINGFACE_API_KEY
         self.mistral_client = mistral_client
         self.openai_client = (
             openai_client
@@ -161,7 +163,7 @@ setting the default model and generating completions with retry logic.</p>
             else (AsyncOpenAI(api_key=openai_api_key) if openai_api_key else None)
         )
         self.mistral_client = (
-            MistralClient(api_key=mistral_api_key) if mistral_api_key else None
+            MistralClient(api_key=mistral_api_key, hf_token=self.hf_token) if mistral_api_key else None
         )
         self.default_model = &#34;gpt-3.5-turbo&#34;
         self.token_bucket = TokenBucket(
@@ -259,8 +261,6 @@ setting the default model and generating completions with retry logic.</p>
             if isinstance(response, str):
                 # If the response is a string, try to parse it as JSON
                 try:
-                    import json
-
                     json_response = json.loads(response.strip())
                     return json.dumps(
                         json_response
@@ -272,8 +272,6 @@ setting the default model and generating completions with retry logic.</p>
                 content = response.choices[0].message.content.strip()
                 # Try to parse the content as JSON
                 try:
-                    import json
-
                     json_content = json.loads(content)
                     return json.dumps(
                         json_content
@@ -299,11 +297,6 @@ setting the default model and generating completions with retry logic.</p>
     async def _get_mistral_completion(
         self, prompt: str, config: LMQLConfig, model_name: str
     ) -&gt; str:
-        if self.mistral_client is None:
-            raise ValueError(&#34;Mistral client is not initialized&#34;)
-        if self.mistral_client is None:
-            raise ValueError(&#34;Mistral client is not initialized&#34;)
-
         try:
             response = await self.mistral_client.generate_completion(
                 prompt=prompt,
@@ -460,7 +453,7 @@ class LMQLConfig:
 </dd>
 <dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient"><code class="flex name class">
 <span>class <span class="ident">MistralClient</span></span>
-<span>(</span><span>api_key: Optional[str] = None)</span>
+<span>(</span><span>api_key: Optional[str] = None, hf_token: Optional[str] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -469,7 +462,8 @@ class LMQLConfig:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class MistralClient:
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, hf_token: Optional[str] = None):
+        self.hf_token = hf_token
         self.api_key = api_key
 
     async def generate_completion(
@@ -482,18 +476,19 @@ class LMQLConfig:
         frequency_penalty: float,
         presence_penalty: float,
     ) -&gt; str:
-        # Mock implementation of the Mistral API call
-        # Mock implementation of the Mistral API call
-        return json.dumps({
-            &#34;action&#34;: &#34;respond&#34;,
-            &#34;parameters&#34;: {
-                &#34;text&#34;: &#34;This is a mock response from Mistral.&#34;,
-                &#34;analysis&#34;: &#34;Mock analysis content.&#34;
-            },
-            &#34;reasoning&#34;: &#34;Mock reasoning for the response.&#34;,
-            &#34;confidence&#34;: 0.9,
-            &#34;priority&#34;: 5
-        })</code></pre>
+        tokenizer = AutoTokenizer.from_pretrained(model, use_auth_token=self.hf_token, trust_remote_code=True)
+        model_instance = lmql.model(model, tokenizer=tokenizer, use_auth_token=self.hf_token, trust_remote_code=True)
+        if not model_instance:
+            raise ValueError(f&#34;Model {model} could not be loaded. Please check the model identifier and ensure it is available on Hugging Face.&#34;)
+        if asyncio.get_event_loop().is_running():
+            response = await model_instance.generate(prompt, max_tokens=max_tokens)
+        else:
+            response = asyncio.run(model_instance.generate(prompt, max_tokens=max_tokens))
+        
+        if response:
+            return response.strip()
+        else:
+            raise ValueError(&#34;No response from LMQL model&#34;)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
