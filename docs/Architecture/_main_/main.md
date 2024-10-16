@@ -101,10 +101,8 @@ Frame
 │   │   ├── Decision
 │   │   └── Memory
 │   ├── Context
+│   ├── Observers
 │   ├── SharedContext
-│   │   └── SharedContextService
-│   │   ├── Emotional State
-│   │   └── Core Traits
 ├── Framed
 │   └── Multiple Framers
 └── LLM Adapters

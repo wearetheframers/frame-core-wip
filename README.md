@@ -132,6 +132,7 @@ Frame
 │   │   ├── Emotional State
 │   │   └── Core Traits
 │   ├── Context
+│   ├── Observers
 │   └── SharedContext
 │       └── SharedContextService
 ├── Framed
