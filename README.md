@@ -1,7 +1,9 @@
 # Frame
 
 <div align="center">
-  <img src="docs/frame-logo-transparent.png" alt="Frame Logo" width="320"/>
+  <a href="https://frame.dev">
+    <img src="docs/frame-logo-transparent.png" alt="Frame Logo" width="320"/>
+  </a>
   <p>Frame is a multi-modal cognitive agent framework designed to support fully emergent characteristics and efficiently automating tasks.</p>
 </div>
 
