@@ -92,7 +92,7 @@ class LMQLAdapter(LLMAdapterInterface):
             else (AsyncOpenAI(api_key=openai_api_key) if openai_api_key else None)
         )
         self.mistral_client = (
-            MistralClient(api_key=mistral_api_key, hf_token=self.hf_token) if mistral_api_key else None
+            MistralClient(api_key=mistral_api_key, hf_token=self.hf_token) if mistral_api_key or self.hf_token else None
         )
         self.default_model = "gpt-3.5-turbo"
         self.token_bucket = TokenBucket(
