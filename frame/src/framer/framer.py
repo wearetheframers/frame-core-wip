@@ -227,6 +227,7 @@ class Framer:
             )
 
     @classmethod
+    @classmethod
     def load_from_file(
         cls,
         file_path: str,
