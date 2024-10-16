@@ -10,7 +10,7 @@ nav:
     - Frame: API/frame/frame.md
     - Framer: API/frame/framer/framer.md
     - Framed: API/frame/framed/framed.md
-  - Usage / Quick Start Guide: Usage/basic/basic.md
+  - Usage / Quick Start Guide: Usage/basic/basic_usage.md
   - Plugins: plugins.md
   - CLI: CLI.md
   - Glossary: glossary.md
