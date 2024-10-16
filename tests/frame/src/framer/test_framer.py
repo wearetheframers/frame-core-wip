@@ -55,7 +55,16 @@ async def test_framer_initialization():
     roles, goals = await framer.agency.generate_roles_and_goals()
     assert isinstance(roles, list)
     assert isinstance(goals, list)
-    assert roles == [{"name": "Task Assistant", "description": "Assist with the given task or query."}] or roles == []
+    assert (
+        roles
+        == [
+            {
+                "name": "Task Assistant",
+                "description": "Assist with the given task or query.",
+            }
+        ]
+        or roles == []
+    )
 
     # Ensure logging handlers are closed after the test
     close_logging(logger)

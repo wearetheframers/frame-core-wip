@@ -43,7 +43,7 @@ async def test_generate_roles_with_numeric_priority(agency):
     agency.llm_service.get_completion.return_value = {
         "name": "Role1",
         "description": "A test role",
-        "priority": 9
+        "priority": 9,
     }
     roles = await agency.generate_roles()
     assert roles[0]["priority"] == 9
@@ -53,7 +53,7 @@ async def test_generate_roles_with_string_priority(agency):
     agency.llm_service.get_completion.return_value = {
         "name": "Role1",
         "description": "A test role",
-        "priority": "medium"
+        "priority": "medium",
     }
     roles = await agency.generate_roles()
     assert roles[0]["priority"] == 5
@@ -206,7 +206,12 @@ async def test_generate_roles_and_goals_empty_response(agency):
 
     roles, goals = await agency.generate_roles_and_goals()
 
-    assert roles == [{"name": "Task Assistant", "description": "Assist with the given task or query."}]
+    assert roles == [
+        {
+            "name": "Task Assistant",
+            "description": "Assist with the given task or query.",
+        }
+    ]
     assert goals == [{"description": "Assist users to the best of my abilities"}]
 
     agency.generate_roles.assert_called_once()

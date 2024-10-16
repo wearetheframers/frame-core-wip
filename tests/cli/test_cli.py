@@ -52,7 +52,9 @@ def test_cli_run_framer_command(runner, mocker):
         catch_exceptions=False,
     )
 
-    assert result.exit_code == 0, f"Exit code was {result.exit_code}, expected 0. Output: {strip_ansi_codes(result.output)}"
+    assert (
+        result.exit_code == 0
+    ), f"Exit code was {result.exit_code}, expected 0. Output: {strip_ansi_codes(result.output)}"
 
     # Check if Frame constructor was called
     mock_frame.assert_called_once()
@@ -61,7 +63,9 @@ def test_cli_run_framer_command(runner, mocker):
     assert mock_execute_framer.call_count > 0, "execute_framer was not called"
 
     # Check if the completion message is in the logger output
-    mock_logger.info.assert_any_call("Framer execution completed. Result: {'result': 'success'}")
+    mock_logger.info.assert_any_call(
+        "Framer execution completed. Result: {'result': 'success'}"
+    )
 
     # Check if the execute_framer function was called with the correct arguments
     call_args = mock_execute_framer.call_args
@@ -70,7 +74,11 @@ def test_cli_run_framer_command(runner, mocker):
     assert isinstance(
         args[0], type(mock_frame.return_value)
     ), f"First argument is not a Frame instance, it's {type(args[0])}"
-    assert args[1] == {"name": "Test Framer", "prompt": "Test prompt", "model": "gpt-4o-mini"}
+    assert args[1] == {
+        "name": "Test Framer",
+        "prompt": "Test prompt",
+        "model": "gpt-4o-mini",
+    }
     assert args[2] is False  # sync flag
     assert args[3] is False  # stream flag
 
@@ -82,7 +90,9 @@ def strip_ansi_codes(text):
 
 def test_cli_run_framer_with_prompt(runner, mocker):
     mock_logger = mocker.patch("frame.cli.cli.logger")
-    mock_execute_framer = mocker.patch("frame.cli.cli.execute_framer", return_value={"result": "success"})
+    mock_execute_framer = mocker.patch(
+        "frame.cli.cli.execute_framer", return_value={"result": "success"}
+    )
     mock_frame = mocker.patch("frame.frame.Frame", autospec=True)
     mock_frame_instance = mock_frame.return_value
     mock_frame_instance.llm_service = mocker.Mock(spec=LLMService)
@@ -124,7 +134,9 @@ def test_cli_run_framer_with_prompt(runner, mocker):
     assert args[3] is False  # stream flag
 
     # Check if the completion message is in the logger output
-    mock_logger.info.assert_any_call("Framer execution completed. Result: {'result': 'success'}")
+    mock_logger.info.assert_any_call(
+        "Framer execution completed. Result: {'result': 'success'}"
+    )
     assert mock_click_echo.call_count >= 1
     mock_click_echo.assert_any_call("Framer execution completed")
 
