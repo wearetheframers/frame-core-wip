@@ -47,7 +47,6 @@ To run the Frame package using Docker, build the Docker image locally:
 
 ```bash
 docker build -t frame .
-docker run -p 80:80 frame
 ```
 
 ### Python
@@ -176,7 +175,17 @@ mkdocs serve --config-file ./mkdocs.yml
 
 You must run the `roam_links_converter.py` script before to convert linked references to their actual paths. 
 
-To serve both MkDocs and pdoc3 simultaneously, use:
+To serve both MkDocs and pdoc3 simultaneously, use the following command:
+
+```bash
+python scripts\serve_docs.py
+```
+
+If you want to skip running unit tests and only build and serve the documentation, use the `--skip-tests` argument:
+
+```bash
+python scripts\serve_docs.py --skip-tests
+```
 
 ```bash
 python scripts\serve_docs.py

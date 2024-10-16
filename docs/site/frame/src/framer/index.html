@@ -508,15 +508,6 @@ processing perceptions, making decisions, and executing tasks.</p>
             file_path (str): The path to the file where the Markdown will be saved.
         &#34;&#34;&#34;
         export_config_to_markdown(self.config, file_path)
-        &#34;&#34;&#34;
-        Perform a task asynchronously.
-
-        Args:
-            task (Dict[str, Any]): Dictionary containing task details.
-
-        Returns:
-            Dict[str, Any]: Result of the task execution.
-        &#34;&#34;&#34;
 
     async def perform_task(self, task: Dict[str, Any]) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;

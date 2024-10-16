@@ -1,3 +1,4 @@
+import argparse
 import os
 import subprocess
 import sys
@@ -9,6 +10,11 @@ from multiprocessing import Process
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from roam_links_converter import convert_roam_links
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Serve documentation with optional test skipping.")
+    parser.add_argument("--skip-tests", action="store_true", help="Skip running unit tests.")
+    return parser.parse_args()
 
 # Add the project root to the Python path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -205,9 +211,12 @@ class ChangeHandler(FileSystemEventHandler):
 
 
 if __name__ == "__main__":
-    # Run pytest and move coverage HTML
-    print("Running pytest and generating coverage report...")
-    run_pytest_and_move_coverage()
+    args = parse_arguments()
+
+    if not args.skip_tests:
+        # Run pytest and move coverage HTML
+        print("Running pytest and generating coverage report...")
+        run_pytest_and_move_coverage()
 
     # Clean up and build docs
     print("Cleaning up and building documentation...")

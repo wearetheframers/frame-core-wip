@@ -17,17 +17,20 @@ nav:
             - Framer:
                 - Framer: API/frame/framer/framer.md
                 - Framer Factory: API/frame/framer/framer_factory.md
-                - Agency: API/frame/framer/agency/agency.md
-                - Action Registry: API/frame/framer/agency/action_registry.md
-                - Tasks:
+                - Agency:
+                  - Agency: API/frame/framer/agency/agency.md
+                  - Action Registry: API/frame/framer/agency/action_registry.md
+                  - Default Actions: API/frame/framer/agency/default_actions.md
+                  - Tasks:
                     - Task: API/frame/framer/agency/tasks/task.md
                     - Workflow: API/frame/framer/agency/tasks/workflow/workflow.md
                     - Workflow Manager: API/frame/framer/agency/tasks/workflow/workflow_manager.md
                 - Brain:
                     - Brain: API/frame/framer/brain/brain.md
-                    - Perception: API/frame/framer/brain/perception/perception.md
                     - Decision: API/frame/framer/brain/decision/decision.md
-                    - Mind: API/frame/framer/brain/mind/mind.md
+                    - Mind:
+                      - Mind: API/frame/framer/brain/mind/mind.md
+                      - Perception: API/frame/framer/brain/mind/perception/perception.md
                     - Memory: API/frame/framer/brain/memory/memory.md
                     - Memory Adapter: API/frame/framer/brain/memory/memory_adapters/mem0/mem0_adapter.md
                 - Soul: API/frame/framer/soul/soul.md

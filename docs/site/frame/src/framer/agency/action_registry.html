@@ -152,7 +152,9 @@ hljs.highlightAll();
             raise ValueError(f&#34;Action &#39;{name}&#39; not found&#34;)
         if self.execution_context is None:
             raise ValueError(&#34;Execution context is not set&#34;)
-        response = await action[&#34;action_func&#34;](*args, execution_context=self.execution_context, **kwargs)
+        response = await action[&#34;action_func&#34;](
+            *args, execution_context=self.execution_context, **kwargs
+        )
         role = response if isinstance(response, dict) else response
         if callback:
             callback(response, *callback_args)
