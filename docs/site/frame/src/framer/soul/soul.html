@@ -63,7 +63,11 @@ are stored in the notes. The values can be of any type. Defaults to None.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Soul:
-    def __init__(self, seed: Optional[Union[str, Dict[str, Any]]] = None, traits: Optional[List[str]] = None) -&gt; None:
+    def __init__(
+        self,
+        seed: Optional[Union[str, Dict[str, Any]]] = None,
+        traits: Optional[List[str]] = None,
+    ) -&gt; None:
         &#34;&#34;&#34;
         Initialize a Soul instance.
 

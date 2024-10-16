@@ -40,12 +40,88 @@ hljs.highlightAll();
 <span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager" href="agency/tasks/workflow/workflow_manager.html#frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>The Framer class represents an AI agent with cognitive capabilities. It integrates various components
+such as agency, brain, soul, and workflow management to create a comprehensive AI entity capable of
+processing perceptions, making decisions, and executing tasks.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>config</code></strong> :&ensp;<code>FramerConfig</code></dt>
+<dd>Configuration settings for the Framer.</dd>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>The language model service to be used by the Framer.</dd>
+<dt><strong><code>agency</code></strong> :&ensp;<code>Agency</code></dt>
+<dd>Manages roles, goals, tasks, and workflows for the Framer.</dd>
+<dt><strong><code>brain</code></strong> :&ensp;<code>Brain</code></dt>
+<dd>Handles decision-making processes, integrating perceptions, memories, and thoughts.</dd>
+<dt><strong><code>soul</code></strong> :&ensp;<code>Soul</code></dt>
+<dd>Represents the core essence and personality of a Framer.</dd>
+<dt><strong><code>workflow_manager</code></strong> :&ensp;<code>WorkflowManager</code></dt>
+<dd>Manages workflows and tasks.</dd>
+<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
+<dd>Service for managing memory. Default is None.</dd>
+<dt><strong><code>eq_service</code></strong> :&ensp;<code>Optional[EQService]</code></dt>
+<dd>Service for managing emotional intelligence. Default is None.</dd>
+<dt><strong><code>roles</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
+<dd>List of roles for the Framer. Default is None.</dd>
+<dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
+<dd>List of goals for the Framer. Default is None.</dd>
+<dt><strong><code>observers</code></strong> :&ensp;<code>List[Observer]</code></dt>
+<dd>List of observer functions to notify on decisions.</dd>
+<dt><strong><code>can_execute</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Determines if decisions are executed automatically. Default is True.</dd>
+<dt><strong><code>acting</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Indicates if the Framer is actively processing perceptions. Default is False.</dd>
+</dl>
+<p>Initialize a Framer instance.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong> :&ensp;<code>FramerConfig</code></dt>
+<dd>Configuration settings for the Framer.</dd>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>The language model service to be used by the Framer.</dd>
+<dt><strong><code>agency</code></strong> :&ensp;<code>Agency</code></dt>
+<dd>Manages roles, goals, tasks, and workflows for the Framer.</dd>
+<dt><strong><code>brain</code></strong> :&ensp;<code>Brain</code></dt>
+<dd>Handles decision-making processes, integrating perceptions, memories, and thoughts.</dd>
+<dt><strong><code>soul</code></strong> :&ensp;<code>Soul</code></dt>
+<dd>Represents the core essence and personality of a Framer.</dd>
+<dt><strong><code>workflow_manager</code></strong> :&ensp;<code>WorkflowManager</code></dt>
+<dd>Manages workflows and tasks.</dd>
+<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
+<dd>Service for managing memory. Default is None.</dd>
+<dt><strong><code>eq_service</code></strong> :&ensp;<code>Optional[EQService]</code></dt>
+<dd>Service for managing emotional intelligence. Default is None.</dd>
+<dt><strong><code>roles</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
+<dd>List of roles for the Framer. Default is None.</dd>
+<dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
+<dd>List of goals for the Framer. Default is None.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Framer:
+    &#34;&#34;&#34;
+    The Framer class represents an AI agent with cognitive capabilities. It integrates various components
+    such as agency, brain, soul, and workflow management to create a comprehensive AI entity capable of
+    processing perceptions, making decisions, and executing tasks.
+
+    Attributes:
+        config (FramerConfig): Configuration settings for the Framer.
+        llm_service (LLMService): The language model service to be used by the Framer.
+        agency (Agency): Manages roles, goals, tasks, and workflows for the Framer.
+        brain (Brain): Handles decision-making processes, integrating perceptions, memories, and thoughts.
+        soul (Soul): Represents the core essence and personality of a Framer.
+        workflow_manager (WorkflowManager): Manages workflows and tasks.
+        memory_service (Optional[MemoryService]): Service for managing memory. Default is None.
+        eq_service (Optional[EQService]): Service for managing emotional intelligence. Default is None.
+        roles (Optional[List[Dict[str, Any]]]): List of roles for the Framer. Default is None.
+        goals (Optional[List[Dict[str, Any]]]): List of goals for the Framer. Default is None.
+        observers (List[Observer]): List of observer functions to notify on decisions.
+        can_execute (bool): Determines if decisions are executed automatically. Default is True.
+        acting (bool): Indicates if the Framer is actively processing perceptions. Default is False.
+    &#34;&#34;&#34;
+
     def __init__(
         self,
         config: FramerConfig,
@@ -59,6 +135,21 @@ hljs.highlightAll();
         roles: Optional[List[Dict[str, Any]]] = None,
         goals: Optional[List[Dict[str, Any]]] = None,
     ):
+        &#34;&#34;&#34;
+        Initialize a Framer instance.
+
+        Args:
+            config (FramerConfig): Configuration settings for the Framer.
+            llm_service (LLMService): The language model service to be used by the Framer.
+            agency (Agency): Manages roles, goals, tasks, and workflows for the Framer.
+            brain (Brain): Handles decision-making processes, integrating perceptions, memories, and thoughts.
+            soul (Soul): Represents the core essence and personality of a Framer.
+            workflow_manager (WorkflowManager): Manages workflows and tasks.
+            memory_service (Optional[MemoryService]): Service for managing memory. Default is None.
+            eq_service (Optional[EQService]): Service for managing emotional intelligence. Default is None.
+            roles (Optional[List[Dict[str, Any]]]): List of roles for the Framer. Default is None.
+            goals (Optional[List[Dict[str, Any]]]): List of goals for the Framer. Default is None.
+        &#34;&#34;&#34;
         self._streamed_response = {&#34;status&#34;: &#34;pending&#34;, &#34;result&#34;: &#34;&#34;}
         self.config = config
         self.llm_service = llm_service
@@ -163,6 +254,7 @@ hljs.highlightAll();
             file_path (str): The path to the file where the Markdown will be saved.
         &#34;&#34;&#34;
         from frame.src.utils.config_parser import export_config_to_markdown
+
         export_config_to_markdown(self.config, file_path)
         &#34;&#34;&#34;
         Export the Framer configuration to a JSON file.
@@ -176,15 +268,26 @@ hljs.highlightAll();
             file_path (str): The path to the file where the JSON will be saved.
         &#34;&#34;&#34;
         import json
-        with open(file_path, &#39;w&#39;) as file:
-            json.dump({
-                &#34;config&#34;: self.config.to_dict(),
-                &#34;roles&#34;: self.roles,
-                &#34;goals&#34;: self.goals
-            }, file, indent=4)
+
+        with open(file_path, &#34;w&#34;) as file:
+            json.dump(
+                {
+                    &#34;config&#34;: self.config.to_dict(),
+                    &#34;roles&#34;: self.roles,
+                    &#34;goals&#34;: self.goals,
+                },
+                file,
+                indent=4,
+            )
 
     @classmethod
-    def load_from_file(cls, file_path: str, llm_service: LLMService, memory_service: Optional[MemoryService] = None, eq_service: Optional[EQService] = None) -&gt; &#34;Framer&#34;:
+    def load_from_file(
+        cls,
+        file_path: str,
+        llm_service: LLMService,
+        memory_service: Optional[MemoryService] = None,
+        eq_service: Optional[EQService] = None,
+    ) -&gt; &#34;Framer&#34;:
         &#34;&#34;&#34;
         Load a Framer configuration from a file.
 
@@ -203,7 +306,24 @@ hljs.highlightAll();
             Framer: A new Framer instance configured from the file.
         &#34;&#34;&#34;
         config = parse_json_config(file_path)
-        return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
+        return cls(
+            config=config,
+            llm_service=llm_service,
+            agency=Agency(llm_service=llm_service, context=None),
+            brain=Brain(
+                llm_service=llm_service,
+                default_model=config.default_model,
+                roles=config.roles,
+                goals=config.goals,
+                soul=Soul(seed=config.soul_seed),
+            ),
+            soul=Soul(seed=config.soul_seed),
+            workflow_manager=WorkflowManager(),
+            memory_service=memory_service,
+            eq_service=eq_service,
+            roles=config.roles,
+            goals=config.goals,
+        )
 
     def export_to_json(self, file_path: str) -&gt; None:
         &#34;&#34;&#34;
@@ -218,15 +338,26 @@ hljs.highlightAll();
             file_path (str): The path to the file where the JSON will be saved.
         &#34;&#34;&#34;
         import json
-        with open(file_path, &#39;w&#39;) as file:
-            json.dump({
-                &#34;config&#34;: self.config.to_dict(),
-                &#34;roles&#34;: self.roles,
-                &#34;goals&#34;: self.goals
-            }, file, indent=4)
+
+        with open(file_path, &#34;w&#34;) as file:
+            json.dump(
+                {
+                    &#34;config&#34;: self.config.to_dict(),
+                    &#34;roles&#34;: self.roles,
+                    &#34;goals&#34;: self.goals,
+                },
+                file,
+                indent=4,
+            )
 
     @classmethod
-    def load_from_file(cls, file_path: str, llm_service: LLMService, memory_service: Optional[MemoryService] = None, eq_service: Optional[EQService] = None) -&gt; &#34;Framer&#34;:
+    def load_from_file(
+        cls,
+        file_path: str,
+        llm_service: LLMService,
+        memory_service: Optional[MemoryService] = None,
+        eq_service: Optional[EQService] = None,
+    ) -&gt; &#34;Framer&#34;:
         &#34;&#34;&#34;
         Load a Framer configuration from a file.
 
@@ -245,8 +376,25 @@ hljs.highlightAll();
             Framer: A new Framer instance configured from the file.
         &#34;&#34;&#34;
         config = parse_json_config(file_path)
-        return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
-    
+        return cls(
+            config=config,
+            llm_service=llm_service,
+            agency=Agency(llm_service=llm_service, context=None),
+            brain=Brain(
+                llm_service=llm_service,
+                default_model=config.default_model,
+                roles=config.roles,
+                goals=config.goals,
+                soul=Soul(seed=config.soul_seed),
+            ),
+            soul=Soul(seed=config.soul_seed),
+            workflow_manager=WorkflowManager(),
+            memory_service=memory_service,
+            eq_service=eq_service,
+            roles=config.roles,
+            goals=config.goals,
+        )
+
     async def perform_task(self, task: Dict[str, Any]) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Perform a task asynchronously.
@@ -261,10 +409,10 @@ hljs.highlightAll();
         valid_task_keys = Task.__annotations__.keys()
         task_filtered = {k: v for k, v in task.items() if k in valid_task_keys}
         # Ensure required fields are present
-        if &#39;description&#39; not in task_filtered:
-            task_filtered[&#39;description&#39;] = &#39;Default Task Description&#39;
-        if &#39;workflow_id&#39; not in task_filtered:
-            task_filtered[&#39;workflow_id&#39;] = &#39;default&#39;
+        if &#34;description&#34; not in task_filtered:
+            task_filtered[&#34;description&#34;] = &#34;Default Task Description&#34;
+        if &#34;workflow_id&#34; not in task_filtered:
+            task_filtered[&#34;workflow_id&#34;] = &#34;default&#34;
 
         task_obj = Task(**task_filtered)
         result = await self.agency.perform_task(task_obj)
@@ -282,7 +430,9 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         if not self.acting:
             logger.warning(&#34;Framer is not acting. Cannot process perceptions.&#34;)
-            return Decision(action=&#34;error&#34;, parameters={}, reasoning=&#34;Framer is halted.&#34;)
+            return Decision(
+                action=&#34;error&#34;, parameters={}, reasoning=&#34;Framer is halted.&#34;
+            )
             perception = Perception.from_dict(perception)
         decision = await self.brain.process_perception(
             perception, self.agency.get_goals()

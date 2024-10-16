@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import List, Dict, Any, Optional, Callable, Union
+from typing import List, Dict, Any, Optional, Callable, Union, Tuple
 from frame.src.services.llm.main import LLMService
 from frame.src.framer.config import FramerConfig
 from frame.src.framer.agency import Agency
@@ -33,6 +33,27 @@ logger = logging.getLogger("frame.framer")
 
 
 class Framer:
+    """
+    The Framer class represents an AI agent with cognitive capabilities. It integrates various components
+    such as agency, brain, soul, and workflow management to create a comprehensive AI entity capable of
+    processing perceptions, making decisions, and executing tasks.
+
+    Attributes:
+        config (FramerConfig): Configuration settings for the Framer.
+        llm_service (LLMService): The language model service to be used by the Framer.
+        agency (Agency): Manages roles, goals, tasks, and workflows for the Framer.
+        brain (Brain): Handles decision-making processes, integrating perceptions, memories, and thoughts.
+        soul (Soul): Represents the core essence and personality of a Framer.
+        workflow_manager (WorkflowManager): Manages workflows and tasks.
+        memory_service (Optional[MemoryService]): Service for managing memory. Default is None.
+        eq_service (Optional[EQService]): Service for managing emotional intelligence. Default is None.
+        roles (Optional[List[Dict[str, Any]]]): List of roles for the Framer. Default is None.
+        goals (Optional[List[Dict[str, Any]]]): List of goals for the Framer. Default is None.
+        observers (List[Observer]): List of observer functions to notify on decisions.
+        can_execute (bool): Determines if decisions are executed automatically. Default is True.
+        acting (bool): Indicates if the Framer is actively processing perceptions. Default is False.
+    """
+
     def __init__(
         self,
         config: FramerConfig,
@@ -46,6 +67,21 @@ class Framer:
         roles: Optional[List[Dict[str, Any]]] = None,
         goals: Optional[List[Dict[str, Any]]] = None,
     ):
+        """
+        Initialize a Framer instance.
+
+        Args:
+            config (FramerConfig): Configuration settings for the Framer.
+            llm_service (LLMService): The language model service to be used by the Framer.
+            agency (Agency): Manages roles, goals, tasks, and workflows for the Framer.
+            brain (Brain): Handles decision-making processes, integrating perceptions, memories, and thoughts.
+            soul (Soul): Represents the core essence and personality of a Framer.
+            workflow_manager (WorkflowManager): Manages workflows and tasks.
+            memory_service (Optional[MemoryService]): Service for managing memory. Default is None.
+            eq_service (Optional[EQService]): Service for managing emotional intelligence. Default is None.
+            roles (Optional[List[Dict[str, Any]]]): List of roles for the Framer. Default is None.
+            goals (Optional[List[Dict[str, Any]]]): List of goals for the Framer. Default is None.
+        """
         self._streamed_response = {"status": "pending", "result": ""}
         self.config = config
         self.llm_service = llm_service
