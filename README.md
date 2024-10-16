@@ -78,6 +78,7 @@ result = await framer.perform_task(task)
 print(f"Task result: {result}")
 
 # Clean up
+# This step is not required but is recommended to ensure that all resources are properly released.
 await framer.close()
 ```
 
