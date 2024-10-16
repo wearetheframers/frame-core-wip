@@ -4,15 +4,55 @@ site_url: https://frame.dev
 # repo_name:
 nav:
   - Installation: installation.md
-  - Architecture: Architecture/_main_/main.md
+  - Architecture:
+      - Main: Architecture/_main_/main.md
+      - Overview: Architecture/overview.md
+      - Components: Architecture/components.md
+      - Design Patterns: Architecture/design_patterns.md
   - API:
-    - API Reference: API/api_reference.md
-    - Frame: API/frame/frame.md
-    - Framer: API/frame/framer/framer.md
-    - Framed: API/frame/framed/framed.md
+      - API Reference: API/api_reference.md
+      - Frame:
+          - Overview: API/frame/overview.md
+          - Frame: API/frame/frame.md
+          - Framer:
+              - Framer: API/frame/framer/framer.md
+              - Framer Factory: API/frame/framer/framer_factory.md
+              - Agency: API/frame/framer/agency/agency.md
+              - Action Registry: API/frame/framer/agency/action_registry.md
+              - Tasks:
+                  - Task: API/frame/framer/agency/tasks/task.md
+                  - Workflow: API/frame/framer/agency/tasks/workflow/workflow.md
+                  - Workflow Manager: API/frame/framer/agency/tasks/workflow/workflow_manager.md
+              - Brain:
+                  - Brain: API/frame/framer/brain/brain.md
+                  - Perception: API/frame/framer/brain/perception/perception.md
+                  - Decision: API/frame/framer/brain/decision/decision.md
+                  - Mind: API/frame/framer/brain/mind/mind.md
+                  - Memory: API/frame/framer/brain/memory/memory.md
+                  - Memory Adapter: API/frame/framer/brain/memory/memory_adapters/mem0/mem0_adapter.md
+              - Soul: API/frame/framer/soul/soul.md
+              - Config: API/frame/framer/config.md
+          - Framed:
+              - Framed: API/frame/framed/framed.md
+              - Framed Factory: API/frame/framed/framed_factory.md
+              - Config: API/frame/framed/config.md
+      - Services:
+          - LLM:
+              - Main: API/frame/services/llm/main.md
+              - Adapter Interface: API/frame/services/llm/llm_adapter_interface.md
+          - Memory: API/frame/services/memory/main.md
+          - EQ: API/frame/services/eq/main.md
+          - Context:
+              - Context Service: API/frame/services/context/context_service.md
+              - Shared Context Service: API/frame/services/context/shared_context_service.md
+      - Utils:
+          - Log Manager: API/frame/utils/log_manager.md
+          - ID Generator: API/frame/utils/id_generator.md
+          - LLM Utils: API/frame/utils/llm_utils.md
   - Usage / Quick Start Guide:
     - Basic: Usage/basic/basic_usage.md
     - Testing: Usage/testing/testing.md
+    - Advanced: Usage/advanced/advanced_usage.md
   - Plugins: plugins.md
   - CLI: CLI.md
   - Glossary: glossary.md

@@ -23,7 +23,7 @@ class Task(TaskModel):
         self,
         description: str,
         workflow_id: str,
-        priority: float = 50.0,
+        priority: int = 5,
         expected_results: Optional[List[Any]] = None,
         dependencies: List[str] = None,
         parent_task_id: Optional[str] = None,
@@ -34,6 +34,8 @@ class Task(TaskModel):
         data: Optional[Dict[str, Any]] = None,
     ):
         task_id = generate_id()
+        if not (1 <= priority <= 10):
+            raise ValueError("Priority must be between 1 and 10")
         super().__init__(
             id=task_id,
             description=description,

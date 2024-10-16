@@ -69,7 +69,7 @@ class Decision(DecisionModel):
         parameters: Dict[str, Any],
         reasoning: str,
         confidence: float = 0.7,
-        priority: int = 1,
+        priority: int = 5,
         expected_results: Optional[Any] = None,
         task_status: TaskStatus = TaskStatus.PENDING,
     ) -> "Decision":
@@ -81,7 +81,7 @@ class Decision(DecisionModel):
             parameters (Dict[str, Any]): Parameters for the action.
             reasoning (str): The reasoning behind the decision.
             confidence (float, optional): The confidence level of the decision. Defaults to 0.7.
-            priority (int, optional): The priority of the decision on a scale from 1 (lowest) to 10 (highest). Defaults to 1.
+            priority (int, optional): The priority of the decision on a scale from 1 (lowest) to 10 (highest). Defaults to 5.
             expected_results (Optional[Any], optional): The expected results of the decision. Defaults to None.
             task_status (TaskStatusModel, optional): The status of the associated task. Defaults to PENDING.
 

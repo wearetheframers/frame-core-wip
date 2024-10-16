@@ -115,7 +115,7 @@ class Agency:
     def create_task(
         self,
         description: str,
-        priority: Union[float, str] = 50.0,
+        priority: Union[float, str] = 5.0,
         workflow_id: str = "default",
     ) -> Task:
         """
@@ -123,18 +123,20 @@ class Agency:
 
         Args:
             description (str): The description of the task.
-            priority (Union[float, str], optional): The priority of the task. Can be a float or a string. Defaults to 50.0.
+            priority (Union[float, str], optional): The priority of the task. Must be between 1 and 10. Defaults to 5.
             workflow_id (str, optional): The ID of the workflow this task belongs to. Defaults to "default".
 
         Returns:
             Task: The created Task object.
         """
         if isinstance(priority, str):
-            priority_map = {"Low": 25.0, "Medium": 50.0, "High": 75.0}
-            priority = priority_map.get(priority.capitalize(), 50.0)
-        return Task(
-            description=description, priority=float(priority), workflow_id=workflow_id
-        )
+            priority_map = {"low": 3, "medium": 5, "high": 8}
+            priority = priority_map.get(priority.lower(), 5)
+        
+        if not (1 <= priority <= 10):
+            raise ValueError("Priority must be between 1 and 10")
+        
+        return Task(description=description, priority=priority, workflow_id=workflow_id)
 
     def add_task(self, task: Task, workflow_id: str = "default") -> None:
         """
@@ -278,7 +280,8 @@ class Agency:
         
         Soul: {json.dumps(soul, indent=2)}
         
-        Respond with a JSON object containing 'name' and 'description' fields for the role."""
+        Respond with a JSON object containing 'name', 'description', and 'priority' fields for the role.
+        Ensure the priority is an integer between 1 and 10."""
         logger.debug(f"Role generation prompt: {prompt}")
         try:
             response = await self.llm_service.get_completion(
@@ -296,7 +299,11 @@ class Agency:
                         "description": "Assist with the given task or query.",
                     }
                 ]
-            return [role] if isinstance(role, dict) else role
+            if isinstance(role, dict) and 'priority' in role:
+                role['priority'] = max(1, min(10, int(role['priority'])))
+            return [role] if isinstance(role, dict) else [
+                {**r, 'priority': max(1, min(10, int(r.get('priority', 5))))} for r in role
+            ]
         except Exception as e:
             logger.error(f"Error generating role: {str(e)}", exc_info=True)
             logger.error(f"Prompt used for role generation: {prompt}")
@@ -315,13 +322,14 @@ class Agency:
             List[Dict[str, Any]]: A list of generated goals.
         """
         soul = getattr(self.context, "soul", {})
-        prompt = f"""Generate a goal that aligns with the Framer's current context. 
+        prompt = f"""Generate a goal that aligns with the Framer's current context.
         The goal should be clear, relevant, and directly related to the given information.
         Avoid creating complex scenarios. Keep it simple and focused.
-        
+
         Soul: {json.dumps(soul, indent=2)}
-        
-        Respond with a JSON object containing 'description' and 'priority' fields for the goal."""
+
+        Respond with a JSON object containing 'description' and 'priority' fields for the goal.
+        Ensure the priority is an integer between 1 and 10."""
 
         logger.debug(f"Goal generation prompt: {prompt}")
         try:
@@ -337,7 +345,7 @@ class Agency:
                 return [
                     {
                         "description": "Assist users based on the given input.",
-                        "priority": 50.0,
+                        "priority": 5,
                     }
                 ]
             return [goal] if isinstance(goal, dict) else goal
@@ -347,7 +355,7 @@ class Agency:
             return [
                 {
                     "description": "Assist users to the best of my abilities",
-                    "priority": 1,
+                    "priority": 5,
                 }
             ]
 
@@ -365,7 +373,8 @@ class Agency:
         
         Soul: {json.dumps(soul, indent=2)}
         
-        Respond with a JSON object containing 'description' and 'priority' fields for the goal."""
+        Respond with a JSON object containing 'description' and 'priority' fields for the goal.
+        Ensure the priority is an integer between 1 and 10."""
 
         logger.debug(f"Goal generation prompt: {prompt}")
         try:
@@ -381,7 +390,7 @@ class Agency:
                 return [
                     {
                         "description": "Assist users based on the given input.",
-                        "priority": 50.0,
+                        "priority": 5,
                     }
                 ]
             return [goal] if isinstance(goal, dict) else goal
@@ -391,7 +400,7 @@ class Agency:
             return [
                 {
                     "description": "Assist users to the best of my abilities",
-                    "priority": 1,
+                    "priority": 5,
                 }
             ]
 

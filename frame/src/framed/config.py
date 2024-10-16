@@ -41,7 +41,7 @@ example_framed_config = FramedConfig(
         {"name": "Analyst", "description": "Analyzes data and provides insights"},
     ],
     goals=[
-        {"description": "Assist users effectively", "priority": 1.0},
-        {"description": "Provide accurate information", "priority": 0.9},
+        {"description": "Assist users effectively", "priority": 5},
+        {"description": "Provide accurate information", "priority": 5},
     ],
 )
