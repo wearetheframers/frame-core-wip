@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.soul.soul.Soul"><code class="flex name class">
 <span>class <span class="ident">Soul</span></span>
-<span>(</span><span>seed: Union[str, Dict[str, Any], ForwardRef(None)] = None)</span>
+<span>(</span><span>seed: Union[str, Dict[str, Any], ForwardRef(None)] = None, traits: Optional[List[str]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Initialize a Soul instance.</p>
@@ -50,6 +50,8 @@ Can be either a string or a dictionary:
 - If a dictionary is provided, it can include any keys and values, with an optional 'text' key for the soul's essence.
 The 'text' key is used for the essence, and all other key-value pairs
 are stored in the notes. The values can be of any type. Defaults to None.</dd>
+<dt><strong><code>traits</code></strong> :&ensp;<code>Optional[List[str]]</code>, optional</dt>
+<dd>A list of traits for the Soul. Defaults to None.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -61,7 +63,7 @@ are stored in the notes. The values can be of any type. Defaults to None.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Soul:
-    def __init__(self, seed: Optional[Union[str, Dict[str, Any]]] = None) -&gt; None:
+    def __init__(self, seed: Optional[Union[str, Dict[str, Any]]] = None, traits: Optional[List[str]] = None) -&gt; None:
         &#34;&#34;&#34;
         Initialize a Soul instance.
 
@@ -72,12 +74,14 @@ are stored in the notes. The values can be of any type. Defaults to None.</dd>
                 - If a dictionary is provided, it can include any keys and values, with an optional &#39;text&#39; key for the soul&#39;s essence.
                 The &#39;text&#39; key is used for the essence, and all other key-value pairs
                 are stored in the notes. The values can be of any type. Defaults to None.
+            traits (Optional[List[str]], optional): A list of traits for the Soul. Defaults to None.
 
         Raises:
             ValueError: If the seed is not a string, dictionary, or None.
         &#34;&#34;&#34;
         self.model = SoulModel(seed=seed)
         self.seed = self.model.seed
+        self.traits = traits or []
 
     def update_state(self, key: str, value: Any) -&gt; None:
         &#34;&#34;&#34;
