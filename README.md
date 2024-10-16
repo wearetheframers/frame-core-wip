@@ -187,6 +187,14 @@ The `roam_links_converter.py` script in `scripts` converts roam-style links (e.g
 - Update `mkdocs.yml` for navigation.
 - API docs will be populated automatically from docstrings if you specify the class entrypoint in the markdown file.
 
+### Commiting Without Docs
+
+If you're developing locally with docs live reloading, you'll have doc files changed with every commit. To avoid this, you can run:
+
+```bash
+git add -- . ':!docs'
+```
+
 ### Linting
 
 Use `black` for code formatting:

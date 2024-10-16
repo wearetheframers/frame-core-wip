@@ -499,6 +499,28 @@ processing perceptions, making decisions, and executing tasks.</p>
             goals=config.goals,
         )
 
+    def export_to_markdown(self, file_path: str) -&gt; None:
+        &#34;&#34;&#34;
+        Export the Framer configuration to a Markdown file.
+
+        This method allows the Framer agent to be fully exported into a Markdown format,
+        making it portable and easy to use inside a prompt to any other LLM. This
+        portability enables the Framer agents to be shared and consumed by other
+        systems, facilitating interoperability and reuse.
+
+        Args:
+            file_path (str): The path to the file where the Markdown will be saved.
+        &#34;&#34;&#34;
+        export_config_to_markdown(self.config, file_path)
+        &#34;&#34;&#34;
+        Perform a task asynchronously.
+
+        Args:
+            task (Dict[str, Any]): Dictionary containing task details.
+
+        Returns:
+            Dict[str, Any]: Result of the task execution.
+        &#34;&#34;&#34;
     async def perform_task(self, task: Dict[str, Any]) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Perform a task asynchronously.
@@ -691,6 +713,21 @@ systems, facilitating interoperability and reuse.</p>
 <dl>
 <dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
 <dd>The path to the file where the JSON will be saved.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.Framer.export_to_markdown"><code class="name flex">
+<span>def <span class="ident">export_to_markdown</span></span>(<span>self, file_path: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Export the Framer configuration to a Markdown file.</p>
+<p>This method allows the Framer agent to be fully exported into a Markdown format,
+making it portable and easy to use inside a prompt to any other LLM. This
+portability enables the Framer agents to be shared and consumed by other
+systems, facilitating interoperability and reuse.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>The path to the file where the Markdown will be saved.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.Framer.initialize"><code class="name flex">
@@ -1085,6 +1122,7 @@ ensuring that all necessary components are properly initialized.</p>
 <li><code><a title="frame.src.framer.Framer.close" href="#frame.src.framer.Framer.close">close</a></code></li>
 <li><code><a title="frame.src.framer.Framer.create" href="#frame.src.framer.Framer.create">create</a></code></li>
 <li><code><a title="frame.src.framer.Framer.export_to_json" href="#frame.src.framer.Framer.export_to_json">export_to_json</a></code></li>
+<li><code><a title="frame.src.framer.Framer.export_to_markdown" href="#frame.src.framer.Framer.export_to_markdown">export_to_markdown</a></code></li>
 <li><code><a title="frame.src.framer.Framer.initialize" href="#frame.src.framer.Framer.initialize">initialize</a></code></li>
 <li><code><a title="frame.src.framer.Framer.load_from_file" href="#frame.src.framer.Framer.load_from_file">load_from_file</a></code></li>
 <li><code><a title="frame.src.framer.Framer.notify_observers" href="#frame.src.framer.Framer.notify_observers">notify_observers</a></code></li>

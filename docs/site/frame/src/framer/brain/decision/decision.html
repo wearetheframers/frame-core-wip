@@ -132,7 +132,7 @@ validated to form a valid model.</p>
         parameters: Dict[str, Any],
         reasoning: str,
         confidence: float = 0.7,
-        priority: int = 1,
+        priority: int = 5,
         expected_results: Optional[Any] = None,
         task_status: TaskStatus = TaskStatus.PENDING,
     ) -&gt; &#34;Decision&#34;:
@@ -144,7 +144,7 @@ validated to form a valid model.</p>
             parameters (Dict[str, Any]): Parameters for the action.
             reasoning (str): The reasoning behind the decision.
             confidence (float, optional): The confidence level of the decision. Defaults to 0.7.
-            priority (int, optional): The priority of the decision on a scale from 1 (lowest) to 10 (highest). Defaults to 1.
+            priority (int, optional): The priority of the decision on a scale from 1 (lowest) to 10 (highest). Defaults to 5.
             expected_results (Optional[Any], optional): The expected results of the decision. Defaults to None.
             task_status (TaskStatusModel, optional): The status of the associated task. Defaults to PENDING.
 
@@ -235,7 +235,7 @@ validated to form a valid model.</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.decision.decision.Decision.create"><code class="name flex">
-<span>def <span class="ident">create</span></span>(<span>action: str, parameters: Dict[str, Any], reasoning: str, confidence: float = 0.7, priority: int = 1, expected_results: Optional[Any] = None, task_status: <a title="frame.src.models.framer.agency.tasks.task.TaskStatus" href="../../../models/framer/agency/tasks/task.html#frame.src.models.framer.agency.tasks.task.TaskStatus">TaskStatus</a> = TaskStatus.PENDING) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+<span>def <span class="ident">create</span></span>(<span>action: str, parameters: Dict[str, Any], reasoning: str, confidence: float = 0.7, priority: int = 5, expected_results: Optional[Any] = None, task_status: <a title="frame.src.models.framer.agency.tasks.task.TaskStatus" href="../../../models/framer/agency/tasks/task.html#frame.src.models.framer.agency.tasks.task.TaskStatus">TaskStatus</a> = TaskStatus.PENDING) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new Decision instance with the given parameters.</p>
@@ -250,7 +250,7 @@ validated to form a valid model.</p>
 <dt><strong><code>confidence</code></strong> :&ensp;<code>float</code>, optional</dt>
 <dd>The confidence level of the decision. Defaults to 0.7.</dd>
 <dt><strong><code>priority</code></strong> :&ensp;<code>int</code>, optional</dt>
-<dd>The priority of the decision on a scale from 1 (lowest) to 10 (highest). Defaults to 1.</dd>
+<dd>The priority of the decision on a scale from 1 (lowest) to 10 (highest). Defaults to 5.</dd>
 <dt><strong><code>expected_results</code></strong> :&ensp;<code>Optional[Any]</code>, optional</dt>
 <dd>The expected results of the decision. Defaults to None.</dd>
 <dt><strong><code>task_status</code></strong> :&ensp;<code>TaskStatusModel</code>, optional</dt>

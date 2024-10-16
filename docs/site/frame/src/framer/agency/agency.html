@@ -175,7 +175,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
     def create_task(
         self,
         description: str,
-        priority: Union[float, str] = 50.0,
+        priority: Union[float, str] = 5.0,
         workflow_id: str = &#34;default&#34;,
     ) -&gt; Task:
         &#34;&#34;&#34;
@@ -183,18 +183,20 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 
         Args:
             description (str): The description of the task.
-            priority (Union[float, str], optional): The priority of the task. Can be a float or a string. Defaults to 50.0.
+            priority (Union[float, str], optional): The priority of the task. Must be between 1 and 10. Defaults to 5.
             workflow_id (str, optional): The ID of the workflow this task belongs to. Defaults to &#34;default&#34;.
 
         Returns:
             Task: The created Task object.
         &#34;&#34;&#34;
         if isinstance(priority, str):
-            priority_map = {&#34;Low&#34;: 25.0, &#34;Medium&#34;: 50.0, &#34;High&#34;: 75.0}
-            priority = priority_map.get(priority.capitalize(), 50.0)
-        return Task(
-            description=description, priority=float(priority), workflow_id=workflow_id
-        )
+            priority_map = {&#34;low&#34;: 3, &#34;medium&#34;: 5, &#34;high&#34;: 8}
+            priority = priority_map.get(priority.lower(), 5)
+        
+        if not (1 &lt;= priority &lt;= 10):
+            raise ValueError(&#34;Priority must be between 1 and 10&#34;)
+        
+        return Task(description=description, priority=priority, workflow_id=workflow_id)
 
     def add_task(self, task: Task, workflow_id: str = &#34;default&#34;) -&gt; None:
         &#34;&#34;&#34;
@@ -338,7 +340,8 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         
         Soul: {json.dumps(soul, indent=2)}
         
-        Respond with a JSON object containing &#39;name&#39; and &#39;description&#39; fields for the role.&#34;&#34;&#34;
+        Respond with a JSON object containing &#39;name&#39;, &#39;description&#39;, and &#39;priority&#39; fields for the role.
+        Ensure the priority is an integer between 1 and 10.&#34;&#34;&#34;
         logger.debug(f&#34;Role generation prompt: {prompt}&#34;)
         try:
             response = await self.llm_service.get_completion(
@@ -356,7 +359,11 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                         &#34;description&#34;: &#34;Assist with the given task or query.&#34;,
                     }
                 ]
-            return [role] if isinstance(role, dict) else role
+            if isinstance(role, dict) and &#39;priority&#39; in role:
+                role[&#39;priority&#39;] = max(1, min(10, int(role[&#39;priority&#39;])))
+            return [role] if isinstance(role, dict) else [
+                {**r, &#39;priority&#39;: max(1, min(10, int(r.get(&#39;priority&#39;, 5))))} for r in role
+            ]
         except Exception as e:
             logger.error(f&#34;Error generating role: {str(e)}&#34;, exc_info=True)
             logger.error(f&#34;Prompt used for role generation: {prompt}&#34;)
@@ -375,13 +382,14 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             List[Dict[str, Any]]: A list of generated goals.
         &#34;&#34;&#34;
         soul = getattr(self.context, &#34;soul&#34;, {})
-        prompt = f&#34;&#34;&#34;Generate a goal that aligns with the Framer&#39;s current context. 
+        prompt = f&#34;&#34;&#34;Generate a goal that aligns with the Framer&#39;s current context.
         The goal should be clear, relevant, and directly related to the given information.
         Avoid creating complex scenarios. Keep it simple and focused.
-        
+
         Soul: {json.dumps(soul, indent=2)}
-        
-        Respond with a JSON object containing &#39;description&#39; and &#39;priority&#39; fields for the goal.&#34;&#34;&#34;
+
+        Respond with a JSON object containing &#39;description&#39; and &#39;priority&#39; fields for the goal.
+        Ensure the priority is an integer between 1 and 10.&#34;&#34;&#34;
 
         logger.debug(f&#34;Goal generation prompt: {prompt}&#34;)
         try:
@@ -397,7 +405,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                 return [
                     {
                         &#34;description&#34;: &#34;Assist users based on the given input.&#34;,
-                        &#34;priority&#34;: 50.0,
+                        &#34;priority&#34;: 5,
                     }
                 ]
             return [goal] if isinstance(goal, dict) else goal
@@ -407,7 +415,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             return [
                 {
                     &#34;description&#34;: &#34;Assist users to the best of my abilities&#34;,
-                    &#34;priority&#34;: 1,
+                    &#34;priority&#34;: 5,
                 }
             ]
 
@@ -425,7 +433,8 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         
         Soul: {json.dumps(soul, indent=2)}
         
-        Respond with a JSON object containing &#39;description&#39; and &#39;priority&#39; fields for the goal.&#34;&#34;&#34;
+        Respond with a JSON object containing &#39;description&#39; and &#39;priority&#39; fields for the goal.
+        Ensure the priority is an integer between 1 and 10.&#34;&#34;&#34;
 
         logger.debug(f&#34;Goal generation prompt: {prompt}&#34;)
         try:
@@ -441,7 +450,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                 return [
                     {
                         &#34;description&#34;: &#34;Assist users based on the given input.&#34;,
-                        &#34;priority&#34;: 50.0,
+                        &#34;priority&#34;: 5,
                     }
                 ]
             return [goal] if isinstance(goal, dict) else goal
@@ -451,7 +460,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             return [
                 {
                     &#34;description&#34;: &#34;Assist users to the best of my abilities&#34;,
-                    &#34;priority&#34;: 1,
+                    &#34;priority&#34;: 5,
                 }
             ]
 
@@ -587,7 +596,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.create_task"><code class="name flex">
-<span>def <span class="ident">create_task</span></span>(<span>self, description: str, priority: Union[float, str] = 50.0, workflow_id: str = 'default') ‑> <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a></span>
+<span>def <span class="ident">create_task</span></span>(<span>self, description: str, priority: Union[float, str] = 5.0, workflow_id: str = 'default') ‑> <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new task with the given description and priority.</p>
@@ -596,7 +605,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <dt><strong><code>description</code></strong> :&ensp;<code>str</code></dt>
 <dd>The description of the task.</dd>
 <dt><strong><code>priority</code></strong> :&ensp;<code>Union[float, str]</code>, optional</dt>
-<dd>The priority of the task. Can be a float or a string. Defaults to 50.0.</dd>
+<dd>The priority of the task. Must be between 1 and 10. Defaults to 5.</dd>
 <dt><strong><code>workflow_id</code></strong> :&ensp;<code>str</code>, optional</dt>
 <dd>The ID of the workflow this task belongs to. Defaults to "default".</dd>
 </dl>
