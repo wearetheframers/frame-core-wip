@@ -26,11 +26,20 @@ class TestFramerIO(unittest.TestCase):
         mock_open.assert_called_once_with('dummy_path', 'w')
         mock_json_dump.assert_called_once()
 
-    @patch('frame.src.utils.config_parser.export_framer_to_markdown')
-    def test_export_framer_to_markdown(self, mock_export):
-        framer = MagicMock(spec=Framer)
-        export_framer_to_markdown(framer, 'dummy_path')
-        mock_export.assert_called_once_with(framer, 'dummy_path')
+    @patch('builtins.open', new_callable=unittest.mock.mock_open)
+    @patch('frame.src.utils.config_parser.export_config_to_markdown')
+    def test_export_to_markdown(self, mock_export, mock_open):
+        framer = Framer(
+            config=MagicMock(),
+            llm_service=MagicMock(),
+            agency=MagicMock(),
+            brain=MagicMock(),
+            soul=MagicMock(),
+            workflow_manager=MagicMock()
+        )
+        framer.export_to_markdown('dummy_path')
+        mock_open.assert_called_once_with('dummy_path', 'w')
+        mock_export.assert_called_once_with(framer.config, 'dummy_path')
 
 if __name__ == '__main__':
     unittest.main()
