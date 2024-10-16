@@ -201,7 +201,7 @@ This project is dual-licensed under the GNU Affero General Public License versio
 
 ## Custom Enterprise Support
 
-For custom enterprise support, development of features, or plugins, please contact our team at [team@frame.dev] or visit our website at [Frame.dev].
+For custom enterprise support, development of features, or plugins, please contact our team at [team@frame.dev](mailto:team@frame.dev) or visit our website at [frame.dev/contact].
 
 ## Contributing
 

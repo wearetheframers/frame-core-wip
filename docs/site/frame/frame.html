@@ -220,8 +220,6 @@ model to be used for completions.</p>
         # Calculate tokens used (you may need to implement this based on your LLM service)
         tokens_used = self.calculate_tokens_used(prompt, result)
 
-        from frame.src.utils.llm_utils import track_llm_usage
-
         track_llm_usage(model, tokens_used)
 
         return result
