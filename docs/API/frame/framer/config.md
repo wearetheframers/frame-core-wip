@@ -24,7 +24,7 @@ from frame.src.framer.config import FramerConfig
 config = FramerConfig(
     name="Example Framer",
     description="A sample Framer for demonstration purposes",
-    default_model="gpt-3.5-turbo"
+    default_model="gpt-4o-mini"
 )
 ```
 

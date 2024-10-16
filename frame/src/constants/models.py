@@ -21,4 +21,4 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gpt-4-mini")
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gpt-4o-mini")

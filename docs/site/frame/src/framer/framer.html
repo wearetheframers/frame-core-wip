@@ -295,7 +295,6 @@ processing perceptions, making decisions, and executing tasks.</p>
             )
 
     @classmethod
-    @classmethod
     def load_from_file(
         cls,
         file_path: str,
@@ -320,7 +319,10 @@ processing perceptions, making decisions, and executing tasks.</p>
         Returns:
             Framer: A new Framer instance configured from the file.
         &#34;&#34;&#34;
+        # Parse the configuration from the file
         config = parse_json_config(file_path)
+
+        # Create a new Framer instance with the parsed configuration
         return cls(
             config=config,
             llm_service=llm_service,

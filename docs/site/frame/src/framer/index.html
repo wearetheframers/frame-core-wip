@@ -322,7 +322,6 @@ processing perceptions, making decisions, and executing tasks.</p>
             )
 
     @classmethod
-    @classmethod
     def load_from_file(
         cls,
         file_path: str,
@@ -347,7 +346,10 @@ processing perceptions, making decisions, and executing tasks.</p>
         Returns:
             Framer: A new Framer instance configured from the file.
         &#34;&#34;&#34;
+        # Parse the configuration from the file
         config = parse_json_config(file_path)
+
+        # Create a new Framer instance with the parsed configuration
         return cls(
             config=config,
             llm_service=llm_service,
@@ -747,10 +749,10 @@ systems, facilitating interoperability and reuse.</p>
 </dd>
 <dt id="frame.src.framer.FramerConfig"><code class="flex name class">
 <span>class <span class="ident">FramerConfig</span></span>
-<span>(</span><span>name: str, model: Optional[str] = None, soul_seed: Union[str, Dict[str, Any], ForwardRef(None)] = 'You are a helpful AI assistant.', description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-4o', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = &lt;factory&gt;, goals: Optional[List[Dict[str, Any]]] = &lt;factory&gt;, recent_memories_limit: Optional[int] = 5)</span>
+<span>(</span><span>name: str, model: Optional[str] = None, soul_seed: Union[str, Dict[str, Any], ForwardRef(None)] = 'You are a helpful AI assistant.', description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-4o-mini', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = &lt;factory&gt;, goals: Optional[List[Dict[str, Any]]] = &lt;factory&gt;, recent_memories_limit: Optional[int] = 5)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>FramerConfig(name: str, model: Optional[str] = None, soul_seed: Union[str, Dict[str, Any], NoneType] = 'You are a helpful AI assistant.', description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-4o', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = <factory>, goals: Optional[List[Dict[str, Any]]] = <factory>, recent_memories_limit: Optional[int] = 5)</p></div>
+<div class="desc"><p>FramerConfig(name: str, model: Optional[str] = None, soul_seed: Union[str, Dict[str, Any], NoneType] = 'You are a helpful AI assistant.', description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-4o-mini', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = <factory>, goals: Optional[List[Dict[str, Any]]] = <factory>, recent_memories_limit: Optional[int] = 5)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -787,7 +789,7 @@ class FramerConfig:
     description: Optional[str] = None
     singleton: Optional[bool] = False
     gender: Optional[str] = &#34;neutral&#34;
-    default_model: Optional[str] = &#34;gpt-4o&#34;
+    default_model: Optional[str] = &#34;gpt-4o-mini&#34;
     multi_modal_model: Optional[str] = &#34;gpt-4-vision-preview&#34;
     llm_temperature: Optional[float] = 0.7
     llm_max_tokens: Optional[int] = 1024

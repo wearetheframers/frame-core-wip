@@ -105,10 +105,14 @@ Frame
 │   ├── SharedContext
 ├── Framed
 │   └── Multiple Framers
-└── LLM Adapters
-    ├── DSPy Adapter
-    ├── HuggingFace Adapter
-    └── LMQL Adapter
+├── LLMService
+│   └── LLMAdapters
+│       ├── DSPyAdapter
+│       ├── HuggingFaceAdapter
+│       └── LMQLAdapter
+├── MemoryService
+│   └── MemoryAdapters
+│       └── Mem0Adapter
 ```
 
 ## Agent Flow

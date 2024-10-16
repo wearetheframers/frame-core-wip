@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
-<title>frame.src.utils API documentation</title>
+<title>frame.src.utils.token_utils API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -22,87 +22,31 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>frame.src.utils</code></h1>
+<h1 class="title">Module <code>frame.src.utils.token_utils</code></h1>
 </header>
 <section id="section-intro">
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
-<dl>
-<dt><code class="name"><a title="frame.src.utils.cleanup" href="cleanup.html">frame.src.utils.cleanup</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.utils.config_parser" href="config_parser.html">frame.src.utils.config_parser</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.utils.helpers" href="helpers.html">frame.src.utils.helpers</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.utils.id_generator" href="id_generator.html">frame.src.utils.id_generator</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.utils.llm_utils" href="llm_utils.html">frame.src.utils.llm_utils</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.utils.log_manager" href="log_manager.html">frame.src.utils.log_manager</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.utils.metrics" href="metrics.html">frame.src.utils.metrics</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.utils.metrics_manager" href="metrics_manager.html">frame.src.utils.metrics_manager</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.utils.prompt_formatters" href="prompt_formatters.html">frame.src.utils.prompt_formatters</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.utils.token_utils" href="token_utils.html">frame.src.utils.token_utils</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 </section>
 <section>
 </section>
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="frame.src.utils.generate_id"><code class="name flex">
-<span>def <span class="ident">generate_id</span></span>(<span>) ‑> str</span>
+<dt id="frame.src.utils.token_utils.calculate_token_size"><code class="name flex">
+<span>def <span class="ident">calculate_token_size</span></span>(<span>text: str) ‑> int</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Generate a unique identifier.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>str</code></dt>
-<dd>A unique identifier string.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.utils.setup_logging"><code class="name flex">
-<span>def <span class="ident">setup_logging</span></span>(<span>level: Optional[int] = None, testing: bool = False) ‑> logging.Logger</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set up and configure logging for the application.</p>
+<div class="desc"><p>Calculate the number of tokens in a given text.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>level</code></strong> :&ensp;<code>Optional[int]</code></dt>
-<dd>The logging level to set. If None, defaults to INFO.</dd>
-<dt><strong><code>testing</code></strong> :&ensp;<code>bool</code></dt>
-<dd>If True, configure logging for testing environment.</dd>
+<dt><strong><code>text</code></strong> :&ensp;<code>str</code></dt>
+<dd>The text to calculate tokens for.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>logging.Logger</code></dt>
-<dd>The configured logger instance.</dd>
+<dt><code>int</code></dt>
+<dd>The number of tokens in the text.</dd>
 </dl></div>
 </dd>
 </dl>
@@ -117,27 +61,12 @@ hljs.highlightAll();
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="frame.src" href="../index.html">frame.src</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="frame.src.utils.cleanup" href="cleanup.html">frame.src.utils.cleanup</a></code></li>
-<li><code><a title="frame.src.utils.config_parser" href="config_parser.html">frame.src.utils.config_parser</a></code></li>
-<li><code><a title="frame.src.utils.helpers" href="helpers.html">frame.src.utils.helpers</a></code></li>
-<li><code><a title="frame.src.utils.id_generator" href="id_generator.html">frame.src.utils.id_generator</a></code></li>
-<li><code><a title="frame.src.utils.llm_utils" href="llm_utils.html">frame.src.utils.llm_utils</a></code></li>
-<li><code><a title="frame.src.utils.log_manager" href="log_manager.html">frame.src.utils.log_manager</a></code></li>
-<li><code><a title="frame.src.utils.metrics" href="metrics.html">frame.src.utils.metrics</a></code></li>
-<li><code><a title="frame.src.utils.metrics_manager" href="metrics_manager.html">frame.src.utils.metrics_manager</a></code></li>
-<li><code><a title="frame.src.utils.prompt_formatters" href="prompt_formatters.html">frame.src.utils.prompt_formatters</a></code></li>
-<li><code><a title="frame.src.utils.token_utils" href="token_utils.html">frame.src.utils.token_utils</a></code></li>
+<li><code><a title="frame.src.utils" href="index.html">frame.src.utils</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="frame.src.utils.generate_id" href="#frame.src.utils.generate_id">generate_id</a></code></li>
-<li><code><a title="frame.src.utils.setup_logging" href="#frame.src.utils.setup_logging">setup_logging</a></code></li>
+<li><code><a title="frame.src.utils.token_utils.calculate_token_size" href="#frame.src.utils.token_utils.calculate_token_size">calculate_token_size</a></code></li>
 </ul>
 </li>
 </ul>

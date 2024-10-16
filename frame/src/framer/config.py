@@ -35,7 +35,7 @@ class FramerConfig:
     description: Optional[str] = None
     singleton: Optional[bool] = False
     gender: Optional[str] = "neutral"
-    default_model: Optional[str] = "gpt-4o"
+    default_model: Optional[str] = "gpt-4o-mini"
     multi_modal_model: Optional[str] = "gpt-4-vision-preview"
     llm_temperature: Optional[float] = 0.7
     llm_max_tokens: Optional[int] = 1024
