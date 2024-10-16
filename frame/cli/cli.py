@@ -116,7 +116,7 @@ def execute_framer(frame, data, sync, stream):
 
     name = data.get("name", "Default Framer")
     description = data.get("description")
-    model = data.get("model", DEFAULT_MODEL)
+    model = data.get("model", DEFAULT_MODEL).lower()
     prompt = data.get("prompt")
     perception = data.get("perception")
     soul_seed = data.get("soul_seed", "default_soul_seed")
@@ -247,7 +247,7 @@ def execute_framer(frame, data, sync, stream):
     """Execute the Framer based on the provided configuration."""
     name = data.get("name", "Default Framer")
     description = data.get("description")
-    model = data.get("model", "gpt-3.5-turbo")
+    model = data.get("model", "gpt-3.5-turbo").lower()
     prompt = data.get("prompt")
     perception = data.get("perception")
     soul_seed = data.get("soul_seed", "You are a helpful AI")
