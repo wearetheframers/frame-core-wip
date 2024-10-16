@@ -16,9 +16,9 @@ from frame.src.utils.config_parser import (
 )
 from frame.src.utils.llm_utils import (
     get_completion,
-    calculate_token_size,
     choose_best_model_for_tokens,
 )
+from frame.src.utils.token_utils import calculate_token_size
 from frame.src.framer.brain.perception import Perception
 from frame.src.framer.brain.decision import Decision
 from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import DSPyAdapter
@@ -227,7 +227,6 @@ class Framer:
             )
 
     @classmethod
-    @classmethod
     def load_from_file(
         cls,
         file_path: str,
@@ -252,7 +251,10 @@ class Framer:
         Returns:
             Framer: A new Framer instance configured from the file.
         """
+        # Parse the configuration from the file
         config = parse_json_config(file_path)
+
+        # Create a new Framer instance with the parsed configuration
         return cls(
             config=config,
             llm_service=llm_service,
