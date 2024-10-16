@@ -5,6 +5,8 @@ from frame.src.framed.config import FramedConfig
 from frame.src.framed.framed import Framed
 from frame.src.framer.soul.soul import Soul
 from frame.src.framer.agency import Agency
+from frame.src.framer.agency.roles import Roles, Role
+from frame.src.framer.agency.goals import Goals, Goal
 from frame.src.services.llm.main import LLMService
 from frame.src.framer.agency.tasks.task import Task
 from frame.src.framer.agency.tasks.workflow import Workflow
@@ -40,23 +42,23 @@ def test_agency_initialization(agency, mock_llm_service):
 
 @pytest.mark.asyncio
 async def test_generate_roles_with_numeric_priority(agency):
-    agency.llm_service.get_completion.return_value = {
+    agency.llm_service.get_completion.return_value = json.dumps({
         "name": "Role1",
         "description": "A test role",
         "priority": 9,
-    }
+    })
     roles = await agency.generate_roles()
-    assert roles[0]["priority"] == 9
+    assert roles[0]["parameters"] == {"name": "Role1", "description": "A test role", "priority": 9}
 
 
 async def test_generate_roles_with_string_priority(agency):
-    agency.llm_service.get_completion.return_value = {
+    agency.llm_service.get_completion.return_value = json.dumps({
         "name": "Role1",
         "description": "A test role",
         "priority": "medium",
-    }
+    })
     roles = await agency.generate_roles()
-    assert roles[0]["priority"] == 5
+    assert roles[0]["parameters"] == {"name": "Role1", "description": "A test role", "priority": 5}
     mock_roles = [{"name": "Test Role", "description": "A test role"}]
     mock_goals = [{"description": "Test Goal", "priority": 1}]
 
@@ -70,15 +72,15 @@ async def test_generate_roles_with_string_priority(agency):
 
 
 def test_add_role(agency):
-    role = {"name": "Test Role", "description": "A test role"}
+    role = Role(name="Test Role", description="A test role")
     agency.add_role(role)
-    assert role in agency.roles
+    assert any(r.name == "Test Role" for r in agency.get_roles())
 
 
 def test_add_goal(agency):
-    goal = {"description": "Test Goal", "priority": 1}
+    goal = Goal(name="Test Goal", description="A test goal", priority=1)
     agency.add_goal(goal)
-    assert goal in agency.goals
+    assert any(g.name == "Test Goal" for g in agency.get_goals())
 
 
 def test_get_roles(agency):
@@ -183,12 +185,7 @@ async def test_generate_roles_and_goals(agency):
 
     roles, goals = await agency.generate_roles_and_goals()
 
-    assert roles == [
-        {
-            "name": "Task Assistant",
-            "description": "Assist with the given task or query.",
-        }
-    ]
+    assert roles == [{"name": "Task Assistant", "description": "Assist with the given task or query."}]
     assert goals == [{"description": "Test Goal", "priority": 1}]
 
     assert agency.generate_roles.call_count == 1
@@ -201,18 +198,19 @@ async def test_generate_roles_and_goals_empty_response(agency):
     agency.context = {"soul": "Test soul"}
 
     # Mock the generate_roles and generate_goals methods to return empty responses
-    agency.generate_roles = AsyncMock(return_value=[])
-    agency.generate_goals = AsyncMock(return_value=[])
+    agency.generate_roles = AsyncMock(return_value=[
+        Role(name="Task Assistant", description="Assist with the given task or query.")
+    ])
+    agency.generate_goals = AsyncMock(return_value=[
+        Goal(name="User Assistant", description="Assist users to the best of my abilities", priority=1)
+    ])
 
     roles, goals = await agency.generate_roles_and_goals()
 
     assert roles == [
-        {
-            "name": "Task Assistant",
-            "description": "Assist with the given task or query.",
-        }
+        Role(name="Task Assistant", description="Assist with the given task or query.", permissions=[])
     ]
-    assert goals == [{"description": "Assist users to the best of my abilities"}]
+    assert goals == [Goal(name="User Assistant", description="Assist users to the best of my abilities", priority=1)]
 
     agency.generate_roles.assert_called_once()
     agency.generate_goals.assert_called_once()

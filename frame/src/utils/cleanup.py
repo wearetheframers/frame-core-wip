@@ -40,7 +40,11 @@ def cleanup(logger=None):
     message = "Cleaning up Frame resources..."
     try:
         print(message, flush=True)
-        logger.info(message)
+        try:
+            logger.info(message)
+        except Exception as e:
+            error_message = f"Error during cleanup logging: {e}"
+            print(error_message, file=sys.stderr, flush=True)
     except Exception as e:
         error_message = f"Error during cleanup logging: {e}"
         print(error_message, file=sys.stderr, flush=True)

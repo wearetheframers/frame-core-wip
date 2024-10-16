@@ -127,5 +127,5 @@ async def test_default_actions(action_registry):
                 action, research_topic="test topic"
             )
         else:
-            result = await action_registry.perform_action(action)
+            result = await action_registry.perform_action(action, execution_context=action_registry.execution_context)
         assert result is not None or isinstance(result, (str, dict))

@@ -25,7 +25,7 @@ class MetricsManager(metaclass=SingletonMeta):
             self._total_cost = 0.0
             self._initialized = True
 
-    def update_metrics(self, model: str, calls: int, cost: float):
+    def update_metrics(self, model: str, calls: int = 1, cost: float = 0.0):
         self._metrics[model]["calls"] += calls
         self._metrics[model]["cost"] += cost
         self._total_calls += calls

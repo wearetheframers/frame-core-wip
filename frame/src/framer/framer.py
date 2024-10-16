@@ -162,9 +162,11 @@ class Framer:
         """Initialize the Framer with roles and goals."""
         self.act()  # Start acting after initialization
 
-        if not self.roles:
+        if not self.roles and not self.goals:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+        elif not self.roles:
             self.roles, _ = await self.agency.generate_roles_and_goals()
-        if not self.goals:
+        elif not self.goals:
             _, self.goals = await self.agency.generate_roles_and_goals()
 
         self.agency.set_roles(self.roles)
@@ -412,6 +414,7 @@ class Framer:
         Args:
             file_path (str): The path to the file where the Markdown will be saved.
         """
+        from frame.src.utils.config_parser import export_config_to_markdown
         export_config_to_markdown(self.config, file_path)
 
     async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:

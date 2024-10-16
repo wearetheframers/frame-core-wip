@@ -174,7 +174,7 @@ class LMQLAdapter(LLMAdapterInterface):
         if not self.token_bucket.consume(1):
             await asyncio.sleep(1)  # Wait for a token to become available
 
-        if self.mistral_client is None:
+        if self.mistral_client is None and model_name.startswith("mistral"):
             raise ValueError("Mistral client is not initialized")
         try:
             lmql_prompt = f"""

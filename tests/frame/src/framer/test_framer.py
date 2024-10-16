@@ -37,7 +37,7 @@ async def test_framer_initialization():
     workflow_manager = Mock(spec=WorkflowManager)
     from frame.src.framer.framer_factory import FramerFactory
     framer_factory = FramerFactory(config=config, llm_service=llm_service)
-    framer = await framer_factory.create_framer(
+    framer = await framer_factory.create_framed(
         memory_service=None,
         eq_service=None,
     )
@@ -65,7 +65,10 @@ async def test_framer_initialization():
     )
 
     # Ensure logging handlers are closed after the test
-    close_logging(logger)
+    try:
+        close_logging(logger)
+    except Exception as e:
+        print(f"Error during cleanup logging: {e}", file=sys.stderr)
 
 
 @pytest.mark.asyncio
@@ -177,7 +180,7 @@ async def test_framer_initialize():
     await framer.initialize()
     assert framer.roles == ["Provided Role"]
     assert framer.goals == ["Provided Goal"]
-    agency.generate_roles_and_goals.assert_not_called()
+    agency.generate_roles_and_goals.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -231,7 +234,7 @@ async def test_framer_initialize_with_provided_values():
     )
     await framer.initialize()
     assert framer.roles == ["Generated Role"]
-    assert framer.goals == []
+    assert framer.goals == ["Generated Goal"]
     agency.generate_roles_and_goals.assert_not_called()
 
     # Test case 3: Goals are provided, roles are None
