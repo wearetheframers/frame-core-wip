@@ -174,17 +174,29 @@ To build and serve MkDocs documentation, run:
 mkdocs serve --config-file ./mkdocs.yml
 ```
 
+You must run the `roam_links_converter.py` script before to convert linked references to their actual paths. 
+
 To serve both MkDocs and pdoc3 simultaneously, use:
 
 ```bash
 python scripts\serve_docs.py
 ```
 
-This runs MkDocs on port 3010 and pdoc3 on port 3011. This script runs both with live reloading, runs unit tests on initialization and generates a coverage report, and also parses and converts link references automatically (see below).
+This runs MkDocs on port 3010 and pdoc3 on port 3011. This script runs both with live reloading, runs unit tests on initialization and generates a coverage report, and also parses and converts link references automatically.
 
 #### Roam Links Converter
 
 The `roam_links_converter.py` script in `scripts` converts roam-style links (e.g., `[[Link Text]]`) to standard Markdown links. Use it before generating final docs to improve navigation.
+
+To add a doc file to be ignored by the converter, add:
+
+```
+<!---
+roam-ignore
+-->
+```
+
+anywhere within the markdown file.
 
 ### Using MkDocs
 
