@@ -142,7 +142,7 @@ Frame provides a comprehensive SDK for building and managing AI agents. For deta
 
 ### CLI Usage
 
-Frame's CLI supports both JSON input and traditional CLI arguments for flexible configuration. For more details, see the [CLI Usage](docs/Usage/CLI_Usage.md) documentation.
+Frame's CLI supports both JSON input and traditional CLI arguments for flexible configuration. Frame also supports a running a graphical textual user interface (TUI) in the Terminal. For more details, see the [CLI Usage](docs/Usage/CLI_Usage.md) documentation.
 
 ## Plugins and Actions
 
