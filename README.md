@@ -158,6 +158,12 @@ To run all tests, navigate to the root directory of the project and execute:
 pytest
 ```
 
+*Note*: Testing can take a little while as we have tests for rate limiting / retry logic, so you can exclude those (they are in the `llm_adapter` tests) if it's slow while developing others:
+
+```python
+pytest -k "not (llm_service or llm_adapter)"
+```
+
 ### Documentation
 
 The project uses MkDocs and can also use pdoc3 for documentation. The MkDocs config is in `docs/`, and HTML output is also in `docs/`.
