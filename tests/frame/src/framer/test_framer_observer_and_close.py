@@ -17,6 +17,7 @@ def framer():
     brain = Mock(spec=Brain)
     soul = Mock(spec=Soul)
     workflow_manager = Mock(spec=WorkflowManager)
+    workflow_manager.workflows = {}
     return Framer(
         config=config,
         llm_service=llm_service,

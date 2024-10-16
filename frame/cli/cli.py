@@ -4,6 +4,14 @@ import os
 import logging
 import asyncio
 import atexit
+
+import json
+from frame.src.framer.config import FramerConfig
+from frame.src.framer.framer_factory import FramerFactory
+from frame.src.framer.agency import Agency
+from frame.src.services.context.context_service import Context
+from frame.cli.common import process_perception_and_log
+
 from frame.src.utils.cleanup import cleanup
 
 # Initialize colorama
@@ -17,6 +25,7 @@ project_root = os.path.dirname(os.path.dirname(current_dir))
 sys.path.insert(0, project_root)
 
 from frame.cli.common import pretty_log
+from frame.src.constants.models import DEFAULT_MODEL
 from frame.src.framer.brain.perception import Perception
 from frame.sync_frame import sync_frame
 
@@ -107,7 +116,7 @@ def execute_framer(frame, data, sync, stream):
 
     name = data.get("name", "Default Framer")
     description = data.get("description")
-    model = data.get("model", "gpt-3.5-turbo")
+    model = data.get("model", DEFAULT_MODEL)
     prompt = data.get("prompt")
     perception = data.get("perception")
     soul_seed = data.get("soul_seed", "default_soul_seed")
@@ -190,7 +199,7 @@ def tui():
 @cli.command()
 @click.option("--prompt", help="Prompt for the Framer")
 @click.option("--name", default="Default Framer", help="Name of the Framer")
-@click.option("--model", default="gpt-3.5-turbo", help="Model to use for the Framer")
+@click.option("--model", default="gpt-4o-mini", help="Model to use for the Framer")
 @click.option("--debug/--no-debug", default=False, help="Enable debug logging")
 @click.option("--sync", is_flag=True, help="Run in synchronous mode")
 @click.option("--stream", is_flag=True, help="Stream the output")
@@ -236,9 +245,6 @@ def run_framer(ctx, prompt, name, model, debug, sync, stream):
 
 def execute_framer(frame, data, sync, stream):
     """Execute the Framer based on the provided configuration."""
-    import json
-    from frame.src.framer.config import FramerConfig
-
     name = data.get("name", "Default Framer")
     description = data.get("description")
     model = data.get("model", "gpt-3.5-turbo")
@@ -387,13 +393,6 @@ async def run_async(
     """
     Run the Framer asynchronously.
     """
-    import json
-    from frame.src.framer.config import FramerConfig
-    from frame.src.framer.framer_factory import FramerFactory
-    from frame.src.framer.agency import Agency
-    from frame.src.services.context.context_service import Context
-    from frame.cli.common import process_perception_and_log
-
     logger.debug(f"run_async - Soul seed: {soul_seed}")
     config = FramerConfig(
         name=name,

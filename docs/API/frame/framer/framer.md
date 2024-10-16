@@ -20,7 +20,7 @@ The `Framer` class represents an AI agent with cognitive capabilities. It integr
 
 - **Execution Control**: Framers have a `can_execute` property that determines if decisions are executed automatically. By default, this is set to `True`.
 
-- **Integration with Services**: The Framer class integrates with various services such as LLMService, MemoryService, EQService, and ActionRegistry to enhance its capabilities. Note: DSPy does not support streaming mode. When streaming is enabled, the `_streamed_response` variable accumulates the streamed content and resets with each new `get_completion` call.
+- **Integration with Services**: The Framer class integrates with various services such as LLMService, MemoryService, EQService, and ActionRegistry to enhance its capabilities. Note: DSPy does not support streaming mode. When streaming is enabled, the `_streamed_response` variable accumulates the streamed content and resets with each new `get_completion` call. Models can be specified in the configuration and in each completion endpoint/call, beyond just the default model given to all Frame configs.
 
 - **Automatic Role and Goal Generation**: If roles or goals are not provided during initialization, they will be automatically generated:
   - If both roles and goals are None, they will be generated using `generate_roles_and_goals()`.

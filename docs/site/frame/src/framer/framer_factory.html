@@ -160,7 +160,7 @@ ensuring that all necessary components are properly initialized.</p>
             llm_service=self.llm_service,
             roles=roles,
             goals=goals,
-            default_model=self.config.default_model,
+            default_model=self.config.default_model or DEFAULT_MODEL,
             execution_context=execution_context,
         )
 

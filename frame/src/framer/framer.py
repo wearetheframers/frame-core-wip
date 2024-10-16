@@ -122,7 +122,7 @@ class Framer:
         soul = Soul(seed=config.soul_seed)
         brain = Brain(
             llm_service=llm_service,
-            default_model=config.default_model,
+            default_model="gpt-4o",
             roles=roles,
             goals=goals,
             soul=soul,
@@ -174,21 +174,33 @@ class Framer:
         """Disable the Framer from processing perceptions and making decisions."""
         self.acting = False
 
-    def export_to_markdown(self, file_path: str) -> None:
+    def export_to_json(self, file_path: str) -> None:
         """
-        Export the Framer configuration to a Markdown file.
+        Export the Framer configuration to a JSON file.
 
-        This method allows the Framer agent to be fully exported into a Markdown format,
+        This method allows the Framer agent to be fully exported into a JSON format,
         making it portable and easy to use inside a prompt to any other LLM. This
         portability enables the Framer agents to be shared and consumed by other
         systems, facilitating interoperability and reuse.
 
         Args:
-            file_path (str): The path to the file where the Markdown will be saved.
+            file_path (str): The path to the file where the JSON will be saved.
         """
-        from frame.src.utils.config_parser import export_config_to_markdown
+        import json
 
-        export_config_to_markdown(self.config, file_path)
+        with open(file_path, "w") as file:
+            json.dump(
+                {
+                    "config": self.config.to_dict() if hasattr(self.config, "to_dict") else self.config,
+                    "roles": self.roles,
+                    "goals": self.goals,
+                },
+                file,
+                indent=4,
+                default=str  # Use default=str to handle non-serializable objects
+            )
+
+    def export_to_json(self, file_path: str) -> None:
         """
         Export the Framer configuration to a JSON file.
 

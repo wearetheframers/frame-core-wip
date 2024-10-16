@@ -1,4 +1,5 @@
 from typing import Optional, List, Dict, Any, Union
+from frame.src.constants.models import DEFAULT_MODEL
 from dataclasses import dataclass, field
 
 
@@ -34,7 +35,7 @@ class FramerConfig:
     description: Optional[str] = None
     singleton: Optional[bool] = False
     gender: Optional[str] = "neutral"
-    default_model: Optional[str] = "gpt-3.5-turbo"
+    default_model: Optional[str] = "gpt-4o"
     multi_modal_model: Optional[str] = "gpt-4-vision-preview"
     llm_temperature: Optional[float] = 0.7
     llm_max_tokens: Optional[int] = 1024

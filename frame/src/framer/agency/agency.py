@@ -1,4 +1,5 @@
 from typing import List, Dict, Any, Optional, Tuple, Union
+from frame.src.constants.models import DEFAULT_MODEL
 from frame.src.framer.agency.tasks.task import Task, TaskStatus
 from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services.llm.main import LLMService
@@ -54,7 +55,7 @@ class Agency:
         self.goals = goals if goals is not None else []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
-        self.default_model = getattr(self.llm_service, "default_model", "gpt-3.5-turbo")
+        self.default_model = getattr(self.llm_service, "default_model", DEFAULT_MODEL)
         self.action_registry = ActionRegistry(self.execution_context)
 
     def add_role(self, role: Dict[str, Any]) -> None:

@@ -190,7 +190,7 @@ processing perceptions, making decisions, and executing tasks.</p>
         soul = Soul(seed=config.soul_seed)
         brain = Brain(
             llm_service=llm_service,
-            default_model=config.default_model,
+            default_model=&#34;gpt-4o&#34;,
             roles=roles,
             goals=goals,
             soul=soul,
@@ -242,21 +242,33 @@ processing perceptions, making decisions, and executing tasks.</p>
         &#34;&#34;&#34;Disable the Framer from processing perceptions and making decisions.&#34;&#34;&#34;
         self.acting = False
 
-    def export_to_markdown(self, file_path: str) -&gt; None:
+    def export_to_json(self, file_path: str) -&gt; None:
         &#34;&#34;&#34;
-        Export the Framer configuration to a Markdown file.
+        Export the Framer configuration to a JSON file.
 
-        This method allows the Framer agent to be fully exported into a Markdown format,
+        This method allows the Framer agent to be fully exported into a JSON format,
         making it portable and easy to use inside a prompt to any other LLM. This
         portability enables the Framer agents to be shared and consumed by other
         systems, facilitating interoperability and reuse.
 
         Args:
-            file_path (str): The path to the file where the Markdown will be saved.
+            file_path (str): The path to the file where the JSON will be saved.
         &#34;&#34;&#34;
-        from frame.src.utils.config_parser import export_config_to_markdown
+        import json
 
-        export_config_to_markdown(self.config, file_path)
+        with open(file_path, &#34;w&#34;) as file:
+            json.dump(
+                {
+                    &#34;config&#34;: self.config.to_dict() if hasattr(self.config, &#34;to_dict&#34;) else self.config,
+                    &#34;roles&#34;: self.roles,
+                    &#34;goals&#34;: self.goals,
+                },
+                file,
+                indent=4,
+                default=str  # Use default=str to handle non-serializable objects
+            )
+
+    def export_to_json(self, file_path: str) -&gt; None:
         &#34;&#34;&#34;
         Export the Framer configuration to a JSON file.
 
@@ -628,19 +640,19 @@ important to call this method when the Framer is no longer needed to
 prevent memory leaks and ensure optimal performance. This method
 should be called to gracefully shut down the Framer.</p></div>
 </dd>
-<dt id="frame.src.framer.framer.Framer.export_to_markdown"><code class="name flex">
-<span>def <span class="ident">export_to_markdown</span></span>(<span>self, file_path: str) ‑> None</span>
+<dt id="frame.src.framer.framer.Framer.export_to_json"><code class="name flex">
+<span>def <span class="ident">export_to_json</span></span>(<span>self, file_path: str) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Export the Framer configuration to a Markdown file.</p>
-<p>This method allows the Framer agent to be fully exported into a Markdown format,
+<div class="desc"><p>Export the Framer configuration to a JSON file.</p>
+<p>This method allows the Framer agent to be fully exported into a JSON format,
 making it portable and easy to use inside a prompt to any other LLM. This
 portability enables the Framer agents to be shared and consumed by other
 systems, facilitating interoperability and reuse.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
-<dd>The path to the file where the Markdown will be saved.</dd>
+<dd>The path to the file where the JSON will be saved.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.framer.Framer.initialize"><code class="name flex">
@@ -727,7 +739,7 @@ systems, facilitating interoperability and reuse.</p>
 <li><code><a title="frame.src.framer.framer.Framer.add_observer" href="#frame.src.framer.framer.Framer.add_observer">add_observer</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.close" href="#frame.src.framer.framer.Framer.close">close</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.create" href="#frame.src.framer.framer.Framer.create">create</a></code></li>
-<li><code><a title="frame.src.framer.framer.Framer.export_to_markdown" href="#frame.src.framer.framer.Framer.export_to_markdown">export_to_markdown</a></code></li>
+<li><code><a title="frame.src.framer.framer.Framer.export_to_json" href="#frame.src.framer.framer.Framer.export_to_json">export_to_json</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.initialize" href="#frame.src.framer.framer.Framer.initialize">initialize</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.load_from_file" href="#frame.src.framer.framer.Framer.load_from_file">load_from_file</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.notify_observers" href="#frame.src.framer.framer.Framer.notify_observers">notify_observers</a></code></li>
