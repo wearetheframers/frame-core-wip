@@ -8,15 +8,21 @@ import asyncio
 from frame import Frame, FramerConfig
 from frame.src.utils.config_parser import parse_markdown_config
 
+
 async def main():
     # Load configuration from Markdown file
     # Try to locate the config.md file in multiple potential directories
-    # Since we might be running this script inside the examples directory, 
+    # Since we might be running this script inside the examples directory,
     # or inside the root dir of the project.
     possible_paths = [
-        os.path.join(os.path.dirname(__file__), 'config.md'),
-        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), 'config.md'),
-        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")), 'config.md')
+        os.path.join(os.path.dirname(__file__), "config.md"),
+        os.path.join(
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), "config.md"
+        ),
+        os.path.join(
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")),
+            "config.md",
+        ),
     ]
 
     config = None
@@ -51,6 +57,7 @@ async def main():
 
     # Clean up
     await framer.close()
+
 
 # Run the example
 if __name__ == "__main__":

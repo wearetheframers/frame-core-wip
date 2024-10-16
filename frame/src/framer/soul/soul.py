@@ -3,7 +3,11 @@ from frame.src.models.framer.soul.soul import Soul as SoulModel
 
 
 class Soul:
-    def __init__(self, seed: Optional[Union[str, Dict[str, Any]]] = None, traits: Optional[List[str]] = None) -> None:
+    def __init__(
+        self,
+        seed: Optional[Union[str, Dict[str, Any]]] = None,
+        traits: Optional[List[str]] = None,
+    ) -> None:
         """
         Initialize a Soul instance.
 

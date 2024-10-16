@@ -298,5 +298,3 @@ async def test_cancel_task():
 
     # Check if the task status is CANCELED
     assert task.status == TaskStatus.CANCELED
-
-

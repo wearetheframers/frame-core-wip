@@ -9,7 +9,11 @@ from frame.src.framer.soul import Soul
 from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
 from frame.src.framer.agency.tasks.task import Task
 from frame.src.models.framer.agency.tasks.task import TaskStatus
-from frame.src.utils.config_parser import parse_json_config, parse_markdown_config, export_config_to_markdown
+from frame.src.utils.config_parser import (
+    parse_json_config,
+    parse_markdown_config,
+    export_config_to_markdown,
+)
 from frame.src.utils.llm_utils import (
     get_completion,
     calculate_token_size,
@@ -146,6 +150,7 @@ class Framer:
             file_path (str): The path to the file where the Markdown will be saved.
         """
         from frame.src.utils.config_parser import export_config_to_markdown
+
         export_config_to_markdown(self.config, file_path)
         """
         Export the Framer configuration to a JSON file.
@@ -159,15 +164,26 @@ class Framer:
             file_path (str): The path to the file where the JSON will be saved.
         """
         import json
-        with open(file_path, 'w') as file:
-            json.dump({
-                "config": self.config.to_dict(),
-                "roles": self.roles,
-                "goals": self.goals
-            }, file, indent=4)
+
+        with open(file_path, "w") as file:
+            json.dump(
+                {
+                    "config": self.config.to_dict(),
+                    "roles": self.roles,
+                    "goals": self.goals,
+                },
+                file,
+                indent=4,
+            )
 
     @classmethod
-    def load_from_file(cls, file_path: str, llm_service: LLMService, memory_service: Optional[MemoryService] = None, eq_service: Optional[EQService] = None) -> "Framer":
+    def load_from_file(
+        cls,
+        file_path: str,
+        llm_service: LLMService,
+        memory_service: Optional[MemoryService] = None,
+        eq_service: Optional[EQService] = None,
+    ) -> "Framer":
         """
         Load a Framer configuration from a file.
 
@@ -186,7 +202,24 @@ class Framer:
             Framer: A new Framer instance configured from the file.
         """
         config = parse_json_config(file_path)
-        return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
+        return cls(
+            config=config,
+            llm_service=llm_service,
+            agency=Agency(llm_service=llm_service, context=None),
+            brain=Brain(
+                llm_service=llm_service,
+                default_model=config.default_model,
+                roles=config.roles,
+                goals=config.goals,
+                soul=Soul(seed=config.soul_seed),
+            ),
+            soul=Soul(seed=config.soul_seed),
+            workflow_manager=WorkflowManager(),
+            memory_service=memory_service,
+            eq_service=eq_service,
+            roles=config.roles,
+            goals=config.goals,
+        )
 
     def export_to_json(self, file_path: str) -> None:
         """
@@ -201,15 +234,26 @@ class Framer:
             file_path (str): The path to the file where the JSON will be saved.
         """
         import json
-        with open(file_path, 'w') as file:
-            json.dump({
-                "config": self.config.to_dict(),
-                "roles": self.roles,
-                "goals": self.goals
-            }, file, indent=4)
+
+        with open(file_path, "w") as file:
+            json.dump(
+                {
+                    "config": self.config.to_dict(),
+                    "roles": self.roles,
+                    "goals": self.goals,
+                },
+                file,
+                indent=4,
+            )
 
     @classmethod
-    def load_from_file(cls, file_path: str, llm_service: LLMService, memory_service: Optional[MemoryService] = None, eq_service: Optional[EQService] = None) -> "Framer":
+    def load_from_file(
+        cls,
+        file_path: str,
+        llm_service: LLMService,
+        memory_service: Optional[MemoryService] = None,
+        eq_service: Optional[EQService] = None,
+    ) -> "Framer":
         """
         Load a Framer configuration from a file.
 
@@ -228,8 +272,25 @@ class Framer:
             Framer: A new Framer instance configured from the file.
         """
         config = parse_json_config(file_path)
-        return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
-    
+        return cls(
+            config=config,
+            llm_service=llm_service,
+            agency=Agency(llm_service=llm_service, context=None),
+            brain=Brain(
+                llm_service=llm_service,
+                default_model=config.default_model,
+                roles=config.roles,
+                goals=config.goals,
+                soul=Soul(seed=config.soul_seed),
+            ),
+            soul=Soul(seed=config.soul_seed),
+            workflow_manager=WorkflowManager(),
+            memory_service=memory_service,
+            eq_service=eq_service,
+            roles=config.roles,
+            goals=config.goals,
+        )
+
     async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """
         Perform a task asynchronously.
@@ -244,10 +305,10 @@ class Framer:
         valid_task_keys = Task.__annotations__.keys()
         task_filtered = {k: v for k, v in task.items() if k in valid_task_keys}
         # Ensure required fields are present
-        if 'description' not in task_filtered:
-            task_filtered['description'] = 'Default Task Description'
-        if 'workflow_id' not in task_filtered:
-            task_filtered['workflow_id'] = 'default'
+        if "description" not in task_filtered:
+            task_filtered["description"] = "Default Task Description"
+        if "workflow_id" not in task_filtered:
+            task_filtered["workflow_id"] = "default"
 
         task_obj = Task(**task_filtered)
         result = await self.agency.perform_task(task_obj)
@@ -265,7 +326,9 @@ class Framer:
         """
         if not self.acting:
             logger.warning("Framer is not acting. Cannot process perceptions.")
-            return Decision(action="error", parameters={}, reasoning="Framer is halted.")
+            return Decision(
+                action="error", parameters={}, reasoning="Framer is halted."
+            )
             perception = Perception.from_dict(perception)
         decision = await self.brain.process_perception(
             perception, self.agency.get_goals()

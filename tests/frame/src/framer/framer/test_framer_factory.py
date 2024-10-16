@@ -28,8 +28,6 @@ async def test_create_framer(framer_builder):
     assert framer.config.default_model == "gpt-3.5-turbo"
 
 
-
-
 def test_framer_builder_set_config(framer_builder):
     new_config = FramerConfig(name="New Framer", default_model="gpt-4")
     framer_builder.config = new_config

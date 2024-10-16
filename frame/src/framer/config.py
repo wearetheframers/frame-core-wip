@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict, Any, Union
 from dataclasses import dataclass, field
 
+
 @dataclass
 class FramerConfig:
     name: str
@@ -44,4 +45,3 @@ class FramerConfig:
     roles: Optional[List[Dict[str, str]]] = field(default_factory=list)
     goals: Optional[List[Dict[str, Any]]] = field(default_factory=list)
     recent_memories_limit: Optional[int] = 5
-

@@ -4,10 +4,11 @@ from frame.src.framer.framer import Framer
 from frame.src.framer.config import FramerConfig
 from frame.src.services.llm.main import LLMService
 
+
 def main():
     # Get the directory of the current script
     script_dir = os.path.dirname(__file__)
-    config_path = os.path.join(script_dir, 'config.md')
+    config_path = os.path.join(script_dir, "config.md")
 
     # Load the Framer configuration from the Markdown file
     config = load_framer_from_file(config_path)
@@ -22,6 +23,7 @@ def main():
 
     # Perform tasks with the Framer
     # Example: framer.perform_task({"task": "example task"})
+
 
 if __name__ == "__main__":
     main()

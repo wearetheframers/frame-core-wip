@@ -11,15 +11,22 @@ from frame.src.utils.config_parser import parse_json_config, parse_markdown_conf
 # Import Frame from upper dir
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
+
 async def main():
     # Load configuration from JSON file
     # Try to locate the config.json file in multiple potential directories
-    # Since we might be running this script inside the examples directory, 
+    # Since we might be running this script inside the examples directory,
     # or inside the root dir of the project.
     possible_paths = [
-        os.path.join(os.path.dirname(__file__), 'config.json'),
-        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), 'config.json'),
-        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")), 'config.json')
+        os.path.join(os.path.dirname(__file__), "config.json"),
+        os.path.join(
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..")),
+            "config.json",
+        ),
+        os.path.join(
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")),
+            "config.json",
+        ),
     ]
 
     config = None
@@ -31,7 +38,9 @@ async def main():
             continue
 
     if config is None:
-        raise FileNotFoundError("config.json not found in any of the expected locations.")
+        raise FileNotFoundError(
+            "config.json not found in any of the expected locations."
+        )
 
     # Initialize the Frame
     frame = Frame()
@@ -54,6 +63,7 @@ async def main():
 
     # Clean up
     await framer.close()
+
 
 # Run the example
 if __name__ == "__main__":
