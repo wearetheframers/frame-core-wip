@@ -220,10 +220,9 @@ class Brain:
         action = decision_data.get("action", "respond").lower()
         valid_actions = [
             action.lower() for action in self.action_registry.actions.keys()
-        ] + [
-            "test_action"
-        ]  # Add "test_action" for testing purposes
+        ]
 
+        # Check if the action is valid
         if action not in valid_actions:
             invalid_action = action
             action = "respond"

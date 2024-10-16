@@ -15,13 +15,13 @@ async def main():
     # Since we might be running this script inside the examples directory,
     # or inside the root dir of the project.
     possible_paths = [
-        os.path.join(os.path.dirname(__file__), "config.md"),
+        os.path.join(os.path.dirname(__file__), "framer.md"),
         os.path.join(
-            os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), "config.md"
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), "framer.md"
         ),
         os.path.join(
             os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")),
-            "config.md",
+            "framer.md",
         ),
     ]
 
