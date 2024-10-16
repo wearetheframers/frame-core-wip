@@ -58,56 +58,6 @@ class Framer:
         self.roles = roles
         self.goals = goals
 
-    def add_observer(self, observer: Observer) -> None:
-        """
-        Add an observer to be notified when a decision is made.
-
-        Args:
-            observer (Observer): The observer function to add.
-        """
-        self.observers.append(observer)
-
-    def remove_observer(self, observer: Observer) -> None:
-        """
-        Remove an observer.
-
-        Args:
-            observer (Observer): The observer function to remove.
-        """
-        self.observers.remove(observer)
-
-    def notify_observers(self, decision: Decision) -> None:
-        """
-        Notify all observers about a decision.
-
-        Args:
-            decision (Decision): The decision to notify observers about.
-        """
-        for observer in self.observers:
-            observer(decision)
-
-        # Notify plugins about the decision
-        if hasattr(self, "plugins"):
-            for plugin in self.plugins.values():
-                if hasattr(plugin, "on_decision_made"):
-                    plugin.on_decision_made(decision)
-
-    def notify_task_completion(self, task: Task) -> None:
-        """
-        Notify all observers and plugins about task completion.
-
-        Args:
-            task (Task): The task that was completed.
-        """
-        for observer in self.observers:
-            if hasattr(observer, "on_task_completed"):
-                observer.on_task_completed(task)
-
-        if hasattr(self, "plugins"):
-            for plugin in self.plugins.values():
-                if hasattr(plugin, "on_task_completed"):
-                    plugin.on_task_completed(task)
-
     @classmethod
     async def create(
         cls,
@@ -148,6 +98,28 @@ class Framer:
 
         await framer.initialize()
         return framer
+
+    @classmethod
+    def load_from_file(cls, file_path: str, llm_service: LLMService, memory_service: Optional[MemoryService] = None, eq_service: Optional[EQService] = None) -> "Framer":
+        """
+        Load a Framer configuration from a file.
+
+        This method allows importing a Framer agent from a JSON or markdown file,
+        enabling the reconstruction of the agent's state and configuration. This
+        functionality is crucial for restoring Framer agents from saved states,
+        ensuring continuity and consistency across different sessions or environments.
+
+        Args:
+            file_path (str): The path to the configuration file.
+            llm_service (LLMService): Language model service.
+            memory_service (Optional[MemoryService]): Memory service for the Framer.
+            eq_service (Optional[EQService]): Emotional intelligence service for the Framer.
+
+        Returns:
+            Framer: A new Framer instance configured from the file.
+        """
+        config = load_framer_from_file(file_path)
+        return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
 
     async def initialize(self):
         """
@@ -205,53 +177,6 @@ class Framer:
         self.agency.roles = self.roles
         self.agency.goals = self.goals
 
-    # Add a docstring explaining the role and goal generation behavior
-    create.__doc__ = """
-    Create a new Framer instance.
-
-    Role and goal generation behavior:
-    - If both roles and goals are None, they will be generated using generate_roles_and_goals().
-    - If roles is an empty list [] and goals is None, only roles will be generated.
-    - If goals is an empty list [] and roles is None, only goals will be generated.
-    - If both roles and goals are empty lists [], both will be generated.
-    - If either roles or goals is provided (not None or empty list), the provided value will be used.
-
-    Args:
-        config (FramerConfig): Configuration for the Framer.
-        llm_service (LLMService): Language model service.
-        soul_seed (Optional[Union[str, Dict[str, Any]]]): Initial seed for the Framer's soul.
-            Can be either a string or a dictionary. If a string is provided, it will be used
-            as the 'text' value in the soul's seed dictionary. If a dictionary is provided,
-            it can include any keys and values, with an optional 'text' key for the soul's essence.
-        memory_service (Optional[MemoryService]): Memory service for the Framer.
-        eq_service (Optional[EQService]): Emotional intelligence service for the Framer.
-
-    Returns:
-        Framer: A new Framer instance.
-    """
-
-    @classmethod
-    def load_from_file(cls, file_path: str, llm_service: LLMService, memory_service: Optional[MemoryService] = None, eq_service: Optional[EQService] = None) -> "Framer":
-        """
-        Load a Framer configuration from a file.
-
-        This method allows importing a Framer agent from a JSON or markdown file,
-        enabling the reconstruction of the agent's state and configuration. This
-        functionality is crucial for restoring Framer agents from saved states,
-        ensuring continuity and consistency across different sessions or environments.
-
-        Args:
-            file_path (str): The path to the configuration file.
-            llm_service (LLMService): Language model service.
-            memory_service (Optional[MemoryService]): Memory service for the Framer.
-            eq_service (Optional[EQService]): Emotional intelligence service for the Framer.
-
-        Returns:
-            Framer: A new Framer instance configured from the file.
-        """
-        config = load_framer_from_file(file_path)
-        return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
-
     def export_to_json(self, file_path: str) -> None:
         """
         Export the Framer configuration to a JSON file.
@@ -307,3 +232,53 @@ class Framer:
         logger.debug(f"Processed perception: {perception}, Decision: {decision}")
         self.notify_observers(decision)
         return decision
+
+    def add_observer(self, observer: Observer) -> None:
+        """
+        Add an observer to be notified when a decision is made.
+
+        Args:
+            observer (Observer): The observer function to add.
+        """
+        self.observers.append(observer)
+
+    def remove_observer(self, observer: Observer) -> None:
+        """
+        Remove an observer.
+
+        Args:
+            observer (Observer): The observer function to remove.
+        """
+        self.observers.remove(observer)
+
+    def notify_observers(self, decision: Decision) -> None:
+        """
+        Notify all observers about a decision.
+
+        Args:
+            decision (Decision): The decision to notify observers about.
+        """
+        for observer in self.observers:
+            observer(decision)
+
+        # Notify plugins about the decision
+        if hasattr(self, "plugins"):
+            for plugin in self.plugins.values():
+                if hasattr(plugin, "on_decision_made"):
+                    plugin.on_decision_made(decision)
+
+    def notify_task_completion(self, task: Task) -> None:
+        """
+        Notify all observers and plugins about task completion.
+
+        Args:
+            task (Task): The task that was completed.
+        """
+        for observer in self.observers:
+            if hasattr(observer, "on_task_completed"):
+                observer.on_task_completed(task)
+
+        if hasattr(self, "plugins"):
+            for plugin in self.plugins.values():
+                if hasattr(plugin, "on_task_completed"):
+                    plugin.on_task_completed(task)
