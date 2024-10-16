@@ -79,20 +79,6 @@ from frame.src.services.memory.main import MemoryService
 from frame.src.services.eq.main import EQService
 
 # Expose the main classes and functions
-framer = Frame
-framer_factory = Frame.create_framer
-framed_factory = Frame.create_framed
-config = FramerConfig
-agency = Agency
-brain = Brain
-soul = Soul
-workflow_manager = WorkflowManager
-task = Task
-llm_service = LLMService
-perception = Perception
-decision = Decision
-memory_service = MemoryService
-eq_service = EQService
 
 # Version information
 __version__ = "0.1.0"

@@ -275,6 +275,48 @@ hljs.highlightAll();
         Framer: A new Framer instance.
     &#34;&#34;&#34;
 
+    @classmethod
+    def load_from_file(cls, file_path: str, llm_service: LLMService, memory_service: Optional[MemoryService] = None, eq_service: Optional[EQService] = None) -&gt; &#34;Framer&#34;:
+        &#34;&#34;&#34;
+        Load a Framer configuration from a file.
+
+        This method allows importing a Framer agent from a JSON or markdown file,
+        enabling the reconstruction of the agent&#39;s state and configuration. This
+        functionality is crucial for restoring Framer agents from saved states,
+        ensuring continuity and consistency across different sessions or environments.
+
+        Args:
+            file_path (str): The path to the configuration file.
+            llm_service (LLMService): Language model service.
+            memory_service (Optional[MemoryService]): Memory service for the Framer.
+            eq_service (Optional[EQService]): Emotional intelligence service for the Framer.
+
+        Returns:
+            Framer: A new Framer instance configured from the file.
+        &#34;&#34;&#34;
+        config = load_framer_from_file(file_path)
+        return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
+
+    def export_to_json(self, file_path: str) -&gt; None:
+        &#34;&#34;&#34;
+        Export the Framer configuration to a JSON file.
+
+        This method allows the Framer agent to be fully exported into a JSON format,
+        making it portable and easy to use inside a prompt to any other LLM. This
+        portability enables the Framer agents to be shared and consumed by other
+        systems, facilitating interoperability and reuse.
+
+        Args:
+            file_path (str): The path to the file where the JSON will be saved.
+        &#34;&#34;&#34;
+        import json
+        with open(file_path, &#39;w&#39;) as file:
+            json.dump({
+                &#34;config&#34;: self.config.to_dict(),
+                &#34;roles&#34;: self.roles,
+                &#34;goals&#34;: self.goals
+            }, file, indent=4)
+
     async def perform_task(self, task: Dict[str, Any]) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Perform a task asynchronously.
@@ -319,6 +361,32 @@ hljs.highlightAll();
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.framer.Framer.load_from_file"><code class="name flex">
+<span>def <span class="ident">load_from_file</span></span>(<span>file_path: str, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load a Framer configuration from a file.</p>
+<p>This method allows importing a Framer agent from a JSON or markdown file,
+enabling the reconstruction of the agent's state and configuration. This
+functionality is crucial for restoring Framer agents from saved states,
+ensuring continuity and consistency across different sessions or environments.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>The path to the configuration file.</dd>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>Language model service.</dd>
+<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
+<dd>Memory service for the Framer.</dd>
+<dt><strong><code>eq_service</code></strong> :&ensp;<code>Optional[EQService]</code></dt>
+<dd>Emotional intelligence service for the Framer.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="frame.src.framer.Framer" href="#frame.src.framer.Framer">Framer</a></code></dt>
+<dd>A new Framer instance configured from the file.</dd>
+</dl></div>
+</dd>
 </dl>
 <h3>Methods</h3>
 <dl>
@@ -331,6 +399,21 @@ hljs.highlightAll();
 <dl>
 <dt><strong><code>observer</code></strong> :&ensp;<code>Observer</code></dt>
 <dd>The observer function to add.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.Framer.export_to_json"><code class="name flex">
+<span>def <span class="ident">export_to_json</span></span>(<span>self, file_path: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Export the Framer configuration to a JSON file.</p>
+<p>This method allows the Framer agent to be fully exported into a JSON format,
+making it portable and easy to use inside a prompt to any other LLM. This
+portability enables the Framer agents to be shared and consumed by other
+systems, facilitating interoperability and reuse.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>The path to the file where the JSON will be saved.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.Framer.initialize"><code class="name flex">
@@ -768,7 +851,9 @@ ensuring that all necessary components are properly initialized.</p>
 <ul class="">
 <li><code><a title="frame.src.framer.Framer.add_observer" href="#frame.src.framer.Framer.add_observer">add_observer</a></code></li>
 <li><code><a title="frame.src.framer.Framer.create" href="#frame.src.framer.Framer.create">create</a></code></li>
+<li><code><a title="frame.src.framer.Framer.export_to_json" href="#frame.src.framer.Framer.export_to_json">export_to_json</a></code></li>
 <li><code><a title="frame.src.framer.Framer.initialize" href="#frame.src.framer.Framer.initialize">initialize</a></code></li>
+<li><code><a title="frame.src.framer.Framer.load_from_file" href="#frame.src.framer.Framer.load_from_file">load_from_file</a></code></li>
 <li><code><a title="frame.src.framer.Framer.notify_observers" href="#frame.src.framer.Framer.notify_observers">notify_observers</a></code></li>
 <li><code><a title="frame.src.framer.Framer.notify_task_completion" href="#frame.src.framer.Framer.notify_task_completion">notify_task_completion</a></code></li>
 <li><code><a title="frame.src.framer.Framer.perform_task" href="#frame.src.framer.Framer.perform_task">perform_task</a></code></li>
