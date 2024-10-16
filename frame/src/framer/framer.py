@@ -102,6 +102,11 @@ class Framer:
         )
 
         await framer.initialize()
+        # Notify observers about the Framer being opened
+        for observer in framer.observers:
+            if hasattr(observer, "on_framer_opened"):
+                observer.on_framer_opened(framer)
+
         return framer
 
     def act(self):
@@ -161,7 +166,6 @@ class Framer:
                 "goals": self.goals
             }, file, indent=4)
 
-    @classmethod
     @classmethod
     def load_from_file(cls, file_path: str, llm_service: LLMService, memory_service: Optional[MemoryService] = None, eq_service: Optional[EQService] = None) -> "Framer":
         """
@@ -225,6 +229,7 @@ class Framer:
         """
         config = parse_json_config(file_path)
         return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
+    
     async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """
         Perform a task asynchronously.
@@ -300,12 +305,9 @@ class Framer:
             observer(decision)
 
         # Notify plugins about the decision
-        for observer in self.observers:
-            if hasattr(observer, "on_framer_opened"):
-                observer.on_framer_opened(self)
-            for plugin in self.plugins.values():
-                if hasattr(plugin, "on_decision_made"):
-                    plugin.on_decision_made(decision)
+        for plugin in self.plugins.values():
+            if hasattr(plugin, "on_decision_made"):
+                plugin.on_decision_made(decision)
 
     async def close(self) -> None:
         """
