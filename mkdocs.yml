@@ -16,7 +16,6 @@ nav:
   - Plugins: plugins.md
   - CLI: CLI.md
   - Glossary: glossary.md
-  - Testing: testing.md
 docs_dir: ./docs
 site_dir: ./docs/site
 theme:
