@@ -1,9 +1,9 @@
-from typing import Dict, Any, Optional, Union
+from typing import Dict, Any, Optional, Union, List
 from frame.src.models.framer.soul.soul import Soul as SoulModel
 
 
 class Soul:
-    def __init__(self, seed: Optional[Union[str, Dict[str, Any]]] = None) -> None:
+    def __init__(self, seed: Optional[Union[str, Dict[str, Any]]] = None, traits: Optional[List[str]] = None) -> None:
         """
         Initialize a Soul instance.
 
@@ -14,12 +14,14 @@ class Soul:
                 - If a dictionary is provided, it can include any keys and values, with an optional 'text' key for the soul's essence.
                 The 'text' key is used for the essence, and all other key-value pairs
                 are stored in the notes. The values can be of any type. Defaults to None.
+            traits (Optional[List[str]], optional): A list of traits for the Soul. Defaults to None.
 
         Raises:
             ValueError: If the seed is not a string, dictionary, or None.
         """
         self.model = SoulModel(seed=seed)
         self.seed = self.model.seed
+        self.traits = traits or []
 
     def update_state(self, key: str, value: Any) -> None:
         """

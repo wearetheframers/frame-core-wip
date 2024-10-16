@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from .src.framer.framer import Framer
+from .src.framer.framer import Framer, FramerConfig
 from .src.framer.framer_factory import FramerBuilder, FramerFactory
 from .src.framed import Framed
 from .src.framed.framed_factory import FramedFactory
@@ -79,6 +79,9 @@ class Frame:
         """
         framer_builder = FramerBuilder(config, self.llm_service, **kwargs)
         return await framer_builder.build()
+
+    def load_framer_from_file(self, file_path: str) -> Framer:
+        return Framer.load_from_file(file_path, self.llm_service)
 
     async def create_framed(self, config: FramerConfig, **kwargs: Any) -> "Framed":
         """

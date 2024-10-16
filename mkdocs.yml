@@ -10,10 +10,13 @@ nav:
     - Frame: API/frame/frame.md
     - Framer: API/frame/framer/framer.md
     - Framed: API/frame/framed/framed.md
-  - Usage / Quick Start Guide: Usage/basic/basic_usage.md
+  - Usage / Quick Start Guide:
+    - Basic: Usage/basic/basic_usage.md
+    - Testing: Usage/testing/testing.md
   - Plugins: plugins.md
   - CLI: CLI.md
   - Glossary: glossary.md
+  - Testing: testing.md
 docs_dir: ./docs
 site_dir: ./docs/site
 theme:

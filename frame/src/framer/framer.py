@@ -9,6 +9,7 @@ from frame.src.framer.brain import Brain
 from frame.src.framer.soul import Soul
 from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
 from frame.src.framer.agency.tasks.task import Task
+from frame.src.utils.config_parser import load_framer_from_file, export_framer_to_json, export_framer_to_markdown
 from frame.src.utils.llm_utils import (
     get_completion,
     calculate_token_size,
@@ -229,6 +230,14 @@ class Framer:
     Returns:
         Framer: A new Framer instance.
     """
+
+    @classmethod
+    def load_from_file(cls, file_path: str, llm_service: LLMService, memory_service: Optional[MemoryService] = None, eq_service: Optional[EQService] = None) -> "Framer":
+        config = load_framer_from_file(file_path)
+        return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
+
+    def export_to_json(self, file_path: str) -> None:
+        export_framer_to_json(self, file_path)
 
     async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """
