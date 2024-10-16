@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 from frame.src.framer.framer import Framer
-from frame.src.utils.config_parser import load_framer_from_file, export_framer_to_json, export_framer_to_markdown
+from frame.src.utils.config_parser import load_framer_from_file, export_framer_to_markdown
 
 class TestFramerIO(unittest.TestCase):
 
@@ -11,11 +11,20 @@ class TestFramerIO(unittest.TestCase):
         framer = load_framer_from_file('dummy_path')
         self.assertIsNotNone(framer)
 
-    @patch('frame.src.utils.config_parser.export_framer_to_json')
-    def test_export_framer_to_json(self, mock_export):
-        framer = MagicMock(spec=Framer)
-        export_framer_to_json(framer, 'dummy_path')
-        mock_export.assert_called_once_with(framer, 'dummy_path')
+    @patch('builtins.open', new_callable=unittest.mock.mock_open)
+    @patch('json.dump')
+    def test_export_to_json(self, mock_json_dump, mock_open):
+        framer = Framer(
+            config=MagicMock(),
+            llm_service=MagicMock(),
+            agency=MagicMock(),
+            brain=MagicMock(),
+            soul=MagicMock(),
+            workflow_manager=MagicMock()
+        )
+        framer.export_to_json('dummy_path')
+        mock_open.assert_called_once_with('dummy_path', 'w')
+        mock_json_dump.assert_called_once()
 
     @patch('frame.src.utils.config_parser.export_framer_to_markdown')
     def test_export_framer_to_markdown(self, mock_export):
