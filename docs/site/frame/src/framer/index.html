@@ -104,6 +104,9 @@ hljs.highlightAll();
         self.roles = roles
         self.goals = goals
 
+        # Start acting by default
+        self.act()
+
     @classmethod
     async def create(
         cls,
@@ -119,7 +122,7 @@ hljs.highlightAll();
         roles = config.roles
         goals = config.goals
 
-        soul = Soul(seed=soul_seed)
+        soul = Soul(seed=config.soul_seed)
         brain = Brain(
             llm_service=llm_service,
             default_model=config.default_model,
@@ -734,7 +737,7 @@ ensuring that all necessary components are properly initialized.</p>
             execution_context=execution_context,
         )
 
-        soul = Soul(seed={&#34;text&#34;: &#34;You are a helpful AI assistant.&#34;})
+        soul = Soul(seed=self.config.soul_seed)
         # Initialize the Soul component with the provided or default seed
         workflow_manager = WorkflowManager()
         # Initialize the WorkflowManager component
