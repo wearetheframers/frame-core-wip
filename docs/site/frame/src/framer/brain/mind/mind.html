@@ -149,10 +149,7 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
         Args:
             thought (str): The thought to add.
         &#34;&#34;&#34;
-        new_thought = {
-            &#34;content&#34;: thought,
-            &#34;timestamp&#34;: datetime.now()
-        }
+        new_thought = {&#34;content&#34;: thought, &#34;timestamp&#34;: datetime.now()}
         self.thoughts.append(new_thought)
         self.current_thought = new_thought
         logger.debug(f&#34;New thought: {thought}&#34;)
@@ -187,7 +184,7 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
         Returns:
             List[Dict[str, Any]]: All thoughts with their timestamps.
         &#34;&#34;&#34;
-        return sorted(self.thoughts, key=lambda x: x[&#39;timestamp&#39;], reverse=True)
+        return sorted(self.thoughts, key=lambda x: x[&#34;timestamp&#34;], reverse=True)
 
     def clear_thoughts(self) -&gt; None:
         &#34;&#34;&#34;

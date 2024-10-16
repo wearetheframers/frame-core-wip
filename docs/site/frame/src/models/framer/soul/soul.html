@@ -109,18 +109,20 @@ validated to form a valid model.</p>
     class Config:
         arbitrary_types_allowed = True
 
-    @validator(&#39;seed&#39;, pre=True, always=True)
+    @validator(&#34;seed&#34;, pre=True, always=True)
     def process_seed(cls, v, values):
         if isinstance(v, str):
-            values[&#39;essence&#39;] = v
+            values[&#34;essence&#34;] = v
             return {&#34;text&#34;: v}
         elif isinstance(v, dict):
-            values[&#39;essence&#39;] = v.get(&#34;text&#34;, v.get(&#34;essence&#34;, values.get(&#39;essence&#39;)))
-            seed = {&#34;text&#34;: values[&#39;essence&#39;]}
-            values[&#39;notes&#39;].update({k: v for k, v in v.items() if k not in [&#34;text&#34;, &#34;essence&#34;]})
+            values[&#34;essence&#34;] = v.get(&#34;text&#34;, v.get(&#34;essence&#34;, values.get(&#34;essence&#34;)))
+            seed = {&#34;text&#34;: values[&#34;essence&#34;]}
+            values[&#34;notes&#34;].update(
+                {k: v for k, v in v.items() if k not in [&#34;text&#34;, &#34;essence&#34;]}
+            )
             return seed
         elif v is None:
-            return {&#34;text&#34;: values.get(&#39;essence&#39;, &#34;You are a helpful AI assistant.&#34;)}
+            return {&#34;text&#34;: values.get(&#34;essence&#34;, &#34;You are a helpful AI assistant.&#34;)}
         else:
             raise ValueError(&#34;Seed must be either a string, dictionary, or None.&#34;)
 

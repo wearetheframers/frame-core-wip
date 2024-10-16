@@ -1,6 +1,10 @@
+import sys
+import os
+
+# Import Frame from upper dir
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 import asyncio
-from frame.frame import Frame
-from frame.src.framer.config import FramerConfig
+from frame import Frame, FramerConfig
 
 
 # Define a new custom action
