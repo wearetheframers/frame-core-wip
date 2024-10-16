@@ -188,6 +188,7 @@ processing perceptions, making decisions, and executing tasks.</p>
         self.eq_service = eq_service
         self._dynamic_model_choice = False
         self.observers = []
+        self.plugins = {}  # Initialize plugins attribute
         self.can_execute = True  # Add can_execute attribute
         self.acting = False
 
@@ -299,12 +300,13 @@ processing perceptions, making decisions, and executing tasks.</p>
         with open(file_path, &#34;w&#34;) as file:
             json.dump(
                 {
-                    &#34;config&#34;: self.config.to_dict(),
+                    &#34;config&#34;: self.config.to_dict() if hasattr(self.config, &#34;to_dict&#34;) else self.config,
                     &#34;roles&#34;: self.roles,
                     &#34;goals&#34;: self.goals,
                 },
                 file,
                 indent=4,
+                default=str  # Use default=str to handle non-serializable objects
             )
 
     @classmethod
@@ -352,7 +354,50 @@ processing perceptions, making decisions, and executing tasks.</p>
             goals=config.goals,
         )
 
-    def export_to_json(self, file_path: str) -&gt; None:
+    @classmethod
+    def load_from_file(
+        cls,
+        file_path: str,
+        llm_service: LLMService,
+        memory_service: Optional[MemoryService] = None,
+        eq_service: Optional[EQService] = None,
+    ) -&gt; &#34;Framer&#34;:
+        &#34;&#34;&#34;
+        Load a Framer configuration from a file.
+
+        This method allows importing a Framer agent from a JSON or markdown file,
+        enabling the reconstruction of the agent&#39;s state and configuration. This
+        functionality is crucial for restoring Framer agents from saved states,
+        ensuring continuity and consistency across different sessions or environments.
+
+        Args:
+            file_path (str): The path to the configuration file.
+            llm_service (LLMService): Language model service.
+            memory_service (Optional[MemoryService]): Memory service for the Framer.
+            eq_service (Optional[EQService]): Emotional intelligence service for the Framer.
+
+        Returns:
+            Framer: A new Framer instance configured from the file.
+        &#34;&#34;&#34;
+        config = parse_json_config(file_path)
+        return cls(
+            config=config,
+            llm_service=llm_service,
+            agency=Agency(llm_service=llm_service, context=None),
+            brain=Brain(
+                llm_service=llm_service,
+                default_model=config.default_model,
+                roles=config.roles,
+                goals=config.goals,
+                soul=Soul(seed=config.soul_seed),
+            ),
+            soul=Soul(seed=config.soul_seed),
+            workflow_manager=WorkflowManager(),
+            memory_service=memory_service,
+            eq_service=eq_service,
+            roles=config.roles,
+            goals=config.goals,
+        )
         &#34;&#34;&#34;
         Export the Framer configuration to a JSON file.
 
@@ -600,21 +645,6 @@ and any resources or memory used by the Framer are released. It is
 important to call this method when the Framer is no longer needed to
 prevent memory leaks and ensure optimal performance. This method
 should be called to gracefully shut down the Framer.</p></div>
-</dd>
-<dt id="frame.src.framer.Framer.export_to_json"><code class="name flex">
-<span>def <span class="ident">export_to_json</span></span>(<span>self, file_path: str) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Export the Framer configuration to a JSON file.</p>
-<p>This method allows the Framer agent to be fully exported into a JSON format,
-making it portable and easy to use inside a prompt to any other LLM. This
-portability enables the Framer agents to be shared and consumed by other
-systems, facilitating interoperability and reuse.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
-<dd>The path to the file where the JSON will be saved.</dd>
-</dl></div>
 </dd>
 <dt id="frame.src.framer.Framer.export_to_markdown"><code class="name flex">
 <span>def <span class="ident">export_to_markdown</span></span>(<span>self, file_path: str) ‑> None</span>
@@ -1022,7 +1052,6 @@ ensuring that all necessary components are properly initialized.</p>
 <li><code><a title="frame.src.framer.Framer.add_observer" href="#frame.src.framer.Framer.add_observer">add_observer</a></code></li>
 <li><code><a title="frame.src.framer.Framer.close" href="#frame.src.framer.Framer.close">close</a></code></li>
 <li><code><a title="frame.src.framer.Framer.create" href="#frame.src.framer.Framer.create">create</a></code></li>
-<li><code><a title="frame.src.framer.Framer.export_to_json" href="#frame.src.framer.Framer.export_to_json">export_to_json</a></code></li>
 <li><code><a title="frame.src.framer.Framer.export_to_markdown" href="#frame.src.framer.Framer.export_to_markdown">export_to_markdown</a></code></li>
 <li><code><a title="frame.src.framer.Framer.initialize" href="#frame.src.framer.Framer.initialize">initialize</a></code></li>
 <li><code><a title="frame.src.framer.Framer.load_from_file" href="#frame.src.framer.Framer.load_from_file">load_from_file</a></code></li>

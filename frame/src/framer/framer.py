@@ -93,6 +93,7 @@ class Framer:
         self.eq_service = eq_service
         self._dynamic_model_choice = False
         self.observers = []
+        self.plugins = {}  # Initialize plugins attribute
         self.can_execute = True  # Add can_execute attribute
         self.acting = False
 
@@ -204,12 +205,13 @@ class Framer:
         with open(file_path, "w") as file:
             json.dump(
                 {
-                    "config": self.config.to_dict(),
+                    "config": self.config.to_dict() if hasattr(self.config, "to_dict") else self.config,
                     "roles": self.roles,
                     "goals": self.goals,
                 },
                 file,
                 indent=4,
+                default=str  # Use default=str to handle non-serializable objects
             )
 
     @classmethod
@@ -257,7 +259,50 @@ class Framer:
             goals=config.goals,
         )
 
-    def export_to_json(self, file_path: str) -> None:
+    @classmethod
+    def load_from_file(
+        cls,
+        file_path: str,
+        llm_service: LLMService,
+        memory_service: Optional[MemoryService] = None,
+        eq_service: Optional[EQService] = None,
+    ) -> "Framer":
+        """
+        Load a Framer configuration from a file.
+
+        This method allows importing a Framer agent from a JSON or markdown file,
+        enabling the reconstruction of the agent's state and configuration. This
+        functionality is crucial for restoring Framer agents from saved states,
+        ensuring continuity and consistency across different sessions or environments.
+
+        Args:
+            file_path (str): The path to the configuration file.
+            llm_service (LLMService): Language model service.
+            memory_service (Optional[MemoryService]): Memory service for the Framer.
+            eq_service (Optional[EQService]): Emotional intelligence service for the Framer.
+
+        Returns:
+            Framer: A new Framer instance configured from the file.
+        """
+        config = parse_json_config(file_path)
+        return cls(
+            config=config,
+            llm_service=llm_service,
+            agency=Agency(llm_service=llm_service, context=None),
+            brain=Brain(
+                llm_service=llm_service,
+                default_model=config.default_model,
+                roles=config.roles,
+                goals=config.goals,
+                soul=Soul(seed=config.soul_seed),
+            ),
+            soul=Soul(seed=config.soul_seed),
+            workflow_manager=WorkflowManager(),
+            memory_service=memory_service,
+            eq_service=eq_service,
+            roles=config.roles,
+            goals=config.goals,
+        )
         """
         Export the Framer configuration to a JSON file.
 

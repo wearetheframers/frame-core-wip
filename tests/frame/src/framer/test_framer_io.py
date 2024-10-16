@@ -15,10 +15,13 @@ class TestFramerIO(unittest.TestCase):
     @patch("builtins.open", new_callable=unittest.mock.mock_open)
     @patch("json.dump")
     def test_export_to_json(self, mock_json_dump, mock_open):
+        agency_mock = MagicMock()
+        agency_mock.roles = []
+        agency_mock.goals = []
         framer = Framer(
             config=MagicMock(),
             llm_service=MagicMock(),
-            agency=MagicMock(),
+            agency=agency_mock,
             brain=MagicMock(),
             soul=MagicMock(),
             workflow_manager=MagicMock(),
