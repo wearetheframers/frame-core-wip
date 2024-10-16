@@ -61,10 +61,7 @@ async def main():
         print(f"\nProcessing perception: {perception}")
         decision = await framer.sense(perception)
         print(f"Decision made: {decision}")
-
-        if decision and decision.action != "default_action":
-            await framer.brain.execute_decision(decision)
-
+        await framer.brain.execute_decision(decision)
         # Add a small delay to simulate time passing between perceptions
         await asyncio.sleep(1)
 
