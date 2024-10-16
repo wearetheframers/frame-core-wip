@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 from frame.src.framer.framer import Framer
-from frame.src.utils.config_parser import load_framer_from_file, export_framer_to_markdown
+from frame.src.utils.config_parser import load_framer_from_file
 
 class TestFramerIO(unittest.TestCase):
 
