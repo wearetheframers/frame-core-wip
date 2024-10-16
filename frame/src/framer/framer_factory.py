@@ -131,5 +131,4 @@ class FramerBuilder:
         Returns:
             Framer: A new Framer instance, fully configured and ready to use.
         """
-        factory = FramerFactory(self.config, self.llm_service)
-        return await factory.create_framer()
+        return await FramerFactory(self.config, self.llm_service).create_framer()

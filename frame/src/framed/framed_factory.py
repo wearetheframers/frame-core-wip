@@ -36,7 +36,7 @@ class FramedFactory:
         self.llm_service = llm_service
         self.plugins: Dict[str, Any] = {}
 
-    async def create_framer(
+    async def create_framed(
         self,
         soul_seed: Optional[str] = None,
         memory_service: Optional[MemoryService] = None,
@@ -44,15 +44,13 @@ class FramedFactory:
         roles: Optional[List[Dict[str, Any]]] = None,
         goals: Optional[List[Dict[str, Any]]] = None,
     ) -> Framed:
-        builder = FramedBuilder(self.config, self.llm_service)
-        builder.with_soul_seed(soul_seed)
-        builder.with_memory_service(memory_service)
-        builder.with_eq_service(eq_service)
-        builder.with_roles(roles)
-        builder.with_goals(goals)
-        framed = await builder.build()
-        await framed.initialize()
-        return framed
+        return await FramedFactory(self.config, self.llm_service).create_framed(
+            soul_seed=soul_seed,
+            memory_service=memory_service,
+            eq_service=eq_service,
+            roles=roles,
+            goals=goals,
+        )
 
     async def create_framed(
         self,
