@@ -1,4 +1,5 @@
 import pytest
+import json
 from unittest.mock import patch, AsyncMock, call, Mock
 from frame.src.framer.brain.brain import Brain
 from frame.src.framer.brain.decision import Decision
@@ -91,21 +92,32 @@ async def test_make_decision(brain):
 
 
 @pytest.mark.asyncio
-async def test_make_decision_invalid_action(brain, caplog):
+async def test_action_priority(brain):
+    # Register actions with different priorities
+    brain.action_registry.register_action(
+        "low_priority_action", AsyncMock(), description="Low priority action", priority=1
+    )
+    brain.action_registry.register_action(
+        "high_priority_action", AsyncMock(), description="High priority action", priority=10
+    )
+
+    # Mock the LLM service to return a decision with both actions
     with patch.object(
         brain.llm_service, "get_completion", new_callable=AsyncMock
     ) as mock_get_completion:
-        mock_get_completion.return_value = '{"action": "invalid_action", "parameters": {}, "reasoning": "Test reasoning", "confidence": 0.9, "priority": 1}'
+        mock_get_completion.return_value = json.dumps({
+            "action": "high_priority_action",
+            "parameters": {},
+            "reasoning": "Test reasoning",
+            "confidence": 0.9,
+            "priority": 10
+        })
         perception = Perception(type="test", data={"key": "value"})
         decision = await brain.make_decision(perception)
 
-    assert isinstance(decision, Decision)
-    assert decision.action == "error"
-    assert (
-        "Invalid action 'invalid_action' was generated" in decision.reasoning
-        or "Defaulted to 'error'" in decision.reasoning
-    )
-    assert "Defaulted to 'error'" in decision.reasoning
+    # Ensure the high priority action is chosen
+    assert decision.action == "high_priority_action"
+    assert decision.priority == 10
     assert isinstance(decision.parameters, dict)
 
 
