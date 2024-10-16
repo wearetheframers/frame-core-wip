@@ -73,8 +73,10 @@ hljs.highlightAll();
         if not (1 &lt;= priority &lt;= 10):
             raise ValueError(&#34;Priority must be between 1 and 10&#34;)
         if not asyncio.iscoroutinefunction(action_func):
+
             async def wrapper(*args, **kwargs):
                 return await asyncio.to_thread(action_func, *args, **kwargs)
+
             action_func = wrapper
         self.actions[name] = {
             &#34;action_func&#34;: action_func,
