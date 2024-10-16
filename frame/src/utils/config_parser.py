@@ -3,9 +3,6 @@ import re
 import os
 from typing import Dict, Any, Union, List
 from frame.src.framer.config import FramerConfig
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from frame.src.framer.framer import Framer
 
 def parse_json_config(file_path: str) -> FramerConfig:
     with open(file_path, 'r') as file:
@@ -44,25 +41,6 @@ def load_framer_from_file(file_path: str) -> FramerConfig:
     else:
         raise ValueError("Unsupported file format. Please use .json or .md files.")
 
-def export_framer_to_json(framer: Framer, file_path: str) -> None:
-    with open(file_path, 'w') as file:
-        json.dump(framer.config.dict(), file, indent=2)
-
-def export_framer_to_markdown(framer: Framer, file_path: str) -> None:
-    with open(file_path, 'w') as file:
-        for key, value in framer.config.dict().items():
-            if key == 'custom_script':
-                continue  # Skip custom_script when exporting to markdown
-            file.write(f"## {key.replace('_', ' ').title()}\n")
-            if key == 'soul_traits':
-                for item in value:
-                    file.write(f"- {item}\n")
-            elif key == 'soul_seed':
-                file.write(f"{value['text']}\n")
-            else:
-                file.write(f"{value}\n")
-            file.write("\n")
-    # Removed duplicate and incorrect json.dump call
 
 def export_config_to_markdown(config: FramerConfig, file_path: str) -> None:
     with open(file_path, 'w') as file:
