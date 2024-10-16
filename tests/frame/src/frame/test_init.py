@@ -49,9 +49,8 @@ def test_cleanup(setup_logger):
 
 
 def test_cleanup_with_logger():
-    with patch(
-        "frame.src.utils.log_manager.get_logger", return_value=MagicMock()
-    ) as mock_get_logger:
+    with patch("frame.src.utils.cleanup.get_logger") as mock_get_logger:
+        mock_logger = mock_get_logger.return_value
         mock_logger = mock_get_logger.return_value
         cleanup(mock_logger)
         mock_logger.info.assert_called_once_with("Cleaning up Frame resources...")

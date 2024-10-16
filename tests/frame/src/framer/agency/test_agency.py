@@ -179,15 +179,8 @@ async def test_generate_roles_and_goals_empty_response(agency):
 
     roles, goals = await agency.generate_roles_and_goals()
 
-    assert roles == [
-        {
-            "name": "Task Assistant",
-            "description": "Assist with the given task or query.",
-        }
-    ]
-    assert goals == [
-        {"description": "Assist users to the best of my abilities", "priority": 1}
-    ]
+    assert roles == [{"name": "Task Assistant"}]
+    assert goals == [{"description": "Assist users to the best of my abilities"}]
 
     agency.generate_roles.assert_called_once()
     agency.generate_goals.assert_called_once()

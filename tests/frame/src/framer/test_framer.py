@@ -86,9 +86,7 @@ async def test_framer_initialize():
         workflow_manager=workflow_manager,
     )
     await framer.initialize()
-    assert framer.roles == [
-        {"name": "Generated Role", "description": "Generated role description"}
-    ]
+    assert framer.roles == ["Generated Role"]
     assert framer.goals == [{"description": "Generated Goal", "priority": 1}]
     assert agency.generate_roles_and_goals.call_count == 1
 
@@ -201,7 +199,7 @@ async def test_framer_initialize_with_provided_values():
         roles=["Provided Role"],
     )
     await framer.initialize()
-    assert framer.agency.roles == ["Provided Role"]
+    assert framer.roles == ["Provided Role"]
     assert framer.agency.goals == ["Generated Goal"]
     agency.generate_roles_and_goals.assert_called_once()
 

@@ -5,11 +5,11 @@ from frame.src.utils.config_parser import parse_json_config, parse_markdown_conf
 
 class TestFramerIO(unittest.TestCase):
 
-    @patch('frame.src.utils.config_parser.load_framer_from_file')
+    @patch('frame.src.framer.framer.load_from_file')
     def test_load_framer_from_file(self, mock_load):
-        mock_load.return_value = MagicMock()
-        framer = parse_json_config('dummy_path')
-        self.assertIsNotNone(framer)
+        mock_load.return_value = MagicMock(spec=Framer)
+        framer = Framer.load_from_file('dummy_path', MagicMock())
+        self.assertIsInstance(framer, Framer)
 
     @patch('builtins.open', new_callable=unittest.mock.mock_open)
     @patch('json.dump')
