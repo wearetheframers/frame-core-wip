@@ -401,7 +401,7 @@ async def run_async(
         default_model=model,
     )
     framer_factory = FramerFactory(config, frame.llm_service)
-    framer = await framer_factory.create_framer(soul_seed=soul_seed)
+    framer = await framer_factory.create_framer()
     context = Context()  # Create a new Context
     framer.agency = Agency(
         llm_service=frame.llm_service,

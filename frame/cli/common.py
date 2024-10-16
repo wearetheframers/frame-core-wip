@@ -124,9 +124,9 @@ async def setup_framer(
 
     if framer.soul is None:
         logger.warning("Framer's Soul is null. Initializing with default values.")
-        framer.soul = Soul(seed=soul_seed)
+        framer.soul = Soul(seed=config.soul_seed)
     else:
-        framer.soul.seed = soul_seed  # Explicitly set the soul seed
+        framer.soul.seed = config.soul_seed  # Explicitly set the soul seed
 
     context = Context()  # Create a new Context
     framer.agency = Agency(

@@ -60,6 +60,9 @@ class Framer:
         self.roles = roles
         self.goals = goals
 
+        # Start acting by default
+        self.act()
+
     @classmethod
     async def create(
         cls,
@@ -75,7 +78,7 @@ class Framer:
         roles = config.roles
         goals = config.goals
 
-        soul = Soul(seed=soul_seed)
+        soul = Soul(seed=config.soul_seed)
         brain = Brain(
             llm_service=llm_service,
             default_model=config.default_model,

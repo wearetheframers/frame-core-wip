@@ -66,7 +66,7 @@ class FramerFactory:
             execution_context=execution_context,
         )
 
-        soul = Soul(seed={"text": "You are a helpful AI assistant."})
+        soul = Soul(seed=self.config.soul_seed)
         # Initialize the Soul component with the provided or default seed
         workflow_manager = WorkflowManager()
         # Initialize the WorkflowManager component

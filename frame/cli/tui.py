@@ -225,7 +225,7 @@ class FramerTUI(App):
         self.framer = await framer_factory.create_framer()
 
         # Set up the soul seed
-        self.framer.soul.seed = self._soul_seed
+        self.framer.soul.seed = self.framer.config.soul_seed
 
         # Set up the agency
         from frame.src.framer.agency import Agency

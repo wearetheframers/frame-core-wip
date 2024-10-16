@@ -14,6 +14,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 async def main():
     # Load configuration from JSON file
     # Try to locate the config.json file in multiple potential directories
+    # Since we might be running this script inside the examples directory, 
+    # or inside the root dir of the project.
     possible_paths = [
         os.path.join(os.path.dirname(__file__), 'config.json'),
         os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), 'config.json'),
