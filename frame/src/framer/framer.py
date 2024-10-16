@@ -197,6 +197,48 @@ class Framer:
                 "goals": self.goals
             }, file, indent=4)
 
+    @classmethod
+    def load_from_file(cls, file_path: str, llm_service: LLMService, memory_service: Optional[MemoryService] = None, eq_service: Optional[EQService] = None) -> "Framer":
+        """
+        Load a Framer configuration from a file.
+
+        This method allows importing a Framer agent from a JSON or markdown file,
+        enabling the reconstruction of the agent's state and configuration. This
+        functionality is crucial for restoring Framer agents from saved states,
+        ensuring continuity and consistency across different sessions or environments.
+
+        Args:
+            file_path (str): The path to the configuration file.
+            llm_service (LLMService): Language model service.
+            memory_service (Optional[MemoryService]): Memory service for the Framer.
+            eq_service (Optional[EQService]): Emotional intelligence service for the Framer.
+
+        Returns:
+            Framer: A new Framer instance configured from the file.
+        """
+        config = load_framer_from_file(file_path)
+        return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
+
+    def export_to_json(self, file_path: str) -> None:
+        """
+        Export the Framer configuration to a JSON file.
+
+        This method allows the Framer agent to be fully exported into a JSON format,
+        making it portable and easy to use inside a prompt to any other LLM. This
+        portability enables the Framer agents to be shared and consumed by other
+        systems, facilitating interoperability and reuse.
+
+        Args:
+            file_path (str): The path to the file where the JSON will be saved.
+        """
+        import json
+        with open(file_path, 'w') as file:
+            json.dump({
+                "config": self.config.to_dict(),
+                "roles": self.roles,
+                "goals": self.goals
+            }, file, indent=4)
+
     async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """
         Perform a task asynchronously.
