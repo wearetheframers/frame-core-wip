@@ -35,6 +35,7 @@ async def test_create_framer(frame):
     assert framer.config.name == "TestFramer"
     assert framer.config.description == "A test framer"
     assert framer.config.default_model == "gpt-3.5-turbo"
+    assert framer.acting is True
 
 
 def test_set_default_model(frame):

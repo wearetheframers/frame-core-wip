@@ -30,7 +30,7 @@ The `Framer` class represents an AI agent with cognitive capabilities. It integr
   - If roles are None or an empty list and goals are provided, roles will be generated and new goals will be added to the existing ones.
   - If either roles or goals is provided (not None or empty list), the provided value will be used.
 
-- **Initialization**: The `initialize()` method is called after creating a Framer to ensure proper setup of roles and goals. This method handles various scenarios of role and goal initialization based on the provided or existing values.
+- **Initialization**: The `initialize()` method is called after creating a Framer to ensure proper setup of roles and goals. This method handles various scenarios of role and goal initialization based on the provided or existing values. The `act()` method is automatically called during initialization to ensure the Framer starts acting immediately.
 
 ## Attributes
 
@@ -39,6 +39,6 @@ The `Framer` class represents an AI agent with cognitive capabilities. It integr
 
 ## Methods
 
-- `act()`: Activates the Framer, allowing it to make decisions from new perceptions.
+- `act()`: Activates the Framer, allowing it to make decisions from new perceptions. This method sets the Framer to an active state, enabling it to respond to perceptions and execute tasks. It is automatically called during initialization to ensure the Framer starts acting immediately.
 - `halt()`: Halts the Framer, pausing decision-making from new perceptions.
-- `sense(perception)`: Processes a perception and makes a decision if the Framer is active.
+- `sense(perception)`: Processes a perception and makes a decision if the Framer is active. The Framer must be acting to respond to perceptions.

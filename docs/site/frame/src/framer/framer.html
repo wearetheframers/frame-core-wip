@@ -122,7 +122,13 @@ hljs.highlightAll();
         return framer
 
     def act(self):
-        &#34;&#34;&#34;Enable the Framer to process perceptions and make decisions.&#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Enable the Framer to process perceptions and make decisions.
+
+        This method sets the Framer to an active state, allowing it to respond
+        to perceptions and execute tasks. It is automatically called during
+        initialization to ensure the Framer starts acting immediately.
+        &#34;&#34;&#34;
         self.acting = True
 
     async def initialize(self):
@@ -301,7 +307,8 @@ hljs.highlightAll();
         This method ensures that all tasks and workflows are closed properly,
         and any resources or memory used by the Framer are released. It is
         important to call this method when the Framer is no longer needed to
-        prevent memory leaks and ensure optimal performance.
+        prevent memory leaks and ensure optimal performance. This method
+        should be called to gracefully shut down the Framer.
         &#34;&#34;&#34;
         # Close all workflows
         for workflow in self.workflow_manager.workflows.values():
@@ -364,7 +371,10 @@ ensuring continuity and consistency across different sessions or environments.</
 <span>def <span class="ident">act</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Enable the Framer to process perceptions and make decisions.</p></div>
+<div class="desc"><p>Enable the Framer to process perceptions and make decisions.</p>
+<p>This method sets the Framer to an active state, allowing it to respond
+to perceptions and execute tasks. It is automatically called during
+initialization to ensure the Framer starts acting immediately.</p></div>
 </dd>
 <dt id="frame.src.framer.framer.Framer.add_observer"><code class="name flex">
 <span>def <span class="ident">add_observer</span></span>(<span>self, observer: Callable[[<a title="frame.src.framer.brain.decision.decision.Decision" href="brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>], None]) ‑> None</span>
@@ -385,7 +395,8 @@ ensuring continuity and consistency across different sessions or environments.</
 <p>This method ensures that all tasks and workflows are closed properly,
 and any resources or memory used by the Framer are released. It is
 important to call this method when the Framer is no longer needed to
-prevent memory leaks and ensure optimal performance.</p></div>
+prevent memory leaks and ensure optimal performance. This method
+should be called to gracefully shut down the Framer.</p></div>
 </dd>
 <dt id="frame.src.framer.framer.Framer.export_to_json"><code class="name flex">
 <span>def <span class="ident">export_to_json</span></span>(<span>self, file_path: str) ‑> None</span>

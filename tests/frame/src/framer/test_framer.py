@@ -44,8 +44,12 @@ async def test_framer_initialization():
         workflow_manager=workflow_manager,
     )
     assert framer is not None
+    assert framer.acting is True
     assert isinstance(framer.agency, Agency)
     assert isinstance(framer.soul, Soul)
+    # Test acting state
+    assert framer.acting is True
+
     # Test generate_roles_and_goals
     roles, goals = await framer.agency.generate_roles_and_goals()
     assert isinstance(roles, list)

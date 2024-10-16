@@ -105,7 +105,13 @@ class Framer:
         return framer
 
     def act(self):
-        """Enable the Framer to process perceptions and make decisions."""
+        """
+        Enable the Framer to process perceptions and make decisions.
+
+        This method sets the Framer to an active state, allowing it to respond
+        to perceptions and execute tasks. It is automatically called during
+        initialization to ensure the Framer starts acting immediately.
+        """
         self.acting = True
 
     async def initialize(self):
@@ -284,7 +290,8 @@ class Framer:
         This method ensures that all tasks and workflows are closed properly,
         and any resources or memory used by the Framer are released. It is
         important to call this method when the Framer is no longer needed to
-        prevent memory leaks and ensure optimal performance.
+        prevent memory leaks and ensure optimal performance. This method
+        should be called to gracefully shut down the Framer.
         """
         # Close all workflows
         for workflow in self.workflow_manager.workflows.values():

@@ -30,7 +30,7 @@ config = FramerConfig(
 
 ## Closing the Framer
 
-The `close` method is used to optimize and clear all memory for the Framer. It ensures that all tasks and workflows are closed properly, and any resources or memory used by the Framer are released. This method should be called when the Framer is no longer needed to prevent memory leaks and ensure optimal performance.
+The `close` method is used to optimize and clear all memory for the Framer. It ensures that all tasks and workflows are closed properly, and any resources or memory used by the Framer are released. This method should be called when the Framer is no longer needed to prevent memory leaks and ensure optimal performance. It is important to call this method to gracefully shut down the Framer.
 
 ```python
 framer = Framer(config, llm_service, agency, brain, soul, workflow_manager)

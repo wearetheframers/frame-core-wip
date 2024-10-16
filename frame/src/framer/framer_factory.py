@@ -53,7 +53,7 @@ class FramerFactory:
         execution_context = ExecutionContext(llm_service=self.llm_service)
         agency = Agency(llm_service=self.llm_service, context=None)
         # Initialize the Agency component
-        # Generate roles and goals
+        # Generate roles and goals. The Framer must be acting to respond to perceptions.
         roles, goals = await agency.generate_roles_and_goals()
 
         execution_context = ExecutionContext(llm_service=self.llm_service)
