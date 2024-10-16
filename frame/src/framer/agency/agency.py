@@ -132,10 +132,10 @@ class Agency:
         if isinstance(priority, str):
             priority_map = {"low": 3, "medium": 5, "high": 8}
             priority = priority_map.get(priority.lower(), 5)
-        
+
         if not (1 <= priority <= 10):
             raise ValueError("Priority must be between 1 and 10")
-        
+
         return Task(description=description, priority=priority, workflow_id=workflow_id)
 
     def add_task(self, task: Task, workflow_id: str = "default") -> None:
@@ -299,14 +299,25 @@ class Agency:
                         "description": "Assist with the given task or query.",
                     }
                 ]
-            if isinstance(role, dict) and 'priority' in role:
-                if isinstance(role['priority'], str):
+            if isinstance(role, dict) and "priority" in role:
+                if isinstance(role["priority"], str):
                     priority_map = {"low": 3, "medium": 5, "high": 8}
-                    role['priority'] = priority_map.get(role['priority'].lower(), 5)
-                role['priority'] = max(1, min(10, int(role['priority'])))
-            return [{"action": "role", "parameters": role}] if isinstance(role, dict) else [
-                {"action": "role", "parameters": {**r, 'priority': max(1, min(10, int(r.get('priority', 5))))}} for r in role
-            ]
+                    role["priority"] = priority_map.get(role["priority"].lower(), 5)
+                role["priority"] = max(1, min(10, int(role["priority"])))
+            return (
+                [{"action": "role", "parameters": role}]
+                if isinstance(role, dict)
+                else [
+                    {
+                        "action": "role",
+                        "parameters": {
+                            **r,
+                            "priority": max(1, min(10, int(r.get("priority", 5)))),
+                        },
+                    }
+                    for r in role
+                ]
+            )
         except Exception as e:
             logger.error(f"Error generating role: {str(e)}", exc_info=True)
             logger.error(f"Prompt used for role generation: {prompt}")
@@ -351,9 +362,11 @@ class Agency:
                         "priority": 5,
                     }
                 ]
-            return [{"action": "goal", "parameters": goal}] if isinstance(goal, dict) else [
-                {"action": "goal", "parameters": g} for g in goal
-            ]
+            return (
+                [{"action": "goal", "parameters": goal}]
+                if isinstance(goal, dict)
+                else [{"action": "goal", "parameters": g} for g in goal]
+            )
         except Exception as e:
             logger.error(f"Error generating goal: {e}", exc_info=True)
             logger.error(f"Prompt used for goal generation: {prompt}")

@@ -53,4 +53,6 @@ class FramerConfig(BaseModel):
         if self.default_model:
             self.default_model = self.default_model.lower()
         if self.use_local_model and not HUGGINGFACE_API_KEY.strip():
-            logging.error("Error: Hugging Face API key is not set, but the Framer is set to use local models. Some features may not work.")
+            logging.error(
+                "Error: Hugging Face API key is not set, but the Framer is set to use local models. Some features may not work."
+            )

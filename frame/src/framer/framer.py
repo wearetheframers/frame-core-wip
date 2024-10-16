@@ -426,6 +426,7 @@ class Framer:
         Returns:
             Dict[str, Any]: Result of the task execution.
         """
+
     async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """
         Perform a task asynchronously.

@@ -9,6 +9,7 @@ from .src.services.llm.main import LLMService
 from .src.utils.llm_utils import LLMMetrics, llm_metrics, track_llm_usage
 from frame.src.utils.llm_utils import track_llm_usage
 
+
 class Frame:
     """
     Frame is the main interface for creating and managing Framer instances.

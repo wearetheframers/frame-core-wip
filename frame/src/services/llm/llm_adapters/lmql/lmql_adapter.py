@@ -92,7 +92,9 @@ class LMQLAdapter(LLMAdapterInterface):
             else (AsyncOpenAI(api_key=openai_api_key) if openai_api_key else None)
         )
         self.mistral_client = (
-            MistralClient(api_key=mistral_api_key, hf_token=self.hf_token) if mistral_api_key or self.hf_token else None
+            MistralClient(api_key=mistral_api_key, hf_token=self.hf_token)
+            if mistral_api_key or self.hf_token
+            else None
         )
         self.default_model = "gpt-3.5-turbo"
         self.token_bucket = TokenBucket(
@@ -165,7 +167,9 @@ class LMQLAdapter(LLMAdapterInterface):
         Returns:
             str: The generated completion.
         """
-        model_name = model.lower() if isinstance(model, str) else self.default_model.lower()
+        model_name = (
+            model.lower() if isinstance(model, str) else self.default_model.lower()
+        )
 
         if not self.token_bucket.consume(1):
             await asyncio.sleep(1)  # Wait for a token to become available
@@ -267,7 +271,9 @@ class LMQLAdapter(LLMAdapterInterface):
 
 
 def lmql_adapter(
-    openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None, hf_token: Optional[str] = None
+    openai_api_key: Optional[str] = None,
+    mistral_api_key: Optional[str] = None,
+    hf_token: Optional[str] = None,
 ) -> LMQLAdapter:
     """
     Factory function to create an LMQLAdapter instance.
@@ -285,7 +291,11 @@ def lmql_adapter(
     if openai_client and not isinstance(openai_client, AsyncOpenAI):
         raise ValueError("OpenAI client is incorrectly initialized")
 
-    return LMQLAdapter(openai_api_key=openai_api_key, mistral_api_key=mistral_api_key, hf_token=hf_token)
+    return LMQLAdapter(
+        openai_api_key=openai_api_key,
+        mistral_api_key=mistral_api_key,
+        hf_token=hf_token,
+    )
 
 
 class MistralClient:
@@ -303,15 +313,23 @@ class MistralClient:
         frequency_penalty: float,
         presence_penalty: float,
     ) -> str:
-        tokenizer = AutoTokenizer.from_pretrained(model, token=self.hf_token, trust_remote_code=True)
-        model_instance = lmql.model(model, tokenizer=tokenizer, token=self.hf_token, trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(
+            model, token=self.hf_token, trust_remote_code=True
+        )
+        model_instance = lmql.model(
+            model, tokenizer=tokenizer, token=self.hf_token, trust_remote_code=True
+        )
         if not model_instance:
-            raise ValueError(f"Model {model} could not be loaded. Please check the model identifier and ensure it is available on Hugging Face.")
+            raise ValueError(
+                f"Model {model} could not be loaded. Please check the model identifier and ensure it is available on Hugging Face."
+            )
         if asyncio.get_event_loop().is_running():
             response = await model_instance.generate(prompt, max_tokens=max_tokens)
         else:
-            response = asyncio.run(model_instance.generate(prompt, max_tokens=max_tokens))
-        
+            response = asyncio.run(
+                model_instance.generate(prompt, max_tokens=max_tokens)
+            )
+
         if response:
             return response.strip()
         else:

@@ -192,10 +192,10 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         if isinstance(priority, str):
             priority_map = {&#34;low&#34;: 3, &#34;medium&#34;: 5, &#34;high&#34;: 8}
             priority = priority_map.get(priority.lower(), 5)
-        
+
         if not (1 &lt;= priority &lt;= 10):
             raise ValueError(&#34;Priority must be between 1 and 10&#34;)
-        
+
         return Task(description=description, priority=priority, workflow_id=workflow_id)
 
     def add_task(self, task: Task, workflow_id: str = &#34;default&#34;) -&gt; None:
@@ -359,14 +359,25 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                         &#34;description&#34;: &#34;Assist with the given task or query.&#34;,
                     }
                 ]
-            if isinstance(role, dict) and &#39;priority&#39; in role:
-                if isinstance(role[&#39;priority&#39;], str):
+            if isinstance(role, dict) and &#34;priority&#34; in role:
+                if isinstance(role[&#34;priority&#34;], str):
                     priority_map = {&#34;low&#34;: 3, &#34;medium&#34;: 5, &#34;high&#34;: 8}
-                    role[&#39;priority&#39;] = priority_map.get(role[&#39;priority&#39;].lower(), 5)
-                role[&#39;priority&#39;] = max(1, min(10, int(role[&#39;priority&#39;])))
-            return [{&#34;action&#34;: &#34;role&#34;, &#34;parameters&#34;: role}] if isinstance(role, dict) else [
-                {&#34;action&#34;: &#34;role&#34;, &#34;parameters&#34;: {**r, &#39;priority&#39;: max(1, min(10, int(r.get(&#39;priority&#39;, 5))))}} for r in role
-            ]
+                    role[&#34;priority&#34;] = priority_map.get(role[&#34;priority&#34;].lower(), 5)
+                role[&#34;priority&#34;] = max(1, min(10, int(role[&#34;priority&#34;])))
+            return (
+                [{&#34;action&#34;: &#34;role&#34;, &#34;parameters&#34;: role}]
+                if isinstance(role, dict)
+                else [
+                    {
+                        &#34;action&#34;: &#34;role&#34;,
+                        &#34;parameters&#34;: {
+                            **r,
+                            &#34;priority&#34;: max(1, min(10, int(r.get(&#34;priority&#34;, 5)))),
+                        },
+                    }
+                    for r in role
+                ]
+            )
         except Exception as e:
             logger.error(f&#34;Error generating role: {str(e)}&#34;, exc_info=True)
             logger.error(f&#34;Prompt used for role generation: {prompt}&#34;)
@@ -411,9 +422,11 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                         &#34;priority&#34;: 5,
                     }
                 ]
-            return [{&#34;action&#34;: &#34;goal&#34;, &#34;parameters&#34;: goal}] if isinstance(goal, dict) else [
-                {&#34;action&#34;: &#34;goal&#34;, &#34;parameters&#34;: g} for g in goal
-            ]
+            return (
+                [{&#34;action&#34;: &#34;goal&#34;, &#34;parameters&#34;: goal}]
+                if isinstance(goal, dict)
+                else [{&#34;action&#34;: &#34;goal&#34;, &#34;parameters&#34;: g} for g in goal]
+            )
         except Exception as e:
             logger.error(f&#34;Error generating goal: {e}&#34;, exc_info=True)
             logger.error(f&#34;Prompt used for goal generation: {prompt}&#34;)

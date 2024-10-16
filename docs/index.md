@@ -9,11 +9,11 @@ Welcome to the Frame documentation. Frame is a multi-modal, multi-agent cognitiv
 
 Frame consists of three main components:
 
-1. [[frame]]: The main interface for creating and managing Framer instances. It acts as the central hub for initializing and orchestrating the various components of the framework.
+the [[frame]]: The main interface for creating and managing Framer instances. It acts as the central hub for initializing and orchestrating the various components of the framework.
 
-2. [[framer]]: Represents an individual AI agent with capabilities for task management, decision-making, and interaction with language models. Each Framer operates independently but can collaborate with others. Framers can be initialized with a `soul_seed` that is a string or a dictionary with a 'seed' key.
+the [[framer]]: Represents an individual AI agent with capabilities for task management, decision-making, and interaction with language models. Each Framer operates independently but can collaborate with others. Framers can be initialized with a `soul_seed` that is a string or a dictionary with a 'seed' key.
 
-3. [[framed]]: A collection of Framer objects working together to achieve complex tasks. It enables coordination and communication between multiple Framers, allowing for scalable and collaborative operations.
+the [[framed]]: A collection of Framer objects working together to achieve complex tasks. It enables coordination and communication between multiple Framers, allowing for scalable and collaborative operations.
 
 ## Key Features
 

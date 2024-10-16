@@ -156,6 +156,8 @@ setting the default model and generating completions with retry logic.</p>
         hf_token: Optional[str] = None,
     ):
         self.hf_token = hf_token or HUGGINGFACE_API_KEY
+        if not self.hf_token:
+            logger.warning(&#34;Hugging Face token is not set. Some features may not work.&#34;)
         self.mistral_client = mistral_client
         self.openai_client = (
             openai_client
@@ -163,7 +165,9 @@ setting the default model and generating completions with retry logic.</p>
             else (AsyncOpenAI(api_key=openai_api_key) if openai_api_key else None)
         )
         self.mistral_client = (
-            MistralClient(api_key=mistral_api_key, hf_token=self.hf_token) if mistral_api_key else None
+            MistralClient(api_key=mistral_api_key, hf_token=self.hf_token)
+            if mistral_api_key or self.hf_token
+            else None
         )
         self.default_model = &#34;gpt-3.5-turbo&#34;
         self.token_bucket = TokenBucket(
@@ -236,7 +240,9 @@ setting the default model and generating completions with retry logic.</p>
         Returns:
             str: The generated completion.
         &#34;&#34;&#34;
-        model_name = model if isinstance(model, str) else self.default_model
+        model_name = (
+            model.lower() if isinstance(model, str) else self.default_model.lower()
+        )
 
         if not self.token_bucket.consume(1):
             await asyncio.sleep(1)  # Wait for a token to become available
@@ -476,15 +482,23 @@ class LMQLConfig:
         frequency_penalty: float,
         presence_penalty: float,
     ) -&gt; str:
-        tokenizer = AutoTokenizer.from_pretrained(model, use_auth_token=self.hf_token, trust_remote_code=True)
-        model_instance = lmql.model(model, tokenizer=tokenizer, use_auth_token=self.hf_token, trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(
+            model, token=self.hf_token, trust_remote_code=True
+        )
+        model_instance = lmql.model(
+            model, tokenizer=tokenizer, token=self.hf_token, trust_remote_code=True
+        )
         if not model_instance:
-            raise ValueError(f&#34;Model {model} could not be loaded. Please check the model identifier and ensure it is available on Hugging Face.&#34;)
+            raise ValueError(
+                f&#34;Model {model} could not be loaded. Please check the model identifier and ensure it is available on Hugging Face.&#34;
+            )
         if asyncio.get_event_loop().is_running():
             response = await model_instance.generate(prompt, max_tokens=max_tokens)
         else:
-            response = asyncio.run(model_instance.generate(prompt, max_tokens=max_tokens))
-        
+            response = asyncio.run(
+                model_instance.generate(prompt, max_tokens=max_tokens)
+            )
+
         if response:
             return response.strip()
         else:

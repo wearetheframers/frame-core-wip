@@ -40,14 +40,19 @@ def test_agency_initialization(agency, mock_llm_service):
 
 @pytest.mark.asyncio
 async def test_generate_roles_with_numeric_priority(agency):
-    agency.llm_service.get_completion.return_value = '{"name": "Role1", "description": "A test role", "priority": 9}'
+    agency.llm_service.get_completion.return_value = (
+        '{"name": "Role1", "description": "A test role", "priority": 9}'
+    )
     roles = await agency.generate_roles()
-    assert roles[0]['priority'] == 9
+    assert roles[0]["priority"] == 9
+
 
 async def test_generate_roles_with_string_priority(agency):
-    agency.llm_service.get_completion.return_value = '{"name": "Role1", "description": "A test role", "priority": "medium"}'
+    agency.llm_service.get_completion.return_value = (
+        '{"name": "Role1", "description": "A test role", "priority": "medium"}'
+    )
     roles = await agency.generate_roles()
-    assert roles[0]['priority'] == 5
+    assert roles[0]["priority"] == 5
     mock_roles = [{"name": "Test Role", "description": "A test role"}]
     mock_goals = [{"description": "Test Goal", "priority": 1}]
 
@@ -98,9 +103,11 @@ def test_create_task_with_string_priority(agency):
     task = agency.create_task("Test task", priority="high", workflow_id="test_workflow")
     assert task.priority == 8
 
+
 def test_create_task_with_invalid_priority(agency):
     with pytest.raises(ValueError):
         agency.create_task("Test task", priority=11, workflow_id="test_workflow")
+
 
 @pytest.mark.parametrize(
     "task_data, workflow_name",

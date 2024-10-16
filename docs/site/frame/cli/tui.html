@@ -236,7 +236,7 @@ you are using <code>textual run</code> with the <code>dev</code> switch.</dd>
     def on_select_changed(self, event: Select.Changed) -&gt; None:
         &#34;&#34;&#34;Handle changes in the model selection.&#34;&#34;&#34;
         if event.select.id == &#34;model_select&#34;:
-            self.model = event.value
+            self.model = event.value.lower()
             model_label = self.query_one(&#34;Label#model_label&#34;)
             model_label.update(f&#34;Model: {self.model}&#34;)
 

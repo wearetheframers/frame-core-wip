@@ -35,7 +35,7 @@ To initialize a `Framer` with roles and goals, use the `initialize()` method. Th
 - Decision Making: Utilize advanced decision-making processes to guide actions.
 - Language Model Interaction: Interact with various language models for generating responses and performing tasks. Note: DSPy does not support streaming mode.
 - Perception Processing: Handle and respond to various types of input (text, visual, audio, etc.).
-- Memory Management: Store and retrieve information for long-term learning and context awareness.
+- Memory Management: Store and retrieve information for long-term learning and context awareness. Frame's architecture is flexible and pluggable, allowing components like memory to be swapped out. Mem0 is designed to replace and improve upon RAG, but RAG is still offered as an alternative, maintaining the same interface with a different underlying driver.
 - Multi-modal Support: Process and generate responses in multiple modalities.
 - Emotional Intelligence: Simulate emotional states and responses (work in progress).
 - Flexible Behavior: Adapt behavior based on roles, goals, and context.

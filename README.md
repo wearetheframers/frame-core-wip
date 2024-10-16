@@ -93,7 +93,7 @@ Frame is built on a modular architecture that allows for flexible and emergent A
 - **Soul**: Manages memory, emotional states, and intrinsic characteristics.
 - **Brain**: Handles decision-making processes for the Framer.
 - **Mind**: Represents the cognitive processes of a Framer.
-- **Memory**: Manages memory storage and retrieval.
+- **Memory**: Manages memory storage and retrieval. Frame's architecture is flexible and pluggable, allowing components like memory to be swapped out. While Mem0 is designed to replace and improve upon RAG, RAG is still offered as an alternative, with the same interface but a different underlying driver.
 - **Workflow**: Manages a sequence of related tasks.
 - **Task**: Represents actionable items for Framers to work on.
 - **Perception**: Represents sensory input or information received by a Framer.

@@ -37,19 +37,62 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.config.FramerConfig"><code class="flex name class">
 <span>class <span class="ident">FramerConfig</span></span>
-<span>(</span><span>name: str, model: Optional[str] = None, soul_seed: Union[str, Dict[str, Any], ForwardRef(None)] = 'You are a helpful AI assistant.', description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-4o-mini', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = &lt;factory&gt;, goals: Optional[List[Dict[str, Any]]] = &lt;factory&gt;, recent_memories_limit: Optional[int] = 5)</span>
+<span>(</span><span>**data)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>FramerConfig(name: str, model: Optional[str] = None, soul_seed: Union[str, Dict[str, Any], NoneType] = 'You are a helpful AI assistant.', description: Optional[str] = None, singleton: Optional[bool] = False, gender: Optional[str] = 'neutral', default_model: Optional[str] = 'gpt-4o-mini', multi_modal_model: Optional[str] = 'gpt-4-vision-preview', llm_temperature: Optional[float] = 0.7, llm_max_tokens: Optional[int] = 1024, llm_top_p: Optional[float] = 1.0, llm_frequency_penalty: Optional[float] = 0.0, llm_presence_penalty: Optional[float] = 0.0, is_multi_modal: Optional[bool] = False, roles: Optional[List[Dict[str, str]]] = <factory>, goals: Optional[List[Dict[str, Any]]] = <factory>, recent_memories_limit: Optional[int] = 5)</p></div>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of the class variables defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The synthesized <code>__init__</code> [<code>Signature</code>][inspect.Signature] of the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The core schema of the model.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a [<code>RootModel</code>][pydantic.root_model.RootModel].</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The <code>pydantic-core</code> <code>SchemaSerializer</code> used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The <code>pydantic-core</code> <code>SchemaValidator</code> used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>A dictionary containing extra values, if [<code>extra</code>][pydantic.config.ConfigDict.extra]
+is set to <code>'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>The names of fields explicitly set during instantiation.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@dataclass
-class FramerConfig:
+<pre><code class="python">class FramerConfig(BaseModel):
     name: str
-    model: Optional[str] = field(default=None)
+    model: Optional[str] = None
     soul_seed: Optional[Union[str, Dict[str, Any]]] = &#34;You are a helpful AI assistant.&#34;
+    use_local_model: bool = False
     &#34;&#34;&#34;
     Configuration class for Framer instances.
 
@@ -73,7 +116,6 @@ class FramerConfig:
         goals (Optional[List[Dict[str, Any]]]): The goals for the Framer.
     &#34;&#34;&#34;
 
-    name: str
     description: Optional[str] = None
     singleton: Optional[bool] = False
     gender: Optional[str] = &#34;neutral&#34;
@@ -85,10 +127,23 @@ class FramerConfig:
     llm_frequency_penalty: Optional[float] = 0.0
     llm_presence_penalty: Optional[float] = 0.0
     is_multi_modal: Optional[bool] = False
-    roles: Optional[List[Dict[str, str]]] = field(default_factory=list)
-    goals: Optional[List[Dict[str, Any]]] = field(default_factory=list)
-    recent_memories_limit: Optional[int] = 5</code></pre>
+    roles: Optional[List[Dict[str, str]]] = []
+    goals: Optional[List[Dict[str, Any]]] = []
+    recent_memories_limit: Optional[int] = 5
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        if self.default_model:
+            self.default_model = self.default_model.lower()
+        if self.use_local_model and not HUGGINGFACE_API_KEY.strip():
+            logging.error(
+                &#34;Error: Hugging Face API key is not set, but the Framer is set to use local models. Some features may not work.&#34;
+            )</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
 <h3>Class variables</h3>
 <dl>
 <dt id="frame.src.framer.config.FramerConfig.default_model"><code class="name">var <span class="ident">default_model</span> : Optional[str]</code></dt>
@@ -135,6 +190,18 @@ class FramerConfig:
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.framer.config.FramerConfig.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.config.FramerConfig.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.config.FramerConfig.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.framer.config.FramerConfig.multi_modal_model"><code class="name">var <span class="ident">multi_modal_model</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
@@ -156,6 +223,10 @@ class FramerConfig:
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.config.FramerConfig.soul_seed"><code class="name">var <span class="ident">soul_seed</span> : Union[str, Dict[str, Any], ForwardRef(None)]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.config.FramerConfig.use_local_model"><code class="name">var <span class="ident">use_local_model</span> : bool</code></dt>
 <dd>
 <div class="desc"><p>Configuration class for Framer instances.</p>
 <p>This class initializes a Framer configuration based on a dictionary of settings.
@@ -223,12 +294,16 @@ It uses the FramerConfigModel to validate and set default values for the configu
 <li><code><a title="frame.src.framer.config.FramerConfig.llm_temperature" href="#frame.src.framer.config.FramerConfig.llm_temperature">llm_temperature</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.llm_top_p" href="#frame.src.framer.config.FramerConfig.llm_top_p">llm_top_p</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.model" href="#frame.src.framer.config.FramerConfig.model">model</a></code></li>
+<li><code><a title="frame.src.framer.config.FramerConfig.model_computed_fields" href="#frame.src.framer.config.FramerConfig.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="frame.src.framer.config.FramerConfig.model_config" href="#frame.src.framer.config.FramerConfig.model_config">model_config</a></code></li>
+<li><code><a title="frame.src.framer.config.FramerConfig.model_fields" href="#frame.src.framer.config.FramerConfig.model_fields">model_fields</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.multi_modal_model" href="#frame.src.framer.config.FramerConfig.multi_modal_model">multi_modal_model</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.name" href="#frame.src.framer.config.FramerConfig.name">name</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.recent_memories_limit" href="#frame.src.framer.config.FramerConfig.recent_memories_limit">recent_memories_limit</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.roles" href="#frame.src.framer.config.FramerConfig.roles">roles</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.singleton" href="#frame.src.framer.config.FramerConfig.singleton">singleton</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.soul_seed" href="#frame.src.framer.config.FramerConfig.soul_seed">soul_seed</a></code></li>
+<li><code><a title="frame.src.framer.config.FramerConfig.use_local_model" href="#frame.src.framer.config.FramerConfig.use_local_model">use_local_model</a></code></li>
 </ul>
 </li>
 </ul>
