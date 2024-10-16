@@ -83,36 +83,39 @@ The design of Frame's architecture is driven by several key considerations:
 
 - **Extensibility**: Frame's plugin system allows developers to add new actions and capabilities to Framers, enabling them to customize the behavior of their AI agents.
 
-## Component Hierarchy and Interactions
+### Component Hierarchy and Interactions
 
 ```
 Frame
-├── Framer
-│   ├── Agency
-│   │   ├── Roles
-│   │   ├── Goals
-│   │   ├── Tasks
-│   │   └── Workflows
-│   ├── Brain
-│   │   ├── ContextService
-│   │   ├── Mind
-│   │   │   ├── Perceptions
-│   │   │   └── Thoughts
-│   │   ├── Decision
-│   │   └── Memory
-│   ├── Context
-│   ├── Observers
-│   ├── SharedContext
-├── Framed
-│   └── Multiple Framers
+└── Framer
+    ├── Agency
+    │   ├── Roles
+    │   ├── Goals
+    │   ├── Tasks
+    │   └── Workflows
+    ├── Brain
+    │   ├── Mind
+    │   │   ├── Perceptions
+    │   │   └── Thoughts
+    │   ├── Decision
+    │   └── Memory
+    ├── Soul
+    │   ├── Emotional State
+    │   └── Core Traits
+    ├── Context
+    ├── Observers
+    └── SharedContext
+Framed
+└── Multiple Framers
+LLM Adapters
+├── DSPy Adapter
+├── HuggingFace Adapter
+└── LMQL Adapter
+Services
 ├── LLMService
-│   └── LLMAdapters
-│       ├── DSPyAdapter
-│       ├── HuggingFaceAdapter
-│       └── LMQLAdapter
 ├── MemoryService
-│   └── MemoryAdapters
-│       └── Mem0Adapter
+├── EQService
+└── ContextService
 ```
 
 ## Agent Flow

@@ -10,7 +10,7 @@
 Frame consists of three main components: `Frame`, `Framed`, and `Framer`.
 
 - **Frame**: The main interface for creating and managing Framer instances.
-- **Framer**: Represents an individual AI agent with capabilities for task management, decision-making, and interaction with language models.
+- **Framer**: Represents an individual AI agent with capabilities for task management, decision-making, and interaction with language models. The Soul and Agency components are what allow a Framer to be truly flexible and customizable for any occasion. Agency and Soul are the two components a user will be using the API the most.
 - **Framed**: A collection of Framer objects working together to achieve complex tasks.
 
 ## Table of Contents
@@ -87,7 +87,7 @@ await framer.close()
 Frame is built on a modular architecture that allows for flexible and emergent AI agent behavior. The main components are:
 
 - **Frame**: The main interface for creating and managing Framer instances.
-- **Framer**: An AI agent with agency and soul capabilities.
+- **Framer**: An AI agent with agency and soul capabilities. The Soul and Agency components are what allow a Framer to be truly flexible and customizable for any occasion. Agency and Soul are the two components a user will be using the API the most.
 - **Framed**: A group of Framer objects working together.
 - **Agency**: Manages roles, goals, and task management.
 - **Soul**: Manages memory, emotional states, and intrinsic characteristics.
@@ -98,6 +98,41 @@ Frame is built on a modular architecture that allows for flexible and emergent A
 - **Task**: Represents actionable items for Framers to work on.
 - **Perception**: Represents sensory input or information received by a Framer.
 - **Context**: Manages roles and goals for Framers.
+
+### Component Hierarchy and Interactions
+
+```
+Frame
+└── Framer
+    ├── Agency
+    │   ├── Roles
+    │   ├── Goals
+    │   ├── Tasks
+    │   └── Workflows
+    ├── Brain
+    │   ├── Mind
+    │   │   ├── Perceptions
+    │   │   └── Thoughts
+    │   ├── Decision
+    │   └── Memory
+    ├── Soul
+    │   ├── Emotional State
+    │   └── Core Traits
+    ├── Context
+    ├── Observers
+    └── SharedContext
+Framed
+└── Multiple Framers
+LLM Adapters
+├── DSPy Adapter
+├── HuggingFace Adapter
+└── LMQL Adapter
+Services
+├── LLMService
+├── MemoryService
+├── EQService
+└── ContextService
+```
 
 ## Usage
 
