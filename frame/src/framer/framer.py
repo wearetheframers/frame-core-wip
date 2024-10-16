@@ -272,7 +272,19 @@ class Framer:
                 "goals": self.goals
             }, file, indent=4)
 
-    async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    def export_to_markdown(self, file_path: str) -> None:
+        """
+        Export the Framer configuration to a Markdown file.
+
+        This method allows the Framer agent to be fully exported into a Markdown format,
+        making it portable and easy to use inside a prompt to any other LLM. This
+        portability enables the Framer agents to be shared and consumed by other
+        systems, facilitating interoperability and reuse.
+
+        Args:
+            file_path (str): The path to the file where the Markdown will be saved.
+        """
+        export_config_to_markdown(self.config, file_path)
         """
         Perform a task asynchronously.
 
