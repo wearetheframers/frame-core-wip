@@ -8,7 +8,7 @@ from frame.src.framer.brain import Brain
 from frame.src.framer.soul import Soul
 from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
 from frame.src.framer.agency.tasks.task import Task
-from frame.src.utils.config_parser import load_framer_from_file, export_framer_to_markdown
+from frame.src.utils.config_parser import load_framer_from_file, export_config_to_markdown
 from frame.src.utils.llm_utils import (
     get_completion,
     calculate_token_size,
