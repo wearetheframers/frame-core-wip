@@ -3,7 +3,6 @@ import time
 from typing import List, Dict, Any, Optional, Callable, Union
 from frame.src.services.llm.main import LLMService
 from frame.src.framer.config import FramerConfig
-from frame.src.framed.config import FramedConfig
 from frame.src.framer.agency import Agency
 from frame.src.framer.brain import Brain
 from frame.src.framer.soul import Soul
