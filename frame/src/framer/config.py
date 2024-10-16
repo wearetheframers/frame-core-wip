@@ -1,13 +1,15 @@
 from typing import Optional, List, Dict, Any, Union
 from frame.src.constants.models import DEFAULT_MODEL
-from dataclasses import dataclass, field
+from pydantic import BaseModel
+import logging
+from frame.src.constants.api_keys import HUGGINGFACE_API_KEY
 
 
-@dataclass
-class FramerConfig:
+class FramerConfig(BaseModel):
     name: str
-    model: Optional[str] = field(default=None)
+    model: Optional[str] = None
     soul_seed: Optional[Union[str, Dict[str, Any]]] = "You are a helpful AI assistant."
+    use_local_model: bool = False
     """
     Configuration class for Framer instances.
 
@@ -31,7 +33,6 @@ class FramerConfig:
         goals (Optional[List[Dict[str, Any]]]): The goals for the Framer.
     """
 
-    name: str
     description: Optional[str] = None
     singleton: Optional[bool] = False
     gender: Optional[str] = "neutral"
@@ -43,6 +44,13 @@ class FramerConfig:
     llm_frequency_penalty: Optional[float] = 0.0
     llm_presence_penalty: Optional[float] = 0.0
     is_multi_modal: Optional[bool] = False
-    roles: Optional[List[Dict[str, str]]] = field(default_factory=list)
-    goals: Optional[List[Dict[str, Any]]] = field(default_factory=list)
+    roles: Optional[List[Dict[str, str]]] = []
+    goals: Optional[List[Dict[str, Any]]] = []
     recent_memories_limit: Optional[int] = 5
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        if self.default_model:
+            self.default_model = self.default_model.lower()
+        if self.use_local_model and not HUGGINGFACE_API_KEY.strip():
+            logging.error("Error: Hugging Face API key is not set, but the Framer is set to use local models. Some features may not work.")

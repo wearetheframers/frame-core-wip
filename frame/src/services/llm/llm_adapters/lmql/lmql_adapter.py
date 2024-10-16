@@ -83,6 +83,8 @@ class LMQLAdapter(LLMAdapterInterface):
         hf_token: Optional[str] = None,
     ):
         self.hf_token = hf_token or HUGGINGFACE_API_KEY
+        if not self.hf_token:
+            logger.warning("Hugging Face token is not set. Some features may not work.")
         self.mistral_client = mistral_client
         self.openai_client = (
             openai_client
@@ -163,7 +165,7 @@ class LMQLAdapter(LLMAdapterInterface):
         Returns:
             str: The generated completion.
         """
-        model_name = model if isinstance(model, str) else self.default_model
+        model_name = model.lower() if isinstance(model, str) else self.default_model.lower()
 
         if not self.token_bucket.consume(1):
             await asyncio.sleep(1)  # Wait for a token to become available
@@ -301,8 +303,8 @@ class MistralClient:
         frequency_penalty: float,
         presence_penalty: float,
     ) -> str:
-        tokenizer = AutoTokenizer.from_pretrained(model, use_auth_token=self.hf_token, trust_remote_code=True)
-        model_instance = lmql.model(model, tokenizer=tokenizer, use_auth_token=self.hf_token, trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(model, token=self.hf_token, trust_remote_code=True)
+        model_instance = lmql.model(model, tokenizer=tokenizer, token=self.hf_token, trust_remote_code=True)
         if not model_instance:
             raise ValueError(f"Model {model} could not be loaded. Please check the model identifier and ensure it is available on Hugging Face.")
         if asyncio.get_event_loop().is_running():

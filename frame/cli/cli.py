@@ -228,6 +228,9 @@ def run_framer(ctx, prompt, name, model, debug, sync, stream):
         huggingface_api_key=ctx.obj.get("huggingface_api_key"),
         default_model=model,
     )
+    from frame.src.constants.api_keys import HUGGINGFACE_API_KEY
+    if not HUGGINGFACE_API_KEY:
+        logger.warning("Hugging Face API key is not set. Some features may not work.")
 
     result = execute_framer(frame, data, sync, stream)
     logger.info(f"Framer execution completed. Result: {result}")

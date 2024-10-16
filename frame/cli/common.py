@@ -117,7 +117,7 @@ async def setup_framer(
     config = FramerConfig(
         name=name,
         description=description,
-        default_model="gpt-4o",
+        default_model=model.lower(),
     )
     framer_factory = FramerFactory(config, frame.llm_service)
     framer = await framer_factory.create_framer()

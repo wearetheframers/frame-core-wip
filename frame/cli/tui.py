@@ -179,7 +179,7 @@ class FramerTUI(App):
     def on_select_changed(self, event: Select.Changed) -> None:
         """Handle changes in the model selection."""
         if event.select.id == "model_select":
-            self.model = event.value
+            self.model = event.value.lower()
             model_label = self.query_one("Label#model_label")
             model_label.update(f"Model: {self.model}")
 

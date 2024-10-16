@@ -76,7 +76,7 @@ def log_method_call(func):
 
 from frame.src.constants import OPENAI_API_KEY
 from .llm_adapters import DSPyAdapter, HuggingFaceAdapter, LMQLAdapter
-from frame.src.constants.apis import (
+from frame.src.constants.api_keys import (
     OPENAI_API_KEY,
     MISTRAL_API_KEY,
     HUGGINGFACE_API_KEY,
