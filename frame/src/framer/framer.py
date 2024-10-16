@@ -316,16 +316,25 @@ class Framer:
         """
         import json
 
-        with open(file_path, "w") as file:
-            json.dump(
-                {
-                    "config": self.config.to_dict(),
-                    "roles": self.roles,
-                    "goals": self.goals,
-                },
-                file,
-                indent=4,
-            )
+        config = parse_json_config(file_path)
+        return cls(
+            config=config,
+            llm_service=llm_service,
+            agency=Agency(llm_service=llm_service, context=None),
+            brain=Brain(
+                llm_service=llm_service,
+                default_model=config.default_model,
+                roles=config.roles,
+                goals=config.goals,
+                soul=Soul(seed=config.soul_seed),
+            ),
+            soul=Soul(seed=config.soul_seed),
+            workflow_manager=WorkflowManager(),
+            memory_service=memory_service,
+            eq_service=eq_service,
+            roles=config.roles,
+            goals=config.goals,
+        )
 
     @classmethod
     def load_from_file(

@@ -1,4 +1,4 @@
-# Complex
+# Advanced Usage
 
 This section provides a comprehensive guide on how to use the Frame framework to create and manage AI agents.
 

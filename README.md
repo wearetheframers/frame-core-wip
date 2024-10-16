@@ -61,6 +61,16 @@ Frame is an advanced AI agent framework that enables the creation and management
 
 ## Features
 
+### Observer Events
+
+Framers support observer events to notify external components about significant changes or actions. The following observer events are available:
+
+- `on_framer_opened`: Triggered when a Framer is initialized and ready to act.
+- `on_framer_closed`: Triggered when a Framer is closed and resources are released.
+- `on_decision_made`: Triggered when a decision is made by the Framer.
+- `on_task_completed`: Triggered when a task is completed by the Framer.
+- `on_error_occurred`: Triggered when an error occurs during Framer operations.
+
 - Multi-modal cognitive agents framework
 - Supports developing dynamic, emergent behaviors
 - Layered memory understanding entity relationships with Mem0
@@ -586,16 +596,6 @@ To run all tests, navigate to the root directory of the project and execute:
 pytest
 ```
 
-This command will automatically discover and run all test files in the project.
-
-When contributing to the project, please adhere to the following guidelines for writing tests:
-
-- Location: Place your test files in the `tests` directory.
-- Naming: Follow the naming convention `test_<module>.py` for test files and `test_<function>` for test functions.
-- Structure: Organize tests to mirror the structure of the source code for easy navigation.
-
-To measure test coverage, you can use the `pytest-cov` plugin. Install it via pip if not already installed:
-
 ```bash
 pip install pytest-cov
 ```
@@ -613,18 +613,6 @@ pytest --cov=frame --cov-report=html
 ```
 
 Open the `htmlcov/index.html` file in a browser to view the coverage report.
-
-To run a specific test file:
-
-```bash
-pytest tests/frame/src/frame/test_frame.py
-```
-
-Or a specific test in a file:
-
-```bash
-pytest tests/frame/src/frame/test_frame.py::test_get_completion
-```
 
 *Note*: Testing can take a little while as we have tests for rate limiting / retry logic, so you can exclude those (they are in the `llm_adapter` tests) if it's slow while developing others:
 

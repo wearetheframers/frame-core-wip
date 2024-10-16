@@ -411,16 +411,25 @@ processing perceptions, making decisions, and executing tasks.</p>
         &#34;&#34;&#34;
         import json
 
-        with open(file_path, &#34;w&#34;) as file:
-            json.dump(
-                {
-                    &#34;config&#34;: self.config.to_dict(),
-                    &#34;roles&#34;: self.roles,
-                    &#34;goals&#34;: self.goals,
-                },
-                file,
-                indent=4,
-            )
+        config = parse_json_config(file_path)
+        return cls(
+            config=config,
+            llm_service=llm_service,
+            agency=Agency(llm_service=llm_service, context=None),
+            brain=Brain(
+                llm_service=llm_service,
+                default_model=config.default_model,
+                roles=config.roles,
+                goals=config.goals,
+                soul=Soul(seed=config.soul_seed),
+            ),
+            soul=Soul(seed=config.soul_seed),
+            workflow_manager=WorkflowManager(),
+            memory_service=memory_service,
+            eq_service=eq_service,
+            roles=config.roles,
+            goals=config.goals,
+        )
 
     @classmethod
     def load_from_file(
