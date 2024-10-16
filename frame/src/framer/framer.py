@@ -8,7 +8,7 @@ from frame.src.framer.brain import Brain
 from frame.src.framer.soul import Soul
 from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
 from frame.src.framer.agency.tasks.task import Task
-from frame.src.utils.config_parser import load_framer_from_file, export_framer_to_json, export_framer_to_markdown
+from frame.src.utils.config_parser import load_framer_from_file, export_framer_to_markdown
 from frame.src.utils.llm_utils import (
     get_completion,
     calculate_token_size,
@@ -236,7 +236,19 @@ class Framer:
         return cls(config=config, llm_service=llm_service, agency=Agency(llm_service=llm_service, context=None), brain=Brain(llm_service=llm_service, default_model=config.default_model, roles=config.roles, goals=config.goals, soul=Soul(seed=config.soul_seed)), soul=Soul(seed=config.soul_seed), workflow_manager=WorkflowManager(), memory_service=memory_service, eq_service=eq_service, roles=config.roles, goals=config.goals)
 
     def export_to_json(self, file_path: str) -> None:
-        export_framer_to_json(self, file_path)
+        """
+        Export the Framer configuration to a JSON file.
+
+        Args:
+            file_path (str): The path to the file where the JSON will be saved.
+        """
+        import json
+        with open(file_path, 'w') as file:
+            json.dump({
+                "config": self.config.to_dict(),
+                "roles": self.roles,
+                "goals": self.goals
+            }, file, indent=4)
 
     async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """
