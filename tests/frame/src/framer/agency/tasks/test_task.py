@@ -2,15 +2,16 @@ import pytest
 from datetime import datetime
 from frame.src.framer.agency.tasks.task import Task
 from frame.src.models.framer.agency.tasks.task import TaskStatus
+import json
 from unittest.mock import patch
 
 
 @pytest.fixture
 def sample_task():
-    return Task(
+    task = Task(
         description="Test task",
         workflow_id="test_workflow",
-        priority=50,
+        priority=5,
         expected_results=["Result 1", "Result 2"],
         dependencies=["task1", "task2"],
         parent_task_id="parent_task",
@@ -18,12 +19,18 @@ def sample_task():
         estimated_duration=3.5,
         tags=["test", "sample"],
     )
+    task.llm_service.get_completion.return_value = json.dumps({
+        "name": "Role1",
+        "description": "A test role",
+        "priority": 5,
+    })
+    return task
 
 
 def test_task_initialization(sample_task):
     assert sample_task.description == "Test task"
     assert sample_task.workflow_id == "test_workflow"
-    assert sample_task.priority == 50
+    assert sample_task.priority == 5
     assert sample_task.expected_results == ["Result 1", "Result 2"]
     assert sample_task.dependencies == ["task1", "task2"]
     assert sample_task.parent_task_id == "parent_task"
@@ -70,7 +77,7 @@ def test_to_dict(sample_task):
     assert isinstance(task_dict, dict)
     assert task_dict["description"] == "Test task"
     assert task_dict["workflow_id"] == "test_workflow"
-    assert task_dict["priority"] == 50
+    assert task_dict["priority"] == 5
     assert task_dict["expected_results"] == ["Result 1", "Result 2"]
     assert task_dict["dependencies"] == ["task1", "task2"]
     assert task_dict["parent_task_id"] == "parent_task"

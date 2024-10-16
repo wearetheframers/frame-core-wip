@@ -42,9 +42,10 @@ class TestFramerIO(unittest.TestCase):
             workflow_manager=MagicMock(),
         )
         framer.export_to_markdown("dummy_path")
-        mock_export.assert_called_once()
+        mock_export.assert_called_once_with(framer.config, "dummy_path")
+        mock_export.assert_called_with(framer.config, "dummy_path")
         mock_open.assert_called_once_with("dummy_path", "w")
-        mock_export.assert_called_once()
+        mock_export.assert_called_once_with(framer.config, "dummy_path")
 
 
 if __name__ == "__main__":

@@ -413,15 +413,6 @@ class Framer:
             file_path (str): The path to the file where the Markdown will be saved.
         """
         export_config_to_markdown(self.config, file_path)
-        """
-        Perform a task asynchronously.
-
-        Args:
-            task (Dict[str, Any]): Dictionary containing task details.
-
-        Returns:
-            Dict[str, Any]: Result of the task execution.
-        """
 
     async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """

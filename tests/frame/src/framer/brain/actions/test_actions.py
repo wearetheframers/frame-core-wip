@@ -8,7 +8,8 @@ from frame.src.services.llm.main import LLMService
 
 @pytest.fixture
 def action_registry():
-    llm_service = Mock(spec=LLMService)
+    llm_service = Mock(spec=LLMService, default_model="gpt-3.5-turbo")
+    llm_service.default_model = "gpt-3.5-turbo"
     llm_service.get_completion.return_value = json.dumps(
         {
             "name": "Role1",
