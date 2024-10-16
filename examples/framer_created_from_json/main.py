@@ -13,7 +13,23 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 
 async def main():
     # Load configuration from JSON file
-    config = load_framer_from_file('config.json')
+    # Try to locate the config.json file in multiple potential directories
+    possible_paths = [
+        os.path.join(os.path.dirname(__file__), 'config.json'),
+        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), 'config.json'),
+        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")), 'config.json')
+    ]
+
+    config = None
+    for path in possible_paths:
+        try:
+            config = load_framer_from_file(path)
+            break
+        except FileNotFoundError:
+            continue
+
+    if config is None:
+        raise FileNotFoundError("config.json not found in any of the expected locations.")
 
     # Initialize the Frame
     frame = Frame()

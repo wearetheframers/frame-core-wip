@@ -10,7 +10,23 @@ from frame.src.utils.config_parser import load_framer_from_file
 
 async def main():
     # Load configuration from Markdown file
-    config = load_framer_from_file('config.md')
+    # Try to locate the config.md file in multiple potential directories
+    possible_paths = [
+        os.path.join(os.path.dirname(__file__), 'config.md'),
+        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), 'config.md'),
+        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")), 'config.md')
+    ]
+
+    config = None
+    for path in possible_paths:
+        try:
+            config = load_framer_from_file(path)
+            break
+        except FileNotFoundError:
+            continue
+
+    if config is None:
+        raise FileNotFoundError("config.md not found in any of the expected locations.")
 
     # Initialize the Frame
     frame = Frame()

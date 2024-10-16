@@ -24,7 +24,7 @@ def cleanup(logger=None):
         logger = get_logger(__name__)
 
     # Register the close_logger_handlers function to be called at exit
-    atexit.register(close_logger_handlers, logger)
+    atexit.register(lambda: close_logger_handlers(logger))
 
     # Unregister any previous close_logger_handlers functions
     if hasattr(atexit, "_exithandlers"):
