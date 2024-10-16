@@ -162,6 +162,7 @@ class Framer:
             }, file, indent=4)
 
     @classmethod
+    @classmethod
     def load_from_file(cls, file_path: str, llm_service: LLMService, memory_service: Optional[MemoryService] = None, eq_service: Optional[EQService] = None) -> "Framer":
         """
         Load a Framer configuration from a file.
@@ -299,7 +300,9 @@ class Framer:
             observer(decision)
 
         # Notify plugins about the decision
-        if hasattr(self, "plugins"):
+        for observer in self.observers:
+            if hasattr(observer, "on_framer_opened"):
+                observer.on_framer_opened(self)
             for plugin in self.plugins.values():
                 if hasattr(plugin, "on_decision_made"):
                     plugin.on_decision_made(decision)
@@ -324,7 +327,7 @@ class Framer:
         if self.memory_service:
             self.memory_service.clear()
 
-        # Notify observers and plugins about closure
+        # Notify observers and plugins about closure and opening
         for observer in self.observers:
             if hasattr(observer, "on_framer_closed"):
                 observer.on_framer_closed(self)

@@ -14,7 +14,7 @@ The `Framer` class represents an AI agent with cognitive capabilities. It integr
 
 - **Initialization, Acting, and Halting**: Framers are initialized using the `initialize()` method, which automatically calls `act()`, allowing them to make decisions from new perceptions. To stop the Framer from acting or making new tasks, use the `halt()` method. When halted, perceptions are still registered and can be considered in future decisions unless `ignore_perceptions_while_halted` is set to True.
 
-- **Perception Handling**: The Framer can process perceptions through the `sense()` method. These perceptions are used to make decisions when the Framer is active.
+- **Perception Handling**: The Framer can process perceptions through the `sense()` method. These perceptions are used to make decisions when the Framer is active. Observers can be notified of events such as `on_framer_opened` and `on_framer_closed`.
 
 - **Configuration**: Framers are highly configurable through the `FramerConfig` class, allowing for customization of roles, goals, and other attributes.
 
