@@ -36,11 +36,12 @@ result = await some_action(execution_context, other_params)
 
 ## Methods
 
-- `__init__(self, llm_service: LLMService, soul: Optional[Soul] = None, state: Optional[Dict[str, Any]] = None)`: Initialize the ExecutionContextService with necessary services and state.
+- `__init__(self, llm_service: LLMService, soul: Optional[Soul] = None, state: Optional[Dict[str, Any]] = None, eq_service: Optional[Any] = None)`: Initialize the ExecutionContextService with necessary services and state.
 - `get_state() -> Dict[str, Any]`: Retrieve the current state.
 - `update_state(new_state: Dict[str, Any]) -> None`: Update the current state with new information.
 - `get_llm_service() -> LLMService`: Get the LLM service instance.
 - `get_soul() -> Optional[Soul]`: Get the Soul instance if available.
+- `get_eq_service() -> Optional[Any]`: Get the EQ service instance if available.
 
 ## Related Components
 

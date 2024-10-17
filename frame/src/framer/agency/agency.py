@@ -3,7 +3,6 @@ from frame.src.constants.models import DEFAULT_MODEL
 from frame.src.framer.agency.tasks.task import Task, TaskStatus
 from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services import LLMService
-from frame.src.services import LocalContext
 from frame.src.services import ExecutionContext
 from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.framer.agency.models.roles import Roles

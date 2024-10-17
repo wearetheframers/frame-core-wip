@@ -1,8 +1,8 @@
 from typing import Optional, Dict, Any
-from frame.src.services import LLMService
-from frame.src.services import MemoryService
-from frame.src.services import EQService
-from frame.src.framer.soul import Soul
+from frame.src.services.llm.main import LLMService
+from frame.src.services.memory.main import MemoryService
+from frame.src.services.eq.eq_service import EQService
+from frame.src.framer.soul.soul import Soul
 
 
 class ExecutionContext:
@@ -25,3 +25,21 @@ class ExecutionContext:
 
     def get_state(self, key: str, default: Any = None) -> Any:
         return self.state.get(key, default)
+
+    def get_llm_service(self) -> LLMService:
+        return self.llm_service
+
+    def get_memory_service(self) -> Optional[MemoryService]:
+        return self.memory_service
+
+    def get_eq_service(self) -> Optional[EQService]:
+        return self.eq_service
+
+    def get_soul(self) -> Optional[Soul]:
+        return self.soul
+
+    def update_state(self, new_state: Dict[str, Any]) -> None:
+        self.state.update(new_state)
+
+    def get_full_state(self) -> Dict[str, Any]:
+        return self.state.copy()
