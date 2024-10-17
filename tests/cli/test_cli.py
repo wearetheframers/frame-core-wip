@@ -39,7 +39,7 @@ def test_cli_tui_command(runner, mocker):
 async def test_cli_run_framer_command(runner, mocker):
     mock_logger = mocker.patch("frame.cli.cli.logger")
     mock_execute_framer = mocker.patch(
-        "frame.cli.cli.execute_framer", return_value=AsyncMock(return_value={"result": "success"})
+        "frame.cli.cli.execute_framer", return_value={"result": "success"}
     )
     mock_frame = mocker.patch("frame.frame.Frame", autospec=True)
     mock_llm_service = mocker.patch(
@@ -68,9 +68,7 @@ async def test_cli_run_framer_command(runner, mocker):
         catch_exceptions=False,
     )
 
-    assert (
-        result.exit_code == 0
-    ), f"Exit code was {result.exit_code}, expected 0. Output: {strip_ansi_codes(result.output)}"
+    assert result.exit_code == 0, f"Exit code was {result.exit_code}, expected 0. Output: {strip_ansi_codes(result.output)}"
 
     # Check if Frame constructor was called
     mock_frame.assert_called_once()
@@ -123,9 +121,7 @@ async def test_cli_run_framer_with_prompt(runner, mocker):
         cli_app, ["run-framer", "--name", "Test Framer", "--prompt", "Test prompt"]
     )
 
-    assert (
-        result.exit_code == 0
-    ), f"Exit code was {result.exit_code}, expected 0. Output: {strip_ansi_codes(str(result.output))}"
+    assert result.exit_code == 0, f"Exit code was {result.exit_code}, expected 0. Output: {strip_ansi_codes(str(result.output))}"
 
     # Ensure the output is a string before formatting
     output = strip_ansi_codes(str(result.output))
