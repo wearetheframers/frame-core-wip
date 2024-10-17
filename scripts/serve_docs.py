@@ -218,9 +218,18 @@ if __name__ == "__main__":
         print("Running pytest and generating coverage report...")
         run_pytest_and_move_coverage()
 
+    if not args.skip_tests:
+        # Run pytest and move coverage HTML
+        print("Running pytest and generating coverage report...")
+        run_pytest_and_move_coverage()
+
     # Clean up and build docs
     print("Cleaning up and building documentation...")
     rebuild_docs()
+
+    # Start mkdocs build
+    print("Building mkdocs documentation...")
+    run_command("mkdocs build --config-file ./mkdocs.yml")
 
     # Start servers
     print("Starting documentation servers...")

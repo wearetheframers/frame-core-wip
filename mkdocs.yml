@@ -60,7 +60,7 @@ nav:
   - CLI: CLI.md
   - Glossary: glossary.md
 docs_dir: ./docs
-site_dir: ./docs/site
+site_dir: ../site
 theme:
   logo: ../frame-logo-no-text-transparent.png
   homepage: 
