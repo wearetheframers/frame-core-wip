@@ -36,14 +36,27 @@ async def main():
     framer.brain.action_registry.add_action("transcribe_audio", at_plugin.transcribe_audio)
     framer.brain.action_registry.add_action("analyze_transcription", at_plugin.analyze_transcription)
 
-    # Simulate audio input
-    print("\nRecording audio... (Press Ctrl+C to stop)")
-    transcription = await at_plugin.record_and_transcribe_audio()
-    print(f"Transcription: {transcription}")
+    print("Select mode:")
+    print("1. Singular Recording")
+    print("2. Continuous Live Recording")
+    choice = input("Enter choice (1 or 2): ")
 
-    # Analyze transcription
-    notes = await at_plugin.analyze_transcription(framer, transcription)
-    print(f"Actionable Notes: {notes}")
+    if choice == "1":
+        # Singular recording
+        print("\nRecording audio... (Press Ctrl+C to stop)")
+        transcription = await at_plugin.record_and_transcribe_audio()
+        print(f"Transcription: {transcription}")
+
+        # Analyze transcription
+        notes = await at_plugin.analyze_transcription(framer, transcription)
+        print(f"Actionable Notes: {notes}")
+
+    elif choice == "2":
+        # Continuous live recording
+        await at_plugin.continuous_record_and_transcribe(framer)
+
+    else:
+        print("Invalid choice. Please restart and select 1 or 2.")
 
     # Clean up
     await framer.close()

@@ -21,3 +21,16 @@ class AudioTranscriptionPlugin:
         notes = f"Analyzed notes from transcription: {transcription}"
         print(f"{framer.config.name}: Analysis completed")
         return notes
+
+    async def continuous_record_and_transcribe(self, framer):
+        print("Starting continuous recording. Press Ctrl+C to stop.")
+        try:
+            while True:
+                transcription = await self.record_and_transcribe_audio()
+                if transcription:
+                    print(f"Transcription: {transcription}")
+                    notes = await self.analyze_transcription(framer, transcription)
+                    print(f"Actionable Notes: {notes}")
+                await asyncio.sleep(1)  # Simulate waiting for the next input
+        except KeyboardInterrupt:
+            print("Continuous recording stopped.")
