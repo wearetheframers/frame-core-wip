@@ -1,7 +1,7 @@
 import pytest
-from frame.src.services.context.execution_context_service import ExecutionContextService
-from frame.src.services.llm.main import LLMService
-from frame.src.framer.soul.soul import Soul
+from frame.src.services import ExecutionContextService
+from frame.src.services import LLMService
+from frame.src.framer.soul import Soul
 
 
 @pytest.fixture

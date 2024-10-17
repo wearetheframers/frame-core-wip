@@ -7,7 +7,7 @@ from frame.src.framer.brain.memory import Memory
 from frame.src.framer.brain.mind import Mind
 from frame.src.framer.brain.perception import Perception
 from frame.src.framed.config import FramedConfig
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 
 
 from unittest.mock import Mock

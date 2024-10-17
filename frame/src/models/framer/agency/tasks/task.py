@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Any, Dict, Optional, List
 from datetime import datetime
 from enum import Enum
+from frame.src.models.framer.agency.priority import Priority
 
 
 class TaskStatus(str, Enum):
@@ -16,7 +17,7 @@ class TaskModel(BaseModel):
     id: str
     workflow_id: str
     description: str
-    priority: float
+    priority: Priority = Field(default=Priority.MEDIUM)
     status: TaskStatus = TaskStatus.PENDING
     result: Optional[Any] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)

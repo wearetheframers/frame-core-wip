@@ -1,5 +1,5 @@
 import pytest
-from frame.src.services.context.shared_context_service import SharedContext
+from frame.src.services import SharedContext
 
 
 def test_shared_context_initialization():

@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from frame.src.framer.agency.actions.generate_roles_and_goals import (
     generate_roles_and_goals,
 )
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 
 
 @pytest.fixture

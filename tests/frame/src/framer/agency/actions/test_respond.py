@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from frame.src.framer.agency.actions.respond import respond
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 
 
 @pytest.fixture

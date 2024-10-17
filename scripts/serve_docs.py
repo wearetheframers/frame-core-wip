@@ -11,6 +11,9 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from roam_links_converter import convert_roam_links
 
+# Set up more detailed logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -219,12 +222,15 @@ class ChangeHandler(FileSystemEventHandler):
 if __name__ == "__main__":
     args = parse_arguments()
 
+    logging.debug("Starting serve_docs.py with arguments: %s", args)
+
     # Run pytest and move coverage HTML if not skipping tests
     if not args.skip_tests:
-        print("Running pytest and generating coverage report...")
+        logging.info("Running pytest and generating coverage report...")
         run_pytest_and_move_coverage()
 
     # Start file watching for live reloading
+    logging.info("Starting file watching process...")
     watch_process = Process(target=watch_for_changes)
     watch_process.start()
 
@@ -243,7 +249,16 @@ if __name__ == "__main__":
 
     # Start mkdocs build
     print("Building mkdocs documentation...")
-    run_command("mkdocs build --config-file ./mkdocs.yml")
+    try:
+        output = run_command("mkdocs build --config-file ./mkdocs.yml")
+        print("MkDocs build output:")
+        print(output)
+        print("MkDocs build completed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"MkDocs build failed: {e}")
+        print("MkDocs build error output:")
+        print(e.output.decode())
+        print("Continuing with serving documentation...")
 
     # Start servers
     print("Starting documentation servers...")
@@ -260,9 +275,8 @@ if __name__ == "__main__":
     print("pdoc3: http://localhost:3011/frame")
 
     try:
-        mkdocs_process.join()
-        pdoc_process.join()
-        watch_process.join()
+        while True:
+            time.sleep(1)
     except KeyboardInterrupt:
         print("Shutting down servers...")
         mkdocs_process.terminate()

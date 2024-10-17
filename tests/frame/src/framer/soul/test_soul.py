@@ -1,6 +1,6 @@
 import pytest
 from frame.src.framer.soul.soul import Soul
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 
 
 @pytest.fixture

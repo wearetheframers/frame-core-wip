@@ -2,7 +2,7 @@ import pytest
 import asyncio
 from frame.cli import FramerTUI
 from textual.app import App
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 
 
 @pytest.mark.asyncio

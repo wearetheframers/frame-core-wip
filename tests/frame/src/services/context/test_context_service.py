@@ -1,5 +1,5 @@
 import pytest
-from frame.src.services.context.context_service import Context
+from frame.src.services import Context
 
 
 def test_context_initialization():

@@ -1,7 +1,7 @@
 import json
 import pytest
 from frame.src.framer.agency.action_registry import ActionRegistry
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 from unittest.mock import Mock
 from frame.src.services.llm.main import LLMService
 

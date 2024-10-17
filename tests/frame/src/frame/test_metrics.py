@@ -1,7 +1,7 @@
 import pytest
 from frame.frame import Frame
 from frame.src.utils.metrics import MetricsManager
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 
 
 @pytest.fixture

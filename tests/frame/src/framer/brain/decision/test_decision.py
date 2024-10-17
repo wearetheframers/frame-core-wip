@@ -2,7 +2,7 @@ import pytest
 from frame.src.framer.brain.decision import Decision
 from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.framer.agency.tasks import TaskStatusModel
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 
 
 def test_decision_initialization():

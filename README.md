@@ -11,8 +11,8 @@ Frame consists of three main components: `Frame`, `Framed`, and `Framer`.
 
 - **Frame**: The main interface for creating and managing Framer instances.
 - **Framer**: Represents an individual AI agent equipped with advanced capabilities for task management, decision-making, and interaction with language models. The Soul, Agency, and ExecutionContextService components are integral to a Framer's flexibility and customization, making it adaptable for a wide range of applications. These components are the primary interfaces through which users will interact with the API. The `halt()` method can be used to stop the Framer from acting, providing control over its activity.
-  - Roles: Framer roles are active by default when created, and multiple roles can be active simultaneously.
-  - Goals: Multiple goals can be active at the same time, guiding the Framer's decision-making process.
+  - Roles: Framer roles are represented by the `Role` class, which includes attributes such as id, name, description, permissions, priority, and status. Multiple roles can be active simultaneously. Roles can have different statuses (ACTIVE, INACTIVE, SUSPENDED) to reflect their current state.
+  - Goals: Goals are represented by the `Goal` class, which includes attributes such as name, description, priority, and status. Multiple goals can be active at the same time, guiding the Framer's decision-making process. Goals can have different statuses (ACTIVE, COMPLETED, ABANDONED) to reflect their current state.
 - **Framed**: A collection of Framer objects working together to achieve complex tasks.
 
 ## Table of Contents
@@ -119,9 +119,9 @@ Frame
     ├── Soul
     │   ├── Emotional State
     │   └── Core Traits
-    ├── Context
+    ├── ExecutionContext
     ├── Observers
-    └── SharedContext
+    └── ActionRegistry
 Framed
 └── Multiple Framers
 LLM Adapters
@@ -132,7 +132,7 @@ Services
 ├── LLMService
 ├── MemoryService
 ├── EQService
-└── ContextService
+└── ExecutionContextService
 ```
 
 ## Usage

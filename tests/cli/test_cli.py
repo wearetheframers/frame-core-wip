@@ -12,7 +12,7 @@ from frame.cli import cli as cli_app
 from frame.frame import Frame
 import re
 from frame.src.framer.agency.agency import Agency
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 
 
 @pytest.fixture
