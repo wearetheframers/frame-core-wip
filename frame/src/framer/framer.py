@@ -1,5 +1,6 @@
 import logging
 import time
+import json
 from typing import List, Dict, Any, Optional, Callable, Union, Tuple
 from frame.src.services.llm.main import LLMService
 from frame.src.framer.config import FramerConfig
@@ -64,8 +65,8 @@ class Framer:
         workflow_manager: WorkflowManager,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
-        roles: Optional[List[Dict[str, Any]]] = None,
-        goals: Optional[List[Dict[str, Any]]] = None,
+        roles: List[Dict[str, Any]] = [],
+        goals: List[Dict[str, Any]] = [],
     ):
         """
         Initialize a Framer instance.
@@ -92,14 +93,14 @@ class Framer:
         self.memory_service = memory_service
         self.eq_service = eq_service
         self._dynamic_model_choice = False
-        self.observers = []
-        self.plugins = {}  # Initialize plugins attribute
+        self.observers: List[Observer] = []
+        self.plugins: Dict[str, Any] = {}  # Initialize plugins attribute
         self.can_execute = True  # Add can_execute attribute
         self.acting = False
 
         # Initialize roles and goals
-        self.roles = roles
-        self.goals = goals
+        self.roles: List[Dict[str, Any]] = roles if roles is not None else []
+        self.goals: List[Dict[str, Any]] = goals if goals is not None else []
         self.act()
 
     @classmethod
@@ -140,7 +141,7 @@ class Framer:
             goals=goals,
         )
 
-        await framer.initialize()
+        await framer.initialize(llm_service=llm_service, memory_service=memory_service, eq_service=eq_service)
         # Notify observers about the Framer being opened
         for observer in framer.observers:
             if hasattr(observer, "on_framer_opened"):
@@ -160,7 +161,6 @@ class Framer:
 
     async def initialize(self):
         """Initialize the Framer with roles and goals."""
-        self.act()  # Start acting after initialization
 
         if not self.roles and not self.goals:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
@@ -171,8 +171,10 @@ class Framer:
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
+        self.act()  # Start acting after initialization
 
-    def export_to_json(self, file_path: str) -> None:
+
+    async def export_to_file(self, file_path: str, llm) -> None:
         """
         Export the Framer configuration to a JSON file.
 
@@ -184,101 +186,13 @@ class Framer:
         Args:
             file_path (str): The path to the file where the JSON will be saved.
         """
-        import json
-
-        with open(file_path, "w") as file:
-            json.dump(
-                {
-                    "config": (
-                        self.config.to_dict()
-                        if hasattr(self.config, "to_dict")
-                        else self.config
-                    ),
-                    "roles": self.roles,
-                    "goals": self.goals,
-                },
-                file,
-                indent=4,
-                default=str,  # Use default=str to handle non-serializable objects
-            )
-
-    def export_to_json(self, file_path: str) -> None:
-        """
-        Export the Framer configuration to a JSON file.
-
-        This method allows the Framer agent to be fully exported into a JSON format,
-        making it portable and easy to use inside a prompt to any other LLM. This
-        portability enables the Framer agents to be shared and consumed by other
-        systems, facilitating interoperability and reuse.
-
-        Args:
-            file_path (str): The path to the file where the JSON will be saved.
-        """
-        import json
-
-        with open(file_path, "w") as file:
-            json.dump(
-                {
-                    "config": (
-                        self.config.to_dict()
-                        if hasattr(self.config, "to_dict")
-                        else self.config
-                    ),
-                    "roles": self.roles,
-                    "goals": self.goals,
-                },
-                file,
-                indent=4,
-                default=str,  # Use default=str to handle non-serializable objects
-            )
-
-    @classmethod
-    def load_from_file(
-        cls,
-        file_path: str,
-        llm_service: LLMService,
-        memory_service: Optional[MemoryService] = None,
-        eq_service: Optional[EQService] = None,
-    ) -> "Framer":
-        """
-        Load a Framer configuration from a file.
-
-        This method allows importing a Framer agent from a JSON or markdown file,
-        enabling the reconstruction of the agent's state and configuration. This
-        functionality is crucial for restoring Framer agents from saved states,
-        ensuring continuity and consistency across different sessions or environments.
-
-        Args:
-            file_path (str): The path to the configuration file.
-            llm_service (LLMService): Language model service.
-            memory_service (Optional[MemoryService]): Memory service for the Framer.
-            eq_service (Optional[EQService]): Emotional intelligence service for the Framer.
-
-        Returns:
-            Framer: A new Framer instance configured from the file.
-        """
-        # Parse the configuration from the file
-        config = parse_json_config(file_path)
-
-        # Create a new Framer instance with the parsed configuration
-        return cls(
-            config=config,
-            llm_service=llm_service,
-            agency=Agency(llm_service=llm_service, context=None),
-            brain=Brain(
-                llm_service=llm_service,
-                default_model=config.default_model,
-                roles=config.roles,
-                goals=config.goals,
-                soul=Soul(seed=config.soul_seed),
-            ),
-            soul=Soul(seed=config.soul_seed),
-            workflow_manager=WorkflowManager(),
-            memory_service=memory_service,
-            eq_service=eq_service,
-            roles=config.roles,
-            goals=config.goals,
-        )
+        config = self.config
+        config.soul_seed = self.soul.seed
+        config.roles = self.roles
+        config.goals = self.goals
+        config_dict = config.to_dict()
+        with open(file_path, "w") as f:
+            json.dump(config_dict, f, indent=4)
 
     @classmethod
     def load_from_file(
@@ -313,93 +227,16 @@ class Framer:
             brain=Brain(
                 llm_service=llm_service,
                 default_model=config.default_model,
-                roles=config.roles,
-                goals=config.goals,
+                roles=config.roles if config.roles is not None else [],
+                goals=config.goals if config.goals is not None else [],
                 soul=Soul(seed=config.soul_seed),
             ),
             soul=Soul(seed=config.soul_seed),
             workflow_manager=WorkflowManager(),
             memory_service=memory_service,
             eq_service=eq_service,
-            roles=config.roles,
-            goals=config.goals,
-        )
-        """
-        Export the Framer configuration to a JSON file.
-
-        This method allows the Framer agent to be fully exported into a JSON format,
-        making it portable and easy to use inside a prompt to any other LLM. This
-        portability enables the Framer agents to be shared and consumed by other
-        systems, facilitating interoperability and reuse.
-
-        Args:
-            file_path (str): The path to the file where the JSON will be saved.
-        """
-        import json
-
-        config = parse_json_config(file_path)
-        return cls(
-            config=config,
-            llm_service=llm_service,
-            agency=Agency(llm_service=llm_service, context=None),
-            brain=Brain(
-                llm_service=llm_service,
-                default_model=config.default_model,
-                roles=config.roles,
-                goals=config.goals,
-                soul=Soul(seed=config.soul_seed),
-            ),
-            soul=Soul(seed=config.soul_seed),
-            workflow_manager=WorkflowManager(),
-            memory_service=memory_service,
-            eq_service=eq_service,
-            roles=config.roles,
-            goals=config.goals,
-        )
-
-    @classmethod
-    def load_from_file(
-        cls,
-        file_path: str,
-        llm_service: LLMService,
-        memory_service: Optional[MemoryService] = None,
-        eq_service: Optional[EQService] = None,
-    ) -> "Framer":
-        """
-        Load a Framer configuration from a file.
-
-        This method allows importing a Framer agent from a JSON or markdown file,
-        enabling the reconstruction of the agent's state and configuration. This
-        functionality is crucial for restoring Framer agents from saved states,
-        ensuring continuity and consistency across different sessions or environments.
-
-        Args:
-            file_path (str): The path to the configuration file.
-            llm_service (LLMService): Language model service.
-            memory_service (Optional[MemoryService]): Memory service for the Framer.
-            eq_service (Optional[EQService]): Emotional intelligence service for the Framer.
-
-        Returns:
-            Framer: A new Framer instance configured from the file.
-        """
-        config = parse_json_config(file_path)
-        return cls(
-            config=config,
-            llm_service=llm_service,
-            agency=Agency(llm_service=llm_service, context=None),
-            brain=Brain(
-                llm_service=llm_service,
-                default_model=config.default_model,
-                roles=config.roles,
-                goals=config.goals,
-                soul=Soul(seed=config.soul_seed),
-            ),
-            soul=Soul(seed=config.soul_seed),
-            workflow_manager=WorkflowManager(),
-            memory_service=memory_service,
-            eq_service=eq_service,
-            roles=config.roles,
-            goals=config.goals,
+            roles=config.roles if config.roles is not None else [],
+            goals=config.goals if config.goals is not None else [],
         )
 
     def export_to_markdown(self, file_path: str) -> None:
@@ -437,7 +274,7 @@ class Framer:
             task_filtered["workflow_id"] = "default"
 
         task_obj = Task(**task_filtered)
-        result = await self.agency.perform_task(task_obj)
+        result = await self.perform_task(task_obj.to_dict())
         return result if result is not None else {"output": "No result returned"}
 
     async def sense(self, perception: Any) -> Decision:
@@ -455,7 +292,7 @@ class Framer:
             return Decision(
                 action="error", parameters={}, reasoning="Framer is halted."
             )
-            perception = Perception.from_dict(perception)
+        perception = Perception.from_dict(perception)
         decision = await self.brain.process_perception(
             perception, self.agency.get_goals()
         )
@@ -463,7 +300,7 @@ class Framer:
             await self.brain.execute_decision(decision)
         logger.debug(f"Processed perception: {perception}, Decision: {decision}")
         self.notify_observers(decision)
-        return decision
+        return decision.to_dict()
 
     def add_observer(self, observer: Observer) -> None:
         """
@@ -510,12 +347,12 @@ class Framer:
         """
         # Close all workflows
         for workflow in self.workflow_manager.workflows.values():
-            workflow.set_final_task(None)  # Clear final tasks
+            workflow.set_final_task(Task(description="Final Task"))  # Set a default final task
             for task in workflow.tasks:
                 task.update_status(TaskStatus.COMPLETED)  # Mark tasks as completed
 
         # Clear memory
-        if self.memory_service:
+        if self.memory_service and hasattr(self.memory_service, "clear"):
             self.memory_service.clear()
 
         # Notify observers and plugins about closure and opening
