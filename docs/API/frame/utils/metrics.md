@@ -1,5 +1,10 @@
 # Metrics
 
+::: frame.src.utils.metrics
+    options:
+      show_root_heading: false
+      show_source: false
+
 ## Overview
 
 The `Metrics` module provides functionality for tracking and managing metrics related to the usage of language models and other components within the Frame framework. It includes classes and methods for updating, retrieving, and resetting metrics.
