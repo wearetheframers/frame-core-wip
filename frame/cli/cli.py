@@ -431,16 +431,13 @@ async def run_async(
         else:
             raise click.UsageError("Either prompt or perception must be provided.")
 
-        if isinstance(perception_data, dict):
-            if "data" in perception_data:
-                perception = Perception.from_dict(perception_data)
-            else:
-                logger.error("Perception data is missing the 'data' key.")
-                raise ValueError(
-                    "Perception data must include a 'data' key with a dictionary value."
-                )
+        if isinstance(perception_data, dict) and "data" in perception_data:
+            perception = Perception.from_dict(perception_data)
         else:
-            perception = perception_data
+            logger.error("Perception data is missing the 'data' key or is not a dictionary.")
+            raise ValueError(
+                "Perception data must be a dictionary and include a 'data' key with a dictionary value."
+            )
         decision = await framer.sense(perception)
         if decision:
             # Log the summary
