@@ -79,7 +79,7 @@ class Frame:
         Returns:
             Framer: A new Framer instance, fully configured and ready to use.
         """
-        framer_builder = FramerBuilder(config, self.llm_service, roles=kwargs.get('roles'), goals=kwargs.get('goals'))
+        framer_builder = FramerBuilder(config, self.llm_service)
         return await framer_builder.build()
 
     def load_framer_from_file(self, file_path: str) -> Framer:
