@@ -23,7 +23,7 @@ def action_registry():
 @pytest.mark.asyncio
 async def test_register_and_perform_action(action_registry):
     async def test_action(execution_context, arg1, arg2):
-        return f"Test action performed with {arg1} and {arg2}"
+        return f"Test action performed with {arg1} and {arg2}", execution_context
 
     action_registry.register_action(
         "test_action", test_action, "Test action description", 8
@@ -90,7 +90,7 @@ async def test_perform_nonexistent_action(action_registry):
 @pytest.mark.asyncio
 async def test_action_with_callback(action_registry):
     async def test_action(execution_context):
-        return "Action result"
+        return "Action result", execution_context
 
     callback_result = None
 

@@ -28,6 +28,7 @@ class TestFramerIO(unittest.TestCase):
         )
         framer.export_to_json("dummy_path")
         mock_open.assert_called_once_with("dummy_path", "w")
+        mock_open().write.assert_called_once()
         mock_json_dump.assert_called_once()
 
     @patch("builtins.open", new_callable=unittest.mock.mock_open)

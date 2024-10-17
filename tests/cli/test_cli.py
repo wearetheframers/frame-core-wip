@@ -45,7 +45,7 @@ def test_cli_run_framer_command(runner, mocker):
         "frame.src.services.llm.main.LLMService", autospec=True
     )
     mock_llm_service.return_value.get_completion = AsyncMock()
-    mock_llm_service.return_value.get_completion.return_value = asyncio.Future()
+    mock_llm_service.return_value.get_completion.return_value = await asyncio.Future()
     mock_llm_service.return_value.get_completion.return_value.set_result(json.dumps({
         "action": "think",
         "parameters": {"thought": "Test thought"},
@@ -110,7 +110,7 @@ def test_cli_run_framer_with_prompt(runner, mocker):
     mock_frame = mocker.patch("frame.frame.Frame", autospec=True)
     mock_frame_instance = mock_frame.return_value
     mock_frame_instance.llm_service = mocker.Mock(spec=LLMService)
-    mock_frame_instance.llm_service.get_completion.return_value = asyncio.Future(loop=asyncio.get_event_loop())
+    mock_frame_instance.llm_service.get_completion.return_value = await asyncio.Future()
     mock_frame_instance.llm_service.get_completion.return_value.set_result('{"action": "think", "parameters": {"thought": "Test thought"}, "reasoning": "Test reasoning", "confidence": 0.9, "priority": 5}')
     mock_execute_framer.return_value = {"result": "success"}
     mock_click_echo = mocker.patch("frame.cli.cli.click.echo")
