@@ -44,8 +44,8 @@ class FramerConfig(BaseModel):
     llm_frequency_penalty: Optional[float] = 0.0
     llm_presence_penalty: Optional[float] = 0.0
     is_multi_modal: Optional[bool] = False
-    roles: Optional[List[Dict[str, str]]] = []
-    goals: Optional[List[Dict[str, Any]]] = []
+    roles: Optional[List[Dict[str, Any]]] = None
+    goals: Optional[List[Dict[str, Any]]] = None
     recent_memories_limit: Optional[int] = 5
 
     def __init__(self, **data):

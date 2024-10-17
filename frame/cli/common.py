@@ -133,7 +133,7 @@ async def setup_framer(
         description=description,
         default_model=model.lower(),
     )
-    framer_factory = FramerFactory(config, frame.llm_service)
+    framer_factory = FramerFactory(config, frame.llm_service, roles=roles, goals=goals)
     framer = await framer_factory.create_framer()
     logger.debug(f"Framer brain after build: {framer.brain}")
 

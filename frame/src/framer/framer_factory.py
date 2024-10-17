@@ -52,10 +52,12 @@ class FramerFactory:
         self.llm_service = llm_service
         self.plugins: Dict[str, Any] = {}
 
-    async def create_framer(
+    async def create_framer(self,
         self,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
+        roles: Optional[List[Dict[str, Any]]] = None,
+        goals: Optional[List[Dict[str, Any]]] = None,
     ) -> Framer:
         execution_context = ExecutionContext(llm_service=self.llm_service)
         agency = Agency(
@@ -65,7 +67,8 @@ class FramerFactory:
         )
         # Initialize the Agency component
         # Generate roles and goals. The Framer must be acting to respond to perceptions.
-        roles, goals = await agency.generate_roles_and_goals()
+        if roles is None or goals is None:
+            roles, goals = await agency.generate_roles_and_goals()
 
         execution_context = ExecutionContext(llm_service=self.llm_service)
         brain = Brain(

@@ -403,7 +403,7 @@ async def run_async(
         description=description,
         default_model=model,
     )
-    framer_factory = FramerFactory(config, frame.llm_service)
+    framer_factory = FramerFactory(config, frame.llm_service, roles=roles, goals=goals)
     framer = await framer_factory.create_framer()
     context = Context()  # Create a new Context
     framer.agency = Agency(

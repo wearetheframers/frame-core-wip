@@ -51,8 +51,8 @@ class Agency:
         self.execution_context = execution_context or ExecutionContext(
             llm_service=llm_service
         )
-        self.roles = roles if roles is not None else []
-        self.goals = goals if goals is not None else []
+        self.roles = roles or []
+        self.goals = goals or []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, "default_model", DEFAULT_MODEL)
