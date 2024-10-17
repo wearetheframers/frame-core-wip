@@ -247,7 +247,7 @@ setting the default model and generating completions with retry logic.</p>
         if not self.token_bucket.consume(1):
             await asyncio.sleep(1)  # Wait for a token to become available
 
-        if self.mistral_client is None:
+        if self.mistral_client is None and model_name.startswith(&#34;mistral&#34;):
             raise ValueError(&#34;Mistral client is not initialized&#34;)
         try:
             lmql_prompt = f&#34;&#34;&#34;

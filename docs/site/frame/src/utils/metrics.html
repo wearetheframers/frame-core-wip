@@ -52,7 +52,7 @@ hljs.highlightAll();
             self._total_cost = 0.0
             self._initialized = True
 
-    def update_metrics(self, model: str, calls: int, cost: float):
+    def update_metrics(self, model: str, calls: int = 1, cost: float = 0.0):
         self._metrics[model][&#34;calls&#34;] += calls
         self._metrics[model][&#34;cost&#34;] += cost
         self._total_calls += calls
@@ -94,7 +94,7 @@ hljs.highlightAll();
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.utils.metrics.MetricsManager.update_metrics"><code class="name flex">
-<span>def <span class="ident">update_metrics</span></span>(<span>self, model: str, calls: int, cost: float)</span>
+<span>def <span class="ident">update_metrics</span></span>(<span>self, model: str, calls: int = 1, cost: float = 0.0)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>

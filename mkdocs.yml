@@ -52,6 +52,7 @@ nav:
           - Log Manager: API/frame/utils/log_manager.md
           - ID Generator: API/frame/utils/id_generator.md
           - LLM Utils: API/frame/utils/llm_utils.md
+          - Metrics: API/frame/utils/metrics.md
   - Usage / Quick Start Guide:
     - Basic: Usage/basic/basic_usage.md
     - Testing: Usage/testing/testing.md
