@@ -1,5 +1,5 @@
 from frame.src.models.framer.brain.mind.perception import Perception as PerceptionModel
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 from datetime import datetime
 
 
@@ -27,9 +27,11 @@ class Perception(PerceptionModel):
         }
 
     @classmethod
-    def from_dict(cls, perception_dict: Any) -> "Perception":
-        if not isinstance(perception_dict, dict):
-            raise TypeError("perception_dict must be a dictionary")
+    def from_dict(cls, perception_dict: Union[Dict[str, Any], str]) -> "Perception":
+        if isinstance(perception_dict, str):
+            return cls(type="hearing", data={"text": perception_dict})
+        elif not isinstance(perception_dict, dict):
+            raise TypeError("perception_dict must be a dictionary or a string")
 
         timestamp = perception_dict.get("timestamp")
         if isinstance(timestamp, str):

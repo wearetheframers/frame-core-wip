@@ -286,12 +286,12 @@ class Framer:
         result = await self.perform_task(task_obj.to_dict())
         return result if result is not None else {"output": "No result returned"}
 
-    async def sense(self, perception: Any) -> Decision:
+    async def sense(self, perception: Union[Perception, Dict[str, Any]]) -> Decision:
         """
         Process a perception and make a decision.
 
         Args:
-            perception (Any): The perception to process, can be a Perception object or a dictionary.
+            perception (Union[Perception, Dict[str, Any]]): The perception to process, can be a Perception object or a dictionary.
 
         Returns:
             Decision: The decision made based on the perception.
@@ -301,7 +301,9 @@ class Framer:
             return Decision(
                 action="error", parameters={}, reasoning="Framer is halted."
             )
-        perception = Perception.from_dict(perception)
+        # Convert perception to Perception object if it is a dictionary
+        if isinstance(perception, dict):
+            perception = Perception.from_dict(perception)
         current_goals = self.agency.get_goals()
         decision = await self.brain.process_perception(perception, current_goals)
         
@@ -314,7 +316,7 @@ class Framer:
             await self.brain.execute_decision(decision)
         logger.debug(f"Processed perception: {perception}, Decision: {decision}")
         self.notify_observers(decision)
-        return decision.to_dict()
+        return decision  # Return the Decision object directly
 
     async def prompt(self, text: str) -> Decision:
         """
@@ -363,12 +365,12 @@ class Framer:
             if hasattr(plugin, "on_decision_made"):
                 plugin.on_decision_made(decision)
 
-    async def generate_tasks_from_perception(self, perception: Perception, max_len: Optional[int] = None) -> List[Task]:
+    async def generate_tasks_from_perception(self, perception: Union[Perception, Dict[str, Any]], max_len: Optional[int] = None) -> List[Task]:
         """
         Generate tasks based on the given perception.
 
         Args:
-            perception (Perception): The perception to generate tasks from.
+            perception (Union[Perception, Dict[str, Any]]): The perception to generate tasks from.
             max_len (Optional[int]): Maximum number of tasks to generate. If None, no limit is applied.
 
         Returns:
@@ -376,11 +378,14 @@ class Framer:
         """
         tasks = []
         
+        # Convert dictionary to Perception object if necessary
+        if isinstance(perception, dict):
+            perception = Perception.from_dict(perception)
+        
         # Example: Create a task to process the perception
         task = Task(
             description=f"Process perception of type: {perception.type}",
-            workflow_id="perception_processing",
-            status=TaskStatus.PENDING
+            workflow_id="perception_processing"
         )
         tasks.append(task)
 

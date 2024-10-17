@@ -3,6 +3,8 @@ from pydantic import Field
 from typing import Dict, Any, Optional, Union, List
 from frame.src.models.framer.brain.decision.decision import Decision as DecisionModel
 from frame.src.models.framer.agency.tasks.task import TaskStatus
+from frame.src.models.framer.agency.roles import Role
+from frame.src.models.framer.agency.goals import Goal
 
 
 class Decision(DecisionModel):
@@ -19,7 +21,9 @@ class Decision(DecisionModel):
         confidence (float): The confidence level of the decision.
         priority (int): The priority of the decision.
         expected_results (Optional[Any]): The expected results of the decision.
-        task_status (TaskStatusModel): The status of the associated task.
+        task_status (TaskStatus): The status of the associated task.
+        related_roles (List[Role]): Roles related to this decision.
+        related_goals (List[Goal]): Goals related to this decision.
     """
 
     expected_results: List[Any] = Field(
@@ -27,6 +31,12 @@ class Decision(DecisionModel):
     )
     task_status: TaskStatus = Field(
         default=TaskStatus.PENDING, description="Status of the associated task"
+    )
+    related_roles: List[Role] = Field(
+        default_factory=list, description="Roles related to this decision"
+    )
+    related_goals: List[Goal] = Field(
+        default_factory=list, description="Goals related to this decision"
     )
 
     @classmethod
@@ -60,6 +70,8 @@ class Decision(DecisionModel):
             "priority": self.priority,
             "expected_results": self.expected_results,
             "task_status": self.task_status.value,
+            "related_roles": [role.to_dict() if hasattr(role, 'to_dict') else str(role) for role in self.related_roles],
+            "related_goals": [goal.dict() if hasattr(goal, 'dict') else str(goal) for goal in self.related_goals],
         }
 
     @classmethod
@@ -72,6 +84,8 @@ class Decision(DecisionModel):
         priority: int = 5,
         expected_results: Optional[Any] = None,
         task_status: TaskStatus = TaskStatus.PENDING,
+        related_roles: List[Role] = None,
+        related_goals: List[Goal] = None,
     ) -> "Decision":
         """
         Create a new Decision instance with the given parameters.
@@ -83,7 +97,9 @@ class Decision(DecisionModel):
             confidence (float, optional): The confidence level of the decision. Defaults to 0.7.
             priority (int, optional): The priority of the decision on a scale from 1 (lowest) to 10 (highest). Defaults to 5.
             expected_results (Optional[Any], optional): The expected results of the decision. Defaults to None.
-            task_status (TaskStatusModel, optional): The status of the associated task. Defaults to PENDING.
+            task_status (TaskStatus, optional): The status of the associated task. Defaults to PENDING.
+            related_roles (List[Role], optional): Roles related to this decision. Defaults to None.
+            related_goals (List[Goal], optional): Goals related to this decision. Defaults to None.
 
         Returns:
             Decision: A new Decision instance.
@@ -96,6 +112,8 @@ class Decision(DecisionModel):
             priority=priority,
             expected_results=expected_results,
             task_status=task_status,
+            related_roles=related_roles or [],
+            related_goals=related_goals or [],
         )
 
     def update_status(self, new_status: TaskStatus) -> None:
@@ -103,7 +121,7 @@ class Decision(DecisionModel):
         Update the task status of the decision.
 
         Args:
-            new_status (TaskStatusModel): The new status to set.
+            new_status (TaskStatus): The new status to set.
         """
         self.task_status = new_status
 
@@ -118,7 +136,9 @@ class Decision(DecisionModel):
             f"Decision(action={self.action}, "
             f"confidence={self.confidence:.2f}, "
             f"priority={self.priority}, "
-            f"task_status={self.task_status.value})"
+            f"task_status={self.task_status.value}, "
+            f"related_roles={len(self.related_roles)}, "
+            f"related_goals={len(self.related_goals)})"
         )
 
     async def execute(self, action_registry: Any) -> Dict[str, Any]:
@@ -140,3 +160,41 @@ class Decision(DecisionModel):
             return {"result": result, "error": None}
         except Exception as e:
             return {"result": None, "error": str(e)}
+
+    def add_related_role(self, role: Role) -> None:
+        """
+        Add a related role to the decision.
+
+        Args:
+            role (Role): The role to add to the related roles.
+        """
+        if role not in self.related_roles:
+            self.related_roles.append(role)
+
+    def add_related_goal(self, goal: Goal) -> None:
+        """
+        Add a related goal to the decision.
+
+        Args:
+            goal (Goal): The goal to add to the related goals.
+        """
+        if goal not in self.related_goals:
+            self.related_goals.append(goal)
+
+    def remove_related_role(self, role_id: str) -> None:
+        """
+        Remove a related role from the decision.
+
+        Args:
+            role_id (str): The ID of the role to remove from the related roles.
+        """
+        self.related_roles = [role for role in self.related_roles if role.id != role_id]
+
+    def remove_related_goal(self, goal_name: str) -> None:
+        """
+        Remove a related goal from the decision.
+
+        Args:
+            goal_name (str): The name of the goal to remove from the related goals.
+        """
+        self.related_goals = [goal for goal in self.related_goals if goal.name != goal_name]

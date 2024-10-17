@@ -4,7 +4,7 @@ import ast
 import time
 import asyncio
 import re
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 from frame.src.framer.agency import Agency
 from frame.src.framer.brain.perception import Perception
 from frame.src.framer.agency import ActionRegistry
@@ -18,6 +18,10 @@ from frame.src.services.llm.llm_adapters.lmql.lmql_adapter import LMQLConfig
 from frame.src.framer.soul.soul import Soul
 from frame.src.services import ExecutionContext
 from frame.src.framer.soul.soul import Soul
+from frame.src.models.framer.agency.roles import Role
+from frame.src.models.framer.agency.goals import Goal, GoalStatus
+from frame.src.models.framer.agency.roles import RoleStatus
+from frame.src.models.framer.agency.priority import Priority
 
 logger = logging.getLogger(__name__)
 
@@ -164,25 +168,25 @@ class Brain:
                 "priority": 1,
             }
 
-    def set_roles(self, roles: List[Dict[str, Any]]) -> None:
+    def set_roles(self, roles: List[Role]) -> None:
         """
         Set the roles for the Agency.
 
         Args:
-            roles (List[Dict[str, Any]]): List of role dictionaries to set.
+            roles (List[Role]): List of Role objects to set.
         """
         self.roles = roles
         self.agency.set_roles(roles)
 
     async def process_perception(
-        self, perception: Perception, goals: Optional[List[Dict[str, Any]]] = None
+        self, perception: Union[Perception, Dict[str, Any]], goals: Optional[List[Goal]] = None
     ) -> Decision:
         """
         Process a perception and make a decision based on it.
 
         Args:
-            perception (Perception): The perception to process.
-            goals (Optional[List[Dict[str, Any]]]): List of goal dictionaries to set.
+            perception (Union[Perception, Dict[str, Any]]): The perception to process.
+            goals (Optional[List[Goal]]): List of Goal objects to set.
 
         Returns:
             Decision: The decision made based on the perception.
@@ -190,6 +194,10 @@ class Brain:
         if goals is not None:
             self.goals = goals
             self.agency.set_goals(goals)
+
+        # Convert perception to Perception object if it is a dictionary
+        if isinstance(perception, dict):
+            perception = Perception.from_dict(perception)
 
         self.mind.perceptions.append(perception)
         decision = await self.make_decision(perception)
@@ -207,7 +215,7 @@ class Brain:
         Returns:
             Decision: The decision made based on the current state and perception,
                       including the action to take, parameters, reasoning, confidence,
-                      and priority (1-10 scale).
+                      and priority.
         """
         if perception is None:
             return Decision(action="no_action", reasoning="No perception provided")
@@ -250,17 +258,109 @@ class Brain:
             _, self.agency.goals = await self.agency.generate_roles_and_goals()
 
         # Consider role and goal priorities when setting decision priority
-        roles_priority = max([role.get('priority', 5) for role in self.roles], default=5)
-        goals_priority = max([goal.get('priority', 5) for goal in self.goals], default=5)
-        decision_priority = max(roles_priority, goals_priority, int(decision_data.get("priority", 5)))
+        active_roles = [role for role in self.roles if role.status == RoleStatus.ACTIVE]
+        active_goals = [goal for goal in self.goals if goal.status == GoalStatus.ACTIVE]
+        roles_priority = max([role.priority for role in active_roles], default=Priority.MEDIUM)
+        goals_priority = max([goal.priority for goal in active_goals], default=Priority.MEDIUM)
+        decision_priority = Priority.from_value(decision_data.get("priority", "MEDIUM"))
+        final_priority = max(decision_priority, roles_priority, goals_priority)
 
         return Decision(
             action=action,
             parameters=parameters,
             reasoning=reasoning,
             confidence=float(decision_data.get("confidence", 0.5)),
-            priority=decision_priority,
+            priority=final_priority,
+            related_roles=[role for role in active_roles if role.priority >= final_priority],
+            related_goals=[goal for goal in active_goals if goal.priority >= final_priority],
         )
+
+    async def _get_decision_prompt(self, perception: Optional[Perception]) -> str:
+        """
+        Generate a decision prompt based on the current perception and context.
+
+        Args:
+            perception (Optional[Perception]): The current perception.
+
+        Returns:
+            str: The generated decision prompt.
+        """
+        valid_actions = [
+            action.lower() for action in self.action_registry.actions.keys()
+        ]
+        action_descriptions = "\n".join(
+            [
+                f"- {name.lower()}: {info['description']}"
+                for name, info in self.action_registry.actions.items()
+            ]
+        )
+
+        active_roles = [
+            f"{role.name} (Priority: {role.priority.name}, Status: {role.status.name})"
+            for role in self.roles if role.status == RoleStatus.ACTIVE
+        ]
+        active_goals = [
+            f"{goal.name} (Priority: {goal.priority.name}, Status: {goal.status.name})"
+            for goal in self.goals if goal.status == GoalStatus.ACTIVE
+        ]
+
+        prompt = f"""Given the following perception and context, decide on the most appropriate action to take.
+        Perception: {perception}
+        
+        Current active roles:
+        {json.dumps(active_roles, indent=2)}
+        
+        Current active goals:
+        {json.dumps(active_goals, indent=2)}
+
+        Consider the following possible actions:
+        {action_descriptions}
+
+        Valid actions are:
+        {json.dumps({action.lower(): self.action_registry.actions[action]['description'] for action in self.action_registry.actions}, indent=2)}
+
+        For each perception, carefully evaluate:
+        - The type and content of the perception
+        - The urgency and importance of the information
+        - The current active goals and roles of the system, considering their priorities and statuses
+        - Whether immediate action, further research, or no action is most appropriate
+
+        Priority levels:
+        {json.dumps({p.name: p.value for p in Priority}, indent=2)}
+
+        Respond with a JSON object containing the following fields:
+        - action: The action to take (must be EXACTLY one of the valid action names listed above)
+        - parameters: Any relevant parameters for the action (e.g., new roles, goals, tasks, research topic, or response content)
+        - reasoning: Your reasoning for this decision, including how it aligns with current roles and goals
+        - confidence: A float between 0 and 1 indicating your confidence in this decision
+        - priority: A string representing the priority level (e.g., "MEDIUM", "HIGH", etc.) based on the urgency and importance of the action
+        - related_roles: A list of role names that are most relevant to this decision
+        - related_goals: A list of goal names that are most relevant to this decision
+
+        Ensure your decision is well-reasoned, aligns with the current active goals and roles (considering their priorities), and uses only the valid actions provided.
+        Use the provided priority levels when assigning priority to your decision, taking into account the priorities of related roles and goals.
+        """
+
+        valid_actions = list(self.action_registry.actions.keys())
+        response = await self.llm_service.get_completion(
+            prompt,
+            model=self.default_model,
+            additional_context={"valid_actions": valid_actions},
+            expected_output=f"""
+            {{
+                "action": str where str in {valid_actions},
+                "parameters": dict,
+                "reasoning": str,
+                "confidence": float where 0 <= float <= 1,
+                "priority": str,
+                "related_roles": list,
+                "related_goals": list
+            }}
+            """,
+        )
+        logger.debug(f"Raw LLM response: {response}")
+
+        return response
 
     async def execute_decision(self, decision: Decision):
         """
@@ -431,14 +531,18 @@ class Brain:
         - The current goals and roles of the system
         - Whether immediate action, further research, or no action is most appropriate
 
+        Priority levels:
+        {json.dumps({p.name: p.value for p in Priority}, indent=2)}
+
         Respond with a JSON object containing the following fields:
         - action: The action to take (must be EXACTLY one of the valid action names listed above)
         - parameters: Any relevant parameters for the action (e.g., new roles, goals, tasks, research topic, or response content)
         - reasoning: Your reasoning for this decision
         - confidence: A float between 0 and 1 indicating your confidence in this decision
-        - priority: A number between 1-10 indicating the priority of this decision
+        - priority: A string representing the priority level (e.g., "MEDIUM", "HIGH", etc.)
 
         Ensure your decision is well-reasoned, aligns with the current goals and roles, and uses only the valid actions provided.
+        Use the provided priority levels when assigning priority to your decision.
         """
 
         valid_actions = list(self.action_registry.actions.keys())

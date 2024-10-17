@@ -1,12 +1,15 @@
 from typing import List, Dict, Any, Optional, Tuple, Union
 from frame.src.constants.models import DEFAULT_MODEL
+from frame.src.models.framer.agency.priority import Priority
 from frame.src.framer.agency.tasks.task import Task, TaskStatus
 from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services import LLMService
 from frame.src.services import ExecutionContext
 from frame.src.framer.agency.action_registry import ActionRegistry
-from frame.src.models.framer.agency.roles import Roles, Role
-from frame.src.models.framer.agency.goals import Goals, Goal
+from frame.src.framer.agency.roles import Role, Roles, RoleStatus
+from frame.src.framer.agency.goals import Goal, Goals, GoalStatus
+from frame.src.models.framer.agency.roles import Role as RoleModel, RoleStatus as RoleStatusModel
+from frame.src.models.framer.agency.goals import Goal as GoalModel, GoalStatus as GoalStatusModel
 import json
 import logging
 import time
@@ -24,8 +27,8 @@ class Agency:
 
     Attributes:
         execution_context (ExecutionContext): The execution context containing necessary services.
-        roles (List[Dict[str, Any]]): List of roles assigned to the Agency.
-        goals (List[Dict[str, Any]]): List of goals for the Agency.
+        roles (Roles): Roles assigned to the Agency.
+        goals (Goals): Goals for the Agency.
         workflow_manager (WorkflowManager): Manages workflows and tasks.
     """
 
@@ -34,8 +37,8 @@ class Agency:
         llm_service: LLMService,
         context: Optional[Dict[str, Any]] = None,
         execution_context: Optional[ExecutionContext] = None,
-        roles: Optional[List[Dict[str, Any]]] = None,
-        goals: Optional[List[Dict[str, Any]]] = None,
+        roles: Optional[List[Role]] = None,
+        goals: Optional[List[Goal]] = None,
     ):
         """
         Initialize an Agency instance.
@@ -44,79 +47,88 @@ class Agency:
             llm_service (LLMService): The language model service.
             context (Optional[Dict[str, Any]]): Additional context for the Agency. Defaults to None.
             execution_context (Optional[ExecutionContext]): The execution context for the Agency. Defaults to None.
-            roles (Optional[List[Dict[str, Any]]]): Initial roles for the Agency. Defaults to None.
-            goals (Optional[List[Dict[str, Any]]]): Initial goals for the Agency. Defaults to None.
+            roles (Optional[List[RoleModel]]): Initial roles for the Agency. Defaults to None.
+            goals (Optional[List[GoalModel]]): Initial goals for the Agency. Defaults to None.
         """
         self.llm_service = llm_service
         self.context = context or {}
         self.execution_context = execution_context or ExecutionContext(
             llm_service=llm_service
         )
-        self.roles = roles or []
-        self.goals = goals or []
+        self.roles = Roles()
+        self.goals = Goals()
+        if roles:
+            for role in roles:
+                self.roles.add_role(role)
+        if goals:
+            for goal in goals:
+                self.goals.add_goal(goal)
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, "default_model", DEFAULT_MODEL)
         self.action_registry = ActionRegistry(self.execution_context)
 
-    def add_role(self, role: Dict[str, Any]) -> None:
+    def add_role(self, role: Role) -> None:
         """
         Add a new role to the Agency.
 
         Args:
-            role (Dict[str, Any]): The role to be added.
+            role (RoleModel): The role to be added.
         """
-        self.roles.append(role)
+        self.roles.add_role(role)
 
-    def set_roles(self, roles: Optional[List[Dict[str, Any]]] = None) -> None:
+    def set_roles(self, roles: Optional[List[Role]] = None) -> None:
         """
         Set the roles for the Agency.
 
         Args:
-            roles (Optional[List[Dict[str, Any]]]): List of role dictionaries.
+            roles (Optional[List[RoleModel]]): List of Role objects.
         """
-        self.roles = roles if roles is not None else []
+        self.roles.clear_roles()
+        if roles:
+            for role in roles:
+                self.roles.add_role(role)
 
-    def set_goals(self, goals: Optional[List[Dict[str, Any]]] = None):
+    def set_goals(self, goals: Optional[List[Goal]] = None) -> None:
         """
         Set the goals for the Agency.
 
         Args:
-            goals (Optional[List[Dict[str, Any]]]): List of goal dictionaries.
+            goals (Optional[List[GoalModel]]): List of Goal objects.
         """
-        self.goals = goals if goals is not None else []
+        self.goals.goal_list = goals if goals is not None else []
 
-    def add_goal(self, goal: Dict[str, Any]) -> None:
+    def add_goal(self, goal: Goal) -> None:
         """
         Add a new goal to the Agency.
 
         Args:
-            goal (Dict[str, Any]): The goal to be added.
+            goal (GoalModel): The goal to be added.
         """
-        self.goals.append(goal)
+        self.goals.add_goal(goal)
 
-    def get_roles(self) -> List[Dict[str, Any]]:
+    def get_roles(self) -> List[Role]:
         """
         Get all roles of the Agency.
 
         Returns:
-            List[Dict[str, Any]]: List of all roles.
+            List[RoleModel]: List of all roles.
         """
-        return self.roles
+        return self.roles.get_roles()
 
-    def get_goals(self) -> List[Dict[str, Any]]:
+    def get_goals(self) -> List[Goal]:
         """
         Get all goals of the Agency.
 
         Returns:
-            List[Dict[str, Any]]: List of all goals.
+            List[GoalModel]: List of all goals.
         """
-        return self.goals
+        return self.goals.goal_list
 
     def create_task(
         self,
         description: str,
-        priority: Union[float, str] = 5.0,
+        priority: Union[str, Priority] = Priority.MEDIUM,
         workflow_id: str = "default",
     ) -> Task:
         """
@@ -124,18 +136,16 @@ class Agency:
 
         Args:
             description (str): The description of the task.
-            priority (Union[float, str], optional): The priority of the task. Must be between 1 and 10. Defaults to 5.
+            priority (Union[str, Priority], optional): The priority of the task. Can be a string or Priority enum. Defaults to Priority.MEDIUM.
             workflow_id (str, optional): The ID of the workflow this task belongs to. Defaults to "default".
 
         Returns:
             Task: The created Task object.
         """
         if isinstance(priority, str):
-            priority_map = {"low": 3, "medium": 5, "high": 8}
-            priority = priority_map.get(priority.lower(), 5)
-
-        if not (1 <= priority <= 10):
-            raise ValueError("Priority must be between 1 and 10")
+            priority = Priority.from_string(priority)
+        elif not isinstance(priority, Priority):
+            raise ValueError("Priority must be a string or Priority enum")
 
         return Task(description=description, priority=priority, workflow_id=workflow_id)
 
@@ -267,12 +277,12 @@ class Agency:
         if task.id not in self.completion_calls[task.workflow_id]:
             self.completion_calls[task.workflow_id][task.id] = 0
 
-    async def generate_roles(self) -> List[Dict[str, Any]]:
+    async def generate_roles(self) -> List[Role]:
         """
         Generate roles based on the Framer's context.
 
         Returns:
-            List[Dict[str, Any]]: A list of generated roles.
+            List[RoleModel]: A list of generated roles.
         """
         soul = getattr(self.context, "soul", {})
         prompt = f"""Generate a role that aligns with the Framer's current context. 
@@ -281,110 +291,43 @@ class Agency:
         
         Soul: {json.dumps(soul, indent=2)}
         
-        Respond with a JSON object containing 'name', 'description', and 'priority' fields for the role.
+        Respond with a JSON object containing 'id', 'name', 'description', 'permissions', 'priority', and 'status' fields for the role.
         Ensure the priority is an integer between 1 and 10, where 10 is the highest priority.
-        Consider the importance and urgency of the role when assigning the priority."""
+        The status should be one of: 'ACTIVE', 'INACTIVE', or 'SUSPENDED'.
+        Consider the importance and urgency of the role when assigning the priority and status."""
         logger.debug(f"Role generation prompt: {prompt}")
         try:
             response = await self.llm_service.get_completion(
                 prompt, model=self.default_model, max_tokens=150, temperature=0.5
             )
             logger.debug(f"Role generation response: {response}")
-            role = json.loads(response)
-            if not role:
+            role_data = json.loads(response)
+            if not role_data:
                 logger.warning(
                     "Received empty response while generating role. Using default role."
                 )
-                return [
-                    {
-                        "name": "Task Assistant",
-                        "description": "Assist with the given task or query.",
-                    }
-                ]
-            if isinstance(role, dict) and "priority" in role:
-                if isinstance(role["priority"], str):
-                    priority_map = {"low": 3, "medium": 5, "high": 8}
-                    role["priority"] = priority_map.get(role["priority"].lower(), 5)
-                role["priority"] = max(1, min(10, int(role["priority"])))
-            return (
-                [{"action": "role", "parameters": role}]
-                if isinstance(role, dict)
-                else [
-                    {
-                        "action": "role",
-                        "parameters": {
-                            **r,
-                            "priority": max(1, min(10, int(r.get("priority", 5)))),
-                        },
-                    }
-                    for r in role
-                ]
-            )
+                return [Role(id="default", name="Task Assistant", description="Assist with the given task or query.", priority=5, status=RoleStatus.ACTIVE)]
+            
+            if isinstance(role_data, dict):
+                role_data = [role_data]
+            
+            roles = []
+            for r in role_data:
+                r["priority"] = max(1, min(10, int(r.get("priority", 5))))
+                r["status"] = RoleStatus[r.get("status", "ACTIVE")]
+                roles.append(Role(**r))
+            return roles
         except Exception as e:
             logger.error(f"Error generating role: {str(e)}", exc_info=True)
             logger.error(f"Prompt used for role generation: {prompt}")
-            return [
-                {
-                    "name": "Task Assistant",
-                    "description": "Assist with the given task or query.",
-                }
-            ]
+            return [Role(id="default", name="Task Assistant", description="Assist with the given task or query.", priority=5, status=RoleStatus.ACTIVE)]
 
-    async def generate_goals(self) -> List[Dict[str, Any]]:
+    async def generate_goals(self) -> List[Goal]:
         """
         Generate goals based on the Framer's context.
 
         Returns:
-            List[Dict[str, Any]]: A list of generated goals.
-        """
-        soul = getattr(self.context, "soul", {})
-        prompt = f"""Generate a goal that aligns with the Framer's current context.
-        The goal should be clear, relevant, and directly related to the given information.
-        Avoid creating complex scenarios. Keep it simple and focused.
-
-        Soul: {json.dumps(soul, indent=2)}
-
-        Respond with a JSON object containing 'description' and 'priority' fields for the goal.
-        Ensure the priority is an integer between 1 and 10."""
-
-        logger.debug(f"Goal generation prompt: {prompt}")
-        try:
-            response = await self.llm_service.get_completion(
-                prompt, model=self.default_model, max_tokens=150, temperature=0.5
-            )
-            logger.debug(f"Goal generation response: {response}")
-            goal = json.loads(response)
-            if not goal:
-                logger.warning(
-                    "Received empty response while generating goal. Using default goal."
-                )
-                return [
-                    {
-                        "description": "Assist users based on the given input.",
-                        "priority": 5,
-                    }
-                ]
-            return (
-                [{"action": "goal", "parameters": goal}]
-                if isinstance(goal, dict)
-                else [{"action": "goal", "parameters": g} for g in goal]
-            )
-        except Exception as e:
-            logger.error(f"Error generating goal: {e}", exc_info=True)
-            logger.error(f"Prompt used for goal generation: {prompt}")
-            return [
-                {
-                    "description": "Assist users to the best of my abilities",
-                    "priority": 5,
-                }
-            ]
-
-    async def generate_goals(self) -> List[Dict[str, Any]]:
-        """
-        Generate goals based on the Framer's context.
-
-        Returns:
-            List[Dict[str, Any]]: A list of generated goals.
+            List[GoalModel]: A list of generated goals.
         """
         soul = getattr(self.context, "soul", {})
         prompt = f"""Generate a goal that aligns with the Framer's current context. 
@@ -393,9 +336,10 @@ class Agency:
         
         Soul: {json.dumps(soul, indent=2)}
         
-        Respond with a JSON object containing 'description' and 'priority' fields for the goal.
+        Respond with a JSON object containing 'name', 'description', 'priority', and 'status' fields for the goal.
         Ensure the priority is an integer between 1 and 10, where 10 is the highest priority.
-        Consider the importance and urgency of the goal when assigning the priority."""
+        The status should be one of: 'ACTIVE', 'COMPLETED', or 'ABANDONED'.
+        Consider the importance and urgency of the goal when assigning the priority and status."""
 
         logger.debug(f"Goal generation prompt: {prompt}")
         try:
@@ -403,31 +347,28 @@ class Agency:
                 prompt, model=self.default_model, max_tokens=150, temperature=0.5
             )
             logger.debug(f"Goal generation response: {response}")
-            goal = json.loads(response)
-            if not goal:
+            goal_data = json.loads(response)
+            if not goal_data:
                 logger.warning(
                     "Received empty response while generating goal. Using default goal."
                 )
-                return [
-                    {
-                        "description": "Assist users based on the given input.",
-                        "priority": 5,
-                    }
-                ]
-            return [goal] if isinstance(goal, dict) else goal
+                return [Goal(name="Default Goal", description="Assist users based on the given input.", priority=5, status=GoalStatus.ACTIVE)]
+            
+            if isinstance(goal_data, dict):
+                goal_data = [goal_data]
+            
+            goals = []
+            for g in goal_data:
+                g["priority"] = max(1, min(10, int(g.get("priority", 5))))
+                g["status"] = GoalStatus[g.get("status", "ACTIVE")]
+                goals.append(Goal(**g))
+            return goals
         except Exception as e:
             logger.error(f"Error generating goal: {e}", exc_info=True)
             logger.error(f"Prompt used for goal generation: {prompt}")
-            return [
-                {
-                    "description": "Assist users to the best of my abilities",
-                    "priority": 5,
-                }
-            ]
+            return [Goal(name="Default Goal", description="Assist users to the best of my abilities", priority=5, status=GoalStatus.ACTIVE)]
 
-    async def generate_roles_and_goals(
-        self,
-    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    async def generate_roles_and_goals(self) -> Tuple[List[Role], List[Goal]]:
         """
         Generate roles and goals for the Framer.
 
@@ -437,27 +378,7 @@ class Agency:
         3. If both exist, generate new goals and add them to existing ones.
 
         Returns:
-            Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]: A tuple containing
-            the final roles and goals.
-        """
-        roles = await self.generate_roles()
-        goals = await self.generate_goals()
-        return roles, goals
-
-    async def generate_roles_and_goals(
-        self,
-    ) -> Tuple[List[str], List[str]]:
-        """
-        Generate roles and goals for the Framer.
-
-        This method generates roles and goals based on the current state:
-        1. If roles are empty, generate new roles.
-        2. If goals are empty, generate new goals.
-        3. If both exist, generate new goals and add them to existing ones.
-
-        Returns:
-            Tuple[List[str], List[str]]: A tuple containing
-            the final roles and goals as strings.
+            Tuple[List[RoleModel], List[GoalModel]]: A tuple containing the final roles and goals.
         """
         roles = await self.generate_roles()
         goals = await self.generate_goals()
@@ -498,3 +419,57 @@ class Agency:
         logger.debug(f"Cost incurred: ${cost_incurred:.4f}")
 
         return response
+
+    def update_role_status(self, role_id: str, new_status: RoleStatus) -> None:
+        """
+        Update the status of a role.
+
+        Args:
+            role_id (str): The ID of the role to update.
+            new_status (RoleStatus): The new status to set for the role.
+        """
+        self.roles.update_role_status(role_id, new_status)
+
+    def update_goal_status(self, goal_name: str, new_status: GoalStatus) -> None:
+        """
+        Update the status of a goal.
+
+        Args:
+            goal_name (str): The name of the goal to update.
+            new_status (GoalStatusModel): The new status to set for the goal.
+        """
+        self.goals.set_goal_status(goal_name, new_status)
+
+    async def evaluate_roles_and_goals(self) -> None:
+        """
+        Evaluate and update the status of roles and goals based on the current context.
+        """
+        # Evaluate roles
+        for role in self.roles.get_roles():
+            prompt = f"""
+            Evaluate the following role based on the current context:
+            Role: {role.to_dict()}
+            Current context: {self.context}
+
+            Should this role's status be updated? If yes, what should be the new status?
+            Respond with a JSON object containing 'update_status' (boolean) and 'new_status' (string) fields.
+            """
+            response = await self.llm_service.get_completion(prompt, model=self.default_model)
+            evaluation = json.loads(response)
+            if evaluation['update_status']:
+                self.update_role_status(role.id, RoleStatus[evaluation['new_status']])
+
+        # Evaluate goals
+        for goal in self.goals.goal_list:
+            prompt = f"""
+            Evaluate the following goal based on the current context:
+            Goal: {goal.dict()}
+            Current context: {self.context}
+
+            Should this goal's status be updated? If yes, what should be the new status?
+            Respond with a JSON object containing 'update_status' (boolean) and 'new_status' (string) fields.
+            """
+            response = await self.llm_service.get_completion(prompt, model=self.default_model)
+            evaluation = json.loads(response)
+            if evaluation['update_status']:
+                self.update_goal_status(goal.name, GoalStatus[evaluation['new_status']])
