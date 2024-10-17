@@ -437,8 +437,12 @@ async def run_async(
                 "Perception data must include a 'data' key with a dictionary value."
             )
 
-        perception = Perception.from_dict(perception_data)
-        decision = await framer.sense(perception)
+        if isinstance(perception_data, dict):
+            perception = Perception.from_dict(perception_data)
+            decision = await framer.sense(perception)
+        else:
+            logger.error("Perception data is not a dictionary.")
+            raise TypeError("Perception data must be a dictionary.")
         if decision:
             # Log the summary
             logger.info("Execution Summary:")
