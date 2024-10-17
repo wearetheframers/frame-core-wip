@@ -21,4 +21,3 @@ class Perception(BaseModel):
                 "Perception data must include a 'data' key with a dictionary value."
             )
         return values
-        arbitrary_types_allowed = True
