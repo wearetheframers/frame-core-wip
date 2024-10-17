@@ -426,6 +426,10 @@ async def run_async(
             else:
                 raise click.UsageError("Either prompt or perception must be provided.")
 
+        if not isinstance(perception, dict):
+            logger.error("Perception is not a dictionary.")
+            raise TypeError("Perception must be a dictionary.")
+
         if "data" not in perception:
             logger.error("Perception data is missing the 'data' key.")
             raise ValueError(
