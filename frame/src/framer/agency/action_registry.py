@@ -121,9 +121,7 @@ class ActionRegistry:
             raise ValueError(f"Action '{name}' not found")
         if self.execution_context is None:
             raise ValueError("Execution context is not set")
-        response = await action["action_func"](
-            *args, **kwargs
-        )
+        response = await action["action_func"](*args, **kwargs)
         role = response if isinstance(response, dict) else response
         if callback:
             callback(response, *callback_args)

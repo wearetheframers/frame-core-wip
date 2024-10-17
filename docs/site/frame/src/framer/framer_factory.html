@@ -152,6 +152,8 @@ ensuring that all necessary components are properly initialized.</p>
         self,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
+        roles: Optional[List[Dict[str, Any]]] = None,
+        goals: Optional[List[Dict[str, Any]]] = None,
     ) -&gt; Framer:
         execution_context = ExecutionContext(llm_service=self.llm_service)
         agency = Agency(
@@ -161,7 +163,8 @@ ensuring that all necessary components are properly initialized.</p>
         )
         # Initialize the Agency component
         # Generate roles and goals. The Framer must be acting to respond to perceptions.
-        roles, goals = await agency.generate_roles_and_goals()
+        if roles is None or goals is None:
+            roles, goals = await agency.generate_roles_and_goals()
 
         execution_context = ExecutionContext(llm_service=self.llm_service)
         brain = Brain(
@@ -169,7 +172,11 @@ ensuring that all necessary components are properly initialized.</p>
             llm_service=self.llm_service,
             roles=roles,
             goals=goals,
-            default_model=self.config.default_model or DEFAULT_MODEL,
+            default_model=(
+                self.config.default_model
+                if self.config.default_model
+                else DEFAULT_MODEL
+            ),
             execution_context=execution_context,
         )
 
@@ -212,7 +219,7 @@ ensuring that all necessary components are properly initialized.</p>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.framer_factory.FramerFactory.create_framer"><code class="name flex">
-<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>

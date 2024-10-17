@@ -47,13 +47,17 @@ async def test_cli_run_framer_command(runner, mocker):
     )
     mock_llm_service.return_value.get_completion = AsyncMock()
     future = asyncio.Future()
-    future.set_result(json.dumps({
-        "action": "think",
-        "parameters": {"thought": "Test thought"},
-        "reasoning": "Test reasoning",
-        "confidence": 0.9,
-        "priority": 5
-    }))
+    future.set_result(
+        json.dumps(
+            {
+                "action": "think",
+                "parameters": {"thought": "Test thought"},
+                "reasoning": "Test reasoning",
+                "confidence": 0.9,
+                "priority": 5,
+            }
+        )
+    )
     mock_llm_service.return_value.get_completion.return_value = future
     mock_frame_instance = mock_frame.return_value
     mock_frame_instance.llm_service = mock_llm_service.return_value
@@ -68,7 +72,9 @@ async def test_cli_run_framer_command(runner, mocker):
         catch_exceptions=False,
     )
 
-    assert result.exit_code == 0, f"Exit code was {result.exit_code}, expected 0. Output: {strip_ansi_codes(result.output)}"
+    assert (
+        result.exit_code == 0
+    ), f"Exit code was {result.exit_code}, expected 0. Output: {strip_ansi_codes(result.output)}"
 
     # Check if Frame constructor was called
     mock_frame.assert_called_once()
@@ -112,7 +118,9 @@ async def test_cli_run_framer_with_prompt(runner, mocker):
     mock_frame_instance = mock_frame.return_value
     mock_frame_instance.llm_service = mocker.Mock(spec=LLMService)
     future = asyncio.Future()
-    future.set_result('{"action": "think", "parameters": {"thought": "Test thought"}, "reasoning": "Test reasoning", "confidence": 0.9, "priority": 5}')
+    future.set_result(
+        '{"action": "think", "parameters": {"thought": "Test thought"}, "reasoning": "Test reasoning", "confidence": 0.9, "priority": 5}'
+    )
     mock_frame_instance.llm_service.get_completion.return_value = future
     mock_execute_framer.return_value = {"result": "success"}
     mock_click_echo = mocker.patch("frame.cli.cli.click.echo")
@@ -121,7 +129,9 @@ async def test_cli_run_framer_with_prompt(runner, mocker):
         cli_app, ["run-framer", "--name", "Test Framer", "--prompt", "Test prompt"]
     )
 
-    assert result.exit_code == 0, f"Exit code was {result.exit_code}, expected 0. Output: {strip_ansi_codes(result.output)}"
+    assert (
+        result.exit_code == 0
+    ), f"Exit code was {result.exit_code}, expected 0. Output: {strip_ansi_codes(result.output)}"
 
     # Ensure the output is a string before formatting
     output = strip_ansi_codes(str(result.output))

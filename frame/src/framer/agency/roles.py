@@ -1,10 +1,12 @@
 from pydantic import BaseModel
 from typing import List, Dict, Any
 
+
 class Role(BaseModel):
     name: str
     description: str
     permissions: List[str] = []
+
 
 class Roles(BaseModel):
     role_list: List[Role] = []

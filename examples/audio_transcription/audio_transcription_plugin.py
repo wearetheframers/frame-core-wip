@@ -3,6 +3,7 @@ import sounddevice as sd
 import numpy as np
 import whisper
 
+
 class AudioTranscriptionPlugin:
 
     def __init__(self):
@@ -15,7 +16,12 @@ class AudioTranscriptionPlugin:
         sample_rate = 16000  # Hz
 
         print("Recording...")
-        audio = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='float32')
+        audio = sd.rec(
+            int(duration * sample_rate),
+            samplerate=sample_rate,
+            channels=1,
+            dtype="float32",
+        )
         sd.wait()  # Wait until recording is finished
         print("Recording finished.")
 
@@ -23,7 +29,7 @@ class AudioTranscriptionPlugin:
         audio = np.squeeze(audio)
         result = self.model.transcribe(audio, fp16=False)
         print(f"Transcription result: {result}")
-        return result['text']
+        return result["text"]
 
     async def transcribe_audio(self, execution_context):
         transcription = await self.record_and_transcribe_audio()

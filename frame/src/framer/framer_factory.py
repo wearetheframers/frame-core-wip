@@ -52,7 +52,8 @@ class FramerFactory:
         self.llm_service = llm_service
         self.plugins: Dict[str, Any] = {}
 
-    async def create_framer(self,
+    async def create_framer(
+        self,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
         roles: Optional[List[Dict[str, Any]]] = None,
@@ -75,7 +76,11 @@ class FramerFactory:
             llm_service=self.llm_service,
             roles=roles,
             goals=goals,
-            default_model=self.config.default_model if self.config.default_model else DEFAULT_MODEL,
+            default_model=(
+                self.config.default_model
+                if self.config.default_model
+                else DEFAULT_MODEL
+            ),
             execution_context=execution_context,
         )
 

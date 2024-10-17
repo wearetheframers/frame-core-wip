@@ -42,25 +42,18 @@ commands, including logging, role and goal generation, and perception processing
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="frame.cli.common.execute_framer"><code class="name flex">
-<span>async def <span class="ident">execute_framer</span></span>(<span>framer: <a title="frame.src.framer.framer.Framer" href="../src/framer/framer.html#frame.src.framer.framer.Framer">Framer</a>, prompt: str, max_len: int) ‑> Optional[<a title="frame.src.framer.brain.decision.decision.Decision" href="../src/framer/brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>]</span>
+<span>def <span class="ident">execute_framer</span></span>(<span>framer: <a title="frame.src.framer.framer.Framer" href="../src/framer/framer.html#frame.src.framer.framer.Framer">Framer</a>, action: str, parameters: Optional[Dict[str, Any]] = None) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Execute a Framer with a given prompt and log the results.</p>
-<p>This function generates roles and goals, processes a perception, and logs
-the execution summary, including workflows and tasks.</p>
+<div class="desc"><p>Execute a specified action on the Framer.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
-<dd>The Framer instance to execute.</dd>
-<dt><strong><code>prompt</code></strong> :&ensp;<code>str</code></dt>
-<dd>The prompt to process.</dd>
-<dt><strong><code>max_len</code></strong> :&ensp;<code>int</code></dt>
-<dd>Maximum length for task generation.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Optional[Decision]</code></dt>
-<dd>The decision made based on the prompt, or None if an error occurs.</dd>
+<dd>The Framer instance to execute the action on.</dd>
+<dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
+<dd>The action to execute.</dd>
+<dt><strong><code>parameters</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code></dt>
+<dd>Parameters for the action.</dd>
 </dl></div>
 </dd>
 <dt id="frame.cli.common.generate_roles_and_goals"><code class="name flex">

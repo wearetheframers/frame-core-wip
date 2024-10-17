@@ -22,7 +22,10 @@ from frame.src.framer.soul.soul import Soul
 
 logger = logging.getLogger(__name__)
 
-def execute_framer(framer: Framer, action: str, parameters: Optional[Dict[str, Any]] = None) -> None:
+
+def execute_framer(
+    framer: Framer, action: str, parameters: Optional[Dict[str, Any]] = None
+) -> None:
     """
     Execute a specified action on the Framer.
 
@@ -150,5 +153,3 @@ async def setup_framer(
     )
     logger.info(f"Using model: {model}")
     return framer
-
-

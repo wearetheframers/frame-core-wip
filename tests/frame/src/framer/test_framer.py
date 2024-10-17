@@ -37,6 +37,7 @@ async def test_framer_initialization():
     soul = Mock(spec=Soul)
     workflow_manager = Mock(spec=WorkflowManager)
     from frame.src.framer.framer_factory import FramerFactory
+
     framer_factory = FramerFactory(config=config, llm_service=llm_service)
     framer = await framer_factory.create_framed(
         memory_service=None,
@@ -101,7 +102,9 @@ async def test_framer_initialize():
     await framer.initialize()
     assert framer.roles == ["Generated Role"] or framer.roles is None
     assert framer.goals == ["Generated Goal"]
-    assert agency.generate_roles_and_goals.call_count == 2, "Expected generate_roles_and_goals to be called twice"
+    assert (
+        agency.generate_roles_and_goals.call_count == 2
+    ), "Expected generate_roles_and_goals to be called twice"
 
     # Test case 2: Both roles and goals are empty lists
     agency.generate_roles_and_goals.reset_mock()
@@ -122,7 +125,9 @@ async def test_framer_initialize():
     await framer.initialize()
     assert framer.roles == ["Generated Role"]
     assert framer.goals == ["Generated Goal"]
-    assert agency.generate_roles_and_goals.call_count == 2, "Expected generate_roles_and_goals to be called twice"
+    assert (
+        agency.generate_roles_and_goals.call_count == 2
+    ), "Expected generate_roles_and_goals to be called twice"
 
     # Test case 3: Roles are None, goals are empty list
     agency.generate_roles_and_goals.reset_mock()
@@ -143,7 +148,9 @@ async def test_framer_initialize():
     await framer.initialize()
     assert framer.roles == ["Generated Role"]
     assert framer.goals == ["Generated Goal"]
-    assert agency.generate_roles_and_goals.call_count == 2, "Expected generate_roles_and_goals to be called twice"
+    assert (
+        agency.generate_roles_and_goals.call_count == 2
+    ), "Expected generate_roles_and_goals to be called twice"
 
     # Test case 4: Roles are empty list, goals are None
     agency.generate_roles_and_goals.reset_mock()
@@ -164,7 +171,9 @@ async def test_framer_initialize():
     await framer.initialize()
     assert framer.roles == ["Generated Role"]
     assert framer.goals == ["Generated Goal"]
-    assert agency.generate_roles_and_goals.call_count == 2, "Expected generate_roles_and_goals to be called twice"
+    assert (
+        agency.generate_roles_and_goals.call_count == 2
+    ), "Expected generate_roles_and_goals to be called twice"
 
     # Test case 5: Both roles and goals are provided
     agency.generate_roles_and_goals.reset_mock()

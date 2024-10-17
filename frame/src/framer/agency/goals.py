@@ -1,10 +1,12 @@
 from pydantic import BaseModel
 from typing import List, Dict, Any
 
+
 class Goal(BaseModel):
     name: str
     description: str
     priority: int
+
 
 class Goals(BaseModel):
     goal_list: List[Goal] = []

@@ -19,11 +19,13 @@ def sample_task():
         estimated_duration=3.5,
         tags=["test", "sample"],
     )
-    task.llm_service.get_completion.return_value = json.dumps({
-        "name": "Role1",
-        "description": "A test role",
-        "priority": 5,
-    })
+    task.llm_service.get_completion.return_value = json.dumps(
+        {
+            "name": "Role1",
+            "description": "A test role",
+            "priority": 5,
+        }
+    )
     return task
 
 

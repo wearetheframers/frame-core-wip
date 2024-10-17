@@ -111,8 +111,8 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         self.execution_context = execution_context or ExecutionContext(
             llm_service=llm_service
         )
-        self.roles = roles if roles is not None else []
-        self.goals = goals if goals is not None else []
+        self.roles = roles or []
+        self.goals = goals or []
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, &#34;default_model&#34;, DEFAULT_MODEL)

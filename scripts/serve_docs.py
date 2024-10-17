@@ -11,10 +11,16 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from roam_links_converter import convert_roam_links
 
+
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Serve documentation with optional test skipping.")
-    parser.add_argument("--skip-tests", action="store_true", help="Skip running unit tests.")
+    parser = argparse.ArgumentParser(
+        description="Serve documentation with optional test skipping."
+    )
+    parser.add_argument(
+        "--skip-tests", action="store_true", help="Skip running unit tests."
+    )
     return parser.parse_args()
+
 
 # Add the project root to the Python path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

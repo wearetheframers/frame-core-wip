@@ -112,13 +112,17 @@ validated to form a valid model.</p>
         }
 
     @classmethod
-    def from_dict(cls, perception_dict: Dict[str, Any]) -&gt; &#34;Perception&#34;:
+    def from_dict(cls, perception_dict: Any) -&gt; &#34;Perception&#34;:
+        if not isinstance(perception_dict, dict):
+            raise TypeError(&#34;perception_dict must be a dictionary&#34;)
+
         timestamp = perception_dict.get(&#34;timestamp&#34;)
         if isinstance(timestamp, str):
             timestamp = datetime.fromisoformat(timestamp)
+
         return cls(
-            type=perception_dict[&#34;type&#34;],
-            data=perception_dict[&#34;data&#34;],
+            type=perception_dict.get(&#34;type&#34;, &#34;unknown&#34;),
+            data=perception_dict.get(&#34;data&#34;, {}),
             source=perception_dict.get(&#34;source&#34;),
             timestamp=timestamp,
         )</code></pre>
@@ -146,7 +150,7 @@ validated to form a valid model.</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.perception.perception.Perception.from_dict"><code class="name flex">
-<span>def <span class="ident">from_dict</span></span>(<span>perception_dict: Dict[str, Any]) ‑> <a title="frame.src.framer.brain.perception.perception.Perception" href="#frame.src.framer.brain.perception.perception.Perception">Perception</a></span>
+<span>def <span class="ident">from_dict</span></span>(<span>perception_dict: Any) ‑> <a title="frame.src.framer.brain.perception.perception.Perception" href="#frame.src.framer.brain.perception.perception.Perception">Perception</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>

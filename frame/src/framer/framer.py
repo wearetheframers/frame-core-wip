@@ -141,7 +141,11 @@ class Framer:
             goals=goals,
         )
 
-        await framer.initialize(llm_service=llm_service, memory_service=memory_service, eq_service=eq_service)
+        await framer.initialize(
+            llm_service=llm_service,
+            memory_service=memory_service,
+            eq_service=eq_service,
+        )
         # Notify observers about the Framer being opened
         for observer in framer.observers:
             if hasattr(observer, "on_framer_opened"):
@@ -172,7 +176,6 @@ class Framer:
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
         self.act()  # Start acting after initialization
-
 
     async def export_to_file(self, file_path: str, llm) -> None:
         """
@@ -252,6 +255,7 @@ class Framer:
             file_path (str): The path to the file where the Markdown will be saved.
         """
         from frame.src.utils.config_parser import export_config_to_markdown
+
         export_config_to_markdown(self.config, file_path)
 
     async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
@@ -361,7 +365,9 @@ class Framer:
         """
         # Close all workflows
         for workflow in self.workflow_manager.workflows.values():
-            workflow.set_final_task(Task(description="Final Task"))  # Set a default final task
+            workflow.set_final_task(
+                Task(description="Final Task")
+            )  # Set a default final task
             for task in workflow.tasks:
                 task.update_status(TaskStatus.COMPLETED)  # Mark tasks as completed
 

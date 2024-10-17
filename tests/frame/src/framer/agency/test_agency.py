@@ -42,23 +42,35 @@ def test_agency_initialization(agency, mock_llm_service):
 
 @pytest.mark.asyncio
 async def test_generate_roles_with_numeric_priority(agency):
-    agency.llm_service.get_completion.return_value = json.dumps({
+    agency.llm_service.get_completion.return_value = json.dumps(
+        {
+            "name": "Role1",
+            "description": "A test role",
+            "priority": 9,
+        }
+    )
+    roles = await agency.generate_roles()
+    assert roles[0]["parameters"] == {
         "name": "Role1",
         "description": "A test role",
         "priority": 9,
-    })
-    roles = await agency.generate_roles()
-    assert roles[0]["parameters"] == {"name": "Role1", "description": "A test role", "priority": 9}
+    }
 
 
 async def test_generate_roles_with_string_priority(agency):
-    agency.llm_service.get_completion.return_value = json.dumps({
+    agency.llm_service.get_completion.return_value = json.dumps(
+        {
+            "name": "Role1",
+            "description": "A test role",
+            "priority": "medium",
+        }
+    )
+    roles = await agency.generate_roles()
+    assert roles[0]["parameters"] == {
         "name": "Role1",
         "description": "A test role",
-        "priority": "medium",
-    })
-    roles = await agency.generate_roles()
-    assert roles[0]["parameters"] == {"name": "Role1", "description": "A test role", "priority": 5}
+        "priority": 5,
+    }
     mock_roles = [{"name": "Test Role", "description": "A test role"}]
     mock_goals = [{"description": "Test Goal", "priority": 1}]
 
@@ -185,7 +197,12 @@ async def test_generate_roles_and_goals(agency):
 
     roles, goals = await agency.generate_roles_and_goals()
 
-    assert roles == [{"name": "Task Assistant", "description": "Assist with the given task or query."}]
+    assert roles == [
+        {
+            "name": "Task Assistant",
+            "description": "Assist with the given task or query.",
+        }
+    ]
     assert goals == [{"description": "Test Goal", "priority": 1}]
 
     assert agency.generate_roles.call_count == 1
@@ -198,19 +215,40 @@ async def test_generate_roles_and_goals_empty_response(agency):
     agency.context = {"soul": "Test soul"}
 
     # Mock the generate_roles and generate_goals methods to return empty responses
-    agency.generate_roles = AsyncMock(return_value=[
-        Role(name="Task Assistant", description="Assist with the given task or query.")
-    ])
-    agency.generate_goals = AsyncMock(return_value=[
-        Goal(name="User Assistant", description="Assist users to the best of my abilities", priority=1)
-    ])
+    agency.generate_roles = AsyncMock(
+        return_value=[
+            Role(
+                name="Task Assistant",
+                description="Assist with the given task or query.",
+            )
+        ]
+    )
+    agency.generate_goals = AsyncMock(
+        return_value=[
+            Goal(
+                name="User Assistant",
+                description="Assist users to the best of my abilities",
+                priority=1,
+            )
+        ]
+    )
 
     roles, goals = await agency.generate_roles_and_goals()
 
     assert roles == [
-        Role(name="Task Assistant", description="Assist with the given task or query.", permissions=[])
+        Role(
+            name="Task Assistant",
+            description="Assist with the given task or query.",
+            permissions=[],
+        )
     ]
-    assert goals == [Goal(name="User Assistant", description="Assist users to the best of my abilities", priority=1)]
+    assert goals == [
+        Goal(
+            name="User Assistant",
+            description="Assist users to the best of my abilities",
+            priority=1,
+        )
+    ]
 
     agency.generate_roles.assert_called_once()
     agency.generate_goals.assert_called_once()
