@@ -18,5 +18,5 @@ The Frame component serves as the main interface for creating and managing Frame
 
 ## Related Components
 
-- [[framer]]: Represents an individual AI agent with capabilities for task management, decision-making, and interaction with language models.
+- [[framer]]: Represents an individual AI agent with capabilities for task management, decision-making, and interaction with language models. It now includes an ExecutionContextService for improved modularity and consistency across actions.
 - [[framed]]: A collection of Framer objects working together to achieve complex tasks.

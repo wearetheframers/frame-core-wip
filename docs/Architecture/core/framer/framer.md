@@ -24,6 +24,7 @@ The Framer class represents an individual AI agent within the Frame cognitive ag
 - [[brain]]: Handles decision-making processes, integrating perceptions, memories, and thoughts.
 - [[soul]]: Represents the core essence and personality of a Framer.
 - [[mind]]: Represents the cognitive processes of a Framer.
+- [[execution_context_service]]: Provides a shared context for executing actions across different components of a Framer.
 
 ## Initialization and Key Features
 
