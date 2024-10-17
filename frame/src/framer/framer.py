@@ -312,7 +312,8 @@ class Framer:
         Returns:
             Decision: The decision made based on the prompt.
         """
-        perception = Perception(type="hearing", data={"text": text})
+        perception_dict = {"type": "hearing", "data": {"text": text}}
+        perception = Perception.from_dict(perception_dict)
         return await self.sense(perception)
 
     def add_observer(self, observer: Observer) -> None:
