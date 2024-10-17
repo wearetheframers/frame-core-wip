@@ -8,11 +8,10 @@ from frame.src.framer.agency.agency import Agency
 from frame.src.framer.brain.brain import Brain
 from frame.src.framer.soul.soul import Soul
 from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
+from frame.src.services.context.execution_context_service import ExecutionContext
 from frame.src.services.memory.main import MemoryService
 from frame.src.services.eq.main import EQService
 from frame.src.constants.models import DEFAULT_MODEL
-from frame.src.framer.agency.execution_context import ExecutionContext
-from frame.src.framer.agency.execution_context import ExecutionContext
 
 
 class FramerFactory:
