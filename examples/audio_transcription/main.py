@@ -1,6 +1,9 @@
 import sys
 import os
 import asyncio
+# Import Frame from upper dir
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+import asyncio
 from frame import Frame, FramerConfig
 from audio_transcription_plugin import AudioTranscriptionPlugin
 
@@ -11,11 +14,6 @@ async def main():
     # Initialize configuration
     config = FramerConfig(name="AudioTranscriptionFramer")
 
-    # Create a Framer instance
-    framer = await frame.create_framer(config)
-
-    # Initialize the Framer
-    await framer.initialize()
 
     # Define roles and goals
     roles = [
@@ -27,8 +25,10 @@ async def main():
         {"name": "Generate Notes", "description": "Create detailed notes from transcriptions."}
     ]
 
-    # Initialize the Framer with roles and goals
-    await framer.initialize(roles=roles, goals=goals)
+    # Create a Framer instance
+    framer = await frame.create_framer(config, roles=roles, goals=goals)
+
+
     at_plugin = AudioTranscriptionPlugin()
     framer.brain.action_registry.add_action("transcribe_audio", at_plugin.transcribe_audio)
     framer.brain.action_registry.add_action("analyze_transcription", at_plugin.analyze_transcription)
