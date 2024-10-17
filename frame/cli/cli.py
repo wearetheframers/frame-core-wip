@@ -9,7 +9,7 @@ import json
 from frame.src.framer.config import FramerConfig
 from frame.src.framer.framer_factory import FramerFactory
 from frame.src.framer.agency import Agency
-from frame.src.services.context.context_service import Context
+from frame.src.services.context.local_context_service import LocalContext
 from frame.cli.common import process_perception_and_log
 
 from frame.src.utils.cleanup import cleanup
@@ -70,7 +70,7 @@ def cli(
     the provided options.
 
     Args:
-        ctx (Context): Click context object for managing command-line options.
+        ctx (LocalContext): Click context object for managing command-line options.
         openai_api_key (str): OpenAI API key for accessing OpenAI services.
         mistral_api_key (str): Mistral API key for accessing Mistral services.
         huggingface_api_key (str): Hugging Face API key for accessing Hugging Face services.
@@ -401,7 +401,7 @@ async def run_async(
     )
     framer_factory = FramerFactory(config, frame.llm_service)
     framer = await framer_factory.create_framer()
-    context = Context()  # Create a new Context
+    context = LocalContext()  # Create a new LocalContext
     framer.agency = Agency(
         llm_service=frame.llm_service,
         context=context,

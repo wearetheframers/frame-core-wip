@@ -14,7 +14,7 @@ from frame.src.constants.models import DEFAULT_MODEL
 from frame.src.framer.config import FramerConfig
 from frame.src.framer.framer_factory import FramerFactory
 from frame.src.framer.agency import Agency
-from frame.src.services.context.context_service import Context
+from frame.src.services.context.local_context_service import LocalContext
 from frame.src.framer.framer import Framer
 from frame.frame import Frame
 from frame.src.framer.brain.decision import Decision
@@ -136,7 +136,7 @@ async def setup_framer(
         description=description,
         default_model=model.lower(),
     )
-    framer_factory = FramerFactory(config, frame.llm_service, roles=roles, goals=goals)
+    framer_factory = FramerFactory(config, frame.llm_service)
     framer = await framer_factory.create_framer()
     logger.debug(f"Framer brain after build: {framer.brain}")
 
