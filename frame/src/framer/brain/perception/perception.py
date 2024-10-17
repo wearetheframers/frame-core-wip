@@ -28,12 +28,16 @@ class Perception(PerceptionModel):
 
     @classmethod
     def from_dict(cls, perception_dict: Dict[str, Any]) -> "Perception":
+        if not isinstance(perception_dict, dict):
+            raise TypeError("perception_dict must be a dictionary")
+
         timestamp = perception_dict.get("timestamp")
         if isinstance(timestamp, str):
             timestamp = datetime.fromisoformat(timestamp)
+
         return cls(
-            type=perception_dict["type"],
-            data=perception_dict["data"],
+            type=perception_dict.get("type", "unknown"),
+            data=perception_dict.get("data", {}),
             source=perception_dict.get("source"),
             timestamp=timestamp,
         )
