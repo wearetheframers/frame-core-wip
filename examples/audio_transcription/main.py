@@ -17,7 +17,18 @@ async def main():
     # Initialize the Framer
     await framer.initialize()
 
-    # Initialize and register the plugin
+    # Define roles and goals
+    roles = [
+        {"name": "Listener", "description": "Listens to audio input and transcribes it."},
+        {"name": "Analyzer", "description": "Analyzes transcriptions to create actionable notes."}
+    ]
+    goals = [
+        {"name": "Transcribe Audio", "description": "Accurately transcribe audio input."},
+        {"name": "Generate Notes", "description": "Create detailed notes from transcriptions."}
+    ]
+
+    # Initialize the Framer with roles and goals
+    await framer.initialize(roles=roles, goals=goals)
     at_plugin = AudioTranscriptionPlugin()
     framer.brain.action_registry.add_action("transcribe_audio", at_plugin.transcribe_audio)
     framer.brain.action_registry.add_action("analyze_transcription", at_plugin.analyze_transcription)
