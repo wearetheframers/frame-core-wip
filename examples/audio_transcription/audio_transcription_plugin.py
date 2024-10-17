@@ -22,6 +22,7 @@ class AudioTranscriptionPlugin:
         # Convert audio to numpy array and transcribe
         audio = np.squeeze(audio)
         result = self.model.transcribe(audio, fp16=False)
+        print(f"Transcription result: {result}")
         return result['text']
 
     async def transcribe_audio(self, execution_context):
