@@ -12,7 +12,7 @@ The ExecutionContextService is a crucial component in the Frame framework that p
 ## Key Features
 
 - Manages shared state across Framer components
-- Provides access to essential services (LLM, memory, EQ)
+- Provides access to essential services (LLM, memory)
 - Facilitates consistent execution of actions
 - Improves modularity and testability of the system
 
