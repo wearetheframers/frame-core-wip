@@ -33,4 +33,4 @@ The ActionRegistry now uses an ExecutionContext, which provides:
 
 - [[action]]: Represents actionable items for Framers to work on.
 - [[brain]]: Handles decision-making processes for the Framer.
-- [[execution_context]]: Provides necessary services and shared state for action execution.
+- [[execution_context_service]]: Provides necessary services and shared state for action execution.
