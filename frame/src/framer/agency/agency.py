@@ -2,9 +2,9 @@ from typing import List, Dict, Any, Optional, Tuple, Union
 from frame.src.constants.models import DEFAULT_MODEL
 from frame.src.framer.agency.tasks.task import Task, TaskStatus
 from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
-from frame.src.services.llm.main import LLMService
-from frame.src.services.context.local_context_service import LocalContext
-from frame.src.services.context.execution_context_service import ExecutionContext
+from frame.src.services import LLMService
+from frame.src.services import LocalContext
+from frame.src.services import ExecutionContext
 from frame.src.framer.agency.action_registry import ActionRegistry
 import json
 import logging
