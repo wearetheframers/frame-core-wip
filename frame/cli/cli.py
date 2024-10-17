@@ -85,12 +85,8 @@ def cli(
 
     ctx.obj["expected_output_format_strict"] = expected_output_format_strict
 
-    if debug:
-        logger.setLevel(logging.DEBUG)
-        logging.getLogger().setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
-        logging.getLogger().setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG if debug else logging.INFO)
+    logging.getLogger().setLevel(logging.DEBUG if debug else logging.INFO)
 
 
 def execute_framer(frame, data, sync, stream):
