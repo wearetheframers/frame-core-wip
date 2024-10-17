@@ -26,7 +26,10 @@ async def main():
     ]
 
     # Create a Framer instance
-    framer = await frame.create_framer(config, roles=roles, goals=goals)
+    framer = await frame.create_framer(config)
+
+    # Initialize the Framer with roles and goals
+    await framer.initialize(roles=roles, goals=goals)
 
 
     at_plugin = AudioTranscriptionPlugin()
