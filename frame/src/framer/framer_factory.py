@@ -12,6 +12,7 @@ from frame.src.services.context.execution_context_service import ExecutionContex
 from frame.src.services.memory.main import MemoryService
 from frame.src.services.eq.main import EQService
 from frame.src.constants.models import DEFAULT_MODEL
+from frame.src.models.framer.agency.goals import Goal, GoalStatus
 
 
 class FramerFactory:
@@ -68,6 +69,13 @@ class FramerFactory:
         # Generate roles and goals. The Framer must be acting to respond to perceptions.
         if roles is None or goals is None:
             roles, goals = await agency.generate_roles_and_goals()
+        
+        # Ensure goals have a default status of ACTIVE
+        for goal in goals:
+            if isinstance(goal, dict) and 'status' not in goal:
+                goal['status'] = GoalStatus.ACTIVE.value
+            elif isinstance(goal, Goal) and goal.status is None:
+                goal.status = GoalStatus.ACTIVE
 
         execution_context = ExecutionContext(llm_service=self.llm_service)
         brain = Brain(

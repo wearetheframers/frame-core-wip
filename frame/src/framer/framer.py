@@ -27,6 +27,7 @@ from frame.src.services import MemoryService
 from frame.src.services import EQService
 from frame.src.utils.metrics import MetricsManager
 from frame.src.services import ExecutionContext
+from frame.src.models.framer.agency.goals import GoalStatus
 
 Observer = Callable[[Decision], None]
 
@@ -301,9 +302,14 @@ class Framer:
                 action="error", parameters={}, reasoning="Framer is halted."
             )
         perception = Perception.from_dict(perception)
-        decision = await self.brain.process_perception(
-            perception, self.agency.get_goals()
-        )
+        current_goals = self.agency.get_goals()
+        decision = await self.brain.process_perception(perception, current_goals)
+        
+        # Consider goal status in decision-making
+        active_goals = [goal for goal in current_goals if goal.status == GoalStatus.ACTIVE]
+        if active_goals:
+            decision.reasoning += f" (Aligned with {len(active_goals)} active goals)"
+        
         if hasattr(self, "can_execute") and self.can_execute:
             await self.brain.execute_decision(decision)
         logger.debug(f"Processed perception: {perception}, Decision: {decision}")

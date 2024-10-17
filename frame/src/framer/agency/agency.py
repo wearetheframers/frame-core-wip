@@ -5,9 +5,8 @@ from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services import LLMService
 from frame.src.services import ExecutionContext
 from frame.src.framer.agency.action_registry import ActionRegistry
-from frame.src.framer.agency.models.roles import Roles, Role
-from frame.src.framer.agency.models.goals import Goals, Goal
-from frame.src.framer.agency.models.goals import Goals
+from frame.src.models.framer.agency.roles import Roles, Role
+from frame.src.models.framer.agency.goals import Goals, Goal
 import json
 import logging
 import time

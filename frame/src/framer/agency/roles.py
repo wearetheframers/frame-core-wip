@@ -1,14 +1,8 @@
-from pydantic import BaseModel, Field
-from typing import List, Dict, Any
+from frame.src.models.framer.agency.roles import Roles, Role, RoleStatus as RolesModel, RoleModel, RoleStatusModel
 
-class Role(BaseModel):
-    id: str
-    name: str
-    description: str
-    permissions: List[str] = []
-    priority: int = Field(default=5, ge=1, le=10)
+from typing import List
 
-class Roles(BaseModel):
+class Roles(RoleModel):
     role_list: List[Role] = []
 
     def add_role(self, role: Role):
