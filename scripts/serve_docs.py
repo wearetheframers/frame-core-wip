@@ -213,15 +213,23 @@ class ChangeHandler(FileSystemEventHandler):
 if __name__ == "__main__":
     args = parse_arguments()
 
+    # Run pytest and move coverage HTML if not skipping tests
     if not args.skip_tests:
-        # Run pytest and move coverage HTML
         print("Running pytest and generating coverage report...")
         run_pytest_and_move_coverage()
 
+    # Start file watching for live reloading
+    watch_process = Process(target=watch_for_changes)
+    watch_process.start()
+
+    # Run pytest and move coverage HTML if not skipping tests
     if not args.skip_tests:
-        # Run pytest and move coverage HTML
         print("Running pytest and generating coverage report...")
         run_pytest_and_move_coverage()
+
+    # Start file watching for live reloading
+    watch_process = Process(target=watch_for_changes)
+    watch_process.start()
 
     # Clean up and build docs
     print("Cleaning up and building documentation...")
