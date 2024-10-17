@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any, Union, List
 from frame.src.framer.framer import Framer
 
 # Import necessary components for Framer creation
@@ -53,7 +53,6 @@ class FramerFactory:
         self.plugins: Dict[str, Any] = {}
 
     async def create_framer(self,
-        self,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
         roles: Optional[List[Dict[str, Any]]] = None,
