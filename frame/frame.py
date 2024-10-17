@@ -9,7 +9,7 @@ from .src.framer.config import FramerConfig
 from .src.services.llm.main import LLMService
 from .src.utils.llm_utils import LLMMetrics, llm_metrics, track_llm_usage
 from frame.src.utils.llm_utils import track_llm_usage
-from .src.services.context.execution_context_service import ExecutionContextService
+from .src.services import ExecutionContextService
 
 
 class Frame:

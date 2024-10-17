@@ -1,8 +1,8 @@
 from typing import Optional, Dict, Any
-from frame.src.services.llm.main import LLMService
-from frame.src.services.memory.main import MemoryService
-from frame.src.services.eq.main import EQService
-from frame.src.framer.soul.soul import Soul
+from frame.src.services import LLMService
+from frame.src.services import MemoryService
+from frame.src.services import EQService
+from frame.src.framer.soul import Soul
 
 class ExecutionContext:
     def __init__(
