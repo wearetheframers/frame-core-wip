@@ -6,6 +6,8 @@ from frame.src.services import LLMService
 from frame.src.services import LocalContext
 from frame.src.services import ExecutionContext
 from frame.src.framer.agency.action_registry import ActionRegistry
+from frame.src.framer.agency.models.roles import Roles
+from frame.src.framer.agency.models.goals import Goals
 import json
 import logging
 import time
