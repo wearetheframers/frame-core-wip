@@ -26,7 +26,7 @@ from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import DSPyAdapter
 from frame.src.services import MemoryService
 from frame.src.services import EQService
 from frame.src.utils.metrics import MetricsManager
-from frame.src.services import ExecutionContextService
+from frame.src.services import ExecutionContext
 
 Observer = Callable[[Decision], None]
 
@@ -172,6 +172,10 @@ class Framer:
             self.roles, _ = await self.agency.generate_roles_and_goals()
         elif not self.goals:
             _, self.goals = await self.agency.generate_roles_and_goals()
+
+        # Sort roles and goals by priority
+        self.roles.sort(key=lambda x: x.get('priority', 5), reverse=True)
+        self.goals.sort(key=lambda x: x.get('priority', 5), reverse=True)
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)

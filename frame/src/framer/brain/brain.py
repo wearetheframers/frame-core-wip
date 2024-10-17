@@ -16,7 +16,7 @@ from frame.src.services.llm.main import LLMService
 from asyncio import Future
 from frame.src.services.llm.llm_adapters.lmql.lmql_adapter import LMQLConfig
 from frame.src.framer.soul.soul import Soul
-from frame.src.services.context.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 from frame.src.framer.soul.soul import Soul
 
 logger = logging.getLogger(__name__)
@@ -249,12 +249,17 @@ class Brain:
         if self.agency.goals is None:
             _, self.agency.goals = await self.agency.generate_roles_and_goals()
 
+        # Consider role and goal priorities when setting decision priority
+        roles_priority = max([role.get('priority', 5) for role in self.roles], default=5)
+        goals_priority = max([goal.get('priority', 5) for goal in self.goals], default=5)
+        decision_priority = max(roles_priority, goals_priority, int(decision_data.get("priority", 5)))
+
         return Decision(
             action=action,
             parameters=parameters,
             reasoning=reasoning,
             confidence=float(decision_data.get("confidence", 0.5)),
-            priority=int(decision_data.get("priority", 5)),
+            priority=decision_priority,
         )
 
     async def execute_decision(self, decision: Decision):

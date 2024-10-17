@@ -12,7 +12,7 @@ from frame.src.framer.agency.tasks.task import Task
 # Create a new task
 task = Task(
     description="Analyze market trends",
-    priority=1,
+    priority=8,  # Priority ranges from 1 to 10, with 10 being the highest
     status="pending",
     results=None,
     metadata={"assigned_to": "analyst_team"}
@@ -35,7 +35,13 @@ print(f"Task Status: {task.status}")
 
 - [[agency]]: Manages roles, goals, tasks, and workflows for [[framer|Framers]].
 - [[workflow]]: Represents a sequence of related tasks to achieve a specific goal.
+- [[roles]]: Defines roles with priorities that influence task execution.
+- [[goals]]: Defines goals with priorities that guide task creation and execution.
 
 ## API Documentation
 
 ::: frame.src.framer.agency.tasks.task.Task
+
+## Priority
+
+The `priority` attribute of a Task is an integer ranging from 1 to 10, with 10 being the highest priority. This allows for fine-grained control over task execution order and importance. The default priority is 5 if not specified.

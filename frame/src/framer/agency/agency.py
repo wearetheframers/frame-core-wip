@@ -5,7 +5,8 @@ from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services import LLMService
 from frame.src.services import ExecutionContext
 from frame.src.framer.agency.action_registry import ActionRegistry
-from frame.src.framer.agency.models.roles import Roles
+from frame.src.framer.agency.models.roles import Roles, Role
+from frame.src.framer.agency.models.goals import Goals, Goal
 from frame.src.framer.agency.models.goals import Goals
 import json
 import logging
@@ -282,7 +283,8 @@ class Agency:
         Soul: {json.dumps(soul, indent=2)}
         
         Respond with a JSON object containing 'name', 'description', and 'priority' fields for the role.
-        Ensure the priority is an integer between 1 and 10."""
+        Ensure the priority is an integer between 1 and 10, where 10 is the highest priority.
+        Consider the importance and urgency of the role when assigning the priority."""
         logger.debug(f"Role generation prompt: {prompt}")
         try:
             response = await self.llm_service.get_completion(
@@ -393,7 +395,8 @@ class Agency:
         Soul: {json.dumps(soul, indent=2)}
         
         Respond with a JSON object containing 'description' and 'priority' fields for the goal.
-        Ensure the priority is an integer between 1 and 10."""
+        Ensure the priority is an integer between 1 and 10, where 10 is the highest priority.
+        Consider the importance and urgency of the goal when assigning the priority."""
 
         logger.debug(f"Goal generation prompt: {prompt}")
         try:
