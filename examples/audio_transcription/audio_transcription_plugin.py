@@ -1,15 +1,28 @@
 import asyncio
+import sounddevice as sd
+import numpy as np
+import whisper
 
 class AudioTranscriptionPlugin:
 
     def __init__(self):
         # Initialize any necessary state or resources
-        pass
+        self.model = whisper.load_model("base")
 
     async def record_and_transcribe_audio(self):
-        # Simulate recording and transcribing audio
-        await asyncio.sleep(2)  # Simulate recording time
-        return "This is a sample transcription of the recorded audio."
+        # Record audio for a fixed duration
+        duration = 5  # seconds
+        sample_rate = 16000  # Hz
+
+        print("Recording...")
+        audio = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='int16')
+        sd.wait()  # Wait until recording is finished
+        print("Recording finished.")
+
+        # Convert audio to numpy array and transcribe
+        audio = np.squeeze(audio)
+        result = self.model.transcribe(audio, fp16=False)
+        return result['text']
 
     async def transcribe_audio(self, execution_context):
         transcription = await self.record_and_transcribe_audio()
