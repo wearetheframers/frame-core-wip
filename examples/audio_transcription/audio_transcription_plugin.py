@@ -15,7 +15,7 @@ class AudioTranscriptionPlugin:
         sample_rate = 16000  # Hz
 
         print("Recording...")
-        audio = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='int16')
+        audio = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='float32')
         sd.wait()  # Wait until recording is finished
         print("Recording finished.")
 
