@@ -1,5 +1,6 @@
 from typing import Dict, Any
 
+
 class EQService:
     """
     EQService (Emotional Intelligence Service) class.
