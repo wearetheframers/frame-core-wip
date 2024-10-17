@@ -73,7 +73,7 @@ class FramerFactory:
             llm_service=self.llm_service,
             roles=roles,
             goals=goals,
-            default_model=self.config.default_model or DEFAULT_MODEL,
+            default_model=self.config.default_model if self.config.default_model else DEFAULT_MODEL,
             execution_context=execution_context,
         )
 

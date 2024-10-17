@@ -22,6 +22,20 @@ from frame.src.framer.soul.soul import Soul
 
 logger = logging.getLogger(__name__)
 
+def execute_framer(framer: Framer, action: str, parameters: Optional[Dict[str, Any]] = None) -> None:
+    """
+    Execute a specified action on the Framer.
+
+    Args:
+        framer (Framer): The Framer instance to execute the action on.
+        action (str): The action to execute.
+        parameters (Optional[Dict[str, Any]]): Parameters for the action.
+    """
+    logger.info(f"Executing action '{action}' with parameters: {parameters}")
+    # Placeholder for actual execution logic
+    # This should be replaced with the actual implementation
+    pass
+
 
 def pretty_log(obj: Any) -> str:
     """
@@ -129,72 +143,12 @@ async def setup_framer(
     else:
         framer.soul.seed = config.soul_seed  # Explicitly set the soul seed
 
-    context = Context()  # Create a new Context
+    context: Dict[str, Any] = {}
     framer.agency = Agency(
         llm_service=frame.llm_service,
         context=context,
-        use_local_model=False,
-        brain=framer.brain,
     )
     logger.info(f"Using model: {model}")
     return framer
 
 
-async def execute_framer(
-    framer: Framer, prompt: str, max_len: int
-) -> Optional[Decision]:
-    """
-    Execute a Framer with a given prompt and log the results.
-
-    This function generates roles and goals, processes a perception, and logs
-    the execution summary, including workflows and tasks.
-
-    Args:
-        framer (Framer): The Framer instance to execute.
-        prompt (str): The prompt to process.
-        max_len (int): Maximum length for task generation.
-
-    Returns:
-        Optional[Decision]: The decision made based on the prompt, or None if an error occurs.
-    """
-    try:
-        await generate_roles_and_goals(framer, prompt)
-        perception_data = {"type": "input", "description": prompt}
-        decision = await framer.sense(perception_data)
-        if decision:
-            # Log the summary
-            logger.info("Execution Summary:")
-            total_workflows = len(framer.workflow_manager.workflows)
-            total_tasks = sum(
-                len(workflow.tasks) for workflow in framer.workflow_manager.workflows
-            )
-            logger.info(f"Total Workflows created: {total_workflows}")
-            logger.info(f"Total Tasks created: {total_tasks}")
-            for workflow in framer.workflow_manager.workflows:
-                logger.info(f"Workflow has {len(workflow.tasks)} tasks.")
-                for task in workflow.tasks:
-                    logger.info(
-                        f"Task Name: {task.description}, Task Priority: {task.priority}"
-                    )
-            logger.info(f"Decision reasoning: {decision.reasoning}")
-        if decision:
-            # Log the summary
-            logger.info("Execution Summary:")
-            total_workflows = len(framer.workflow_manager.workflows)
-            total_tasks = sum(
-                len(workflow.tasks) for workflow in framer.workflow_manager.workflows
-            )
-            logger.info(f"Total Workflows created: {total_workflows}")
-            logger.info(f"Total Tasks created: {total_tasks}")
-            for workflow in framer.workflow_manager.workflows:
-                logger.info(f"Workflow has {len(workflow.tasks)} tasks.")
-                for task in workflow.tasks:
-                    logger.info(
-                        f"Task Name: {task.description}, Task Priority: {task.priority}"
-                    )
-            logger.info(f"Decision reasoning: {decision.reasoning}")
-        return decision
-    except Exception as e:
-        logger.error(f"An error occurred: {e}")
-        logger.exception("Detailed traceback:")
-        return None

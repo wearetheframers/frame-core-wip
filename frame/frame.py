@@ -3,6 +3,7 @@ from .src.framer.framer import Framer, FramerConfig
 from .src.framer.framer_factory import FramerBuilder, FramerFactory
 from .src.framed import Framed
 from .src.framed.framed_factory import FramedFactory
+from .src.constants.models import DEFAULT_MODEL
 from .src.framed.framed_factory import FramedBuilder
 from .src.framer.config import FramerConfig
 from .src.services.llm.main import LLMService
@@ -35,10 +36,10 @@ class Frame:
 
     def __init__(
         self,
-        openai_api_key: Optional[str] = None,
-        mistral_api_key: Optional[str] = None,
-        huggingface_api_key: Optional[str] = None,
-        default_model: Optional[str] = "gpt-3.5-turbo",
+        openai_api_key: str = "",
+        mistral_api_key: str = "",
+        huggingface_api_key: str = "",
+        default_model: str = DEFAULT_MODEL,
     ):
         """
         Initialize the Frame instance.
@@ -153,7 +154,7 @@ class Frame:
         result = await self.llm_service.get_completion(prompt, **kwargs)
 
         # Calculate tokens used (you may need to implement this based on your LLM service)
-        tokens_used = self.calculate_tokens_used(prompt, result)
+        tokens_used = self.calculate_tokens_used(prompt, str(result))
 
         track_llm_usage(model, tokens_used)
 
