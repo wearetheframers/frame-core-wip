@@ -33,7 +33,7 @@ from frame.sync_frame import sync_frame
 logger = logging.getLogger(__name__)
 if not logger.hasHandlers():
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG if '--debug' in sys.argv else logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
