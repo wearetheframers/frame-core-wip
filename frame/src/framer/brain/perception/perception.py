@@ -27,7 +27,7 @@ class Perception(PerceptionModel):
         }
 
     @classmethod
-    def from_dict(cls, perception_dict: Dict[str, Any]) -> "Perception":
+    def from_dict(cls, perception_dict: Any) -> "Perception":
         if not isinstance(perception_dict, dict):
             raise TypeError("perception_dict must be a dictionary")
 
