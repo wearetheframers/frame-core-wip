@@ -4,7 +4,7 @@ from frame.src.framer.agency.tasks.task import Task, TaskStatus
 from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services.llm.main import LLMService
 from frame.src.services.context.context_service import Context
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services.context.execution_context import ExecutionContext
 from frame.src.framer.agency.action_registry import ActionRegistry
 import json
 import logging

@@ -26,7 +26,7 @@ from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import DSPyAdapter
 from frame.src.services.memory.main import MemoryService
 from frame.src.services.eq.main import EQService
 from frame.src.utils.metrics import MetricsManager
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services.context.execution_context_service import ExecutionContextService
 
 Observer = Callable[[Decision], None]
 

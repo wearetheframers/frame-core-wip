@@ -16,7 +16,7 @@ from frame.src.services.llm.main import LLMService
 from asyncio import Future
 from frame.src.services.llm.llm_adapters.lmql.lmql_adapter import LMQLConfig
 from frame.src.framer.soul.soul import Soul
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services.context.execution_context import ExecutionContext
 from frame.src.framer.soul.soul import Soul
 
 logger = logging.getLogger(__name__)

@@ -1,15 +1,13 @@
 from typing import List, Dict, Any, Optional
 
 
-class Context:
+class LocalContext:
     """
-    Context Service Module
+    Local Context Service Module
 
-    This module provides the Context class, which manages roles and goals
-    for Framers. It serves as a base class for more specialized contexts.
-
-    This module provides the Context class, which manages roles and goals
-    for Framers. It serves as a base class for more specialized contexts.
+    This module provides the LocalContext class, which manages local context
+    for agent components, allowing them to share information with each other.
+    It serves as a base class for more specialized local contexts.
     """
 
     def __init__(self, soul: Optional[Any] = None, **kwargs):

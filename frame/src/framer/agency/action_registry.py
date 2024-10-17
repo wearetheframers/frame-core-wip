@@ -11,17 +11,17 @@ from frame.src.framer.agency.default_actions import (
     VALID_ACTIONS,
     extend_valid_actions,
 )
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services.context.execution_context_service import ExecutionContextService
 
 
 class ActionRegistry:
-    def __init__(self, execution_context: ExecutionContext):
+    def __init__(self, execution_context_service: ExecutionContextService):
         self.actions: Dict[str, Dict[str, Any]] = {}
-        self.execution_context = execution_context
+        self.execution_context_service = execution_context_service
         self._register_default_actions()
 
-    def set_execution_context(self, execution_context: ExecutionContext):
-        self.execution_context = execution_context
+    def set_execution_context_service(self, execution_context_service: ExecutionContextService):
+        self.execution_context_service = execution_context_service
 
     def _register_default_actions(self):
         for action, info in VALID_ACTIONS.items():

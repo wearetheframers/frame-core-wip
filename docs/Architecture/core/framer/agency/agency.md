@@ -31,3 +31,4 @@ This ensures that Framers always have some roles and goals to guide their behavi
 
 - [[brain]]: Handles decision-making processes for the Framer.
 - [[soul]]: Manages memory and emotional states of a Framer.
+- [[execution_context]]: Provides shared state and services for Framer actions.
