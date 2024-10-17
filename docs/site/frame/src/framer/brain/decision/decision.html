@@ -57,8 +57,12 @@ ActionRegistry and ensure they are recognized in the decision-making process.</p
 <dd>The priority of the decision.</dd>
 <dt><strong><code>expected_results</code></strong> :&ensp;<code>Optional[Any]</code></dt>
 <dd>The expected results of the decision.</dd>
-<dt><strong><code>task_status</code></strong> :&ensp;<code>TaskStatusModel</code></dt>
+<dt><strong><code>task_status</code></strong> :&ensp;<code>TaskStatus</code></dt>
 <dd>The status of the associated task.</dd>
+<dt><strong><code>related_roles</code></strong> :&ensp;<code>List[Role]</code></dt>
+<dd>Roles related to this decision.</dd>
+<dt><strong><code>related_goals</code></strong> :&ensp;<code>List[Goal]</code></dt>
+<dd>Goals related to this decision.</dd>
 </dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
@@ -82,7 +86,9 @@ validated to form a valid model.</p>
         confidence (float): The confidence level of the decision.
         priority (int): The priority of the decision.
         expected_results (Optional[Any]): The expected results of the decision.
-        task_status (TaskStatusModel): The status of the associated task.
+        task_status (TaskStatus): The status of the associated task.
+        related_roles (List[Role]): Roles related to this decision.
+        related_goals (List[Goal]): Goals related to this decision.
     &#34;&#34;&#34;
 
     expected_results: List[Any] = Field(
@@ -90,6 +96,12 @@ validated to form a valid model.</p>
     )
     task_status: TaskStatus = Field(
         default=TaskStatus.PENDING, description=&#34;Status of the associated task&#34;
+    )
+    related_roles: List[Role] = Field(
+        default_factory=list, description=&#34;Roles related to this decision&#34;
+    )
+    related_goals: List[Goal] = Field(
+        default_factory=list, description=&#34;Goals related to this decision&#34;
     )
 
     @classmethod
@@ -123,6 +135,8 @@ validated to form a valid model.</p>
             &#34;priority&#34;: self.priority,
             &#34;expected_results&#34;: self.expected_results,
             &#34;task_status&#34;: self.task_status.value,
+            &#34;related_roles&#34;: [role.to_dict() if hasattr(role, &#39;to_dict&#39;) else str(role) for role in self.related_roles],
+            &#34;related_goals&#34;: [goal.dict() if hasattr(goal, &#39;dict&#39;) else str(goal) for goal in self.related_goals],
         }
 
     @classmethod
@@ -135,6 +149,8 @@ validated to form a valid model.</p>
         priority: int = 5,
         expected_results: Optional[Any] = None,
         task_status: TaskStatus = TaskStatus.PENDING,
+        related_roles: List[Role] = None,
+        related_goals: List[Goal] = None,
     ) -&gt; &#34;Decision&#34;:
         &#34;&#34;&#34;
         Create a new Decision instance with the given parameters.
@@ -146,7 +162,9 @@ validated to form a valid model.</p>
             confidence (float, optional): The confidence level of the decision. Defaults to 0.7.
             priority (int, optional): The priority of the decision on a scale from 1 (lowest) to 10 (highest). Defaults to 5.
             expected_results (Optional[Any], optional): The expected results of the decision. Defaults to None.
-            task_status (TaskStatusModel, optional): The status of the associated task. Defaults to PENDING.
+            task_status (TaskStatus, optional): The status of the associated task. Defaults to PENDING.
+            related_roles (List[Role], optional): Roles related to this decision. Defaults to None.
+            related_goals (List[Goal], optional): Goals related to this decision. Defaults to None.
 
         Returns:
             Decision: A new Decision instance.
@@ -159,6 +177,8 @@ validated to form a valid model.</p>
             priority=priority,
             expected_results=expected_results,
             task_status=task_status,
+            related_roles=related_roles or [],
+            related_goals=related_goals or [],
         )
 
     def update_status(self, new_status: TaskStatus) -&gt; None:
@@ -166,7 +186,7 @@ validated to form a valid model.</p>
         Update the task status of the decision.
 
         Args:
-            new_status (TaskStatusModel): The new status to set.
+            new_status (TaskStatus): The new status to set.
         &#34;&#34;&#34;
         self.task_status = new_status
 
@@ -181,7 +201,9 @@ validated to form a valid model.</p>
             f&#34;Decision(action={self.action}, &#34;
             f&#34;confidence={self.confidence:.2f}, &#34;
             f&#34;priority={self.priority}, &#34;
-            f&#34;task_status={self.task_status.value})&#34;
+            f&#34;task_status={self.task_status.value}, &#34;
+            f&#34;related_roles={len(self.related_roles)}, &#34;
+            f&#34;related_goals={len(self.related_goals)})&#34;
         )
 
     async def execute(self, action_registry: Any) -&gt; Dict[str, Any]:
@@ -202,7 +224,45 @@ validated to form a valid model.</p>
             result = await action_func(**self.parameters)
             return {&#34;result&#34;: result, &#34;error&#34;: None}
         except Exception as e:
-            return {&#34;result&#34;: None, &#34;error&#34;: str(e)}</code></pre>
+            return {&#34;result&#34;: None, &#34;error&#34;: str(e)}
+
+    def add_related_role(self, role: Role) -&gt; None:
+        &#34;&#34;&#34;
+        Add a related role to the decision.
+
+        Args:
+            role (Role): The role to add to the related roles.
+        &#34;&#34;&#34;
+        if role not in self.related_roles:
+            self.related_roles.append(role)
+
+    def add_related_goal(self, goal: Goal) -&gt; None:
+        &#34;&#34;&#34;
+        Add a related goal to the decision.
+
+        Args:
+            goal (Goal): The goal to add to the related goals.
+        &#34;&#34;&#34;
+        if goal not in self.related_goals:
+            self.related_goals.append(goal)
+
+    def remove_related_role(self, role_id: str) -&gt; None:
+        &#34;&#34;&#34;
+        Remove a related role from the decision.
+
+        Args:
+            role_id (str): The ID of the role to remove from the related roles.
+        &#34;&#34;&#34;
+        self.related_roles = [role for role in self.related_roles if role.id != role_id]
+
+    def remove_related_goal(self, goal_name: str) -&gt; None:
+        &#34;&#34;&#34;
+        Remove a related goal from the decision.
+
+        Args:
+            goal_name (str): The name of the goal to remove from the related goals.
+        &#34;&#34;&#34;
+        self.related_goals = [goal for goal in self.related_goals if goal.name != goal_name]</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -227,6 +287,14 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.framer.brain.decision.decision.Decision.related_goals"><code class="name">var <span class="ident">related_goals</span> : List[<a title="frame.src.models.framer.agency.goals.Goal" href="../../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.Decision.related_roles"><code class="name">var <span class="ident">related_roles</span> : List[<a title="frame.src.models.framer.agency.roles.Role" href="../../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : <a title="frame.src.models.framer.agency.tasks.task.TaskStatus" href="../../../models/framer/agency/tasks/task.html#frame.src.models.framer.agency.tasks.task.TaskStatus">TaskStatus</a></code></dt>
 <dd>
 <div class="desc"></div>
@@ -235,7 +303,7 @@ validated to form a valid model.</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.decision.decision.Decision.create"><code class="name flex">
-<span>def <span class="ident">create</span></span>(<span>action: str, parameters: Dict[str, Any], reasoning: str, confidence: float = 0.7, priority: int = 5, expected_results: Optional[Any] = None, task_status: <a title="frame.src.models.framer.agency.tasks.task.TaskStatus" href="../../../models/framer/agency/tasks/task.html#frame.src.models.framer.agency.tasks.task.TaskStatus">TaskStatus</a> = TaskStatus.PENDING) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+<span>def <span class="ident">create</span></span>(<span>action: str, parameters: Dict[str, Any], reasoning: str, confidence: float = 0.7, priority: int = 5, expected_results: Optional[Any] = None, task_status: <a title="frame.src.models.framer.agency.tasks.task.TaskStatus" href="../../../models/framer/agency/tasks/task.html#frame.src.models.framer.agency.tasks.task.TaskStatus">TaskStatus</a> = TaskStatus.PENDING, related_roles: List[<a title="frame.src.models.framer.agency.roles.Role" href="../../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>] = None, related_goals: List[<a title="frame.src.models.framer.agency.goals.Goal" href="../../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new Decision instance with the given parameters.</p>
@@ -253,8 +321,12 @@ validated to form a valid model.</p>
 <dd>The priority of the decision on a scale from 1 (lowest) to 10 (highest). Defaults to 5.</dd>
 <dt><strong><code>expected_results</code></strong> :&ensp;<code>Optional[Any]</code>, optional</dt>
 <dd>The expected results of the decision. Defaults to None.</dd>
-<dt><strong><code>task_status</code></strong> :&ensp;<code>TaskStatusModel</code>, optional</dt>
+<dt><strong><code>task_status</code></strong> :&ensp;<code>TaskStatus</code>, optional</dt>
 <dd>The status of the associated task. Defaults to PENDING.</dd>
+<dt><strong><code>related_roles</code></strong> :&ensp;<code>List[Role]</code>, optional</dt>
+<dd>Roles related to this decision. Defaults to None.</dd>
+<dt><strong><code>related_goals</code></strong> :&ensp;<code>List[Goal]</code>, optional</dt>
+<dd>Goals related to this decision. Defaults to None.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -281,6 +353,28 @@ validated to form a valid model.</p>
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="frame.src.framer.brain.decision.decision.Decision.add_related_goal"><code class="name flex">
+<span>def <span class="ident">add_related_goal</span></span>(<span>self, goal: <a title="frame.src.models.framer.agency.goals.Goal" href="../../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a related goal to the decision.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>goal</code></strong> :&ensp;<code>Goal</code></dt>
+<dd>The goal to add to the related goals.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.Decision.add_related_role"><code class="name flex">
+<span>def <span class="ident">add_related_role</span></span>(<span>self, role: <a title="frame.src.models.framer.agency.roles.Role" href="../../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a related role to the decision.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>role</code></strong> :&ensp;<code>Role</code></dt>
+<dd>The role to add to the related roles.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.framer.brain.decision.decision.Decision.execute"><code class="name flex">
 <span>async def <span class="ident">execute</span></span>(<span>self, action_registry: Any) ‑> Dict[str, Any]</span>
 </code></dt>
@@ -295,6 +389,28 @@ validated to form a valid model.</p>
 <dl>
 <dt><code>Dict[str, Any]</code></dt>
 <dd>The result of executing the action.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.Decision.remove_related_goal"><code class="name flex">
+<span>def <span class="ident">remove_related_goal</span></span>(<span>self, goal_name: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Remove a related goal from the decision.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>goal_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the goal to remove from the related goals.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.Decision.remove_related_role"><code class="name flex">
+<span>def <span class="ident">remove_related_role</span></span>(<span>self, role_id: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Remove a related role from the decision.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>role_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ID of the role to remove from the related roles.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.decision.decision.Decision.to_dict"><code class="name flex">
@@ -315,7 +431,7 @@ validated to form a valid model.</p>
 <div class="desc"><p>Update the task status of the decision.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>new_status</code></strong> :&ensp;<code>TaskStatusModel</code></dt>
+<dt><strong><code>new_status</code></strong> :&ensp;<code>TaskStatus</code></dt>
 <dd>The new status to set.</dd>
 </dl></div>
 </dd>
@@ -339,6 +455,8 @@ validated to form a valid model.</p>
 <li>
 <h4><code><a title="frame.src.framer.brain.decision.decision.Decision" href="#frame.src.framer.brain.decision.decision.Decision">Decision</a></code></h4>
 <ul class="">
+<li><code><a title="frame.src.framer.brain.decision.decision.Decision.add_related_goal" href="#frame.src.framer.brain.decision.decision.Decision.add_related_goal">add_related_goal</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.Decision.add_related_role" href="#frame.src.framer.brain.decision.decision.Decision.add_related_role">add_related_role</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.create" href="#frame.src.framer.brain.decision.decision.Decision.create">create</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.execute" href="#frame.src.framer.brain.decision.decision.Decision.execute">execute</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.expected_results" href="#frame.src.framer.brain.decision.decision.Decision.expected_results">expected_results</a></code></li>
@@ -346,6 +464,10 @@ validated to form a valid model.</p>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.model_computed_fields" href="#frame.src.framer.brain.decision.decision.Decision.model_computed_fields">model_computed_fields</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.model_config" href="#frame.src.framer.brain.decision.decision.Decision.model_config">model_config</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.model_fields" href="#frame.src.framer.brain.decision.decision.Decision.model_fields">model_fields</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.Decision.related_goals" href="#frame.src.framer.brain.decision.decision.Decision.related_goals">related_goals</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.Decision.related_roles" href="#frame.src.framer.brain.decision.decision.Decision.related_roles">related_roles</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.Decision.remove_related_goal" href="#frame.src.framer.brain.decision.decision.Decision.remove_related_goal">remove_related_goal</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.Decision.remove_related_role" href="#frame.src.framer.brain.decision.decision.Decision.remove_related_role">remove_related_role</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.task_status" href="#frame.src.framer.brain.decision.decision.Decision.task_status">task_status</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.to_dict" href="#frame.src.framer.brain.decision.decision.Decision.to_dict">to_dict</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.update_status" href="#frame.src.framer.brain.decision.decision.Decision.update_status">update_status</a></code></li>

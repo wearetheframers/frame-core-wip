@@ -112,9 +112,11 @@ validated to form a valid model.</p>
         }
 
     @classmethod
-    def from_dict(cls, perception_dict: Any) -&gt; &#34;Perception&#34;:
-        if not isinstance(perception_dict, dict):
-            raise TypeError(&#34;perception_dict must be a dictionary&#34;)
+    def from_dict(cls, perception_dict: Union[Dict[str, Any], str]) -&gt; &#34;Perception&#34;:
+        if isinstance(perception_dict, str):
+            return cls(type=&#34;hearing&#34;, data={&#34;text&#34;: perception_dict})
+        elif not isinstance(perception_dict, dict):
+            raise TypeError(&#34;perception_dict must be a dictionary or a string&#34;)
 
         timestamp = perception_dict.get(&#34;timestamp&#34;)
         if isinstance(timestamp, str):
@@ -150,7 +152,7 @@ validated to form a valid model.</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.perception.perception.Perception.from_dict"><code class="name flex">
-<span>def <span class="ident">from_dict</span></span>(<span>perception_dict: Any) ‑> <a title="frame.src.framer.brain.perception.perception.Perception" href="#frame.src.framer.brain.perception.perception.Perception">Perception</a></span>
+<span>def <span class="ident">from_dict</span></span>(<span>perception_dict: Union[str, Dict[str, Any]]) ‑> <a title="frame.src.framer.brain.perception.perception.Perception" href="#frame.src.framer.brain.perception.perception.Perception">Perception</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>

@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry"><code class="flex name class">
 <span>class <span class="ident">ActionRegistry</span></span>
-<span>(</span><span>execution_context: <a title="frame.src.framer.agency.execution_context.ExecutionContext" href="execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>)</span>
+<span>(</span><span>execution_context_service: <a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -46,13 +46,15 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ActionRegistry:
-    def __init__(self, execution_context: ExecutionContext):
+    def __init__(self, execution_context_service: ExecutionContext):
         self.actions: Dict[str, Dict[str, Any]] = {}
-        self.execution_context = execution_context
+        self.execution_context_service = execution_context_service
         self._register_default_actions()
 
-    def set_execution_context(self, execution_context: ExecutionContext):
-        self.execution_context = execution_context
+    def set_execution_context_service(
+        self, execution_context_service: ExecutionContext
+    ):
+        self.execution_context_service = execution_context_service
 
     def _register_default_actions(self):
         for action, info in VALID_ACTIONS.items():
@@ -254,8 +256,8 @@ hljs.highlightAll();
 <dd>The name of the action to remove.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.agency.action_registry.ActionRegistry.set_execution_context"><code class="name flex">
-<span>def <span class="ident">set_execution_context</span></span>(<span>self, execution_context: <a title="frame.src.framer.agency.execution_context.ExecutionContext" href="execution_context.html#frame.src.framer.agency.execution_context.ExecutionContext">ExecutionContext</a>)</span>
+<dt id="frame.src.framer.agency.action_registry.ActionRegistry.set_execution_context_service"><code class="name flex">
+<span>def <span class="ident">set_execution_context_service</span></span>(<span>self, execution_context_service: <a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -288,7 +290,7 @@ hljs.highlightAll();
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.perform_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.perform_action">perform_action</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.register_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.register_action">register_action</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.remove_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.remove_action">remove_action</a></code></li>
-<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.set_execution_context" href="#frame.src.framer.agency.action_registry.ActionRegistry.set_execution_context">set_execution_context</a></code></li>
+<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.set_execution_context_service" href="#frame.src.framer.agency.action_registry.ActionRegistry.set_execution_context_service">set_execution_context_service</a></code></li>
 </ul>
 </li>
 </ul>

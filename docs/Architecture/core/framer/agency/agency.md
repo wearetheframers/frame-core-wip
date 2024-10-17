@@ -27,6 +27,15 @@ The Agency can automatically generate roles and goals for a Framer when they are
 
 This ensures that Framers always have some roles and goals to guide their behavior, even if they are not explicitly defined by the user.
 
+## Roles and Goals
+
+Roles and goals in the Agency now have additional attributes:
+
+- Roles have a priority level and a status (ACTIVE, INACTIVE, or SUSPENDED).
+- Goals have a priority level and a status (ACTIVE, COMPLETED, or ABANDONED).
+
+Multiple roles and goals can be active simultaneously, allowing for more complex and nuanced behavior of the Framer.
+
 ## Related Components
 
 - [[brain]]: Handles decision-making processes for the Framer.

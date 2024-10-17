@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.framer.Framer"><code class="flex name class">
 <span>class <span class="ident">Framer</span></span>
-<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager" href="agency/tasks/workflow/workflow_manager.html#frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [])</span>
+<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager" href="agency/tasks/workflow/workflow_manager.html#frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.eq_service.EQService" href="../services/eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Framer class represents an AI agent with cognitive capabilities. It integrates various components
@@ -240,6 +240,10 @@ processing perceptions, making decisions, and executing tasks.</p>
         elif not self.goals:
             _, self.goals = await self.agency.generate_roles_and_goals()
 
+        # Sort roles and goals by priority
+        self.roles.sort(key=lambda x: x.get(&#39;priority&#39;, 5), reverse=True)
+        self.goals.sort(key=lambda x: x.get(&#39;priority&#39;, 5), reverse=True)
+
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
         self.act()  # Start acting after initialization
@@ -348,12 +352,12 @@ processing perceptions, making decisions, and executing tasks.</p>
         result = await self.perform_task(task_obj.to_dict())
         return result if result is not None else {&#34;output&#34;: &#34;No result returned&#34;}
 
-    async def sense(self, perception: Any) -&gt; Decision:
+    async def sense(self, perception: Union[Perception, Dict[str, Any]]) -&gt; Decision:
         &#34;&#34;&#34;
         Process a perception and make a decision.
 
         Args:
-            perception (Any): The perception to process, can be a Perception object or a dictionary.
+            perception (Union[Perception, Dict[str, Any]]): The perception to process, can be a Perception object or a dictionary.
 
         Returns:
             Decision: The decision made based on the perception.
@@ -363,15 +367,22 @@ processing perceptions, making decisions, and executing tasks.</p>
             return Decision(
                 action=&#34;error&#34;, parameters={}, reasoning=&#34;Framer is halted.&#34;
             )
-        perception = Perception.from_dict(perception)
-        decision = await self.brain.process_perception(
-            perception, self.agency.get_goals()
-        )
+        # Convert perception to Perception object if it is a dictionary
+        if isinstance(perception, dict):
+            perception = Perception.from_dict(perception)
+        current_goals = self.agency.get_goals()
+        decision = await self.brain.process_perception(perception, current_goals)
+        
+        # Consider goal status in decision-making
+        active_goals = [goal for goal in current_goals if goal.status == GoalStatus.ACTIVE]
+        if active_goals:
+            decision.reasoning += f&#34; (Aligned with {len(active_goals)} active goals)&#34;
+        
         if hasattr(self, &#34;can_execute&#34;) and self.can_execute:
             await self.brain.execute_decision(decision)
         logger.debug(f&#34;Processed perception: {perception}, Decision: {decision}&#34;)
         self.notify_observers(decision)
-        return decision.to_dict()
+        return decision  # Return the Decision object directly
 
     async def prompt(self, text: str) -&gt; Decision:
         &#34;&#34;&#34;
@@ -420,6 +431,39 @@ processing perceptions, making decisions, and executing tasks.</p>
             if hasattr(plugin, &#34;on_decision_made&#34;):
                 plugin.on_decision_made(decision)
 
+    async def generate_tasks_from_perception(self, perception: Union[Perception, Dict[str, Any]], max_len: Optional[int] = None) -&gt; List[Task]:
+        &#34;&#34;&#34;
+        Generate tasks based on the given perception.
+
+        Args:
+            perception (Union[Perception, Dict[str, Any]]): The perception to generate tasks from.
+            max_len (Optional[int]): Maximum number of tasks to generate. If None, no limit is applied.
+
+        Returns:
+            List[Task]: A list of generated tasks.
+        &#34;&#34;&#34;
+        tasks = []
+        
+        # Convert dictionary to Perception object if necessary
+        if isinstance(perception, dict):
+            perception = Perception.from_dict(perception)
+        
+        # Example: Create a task to process the perception
+        task = Task(
+            description=f&#34;Process perception of type: {perception.type}&#34;,
+            workflow_id=&#34;perception_processing&#34;
+        )
+        tasks.append(task)
+
+        # Add more sophisticated logic here to generate tasks based on the perception content
+        # For example, you could analyze the perception data and create specific tasks
+
+        # Limit the number of tasks if max_len is specified
+        if max_len is not None:
+            tasks = tasks[:max_len]
+
+        return tasks
+
     async def close(self) -&gt; None:
         &#34;&#34;&#34;
         Optimize and clear all memory for the Framer.
@@ -455,13 +499,13 @@ processing perceptions, making decisions, and executing tasks.</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="frame.src.framer.framer.Framer.create"><code class="name flex">
-<span>async def <span class="ident">create</span></span>(<span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, soul_seed: Union[str, Dict[str, Any], ForwardRef(None)] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="#frame.src.framer.framer.Framer">Framer</a></span>
+<span>async def <span class="ident">create</span></span>(<span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, soul_seed: Union[str, Dict[str, Any], ForwardRef(None)] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.eq_service.EQService" href="../services/eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.framer.Framer.load_from_file"><code class="name flex">
-<span>def <span class="ident">load_from_file</span></span>(<span>file_path: str, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="#frame.src.framer.framer.Framer">Framer</a></span>
+<span>def <span class="ident">load_from_file</span></span>(<span>file_path: str, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.eq_service.EQService" href="../services/eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Load a Framer configuration from a file.</p>
@@ -550,6 +594,24 @@ systems, facilitating interoperability and reuse.</p>
 <dd>The path to the file where the Markdown will be saved.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.framer.framer.Framer.generate_tasks_from_perception"><code class="name flex">
+<span>async def <span class="ident">generate_tasks_from_perception</span></span>(<span>self, perception: Union[<a title="frame.src.framer.brain.perception.perception.Perception" href="brain/perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>, Dict[str, Any]], max_len: Optional[int] = None) ‑> List[<a title="frame.src.framer.agency.tasks.task.Task" href="agency/tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate tasks based on the given perception.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>perception</code></strong> :&ensp;<code>Union[Perception, Dict[str, Any]]</code></dt>
+<dd>The perception to generate tasks from.</dd>
+<dt><strong><code>max_len</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Maximum number of tasks to generate. If None, no limit is applied.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[Task]</code></dt>
+<dd>A list of generated tasks.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.framer.framer.Framer.initialize"><code class="name flex">
 <span>async def <span class="ident">initialize</span></span>(<span>self)</span>
 </code></dt>
@@ -611,13 +673,13 @@ systems, facilitating interoperability and reuse.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.framer.Framer.sense"><code class="name flex">
-<span>async def <span class="ident">sense</span></span>(<span>self, perception: Any) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+<span>async def <span class="ident">sense</span></span>(<span>self, perception: Union[<a title="frame.src.framer.brain.perception.perception.Perception" href="brain/perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>, Dict[str, Any]]) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Process a perception and make a decision.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>perception</code></strong> :&ensp;<code>Any</code></dt>
+<dt><strong><code>perception</code></strong> :&ensp;<code>Union[Perception, Dict[str, Any]]</code></dt>
 <dd>The perception to process, can be a Perception object or a dictionary.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -645,13 +707,14 @@ systems, facilitating interoperability and reuse.</p>
 <ul>
 <li>
 <h4><code><a title="frame.src.framer.framer.Framer" href="#frame.src.framer.framer.Framer">Framer</a></code></h4>
-<ul class="two-column">
+<ul class="">
 <li><code><a title="frame.src.framer.framer.Framer.act" href="#frame.src.framer.framer.Framer.act">act</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.add_observer" href="#frame.src.framer.framer.Framer.add_observer">add_observer</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.close" href="#frame.src.framer.framer.Framer.close">close</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.create" href="#frame.src.framer.framer.Framer.create">create</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.export_to_file" href="#frame.src.framer.framer.Framer.export_to_file">export_to_file</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.export_to_markdown" href="#frame.src.framer.framer.Framer.export_to_markdown">export_to_markdown</a></code></li>
+<li><code><a title="frame.src.framer.framer.Framer.generate_tasks_from_perception" href="#frame.src.framer.framer.Framer.generate_tasks_from_perception">generate_tasks_from_perception</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.initialize" href="#frame.src.framer.framer.Framer.initialize">initialize</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.load_from_file" href="#frame.src.framer.framer.Framer.load_from_file">load_from_file</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.notify_observers" href="#frame.src.framer.framer.Framer.notify_observers">notify_observers</a></code></li>

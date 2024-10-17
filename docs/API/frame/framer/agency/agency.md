@@ -13,13 +13,12 @@ The Agency class represents the decision-making and task management component of
 
 ## Key Features
 
-- **Role Management**: Assign and manage roles for the [[framer|Framer]].
-- **Goal Management**: Set and track goals to guide the [[framer|Framer]]'s actions.
+- **Role Management**: Assign and manage roles for the [[framer|Framer]]. Roles are active by default, and multiple roles can be active simultaneously.
+- **Goal Management**: Set and track goals to guide the [[framer|Framer]]'s actions. Multiple goals can be active at the same time.
 - **Task Management**: Create, assign, and complete tasks.
 - **Workflow Management**: Organize tasks into workflows to achieve specific objectives.
 - **Automatic Role and Goal Generation**: Generate roles and goals when they are not provided or are empty.
 - **Action Priority**: Assign priorities to actions to control their execution order and preference.
-- **Action Priority**: Actions can be assigned priorities to ensure that more important actions are executed first.
 - **Execution Context**: Utilize a centralized execution context for consistent access to services across actions.
 
 ## Usage
@@ -94,3 +93,64 @@ To extend the Agency's capabilities, you can add new actions to the ActionRegist
 ## API Documentation
 
 ::: frame.src.framer.agency.Agency
+# Agency
+
+::: frame.src.framer.agency.agency.Agency
+    options:
+      show_root_heading: false
+      show_source: false
+
+## Overview
+
+The `Agency` module represents the decision-making and task management component of a Framer. It manages roles, goals, and tasks, coordinating the Framer's actions and priorities.
+
+## Components
+
+### Roles
+
+Roles define the different functions or personas that the Framer can adopt. Each role has specific responsibilities and expertise areas.
+
+### Goals
+
+Goals represent the objectives that the Framer aims to achieve. They guide the Framer's decision-making process and task prioritization. Goals have different statuses (ACTIVE, COMPLETED, ABANDONED) which influence their impact on the Framer's behavior.
+
+### Tasks
+
+Tasks are specific actions or processes that the Framer needs to complete to achieve its goals. The Agency manages task creation, prioritization, and execution.
+
+## Key Methods
+
+### `generate_roles_and_goals`
+
+Generates initial roles and goals for the Framer based on its configuration and purpose.
+
+### `set_roles`
+
+Sets or updates the Framer's roles.
+
+### `set_goals`
+
+Sets or updates the Framer's goals.
+
+### `get_goals`
+
+Retrieves the current list of goals, including their statuses.
+
+## Usage
+
+The Agency is a core component of the Framer, coordinating its decision-making process:
+
+```python
+agency = Agency(llm_service=llm_service, execution_context=execution_context)
+
+# Generate initial roles and goals
+roles, goals = await agency.generate_roles_and_goals()
+
+# Update goals
+agency.set_goals(new_goals)
+
+# Get current goals
+current_goals = agency.get_goals()
+```
+
+The Agency ensures that the Framer's actions align with its current goals and roles, taking into account the status of each goal when making decisions or prioritizing tasks.

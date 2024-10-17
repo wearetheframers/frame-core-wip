@@ -92,7 +92,7 @@ validated to form a valid model.</p>
     id: str
     workflow_id: str
     description: str
-    priority: float
+    priority: Priority = Field(default=Priority.MEDIUM)
     status: TaskStatus = TaskStatus.PENDING
     result: Optional[Any] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
@@ -174,7 +174,7 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.agency.tasks.task.TaskModel.priority"><code class="name">var <span class="ident">priority</span> : float</code></dt>
+<dt id="frame.src.models.framer.agency.tasks.task.TaskModel.priority"><code class="name">var <span class="ident">priority</span> : <a title="frame.src.models.framer.agency.priority.Priority" href="../priority.html#frame.src.models.framer.agency.priority.Priority">Priority</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>

@@ -59,3 +59,60 @@ To extend the Brain's capabilities, you can add new actions to the ActionRegistr
 ## API Documentation
 
 ::: frame.src.framer.brain.Brain
+# Brain
+
+::: frame.src.framer.brain.brain.Brain
+    options:
+      show_root_heading: false
+      show_source: false
+
+## Overview
+
+The `Brain` module represents the cognitive processing unit of a Framer. It is responsible for integrating perceptions, memories, and thoughts to make decisions and generate responses.
+
+## Key Components
+
+### Perception Processing
+
+The Brain processes incoming perceptions, interpreting them in the context of the Framer's current goals and their statuses.
+
+### Decision Making
+
+Based on processed perceptions and current goals, the Brain makes decisions that guide the Framer's actions.
+
+### Memory Integration
+
+The Brain integrates short-term and long-term memories to provide context for decision-making.
+
+## Key Methods
+
+### `process_perception`
+
+Processes an incoming perception, taking into account current goals and their statuses.
+
+### `execute_decision`
+
+Executes a decision made by the Brain.
+
+### `update_goals`
+
+Updates the Brain's understanding of current goals and their statuses.
+
+## Usage
+
+The Brain is a core component of the Framer, handling the cognitive processes:
+
+```python
+brain = Brain(llm_service=llm_service, roles=roles, goals=goals)
+
+# Process a perception
+decision = await brain.process_perception(perception, current_goals)
+
+# Execute a decision
+await brain.execute_decision(decision)
+
+# Update goals
+brain.update_goals(new_goals)
+```
+
+The Brain's decision-making process considers the status of each goal (ACTIVE, COMPLETED, ABANDONED), prioritizing actions that align with active goals and adapting its behavior as goals are completed or abandoned. This ensures that the Framer's cognitive processes remain aligned with its current objectives and priorities.

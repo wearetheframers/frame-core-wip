@@ -105,7 +105,15 @@ validated to form a valid model.</p>
             raise ValueError(
                 &#34;Perception data must include a &#39;data&#39; key with a dictionary value.&#34;
             )
-        return values</code></pre>
+        return values
+
+    @classmethod
+    def from_dict(cls, perception_dict: Union[Dict[str, Any], str]) -&gt; &#34;Perception&#34;:
+        if isinstance(perception_dict, str):
+            return cls(type=&#34;hearing&#34;, data={&#34;text&#34;: perception_dict})
+        elif not isinstance(perception_dict, dict):
+            raise TypeError(&#34;perception_dict must be a dictionary or a string&#34;)
+        return cls(**perception_dict)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -154,6 +162,12 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.models.framer.brain.mind.perception.perception.Perception.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>perception_dict: Union[str, Dict[str, Any]]) ‑> <a title="frame.src.models.framer.brain.mind.perception.perception.Perception" href="#frame.src.models.framer.brain.mind.perception.perception.Perception">Perception</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -176,6 +190,7 @@ validated to form a valid model.</p>
 <ul class="">
 <li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.check_data_key" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.check_data_key">check_data_key</a></code></li>
 <li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.data" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.data">data</a></code></li>
+<li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.from_dict" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.from_dict">from_dict</a></code></li>
 <li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.model_computed_fields" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.model_computed_fields">model_computed_fields</a></code></li>
 <li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.model_config" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.model_config">model_config</a></code></li>
 <li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.model_fields" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.model_fields">model_fields</a></code></li>

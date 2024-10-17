@@ -11,7 +11,23 @@ The `Roles` module is responsible for defining and managing the roles that a Fra
 
 ### Attributes
 
-- `role_list` (List[Dict[str, Any]]): A list of roles with their descriptions and associated permissions.
+- `roles` (List[Role]): A list of Role objects representing the current roles.
+
+## Role
+
+::: frame.src.models.framer.agency.roles.Role
+    options:
+      show_root_heading: false
+      show_source: false
+
+### Attributes
+
+- `id` (str): The unique identifier for the role.
+- `name` (str): The name of the role.
+- `description` (str): A detailed description of the role.
+- `permissions` (List[str]): A list of permissions associated with the role.
+- `priority` (Priority): The priority level of the role.
+- `status` (RoleStatus): The current status of the role (ACTIVE, INACTIVE, or SUSPENDED).
 
 ## Methods
 

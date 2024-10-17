@@ -43,11 +43,10 @@ ContextService to manage shared roles and goals across multiple Framers.</p>
 <span>(</span><span>soul: Optional[Any] = None, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Context Service Module</p>
-<p>This module provides the Context class, which manages roles and goals
-for Framers. It serves as a base class for more specialized contexts.</p>
-<p>This module provides the Context class, which manages roles and goals
-for Framers. It serves as a base class for more specialized contexts.</p>
+<div class="desc"><p>Local Context Service Module</p>
+<p>This module provides the LocalContext class, which manages local context
+for agent components, allowing them to share information with each other.
+It serves as a base class for more specialized local contexts.</p>
 <p>Initialize the Context.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -58,19 +57,19 @@ for Framers. It serves as a base class for more specialized contexts.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class SharedContext(Context):
+<pre><code class="python">class SharedContext(LocalContext):
     pass</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="frame.src.services.context.context_service.Context" href="context_service.html#frame.src.services.context.context_service.Context">Context</a></li>
+<li><a title="frame.src.services.context.local_context_service.LocalContext" href="local_context_service.html#frame.src.services.context.local_context_service.LocalContext">LocalContext</a></li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="frame.src.services.context.context_service.Context" href="context_service.html#frame.src.services.context.context_service.Context">Context</a></b></code>:
+<li><code><b><a title="frame.src.services.context.local_context_service.LocalContext" href="local_context_service.html#frame.src.services.context.local_context_service.LocalContext">LocalContext</a></b></code>:
 <ul class="hlist">
-<li><code><a title="frame.src.services.context.context_service.Context.add_to_history" href="context_service.html#frame.src.services.context.context_service.Context.add_to_history">add_to_history</a></code></li>
-<li><code><a title="frame.src.services.context.context_service.Context.set_soul" href="context_service.html#frame.src.services.context.context_service.Context.set_soul">set_soul</a></code></li>
+<li><code><a title="frame.src.services.context.local_context_service.LocalContext.add_to_history" href="local_context_service.html#frame.src.services.context.local_context_service.LocalContext.add_to_history">add_to_history</a></code></li>
+<li><code><a title="frame.src.services.context.local_context_service.LocalContext.set_soul" href="local_context_service.html#frame.src.services.context.local_context_service.LocalContext.set_soul">set_soul</a></code></li>
 </ul>
 </li>
 </ul>

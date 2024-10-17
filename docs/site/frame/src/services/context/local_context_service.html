@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
-<title>frame.src.services.eq.eq_service API documentation</title>
+<title>frame.src.services.context.local_context_service API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -22,7 +22,7 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>frame.src.services.eq.eq_service</code></h1>
+<h1 class="title">Module <code>frame.src.services.context.local_context_service</code></h1>
 </header>
 <section id="section-intro">
 </section>
@@ -35,130 +35,153 @@ hljs.highlightAll();
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="frame.src.services.eq.eq_service.EQService"><code class="flex name class">
-<span>class <span class="ident">EQService</span></span>
+<dt id="frame.src.services.context.local_context_service.LocalContext"><code class="flex name class">
+<span>class <span class="ident">LocalContext</span></span>
+<span>(</span><span>soul: Optional[Any] = None, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>EQService (Emotional Intelligence Service) class.</p>
-<p>This class is responsible for handling emotional intelligence related tasks.</p>
-<p>Initialize the EQService.</p></div>
+<div class="desc"><p>Local Context Service Module</p>
+<p>This module provides the LocalContext class, which manages local context
+for agent components, allowing them to share information with each other.
+It serves as a base class for more specialized local contexts.</p>
+<p>Initialize the Context.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Any]</code></dt>
+<dd>The soul attribute for the context.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class EQService:
+<pre><code class="python">class LocalContext:
     &#34;&#34;&#34;
-    EQService (Emotional Intelligence Service) class.
+    Local Context Service Module
 
-    This class is responsible for handling emotional intelligence related tasks.
+    This module provides the LocalContext class, which manages local context
+    for agent components, allowing them to share information with each other.
+    It serves as a base class for more specialized local contexts.
     &#34;&#34;&#34;
 
-    def __init__(self):
+    def __init__(self, soul: Optional[Any] = None, **kwargs):
         &#34;&#34;&#34;
-        Initialize the EQService.
-        &#34;&#34;&#34;
-        pass
-
-    def analyze_emotion(self, text: str) -&gt; Dict[str, Any]:
-        &#34;&#34;&#34;
-        Analyze the emotion in the given text.
+        Initialize the Context.
 
         Args:
-            text (str): The text to analyze.
-
-        Returns:
-            Dict[str, Any]: A dictionary containing the analyzed emotions.
+            soul (Optional[Any]): The soul attribute for the context.
         &#34;&#34;&#34;
-        # Placeholder implementation
-        return {&#34;emotion&#34;: &#34;neutral&#34;}
+        self._data = {
+            &#34;soul&#34;: soul,
+            &#34;state&#34;: kwargs,
+            &#34;history&#34;: [],
+            &#34;roles&#34;: [],
+            &#34;goals&#34;: [],
+        }
+        for key, value in kwargs.items():
+            self._data[key] = value
 
-    def generate_empathetic_response(self, emotion: str) -&gt; str:
+    def add_to_history(self, entry: str):
         &#34;&#34;&#34;
-        Generate an empathetic response based on the given emotion.
+        Add an entry to the history.
 
         Args:
-            emotion (str): The emotion to respond to.
-
-        Returns:
-            str: An empathetic response.
+            entry (str): The entry to add to the history.
         &#34;&#34;&#34;
-        # Placeholder implementation
-        return f&#34;I understand you&#39;re feeling {emotion}.&#34;
+        self._data[&#34;history&#34;].append(entry)
 
-    def get_emotional_state(self) -&gt; Dict[str, Any]:
-        &#34;&#34;&#34;
-        Get the current emotional state.
+    def __setattr__(self, name, value):
+        if name.startswith(&#34;_&#34;):
+            super().__setattr__(name, value)
+        else:
+            self._data[name] = value
 
-        Returns:
-            Dict[str, Any]: A dictionary representing the current emotional state.
-        &#34;&#34;&#34;
-        # Placeholder implementation
-        return {&#34;current_emotion&#34;: &#34;neutral&#34;, &#34;intensity&#34;: 0.5}
+    def __getattr__(self, name):
+        if name in self._data:
+            return self._data[name]
+        raise AttributeError(
+            f&#34;&#39;{self.__class__.__name__}&#39; object has no attribute &#39;{name}&#39;&#34;
+        )
 
-    def update_emotional_state(self, new_state: Dict[str, Any]) -&gt; None:
+    def get(self, key, default=None):
+        return self._data.get(key, default)
+
+    def get_roles(self) -&gt; List[Dict[str, Any]]:
+        return self._data[&#34;roles&#34;]
+
+    def set_roles(self, roles: List[Dict[str, Any]]) -&gt; None:
+        self._data[&#34;roles&#34;] = roles
+
+    def get_goals(self) -&gt; List[Dict[str, Any]]:
+        return self._data[&#34;goals&#34;]
+
+    def set_goals(self, goals: List[Dict[str, Any]]) -&gt; None:
+        self._data[&#34;goals&#34;] = goals
+
+    def set_soul(self, soul: Any) -&gt; None:
         &#34;&#34;&#34;
-        Update the current emotional state.
+        Set the soul for the context.
 
         Args:
-            new_state (Dict[str, Any]): The new emotional state to set.
+            soul (Any): The soul to set.
         &#34;&#34;&#34;
-        # Placeholder implementation
-        pass</code></pre>
+        self._data[&#34;soul&#34;] = soul</code></pre>
 </details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="frame.src.services.context.shared_context_service.SharedContext" href="shared_context_service.html#frame.src.services.context.shared_context_service.SharedContext">SharedContext</a></li>
+</ul>
 <h3>Methods</h3>
 <dl>
-<dt id="frame.src.services.eq.eq_service.EQService.analyze_emotion"><code class="name flex">
-<span>def <span class="ident">analyze_emotion</span></span>(<span>self, text: str) ‑> Dict[str, Any]</span>
+<dt id="frame.src.services.context.local_context_service.LocalContext.add_to_history"><code class="name flex">
+<span>def <span class="ident">add_to_history</span></span>(<span>self, entry: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Analyze the emotion in the given text.</p>
+<div class="desc"><p>Add an entry to the history.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>text</code></strong> :&ensp;<code>str</code></dt>
-<dd>The text to analyze.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Dict[str, Any]</code></dt>
-<dd>A dictionary containing the analyzed emotions.</dd>
+<dt><strong><code>entry</code></strong> :&ensp;<code>str</code></dt>
+<dd>The entry to add to the history.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.services.eq.eq_service.EQService.generate_empathetic_response"><code class="name flex">
-<span>def <span class="ident">generate_empathetic_response</span></span>(<span>self, emotion: str) ‑> str</span>
+<dt id="frame.src.services.context.local_context_service.LocalContext.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>self, key, default=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Generate an empathetic response based on the given emotion.</p>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.context.local_context_service.LocalContext.get_goals"><code class="name flex">
+<span>def <span class="ident">get_goals</span></span>(<span>self) ‑> List[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.context.local_context_service.LocalContext.get_roles"><code class="name flex">
+<span>def <span class="ident">get_roles</span></span>(<span>self) ‑> List[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.context.local_context_service.LocalContext.set_goals"><code class="name flex">
+<span>def <span class="ident">set_goals</span></span>(<span>self, goals: List[Dict[str, Any]]) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.context.local_context_service.LocalContext.set_roles"><code class="name flex">
+<span>def <span class="ident">set_roles</span></span>(<span>self, roles: List[Dict[str, Any]]) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.context.local_context_service.LocalContext.set_soul"><code class="name flex">
+<span>def <span class="ident">set_soul</span></span>(<span>self, soul: Any) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the soul for the context.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>emotion</code></strong> :&ensp;<code>str</code></dt>
-<dd>The emotion to respond to.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>str</code></dt>
-<dd>An empathetic response.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.services.eq.eq_service.EQService.get_emotional_state"><code class="name flex">
-<span>def <span class="ident">get_emotional_state</span></span>(<span>self) ‑> Dict[str, Any]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get the current emotional state.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Dict[str, Any]</code></dt>
-<dd>A dictionary representing the current emotional state.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.services.eq.eq_service.EQService.update_emotional_state"><code class="name flex">
-<span>def <span class="ident">update_emotional_state</span></span>(<span>self, new_state: Dict[str, Any]) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Update the current emotional state.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>new_state</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
-<dd>The new emotional state to set.</dd>
+<dt><strong><code>soul</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The soul to set.</dd>
 </dl></div>
 </dd>
 </dl>
@@ -173,18 +196,21 @@ hljs.highlightAll();
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="frame.src.services.eq" href="index.html">frame.src.services.eq</a></code></li>
+<li><code><a title="frame.src.services.context" href="index.html">frame.src.services.context</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="frame.src.services.eq.eq_service.EQService" href="#frame.src.services.eq.eq_service.EQService">EQService</a></code></h4>
-<ul class="">
-<li><code><a title="frame.src.services.eq.eq_service.EQService.analyze_emotion" href="#frame.src.services.eq.eq_service.EQService.analyze_emotion">analyze_emotion</a></code></li>
-<li><code><a title="frame.src.services.eq.eq_service.EQService.generate_empathetic_response" href="#frame.src.services.eq.eq_service.EQService.generate_empathetic_response">generate_empathetic_response</a></code></li>
-<li><code><a title="frame.src.services.eq.eq_service.EQService.get_emotional_state" href="#frame.src.services.eq.eq_service.EQService.get_emotional_state">get_emotional_state</a></code></li>
-<li><code><a title="frame.src.services.eq.eq_service.EQService.update_emotional_state" href="#frame.src.services.eq.eq_service.EQService.update_emotional_state">update_emotional_state</a></code></li>
+<h4><code><a title="frame.src.services.context.local_context_service.LocalContext" href="#frame.src.services.context.local_context_service.LocalContext">LocalContext</a></code></h4>
+<ul class="two-column">
+<li><code><a title="frame.src.services.context.local_context_service.LocalContext.add_to_history" href="#frame.src.services.context.local_context_service.LocalContext.add_to_history">add_to_history</a></code></li>
+<li><code><a title="frame.src.services.context.local_context_service.LocalContext.get" href="#frame.src.services.context.local_context_service.LocalContext.get">get</a></code></li>
+<li><code><a title="frame.src.services.context.local_context_service.LocalContext.get_goals" href="#frame.src.services.context.local_context_service.LocalContext.get_goals">get_goals</a></code></li>
+<li><code><a title="frame.src.services.context.local_context_service.LocalContext.get_roles" href="#frame.src.services.context.local_context_service.LocalContext.get_roles">get_roles</a></code></li>
+<li><code><a title="frame.src.services.context.local_context_service.LocalContext.set_goals" href="#frame.src.services.context.local_context_service.LocalContext.set_goals">set_goals</a></code></li>
+<li><code><a title="frame.src.services.context.local_context_service.LocalContext.set_roles" href="#frame.src.services.context.local_context_service.LocalContext.set_roles">set_roles</a></code></li>
+<li><code><a title="frame.src.services.context.local_context_service.LocalContext.set_soul" href="#frame.src.services.context.local_context_service.LocalContext.set_soul">set_soul</a></code></li>
 </ul>
 </li>
 </ul>
