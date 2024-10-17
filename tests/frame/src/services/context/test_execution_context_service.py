@@ -1,5 +1,5 @@
 import pytest
-from frame.src.services import ExecutionContextService
+from frame.src.services import ExecutionContext
 from frame.src.services import LLMService
 from frame.src.framer.soul import Soul
 
