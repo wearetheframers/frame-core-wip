@@ -11,7 +11,6 @@ logger = setup_logging()
 
 __version__ = "0.1.0"
 
-
 from .src.utils.helpers import lazy_import as __lazy_import
 
 
@@ -65,18 +64,18 @@ atexit.register(lambda: __close_logger_handlers(logger))
 from .cli.cli import cli, main
 from frame.frame import Frame
 from frame.src.framer.config import FramerConfig
-from frame.src.framer.agency.agency import Agency
-from frame.src.framer.brain.brain import Brain
-from frame.src.framer.soul.soul import Soul
+from frame.src.framer.agency import Agency
+from frame.src.framer.brain import Brain
+from frame.src.framer.soul import Soul
 from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
 from frame.src.framer.agency.tasks.task import Task
-from frame.src.services.llm.main import LLMService
+from frame.src.services import LLMService
 from frame.src.framer.brain.perception import Perception
 from frame.src.framer.brain.decision import Decision
 from frame.src.framer.framer_factory import FramerBuilder
 from frame.src.framed.framed_factory import FramedBuilder
-from frame.src.services.memory.main import MemoryService
-from frame.src.services.eq.main import EQService
+from frame.src.services import MemoryService
+from frame.src.services import EQService
 
 # Expose the main classes and functions
 
