@@ -42,7 +42,7 @@ async def main():
     print(f"Transcription: {transcription}")
 
     # Analyze transcription
-    notes = await framer.sense({"type": "audio", "data": {"transcription": transcription}})
+    notes = await at_plugin.analyze_transcription(framer.agency.execution_context, transcription)
     print(f"Actionable Notes: {notes}")
 
     # Clean up

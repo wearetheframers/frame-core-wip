@@ -16,8 +16,7 @@ class AudioTranscriptionPlugin:
         print(f"{execution_context.framer.config.name}: Transcription completed")
         return transcription
 
-    async def analyze_transcription(self, execution_context):
-        transcription = execution_context.data.get("transcription", "")
+    async def analyze_transcription(self, execution_context, transcription: str):
         # Simulate analysis of transcription
         notes = f"Analyzed notes from transcription: {transcription}"
         print(f"{execution_context.framer.config.name}: Analysis completed")
