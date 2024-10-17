@@ -35,7 +35,8 @@ def test_cli_tui_command(runner, mocker):
     mock_framer_tui_instance.run.assert_called_once()
 
 
-def test_cli_run_framer_command(runner, mocker):
+@pytest.mark.asyncio
+async def test_cli_run_framer_command(runner, mocker):
     mock_logger = mocker.patch("frame.cli.cli.logger")
     mock_execute_framer = mocker.patch(
         "frame.cli.cli.execute_framer", return_value=AsyncMock(return_value={"result": "success"})
@@ -45,14 +46,15 @@ def test_cli_run_framer_command(runner, mocker):
         "frame.src.services.llm.main.LLMService", autospec=True
     )
     mock_llm_service.return_value.get_completion = AsyncMock()
-    mock_llm_service.return_value.get_completion.return_value = await asyncio.Future()
-    mock_llm_service.return_value.get_completion.return_value.set_result(json.dumps({
+    future = asyncio.Future()
+    future.set_result(json.dumps({
         "action": "think",
         "parameters": {"thought": "Test thought"},
         "reasoning": "Test reasoning",
         "confidence": 0.9,
         "priority": 5
     }))
+    mock_llm_service.return_value.get_completion.return_value = future
     mock_frame_instance = mock_frame.return_value
     mock_frame_instance.llm_service = mock_llm_service.return_value
     mock_frame_instance.get_metrics.return_value = {
