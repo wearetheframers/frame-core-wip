@@ -229,39 +229,23 @@ if __name__ == "__main__":
         logging.info("Running pytest and generating coverage report...")
         run_pytest_and_move_coverage()
 
-    # Start file watching for live reloading
-    logging.info("Starting file watching process...")
-    watch_process = Process(target=watch_for_changes)
-    watch_process.start()
-
-    # Run pytest and move coverage HTML if not skipping tests
-    if not args.skip_tests:
-        print("Running pytest and generating coverage report...")
-        run_pytest_and_move_coverage()
-
-    # Start file watching for live reloading
-    watch_process = Process(target=watch_for_changes)
-    watch_process.start()
-
     # Clean up and build docs
-    print("Cleaning up and building documentation...")
+    logging.info("Cleaning up and building documentation...")
     rebuild_docs()
 
     # Start mkdocs build
-    print("Building mkdocs documentation...")
+    logging.info("Building mkdocs documentation...")
     try:
         output = run_command("mkdocs build --config-file ./mkdocs.yml")
-        print("MkDocs build output:")
-        print(output)
-        print("MkDocs build completed successfully.")
+        logging.info("MkDocs build output:\n%s", output)
+        logging.info("MkDocs build completed successfully.")
     except subprocess.CalledProcessError as e:
-        print(f"MkDocs build failed: {e}")
-        print("MkDocs build error output:")
-        print(e.output.decode())
-        print("Continuing with serving documentation...")
+        logging.error("MkDocs build failed: %s", e)
+        logging.error("MkDocs build error output:\n%s", e.output.decode())
+        logging.info("Continuing with serving documentation...")
 
     # Start servers
-    print("Starting documentation servers...")
+    logging.info("Starting documentation servers...")
     mkdocs_process = Process(target=serve_mkdocs)
     pdoc_process = Process(target=serve_pdoc)
     watch_process = Process(target=watch_for_changes)
@@ -270,19 +254,19 @@ if __name__ == "__main__":
     pdoc_process.start()
     watch_process.start()
 
-    print("Documentation servers are running:")
-    print("MkDocs: http://localhost:3010")
-    print("pdoc3: http://localhost:3011/frame")
+    logging.info("Documentation servers are running:")
+    logging.info("MkDocs: http://localhost:3010")
+    logging.info("pdoc3: http://localhost:3011/frame")
 
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("Shutting down servers...")
+        logging.info("Shutting down servers...")
         mkdocs_process.terminate()
         pdoc_process.terminate()
         watch_process.terminate()
         mkdocs_process.join()
         pdoc_process.join()
         watch_process.join()
-        print("Servers shut down.")
+        logging.info("Servers shut down.")
