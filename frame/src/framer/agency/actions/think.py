@@ -2,6 +2,7 @@ import asyncio
 from typing import Dict, Any
 from frame.src.services import ExecutionContext
 
+
 async def think(
     execution_context: ExecutionContext, thought: str = "Processing information..."
 ) -> Dict[str, Any]:

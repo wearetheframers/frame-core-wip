@@ -20,7 +20,9 @@ class ActionRegistry:
         self.execution_context_service = execution_context_service
         self._register_default_actions()
 
-    def set_execution_context_service(self, execution_context_service: ExecutionContextService):
+    def set_execution_context_service(
+        self, execution_context_service: ExecutionContextService
+    ):
         self.execution_context_service = execution_context_service
 
     def _register_default_actions(self):

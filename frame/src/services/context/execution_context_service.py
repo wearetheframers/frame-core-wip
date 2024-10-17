@@ -4,6 +4,7 @@ from frame.src.services import MemoryService
 from frame.src.services import EQService
 from frame.src.framer.soul import Soul
 
+
 class ExecutionContext:
     def __init__(
         self,
