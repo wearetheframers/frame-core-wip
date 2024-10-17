@@ -5,8 +5,8 @@ This module provides the SharedContextService class, which extends the
 ContextService to manage shared roles and goals across multiple Framers.
 """
 
-from .context_service import Context
+from .local_context_service import LocalContext
 
 
-class SharedContext(Context):
+class SharedContext(LocalContext):
     pass
