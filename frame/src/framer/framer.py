@@ -357,6 +357,32 @@ class Framer:
             if hasattr(plugin, "on_decision_made"):
                 plugin.on_decision_made(decision)
 
+    async def generate_tasks_from_perception(self, perception: Perception) -> List[Task]:
+        """
+        Generate tasks based on the given perception.
+
+        Args:
+            perception (Perception): The perception to generate tasks from.
+
+        Returns:
+            List[Task]: A list of generated tasks.
+        """
+        # Implement the logic to generate tasks based on the perception
+        # This is a placeholder implementation and should be customized based on your specific requirements
+        tasks = []
+        
+        # Example: Create a task to process the perception
+        task = Task(
+            description=f"Process perception of type: {perception.type}",
+            workflow_id="perception_processing",
+            status=TaskStatus.PENDING
+        )
+        tasks.append(task)
+
+        # You can add more sophisticated logic here to generate tasks based on the perception content
+
+        return tasks
+
     async def close(self) -> None:
         """
         Optimize and clear all memory for the Framer.
