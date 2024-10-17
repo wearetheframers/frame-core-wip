@@ -2,7 +2,7 @@ import logging
 import time
 import json
 from typing import List, Dict, Any, Optional, Callable, Union, Tuple
-from frame.src.services.llm.main import LLMService
+from frame.src.services import LLMService
 from frame.src.framer.config import FramerConfig
 from frame.src.framer.agency import Agency
 from frame.src.framer.brain import Brain
@@ -23,10 +23,10 @@ from frame.src.utils.token_utils import calculate_token_size
 from frame.src.framer.brain.perception import Perception
 from frame.src.framer.brain.decision import Decision
 from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import DSPyAdapter
-from frame.src.services.memory.main import MemoryService
-from frame.src.services.eq.main import EQService
+from frame.src.services import MemoryService
+from frame.src.services import EQService
 from frame.src.utils.metrics import MetricsManager
-from frame.src.services.context.execution_context_service import ExecutionContextService
+from frame.src.services import ExecutionContextService
 
 Observer = Callable[[Decision], None]
 
