@@ -418,26 +418,26 @@ async def run_async(
         logger.info(f"Generated roles: {roles}")
         logger.info(f"Generated goals: {goals}")
 
-        if isinstance(perception, str):
-            perception = json.loads(perception)
-        elif not isinstance(perception, dict):
-            if prompt:
-                perception = {"type": "input", "data": {"text": prompt}}
-            else:
+        if prompt:
+            decision = await framer.prompt(prompt)
+        else:
+            if isinstance(perception, str):
+                perception = json.loads(perception)
+            elif not isinstance(perception, dict):
                 raise click.UsageError("Either prompt or perception must be provided.")
 
-        if not isinstance(perception, dict):
-            logger.error("Perception is not a dictionary.")
-            raise TypeError("Perception must be a dictionary.")
+            if not isinstance(perception, dict):
+                logger.error("Perception is not a dictionary.")
+                raise TypeError("Perception must be a dictionary.")
 
-        if "data" not in perception:
-            logger.error("Perception data is missing the 'data' key.")
-            raise ValueError(
-                "Perception data must include a 'data' key with a dictionary value."
-            )
+            if "data" not in perception:
+                logger.error("Perception data is missing the 'data' key.")
+                raise ValueError(
+                    "Perception data must include a 'data' key with a dictionary value."
+                )
 
-        perception_obj = Perception.from_dict(perception)
-        decision = await framer.sense(perception_obj)
+            perception_obj = Perception.from_dict(perception)
+            decision = await framer.sense(perception_obj)
         if decision:
             # Log the summary
             logger.info("Execution Summary:")
