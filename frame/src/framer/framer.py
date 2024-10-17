@@ -302,6 +302,19 @@ class Framer:
         self.notify_observers(decision)
         return decision.to_dict()
 
+    async def prompt(self, text: str) -> Decision:
+        """
+        Process a prompt as a new perception of type 'hearing'.
+
+        Args:
+            text (str): The text of the prompt.
+
+        Returns:
+            Decision: The decision made based on the prompt.
+        """
+        perception = Perception(type="hearing", data={"text": text})
+        return await self.sense(perception)
+
     def add_observer(self, observer: Observer) -> None:
         """
         Add an observer to be notified when a decision is made.
