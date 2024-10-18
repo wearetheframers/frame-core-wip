@@ -28,15 +28,19 @@ class ProcessPerceptionAction(BaseAction):
         )
 
     async def execute(
-        self, execution_context: ExecutionContext, perception: dict
+        self, execution_context: ExecutionContext, **kwargs
     ) -> str:
+        perception = kwargs.get("perception", {})
         print(f"\nProcessing perception: {perception}")
         decision = await execution_context.process_perception(perception)
         print(f"Decision made: {decision}")
         # The line below isn't necessary since we won't error when executing a null decision
         if decision:
             await execution_context.execute_decision(decision)
-        return f"Processed perception: {perception['type']} - {perception['data']['object'] if 'object' in perception['data'] else perception['data']['sound']}"
+        perception_type = perception.get('type', 'unknown')
+        perception_data = perception.get('data', {})
+        object_or_sound = perception_data.get('object') or perception_data.get('sound', 'unknown')
+        return f"Processed perception: {perception_type} - {object_or_sound}"
 
 
 async def main():
