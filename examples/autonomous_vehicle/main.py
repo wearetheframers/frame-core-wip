@@ -1,74 +1,53 @@
 import sys
 import os
-
-# Import Frame from upper dir
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 import asyncio
 from frame import Frame, FramerConfig
 from autonomous_vehicle_plugin import AutonomousVehiclePlugin
+from frame.src.framer.agency.actions.base_action import Action
+from frame.src.services.execution_context import ExecutionContext
+from frame.src.models.framer.agency.priority import Priority
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
+class ProcessPerceptionAction(Action):
+    def __init__(self):
+        super().__init__("process_perception", "Process a perception and make a decision", Priority.HIGH)
+
+    async def execute(self, execution_context: ExecutionContext, perception: dict) -> str:
+        print(f"\nProcessing perception: {perception}")
+        decision = await execution_context.framer.sense(perception)
+        print(f"Decision made: {decision}")
+        await execution_context.framer.brain.execute_decision(decision)
+        return f"Processed perception: {perception['type']} - {perception['data']['object'] if 'object' in perception['data'] else perception['data']['sound']}"
 
 async def main():
-    # Initialize the Frame
     frame = Frame()
-
-    # Initialize configuration
     config = FramerConfig(name="AutonomousVehicleFramer")
-
-    # Create a Framer instance
     framer = await frame.create_framer(config)
-
-    # Initialize the Framer (this will generate roles and goals if not provided)
     await framer.initialize()
 
-    # Initialize and register the plugin
     av_plugin = AutonomousVehiclePlugin()
-    framer.brain.action_registry.add_action("stop", av_plugin.stop_vehicle)
-    framer.brain.action_registry.add_action("slow_down", av_plugin.slow_down_vehicle)
-    framer.brain.action_registry.add_action("change_lane", av_plugin.change_lane)
+    framer.brain.action_registry.register_action(av_plugin.stop_vehicle)
+    framer.brain.action_registry.register_action(av_plugin.slow_down_vehicle)
+    framer.brain.action_registry.register_action(av_plugin.change_lane)
 
-    # Simulate perceptions
+    process_perception_action = ProcessPerceptionAction()
+    framer.brain.action_registry.register_action(process_perception_action)
+
     perceptions = [
-        {
-            "type": "visual",
-            "data": {"object": "stop sign", "distance": "far"},
-            "source": "camera",
-        },
-        {
-            "type": "visual",
-            "data": {"object": "stop sign", "distance": "close"},
-            "source": "camera",
-        },
-        {
-            "type": "visual",
-            "data": {"object": "pedestrian", "distance": "medium"},
-            "source": "camera",
-        },
-        {
-            "type": "audio",
-            "data": {"sound": "siren", "distance": "far"},
-            "source": "microphone",
-        },
-        {
-            "type": "audio",
-            "data": {"sound": "siren", "distance": "close"},
-            "source": "microphone",
-        },
+        {"type": "visual", "data": {"object": "stop sign", "distance": "far"}, "source": "camera"},
+        {"type": "visual", "data": {"object": "stop sign", "distance": "close"}, "source": "camera"},
+        {"type": "visual", "data": {"object": "pedestrian", "distance": "medium"}, "source": "camera"},
+        {"type": "audio", "data": {"sound": "siren", "distance": "far"}, "source": "microphone"},
+        {"type": "audio", "data": {"sound": "siren", "distance": "close"}, "source": "microphone"},
     ]
 
-    # Process perceptions and make decisions
     for perception in perceptions:
-        print(f"\nProcessing perception: {perception}")
-        decision = await framer.sense(perception)
-        print(f"Decision made: {decision}")
-        await framer.brain.execute_decision(decision)
-        # Add a small delay to simulate time passing between perceptions
+        result = await framer.brain.action_registry.execute_action("process_perception", {"perception": perception})
+        print(result)
         await asyncio.sleep(1)
 
-    # Clean up
     await framer.close()
 
-
-# Run the example
 if __name__ == "__main__":
     asyncio.run(main())

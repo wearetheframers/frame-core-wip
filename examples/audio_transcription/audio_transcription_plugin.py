@@ -2,55 +2,65 @@ import asyncio
 import sounddevice as sd
 import numpy as np
 import whisper
-
+from frame.src.framer.agency.actions.base_action import Action
+from frame.src.services.execution_context import ExecutionContext
+from frame.src.models.framer.agency.priority import Priority
 
 class AudioTranscriptionPlugin:
-
     def __init__(self):
-        # Initialize any necessary state or resources
         self.model = whisper.load_model("base")
 
-    async def record_and_transcribe_audio(self):
-        # Record audio for a fixed duration
-        duration = 5  # seconds
-        sample_rate = 16000  # Hz
+    class RecordAndTranscribeAction(Action):
+        def __init__(self, plugin):
+            super().__init__("record_and_transcribe", "Record and transcribe audio", Priority.HIGH)
+            self.plugin = plugin
 
-        print("Recording...")
-        audio = sd.rec(
-            int(duration * sample_rate),
-            samplerate=sample_rate,
-            channels=1,
-            dtype="float32",
-        )
-        sd.wait()  # Wait until recording is finished
-        print("Recording finished.")
+        async def execute(self, execution_context: ExecutionContext) -> str:
+            duration = 5  # seconds
+            sample_rate = 16000  # Hz
 
-        # Convert audio to numpy array and transcribe
-        audio = np.squeeze(audio)
-        result = self.model.transcribe(audio, fp16=False)
-        print(f"Transcription result: {result}")
-        return result["text"]
+            print("Recording...")
+            audio = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype="float32")
+            sd.wait()
+            print("Recording finished.")
 
-    async def transcribe_audio(self, execution_context):
-        transcription = await self.record_and_transcribe_audio()
-        print(f"{execution_context.framer.config.name}: Transcription completed")
-        return transcription
+            audio = np.squeeze(audio)
+            result = self.plugin.model.transcribe(audio, fp16=False)
+            print(f"Transcription result: {result}")
+            return result["text"]
 
-    async def analyze_transcription(self, framer, transcription: str):
-        # Simulate analysis of transcription
-        notes = f"Analyzed notes from transcription: {transcription}"
-        print(f"{framer.config.name}: Analysis completed")
-        return notes
+    class AnalyzeTranscriptionAction(Action):
+        def __init__(self):
+            super().__init__("analyze_transcription", "Analyze transcription and create notes", Priority.MEDIUM)
 
-    async def continuous_record_and_transcribe(self, framer):
-        print("Starting continuous recording. Press Ctrl+C to stop.")
-        try:
-            while True:
-                transcription = await self.record_and_transcribe_audio()
-                if transcription:
-                    print(f"Transcription: {transcription}")
-                    notes = await self.analyze_transcription(framer, transcription)
-                    print(f"Actionable Notes: {notes}")
-                await asyncio.sleep(1)  # Simulate waiting for the next input
-        except KeyboardInterrupt:
-            print("Continuous recording stopped.")
+        async def execute(self, execution_context: ExecutionContext, transcription: str) -> str:
+            notes = f"Analyzed notes from transcription: {transcription}"
+            print(f"{execution_context.framer.config.name}: Analysis completed")
+            return notes
+
+    class ContinuousRecordAndTranscribeAction(Action):
+        def __init__(self, plugin):
+            super().__init__("continuous_record_and_transcribe", "Continuously record and transcribe audio", Priority.HIGH)
+            self.plugin = plugin
+
+        async def execute(self, execution_context: ExecutionContext) -> None:
+            print("Starting continuous recording. Press Ctrl+C to stop.")
+            try:
+                while True:
+                    transcription = await self.plugin.record_and_transcribe.execute(execution_context)
+                    if transcription:
+                        print(f"Transcription: {transcription}")
+                        notes = await self.plugin.analyze_transcription.execute(execution_context, transcription)
+                        print(f"Actionable Notes: {notes}")
+                    await asyncio.sleep(1)
+            except KeyboardInterrupt:
+                print("Continuous recording stopped.")
+
+    def register_actions(self, action_registry):
+        self.record_and_transcribe = self.RecordAndTranscribeAction(self)
+        self.analyze_transcription = self.AnalyzeTranscriptionAction()
+        self.continuous_record_and_transcribe = self.ContinuousRecordAndTranscribeAction(self)
+
+        action_registry.register_action(self.record_and_transcribe)
+        action_registry.register_action(self.analyze_transcription)
+        action_registry.register_action(self.continuous_record_and_transcribe)

@@ -1,28 +1,28 @@
 import sys
 import os
 import asyncio
-
-# Import Frame from upper dir
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-import asyncio
 from frame import Frame, FramerConfig
 from frame.src.utils.config_parser import parse_markdown_config
+from frame.src.framer.agency.actions.base_action import Action
+from frame.src.services.execution_context import ExecutionContext
+from frame.src.models.framer.agency.priority import Priority
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
+class EngageConversationAction(Action):
+    def __init__(self):
+        super().__init__("engage_conversation", "Engage in a deep conversation", Priority.HIGH)
+
+    async def execute(self, execution_context: ExecutionContext) -> str:
+        prompt = "Let's have a deep conversation about the nature of consciousness and artificial intelligence."
+        response = await execution_context.llm_service.get_completion(prompt)
+        return f"Engaged in a deep conversation: {response}"
 
 async def main():
-    # Load configuration from Markdown file
-    # Try to locate the config.md file in multiple potential directories
-    # Since we might be running this script inside the examples directory,
-    # or inside the root dir of the project.
     possible_paths = [
         os.path.join(os.path.dirname(__file__), "framer.md"),
-        os.path.join(
-            os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), "framer.md"
-        ),
-        os.path.join(
-            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")),
-            "framer.md",
-        ),
+        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), "framer.md"),
+        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")), "framer.md"),
     ]
 
     config = None
@@ -36,29 +36,21 @@ async def main():
     if config is None:
         raise FileNotFoundError("config.md not found in any of the expected locations.")
 
-    # Initialize the Frame
     frame = Frame()
-
-    # Create a Framer instance
-    if isinstance(config, FramerConfig):
-        config_dict = config.__dict__
-    else:
-        config_dict = config
-
+    config_dict = config.__dict__ if isinstance(config, FramerConfig) else config
     framer = await frame.create_framer(FramerConfig(**config_dict))
 
-    # Initialize the Framer
+    # Register the EngageConversationAction
+    engage_action = EngageConversationAction()
+    framer.brain.action_registry.register_action(engage_action)
+
     await framer.initialize()
 
-    # Simulate a task
-    task = {"name": "Engage", "description": "Engage in a deep conversation"}
-    result = await framer.perform_task(task)
+    # Execute the engage conversation action
+    result = await framer.brain.action_registry.execute_action("engage_conversation")
     print(f"Task result: {result}")
 
-    # Clean up
     await framer.close()
 
-
-# Run the example
 if __name__ == "__main__":
     asyncio.run(main())

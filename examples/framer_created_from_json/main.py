@@ -1,32 +1,28 @@
 import sys
 import os
 import asyncio
-
-# Import Frame from upper dir
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-import asyncio
 from frame import Frame, FramerConfig
-from frame.src.utils.config_parser import parse_json_config, parse_markdown_config
+from frame.src.utils.config_parser import parse_json_config
+from frame.src.framer.agency.actions.base_action import Action
+from frame.src.services.execution_context import ExecutionContext
+from frame.src.models.framer.agency.priority import Priority
 
-# Import Frame from upper dir
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
+class ExploreEnvironmentAction(Action):
+    def __init__(self):
+        super().__init__("explore_environment", "Explore the environment", Priority.MEDIUM)
+
+    async def execute(self, execution_context: ExecutionContext) -> str:
+        prompt = "Describe an interesting environment that an AI agent might explore."
+        response = await execution_context.llm_service.get_completion(prompt)
+        return f"Explored environment: {response}"
 
 async def main():
-    # Load configuration from JSON file
-    # Try to locate the config.json file in multiple potential directories
-    # Since we might be running this script inside the examples directory,
-    # or inside the root dir of the project.
     possible_paths = [
         os.path.join(os.path.dirname(__file__), "framer.json"),
-        os.path.join(
-            os.path.abspath(os.path.join(os.path.dirname(__file__), "..")),
-            "framer.json",
-        ),
-        os.path.join(
-            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")),
-            "framer.json",
-        ),
+        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), "framer.json"),
+        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")), "framer.json"),
     ]
 
     config = None
@@ -38,33 +34,23 @@ async def main():
             continue
 
     if config is None:
-        raise FileNotFoundError(
-            "config.json not found in any of the expected locations."
-        )
+        raise FileNotFoundError("config.json not found in any of the expected locations.")
 
-    # Initialize the Frame
     frame = Frame()
-
-    # Create a Framer instance
-    if isinstance(config, FramerConfig):
-        config_dict = config.__dict__
-    else:
-        config_dict = config
-
+    config_dict = config.__dict__ if isinstance(config, FramerConfig) else config
     framer = await frame.create_framer(FramerConfig(**config_dict))
 
-    # Initialize the Framer
+    # Register the ExploreEnvironmentAction
+    explore_action = ExploreEnvironmentAction()
+    framer.brain.action_registry.register_action(explore_action)
+
     await framer.initialize()
 
-    # Simulate a task
-    task = {"name": "Explore", "description": "Explore the environment"}
-    result = await framer.perform_task(task)
+    # Execute the explore environment action
+    result = await framer.brain.action_registry.execute_action("explore_environment")
     print(f"Task result: {result}")
 
-    # Clean up
     await framer.close()
 
-
-# Run the example
 if __name__ == "__main__":
     asyncio.run(main())
