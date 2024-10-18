@@ -67,7 +67,8 @@ class FramerFactory:
             execution_context=execution_context,
             context=None,
         )
-        # Initialize the Agency component
+        # Initialize the Agency component with default permissions
+        self.config.permissions = self.config.permissions or ["with_memory", "with_mem0_search_extract_summarize_plugin", "with_shared_context"]
         # Generate roles and goals. The Framer must be acting to respond to perceptions.
         if roles is None or goals is None:
             roles, goals = await agency.generate_roles_and_goals()

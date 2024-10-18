@@ -77,9 +77,13 @@ class Framer:
         # Existing initialization code...
 
         self.config = config
-        self.permissions = config.permissions
+        self.permissions = config.permissions or ["with_memory", "with_mem0_search_extract_summarize_plugin", "with_shared_context"]
 
         # Initialize services and plugins based on permissions
+        # Services like memory, eq, and shared_context are special plugins called services.
+        # They do not require explicit permissions to be accessed but must be passed into a Framer.
+        # The Mem0SearchExtractSummarizePlugin is a default plugin that provides a response mechanism
+        # requiring memory retrieval, functioning as a RAG mechanism.
         if "with_memory" in self.permissions and memory_adapter:
             self.memory_service = memory_service or MemoryService(adapter=memory_adapter)
 
@@ -322,6 +326,7 @@ class Framer:
             raise ValueError(f"Action {action_name} not found in plugin {plugin_name}.")
         
         return await action(**parameters)
+    
     async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """
         Perform a task asynchronously.
