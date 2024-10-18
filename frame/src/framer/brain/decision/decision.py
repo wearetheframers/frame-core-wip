@@ -138,7 +138,12 @@ class Decision(DecisionModel):
         """
         if isinstance(priority, int):
             return priority
-        return Priority.get(priority.upper(), 5)
+        if isinstance(priority, str):
+            try:
+                return Priority[priority.upper()].value
+            except KeyError:
+                raise ValueError(f"Invalid priority level: {priority}")
+        raise ValueError("Priority must be a string or Priority enum")
 
     def __str__(self) -> str:
         """
