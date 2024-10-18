@@ -1,12 +1,13 @@
-from __future__ import annotations
 import json
-from pydantic import Field
+from pydantic import Field, BaseModel
 from typing import Dict, Any, Optional, Union, List
 from frame.src.models.framer.brain.decision.decision import Decision as DecisionModel
 from frame.src.models.framer.agency.tasks import TaskStatus
 from frame.src.framer.agency.priority import Priority
-from frame.src.framer.agency.roles import Role, RoleStatus
-from frame.src.framer.agency.goals import Goal, GoalStatus
+
+from typing import TYPE_CHECKING
+from frame.src.framer.agency.roles import Role
+from frame.src.framer.agency.goals import Goal
 
 
 class Decision(DecisionModel):
@@ -34,15 +35,12 @@ class Decision(DecisionModel):
     task_status: TaskStatus = Field(
         default=TaskStatus.PENDING, description="Status of the associated task"
     )
-    related_roles: List[Role] = Field(
+    related_roles: List["Role"] = Field(
         default_factory=list, description="Roles related to this decision"
     )
-    related_goals: List[Goal] = Field(
+    related_goals: List["Goal"] = Field(
         default_factory=list, description="Goals related to this decision"
     )
-
-    class Config:
-        arbitrary_types_allowed = True
 
     @classmethod
     def from_json(cls, json_data: Union[str, Dict[str, Any]]) -> "Decision":
@@ -95,8 +93,8 @@ class Decision(DecisionModel):
         priority: int = 5,
         expected_results: Optional[Any] = None,
         task_status: TaskStatus = TaskStatus.PENDING,
-        related_roles: List[Role] = None,
-        related_goals: List[Goal] = None,
+        related_roles: List["Role"] = None,
+        related_goals: List["Goal"] = None,
     ) -> "Decision":
         """
         Create a new Decision instance with the given parameters.
@@ -128,29 +126,19 @@ class Decision(DecisionModel):
         )
 
     @staticmethod
-    def convert_priority(priority: Union[str, int, Priority]) -> Priority:
+    def convert_priority(priority: Union[str, int]) -> int:
         """
-        Convert a priority level from string, integer, or Priority enum to a Priority enum value.
+        Convert a priority level from string or integer to an integer value.
 
         Args:
-            priority (Union[str, int, Priority]): The priority level as a string, integer, or Priority enum.
+            priority (Union[str, int]): The priority level as a string or integer.
 
         Returns:
-            Priority: The priority level as a Priority enum.
+            int: The priority level as an integer.
         """
-        if isinstance(priority, Priority):
-            return priority
-        if isinstance(priority, str):
-            try:
-                return Priority[priority.upper()]
-            except KeyError:
-                return Priority.MEDIUM
         if isinstance(priority, int):
-            try:
-                return Priority(priority)
-            except ValueError:
-                return Priority.MEDIUM
-        return Priority.MEDIUM
+            return priority
+        return Priority.get(priority.upper(), 5)
 
     def __str__(self) -> str:
         """
@@ -168,7 +156,12 @@ class Decision(DecisionModel):
             f"related_goals={len(self.related_goals)})"
         )
 
-    async def execute(self, action_registry: Any) -> Dict[str, Any]:
+    class Config:
+        arbitrary_types_allowed = True
+
+Decision.update_forward_refs()
+
+async def execute(self, action_registry: Any) -> Dict[str, Any]:
         """
         Execute the decision using the provided action registry.
 
@@ -184,48 +177,6 @@ class Decision(DecisionModel):
         action_func = action_registry.actions[self.action]["action_func"]
         try:
             result = await action_func(**self.parameters)
-            self.task_status = TaskStatus.COMPLETED
             return {"result": result, "error": None}
         except Exception as e:
-            self.task_status = TaskStatus.FAILED
             return {"result": None, "error": str(e)}
-
-    def add_related_role(self, role: Role) -> None:
-        """
-        Add a related role to the decision.
-
-        Args:
-            role (Role): The role to add to the related roles.
-        """
-        if role not in self.related_roles:
-            self.related_roles.append(role)
-
-    def add_related_goal(self, goal: Goal) -> None:
-        """
-        Add a related goal to the decision.
-
-        Args:
-            goal (Goal): The goal to add to the related goals.
-        """
-        if goal not in self.related_goals:
-            self.related_goals.append(goal)
-
-    def remove_related_role(self, role_id: str) -> None:
-        """
-        Remove a related role from the decision.
-
-        Args:
-            role_id (str): The ID of the role to remove from the related roles.
-        """
-        self.related_roles = [role for role in self.related_roles if role.id != role_id]
-
-    def remove_related_goal(self, goal_name: str) -> None:
-        """
-        Remove a related goal from the decision.
-
-        Args:
-            goal_name (str): The name of the goal to remove from the related goals.
-        """
-        self.related_goals = [
-            goal for goal in self.related_goals if goal.name != goal_name
-        ]

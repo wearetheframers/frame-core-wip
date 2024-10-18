@@ -64,10 +64,7 @@ class Brain:
         self.execution_context = execution_context or ExecutionContext(
             llm_service=llm_service,
             soul=soul,
-            config=FramerConfig(
-                name="DefaultFramer",
-                default_model=default_model
-            )
+            config=FramerConfig(name="DefaultFramer", default_model=default_model),
         )
 
         self.mind = Mind(self, recent_memories_limit)
@@ -94,10 +91,14 @@ class Brain:
                 process_perception=self.process_perception,
                 execute_decision=self.execute_decision,
                 config=FramerConfig(
-                    name=self.framer.config.name if hasattr(self, 'framer') else "DefaultFramer",
-                    default_model=self.default_model
-                )
-            )
+                    name=(
+                        self.framer.config.name
+                        if hasattr(self, "framer")
+                        else "DefaultFramer"
+                    ),
+                    default_model=self.default_model,
+                ),
+            ),
         )
 
         # Register the respond action using the agency's perform_task method
@@ -113,10 +114,12 @@ class Brain:
 
     def set_framer(self, framer):
         self.framer = framer
-        if hasattr(self.agency, 'set_framer'):
+        if hasattr(self.agency, "set_framer"):
             self.agency.set_framer(framer)
         else:
-            logger.warning("Agency does not have a set_framer method. This might cause issues.")
+            logger.warning(
+                "Agency does not have a set_framer method. This might cause issues."
+            )
 
     def get_framer(self):
         return self.framer
@@ -137,9 +140,13 @@ class Brain:
         """
         # Gather context for thinking
         soul_context = {}
-        if self.execution_context and hasattr(self.execution_context, 'soul') and self.execution_context.soul:
+        if (
+            self.execution_context
+            and hasattr(self.execution_context, "soul")
+            and self.execution_context.soul
+        ):
             soul_context = self.execution_context.soul.get_current_state()
-        
+
         roles_and_goals = {"roles": self.roles, "goals": self.goals}
         recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
         recent_perceptions = self.mind.get_recent_perceptions(5)
@@ -230,7 +237,7 @@ class Brain:
                 confidence=0.0,
                 priority=1,
                 related_roles=[],
-                related_goals=[]
+                related_goals=[],
             )
         if hasattr(self, "framer") and getattr(self.framer, "can_execute", False):
             await self.execute_decision(decision)
@@ -256,7 +263,7 @@ class Brain:
                 confidence=0.0,
                 priority=1,
                 related_roles=[],
-                related_goals=[]
+                related_goals=[],
             )
 
         response = await self._get_decision_prompt(perception)
@@ -330,6 +337,8 @@ class Brain:
                 goal for goal in active_goals if goal.priority >= priority_int
             ],
         )
+        logger.info(f"Decision made: {decision}")
+        return decision
 
     async def _get_decision_prompt(self, perception: Optional[Perception]) -> str:
         """
