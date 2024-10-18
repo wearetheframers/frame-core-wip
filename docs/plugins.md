@@ -13,7 +13,26 @@ Framers use plugins to enhance their ability to process various types of percept
 
 The plugin system works in conjunction with the Framer's permission system, which determines which plugins a Framer has access to. This allows for fine-grained control over a Framer's capabilities and ensures that Framers only use actions they are explicitly allowed to perform.
 
-Frame will feature a plugin marketplace where premium plugins and community plugins can be developed, given away, or sold. This marketplace will foster a rich ecosystem of extensions and customizations, similar to mod communities in popular games.
+Frame features a plugin marketplace where premium plugins and community plugins can be developed, given away, or sold. This marketplace fosters a rich ecosystem of extensions and customizations, similar to mod communities in popular games.
+
+## Plugin Permissions
+
+Plugins are controlled by a permission system. Each plugin has a corresponding permission that must be granted to a Framer for it to use that plugin. Permissions are specified in the FramerConfig when creating a Framer.
+
+The permission format for plugins is `with<PluginName>`. For example:
+- `withSearchExtractSummarizePlugin`: Enables access to the Search Extract Summarize plugin
+
+To give a Framer access to a plugin, include its permission in the FramerConfig:
+
+```python
+config = FramerConfig(
+    name="Example Framer",
+    permissions=["withMemory", "withEQ", "withSearchExtractSummarizePlugin"]
+)
+framer = await frame.create_framer(config)
+```
+
+This configuration gives the Framer access to the Memory service, EQ service, and the Search Extract Summarize plugin.
 
 ## Plugin Base
 
