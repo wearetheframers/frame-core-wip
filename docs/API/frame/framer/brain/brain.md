@@ -11,7 +11,7 @@ The Brain class is a critical component of the [[framer|Framer]], responsible fo
 
 ## Key Features
 
-- **Perception Integration**: Processes sensory input to inform decision-making.
+- **Perception Integration**: Processes a wide range of inputs to inform decision-making. These perceptions are not limited to human senses and can include any type of information or stimulus that can be analyzed by the language model.
 - **Memory Utilization**: Uses stored memories to enhance decision accuracy.
 - **Thought Generation**: Generates thoughts based on perceptions and memories.
 

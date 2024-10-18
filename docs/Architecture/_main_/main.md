@@ -48,9 +48,10 @@ The `Framed` class represents a collection of `Framer` objects working together 
    - The `Agency` generates roles and goals based on the seed story if not provided.
 
 2. **Perception and Thought Process**
-   - The `Framer` receives perceptions through the `sense()` method.
+   - The `Framer` receives perceptions through the `sense()` method. These perceptions can be any type of information or stimulus, not limited to human senses. This includes traditional inputs like text, images, or sounds, but also extends to more abstract or non-human sensory data such as magnetic fields, vibrations, internal states like hunger, or any other data that can be analyzed by the language model.
+   - The "prompt" action in a Framer is essentially processing a perception of hearing for text input and responding to it.
    - Perceptions are processed in the `Soul` and stored in short-term memory.
-   - The `Mind` generates new thoughts based on perceptions and memories.
+   - The `Mind` generates new thoughts based on these diverse perceptions and memories.
 
 3. **Decision Making**
    - The `Brain` component makes decisions based on current perceptions, memories, and thoughts.

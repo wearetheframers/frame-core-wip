@@ -6,9 +6,11 @@ The `ActionRegistry` class in the Frame framework manages and executes actions w
 
 The `ActionRegistry` class is responsible for managing actions that can be performed by Framers. It inherits from the `ConfigurableMixin`, allowing it to be configured with various options.
 
-Actions in the Frame framework are central to how Framers process perceptions and make decisions. When a Framer receives a perception (which can be any type of incoming data like text, images, or sounds), it uses its available actions to decide how to respond. The decision-making process takes into account:
+Actions in the Frame framework are central to how Framers process perceptions and make decisions. When a Framer receives a perception, it uses its available actions to decide how to respond. Perceptions in Frame can be any type of information or stimulus, not limited to human senses. This includes traditional inputs like text, images, or sounds, but also extends to more abstract or non-human sensory data such as magnetic fields, vibrations, internal states like hunger, or any other data that can be analyzed by the language model. The "prompt" action in a Framer is essentially processing a perception of hearing for text input and responding to it.
 
-1. The type and content of the perception
+The decision-making process takes into account:
+
+1. The type and content of the perception (which can be highly diverse)
 2. The Framer's current roles and goals
 3. The priority of each available action
 4. The Framer's permissions (which determine which plugins and actions it can use)

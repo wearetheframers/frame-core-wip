@@ -17,7 +17,7 @@ the **[[framed]]**: A collection of Framer objects working together to achieve c
 
 ## Key Features
 
-- Multi-modal cognitive agents framework
+- Multi-modal cognitive agents framework capable of processing diverse types of perceptions
 - Supports developing dynamic, emergent behaviors
 - Layered memory understanding entity relationships with Mem0
 - Supports global and multi-user memory storage
