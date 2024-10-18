@@ -2,6 +2,7 @@ import asyncio
 import sounddevice as sd
 import numpy as np
 import whisper
+import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame.src.framer.agency.actions import BaseAction
