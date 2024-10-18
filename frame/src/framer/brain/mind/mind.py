@@ -41,65 +41,6 @@ class Mind:
         """
         self.recent_memories_limit = limit
 
-    async def make_decision(self, perception: Perception) -> Decision:
-        """
-        Make a decision based on the current perceptions and thoughts.
-
-        Args:
-            perception (Perception): The perception to base the decision on.
-
-        Returns:
-            Decision: The decision made.
-        """
-        # Get the decision prompt from the brain
-        prompt = self.brain._get_decision_prompt(perception)
-
-        # Use the LLM service to get a decision
-        response = await get_completion(
-            self.brain.llm_service, prompt, model=self.brain.default_model
-        )
-        try:
-            if isinstance(response, AsyncMock):
-                # For testing purposes, return a default decision
-                return Decision(
-                    action="default_action",
-                    parameters={},
-                    reasoning="Default decision for testing",
-                    confidence=0.5,
-                    priority=5,
-                )
-
-            decision_data = json.loads(response) if isinstance(response, str) else {}
-            action = decision_data.get("action", "default_action")
-            if action not in self.brain.action_registry.actions:
-                logger.warning(
-                    f"Invalid action: {action}. Defaulting to 'default_action'."
-                )
-                action = "default_action"
-                reasoning = f"Invalid action '{action}' was generated. Defaulted to 'default_action'."
-            else:
-                reasoning = decision_data.get("reasoning", "No reasoning provided.")
-
-            decision = Decision(
-                action=action,
-                parameters=decision_data.get("parameters", {}),
-                reasoning=decision_data.get("reasoning", "No reasoning provided."),
-                confidence=float(decision_data.get("confidence", 0.5)),
-                priority=int(decision_data.get("priority", 5)),
-            )
-        except json.JSONDecodeError:
-            logger.error(f"Failed to parse decision response: {response}")
-            decision = Decision(
-                action="think",
-                parameters={"error": "Failed to parse decision"},
-                reasoning="The decision response could not be parsed as JSON.",
-                confidence=0.1,
-                priority=1,
-            )
-
-        logger.debug(f"Decision made: {decision}")
-        return decision
-
     def think(self, thought: str) -> None:
         """
         Add a new thought to the Mind.
