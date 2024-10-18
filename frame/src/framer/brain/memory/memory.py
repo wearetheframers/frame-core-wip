@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any, List, Optional
 from typing import Dict, Any, List, Optional
-from frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter import Mem0Adapter
+from frame.src.services.memory.memory_adapters.mem0.mem0 import Mem0Adapter
 
 logger = logging.getLogger(__name__)
 
@@ -38,10 +38,10 @@ class Memory:
         if core_memory is not None:
             return core_memory
 
-        mem0_data = self.mem0.retrieve(user_id=self.user_id)
-        for item in mem0_data:
-            if isinstance(item, dict) and item.get("key") == key:
-                return item.get("value")
+        mem0_data = self.mem0.get_all(user_id=self.user_id)
+        for memory_id, item in enumerate(mem0_data):
+            if isinstance(item, dict) and item.get("metadata", {}).get("key") == key:
+                return item.get("memory")
         return None
 
     def set_core_memory(self, key: str, value: Any) -> Any:
@@ -56,7 +56,7 @@ class Memory:
             Any: The stored value.
         """
         self.core[key] = value
-        self.mem0.store(f"{key}: {value}", user_id=self.user_id, metadata={"key": key})
+        self.mem0.store(str(value), user_id=self.user_id, metadata={"key": key})
         return value
 
     def retrieve_memory(self, key: str) -> Any:
@@ -87,7 +87,7 @@ class Memory:
     def get_all_memories(self) -> Dict[str, Any]:
         return {
             "core": self.core,
-            "long_term": self.mem0.retrieve(user_id=self.user_id),
+            "long_term": self.mem0.get_all(user_id=self.user_id),
             "short_term": self.short_term,
         }
 

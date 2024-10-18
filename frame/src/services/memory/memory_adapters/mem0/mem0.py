@@ -3,7 +3,9 @@ from typing import Dict, Any, List, Optional
 
 from typing import Any, Dict, List, Optional
 
-class Mem0Adapter:
+from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
+
+class Mem0Adapter(MemoryAdapterInterface):
     """
     Adapter for basic memory operations.
 
@@ -19,12 +21,20 @@ class Mem0Adapter:
         memory: str,
         user_id: str = "default",
         metadata: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> int:
         if user_id not in self.storage:
             self.storage[user_id] = []
+        memory_id = len(self.storage[user_id])
         self.storage[user_id].append({"memory": memory, "metadata": metadata or {}})
+        return memory_id
 
-    def retrieve(self, user_id: str = "default") -> List[Dict[str, Any]]:
+    def retrieve(self, memory_id: int, user_id: str = "default") -> Optional[Any]:
+        user_memories = self.storage.get(user_id, [])
+        if 0 <= memory_id < len(user_memories):
+            return user_memories[memory_id]
+        return None
+
+    def get_all(self, user_id: str = "default") -> List[Dict[str, Any]]:
         return self.storage.get(user_id, [])
 
     def add(
