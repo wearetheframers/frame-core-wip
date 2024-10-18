@@ -3,13 +3,13 @@ import os
 import asyncio
 from frame import Frame, FramerConfig
 from frame.src.utils.config_parser import parse_json_config
-from frame.src.framer.agency.actions.base_action import Action
+from frame.src.framer.agency.actions import BaseAction
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-class ExploreEnvironmentAction(Action):
+class ExploreEnvironmentAction(BaseAction):
     def __init__(self):
         super().__init__("explore_environment", "Explore the environment", Priority.MEDIUM)
 

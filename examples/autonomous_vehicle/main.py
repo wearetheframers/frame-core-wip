@@ -5,13 +5,13 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 
 from frame import Frame, FramerConfig
 from autonomous_vehicle_plugin import AutonomousVehiclePlugin
-from frame.src.framer.agency.actions.base_action import Action
+from frame.src.framer.agency.actions import BaseAction
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 from frame.src.framer.agency.action_registry import ActionRegistry
 
 
-class ProcessPerceptionAction(Action):
+class ProcessPerceptionAction(BaseAction):
     """
     This replaces some default actions in our Framer like observe etc. 
     It is just meant as a custom function that allows low-level decision-making control

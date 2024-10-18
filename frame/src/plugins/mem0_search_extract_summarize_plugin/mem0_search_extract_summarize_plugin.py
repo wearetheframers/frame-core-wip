@@ -1,13 +1,13 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-from frame.src.framer.brain.plugins.base import PluginBase
+from frame.src.framer.brain.plugins.base import BasePlugin
 from frame.src.framer.agency.goals import Goal, GoalStatus
 from frame.src.framer.agency.roles import Role, RoleStatus
 from frame.src.framer.agency.priority import Priority
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter import Mem0Adapter
 
-class Mem0SearchExtractSummarizePlugin(PluginBase):
+class Mem0SearchExtractSummarizePlugin(BasePlugin):
     def __init__(self, framer):
         super().__init__(framer)
         self.logger = logging.getLogger(__name__)

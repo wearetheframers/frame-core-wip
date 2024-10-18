@@ -1,9 +1,9 @@
 from typing import Dict, Any
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.framer.agency.actions.base_action import Action
+from frame.src.framer.agency.actions.base import BaseAction
 from frame.src.framer.agency.priority import Priority
 
-class ResearchAction(Action):
+class ResearchAction(BaseAction):
     def __init__(self):
         super().__init__("research", "Perform research on a given topic and summarize findings", Priority.HIGH)
 

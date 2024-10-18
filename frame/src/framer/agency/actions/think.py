@@ -1,9 +1,9 @@
 from typing import Dict, Any
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.framer.agency.actions.base_action import Action
+from frame.src.framer.agency.actions.base import BaseAction
 from frame.src.framer.agency.priority import Priority
 
-class ThinkAction(Action):
+class ThinkAction(BaseAction):
     def __init__(self):
         super().__init__("think", "Ponder and reflect on the current situation", Priority.HIGH)
 

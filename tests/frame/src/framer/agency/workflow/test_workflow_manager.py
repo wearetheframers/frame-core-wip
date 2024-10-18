@@ -62,7 +62,7 @@ def test_set_final_task_for_non_existent_workflow(workflow_manager):
 
 
 import pytest
-from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
+from frame.src.framer.agency.workflow.workflow_manager import WorkflowManager
 from frame.src.framer.agency.tasks.task import Task
 
 

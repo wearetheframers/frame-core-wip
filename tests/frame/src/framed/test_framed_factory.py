@@ -4,7 +4,7 @@ from frame.src.framed.config import FramedConfig
 from frame.src.framed import Framed
 from frame.src.framed.framed_factory import FramedFactory
 from frame.src.services.llm.main import LLMService
-from frame.src.framer.agency.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 
 
 @pytest.fixture

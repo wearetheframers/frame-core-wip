@@ -2,13 +2,13 @@ import sys
 import os
 import asyncio
 from frame import Frame, FramerConfig
-from frame.src.framer.agency.actions.base_action import Action
+from frame.src.framer.agency.actions import BaseAction
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.models.framer.agency.priority import Priority
+from frame.src.framer.agency.priority import Priority
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-class StreamingResponseAction(Action):
+class StreamingResponseAction(BaseAction):
     def __init__(self):
         super().__init__("streaming_response", "Generate a streaming response", Priority.MEDIUM)
 

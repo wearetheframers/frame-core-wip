@@ -1,8 +1,8 @@
 from typing import Dict, Any
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.framer.agency.actions.base_action import Action
+from frame.src.framer.agency.actions.base import BaseAction
 
-class RespondAction(Action):
+class RespondAction(BaseAction):
     def __init__(self):
         super().__init__("respond", "Generate a response based on the current context")
 

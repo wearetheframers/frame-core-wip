@@ -1,12 +1,9 @@
 from typing import Any, Optional
 from frame.src.services.execution_context import ExecutionContext
-
-from typing import Any, Optional
-from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 from frame.src.framer.agency.tasks.task import Task
 
-class Action:
+class BaseAction:
     """
     Base class for all actions in the Frame framework.
     Actions can create Tasks, which can enforce output types.
@@ -45,4 +42,4 @@ class Action:
         return Task(description=description, expected_output_type=expected_output_type, **kwargs)
 
     def __str__(self):
-        return f"Action(name={self.name}, priority={self.priority})"
+        return f"BaseAction(name={self.name}, priority={self.priority})"

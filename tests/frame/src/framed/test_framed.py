@@ -6,7 +6,7 @@ from frame.src.framer.agency.agency import Agency
 from frame.src.framer.brain.brain import Brain
 from frame.src.framer.soul.soul import Soul
 from frame.src.framed.framed_factory import FramedFactory
-from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
+from frame.src.framer.agency.workflow.workflow_manager import WorkflowManager
 from frame.src.framer.agency.execution_context import ExecutionContext
 
 

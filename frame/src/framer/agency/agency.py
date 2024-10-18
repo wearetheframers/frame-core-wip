@@ -2,9 +2,9 @@ from typing import List, Dict, Any, Optional, Tuple, Union, TYPE_CHECKING
 from frame.src.constants.models import DEFAULT_MODEL
 from frame.src.framer.agency.priority import Priority
 from frame.src.framer.agency.tasks import Task, TaskStatus
-from frame.src.framer.agency.workflow.workflow_manager import WorkflowManager
-from frame.src.framer.agency.workflow.workflow import Workflow
-from frame.src.services.llm.main import LLMService
+from frame.src.framer.agency.workflow import WorkflowManager
+from frame.src.framer.agency.workflow import Workflow
+from frame.src.services.llm import LLMService
 from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.framer.agency.roles import Role, RoleStatus
 from frame.src.framer.agency.goals import Goal, GoalStatus

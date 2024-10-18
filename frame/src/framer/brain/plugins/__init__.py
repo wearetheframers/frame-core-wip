@@ -1,1 +1,1 @@
-from .base import PluginBase
+from .base import BasePlugin

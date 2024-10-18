@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict
 
 
-class PluginBase(ABC):
+class BasePlugin(ABC):
     """
     Base class for all Frame plugins.
 
@@ -68,7 +68,7 @@ class PluginBase(ABC):
 # inheriting from the PluginBase class.
 
 
-class ExamplePlugin(PluginBase):
+class ExamplePlugin(BasePlugin):
     async def on_load(self):
         self.logger.info("Example plugin loaded")
         # Example of using get_api_key method

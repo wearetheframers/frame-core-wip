@@ -4,7 +4,7 @@ import logging
 from typing import Dict, Any, List, Tuple
 from dotenv import load_dotenv
 import json
-from frame.src.framer.brain.plugins import PluginBase
+from frame.src.framer.brain.plugins import BasePlugin
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
                 plugin_class = getattr(module, f"{item.capitalize()}Plugin")
 
                 # Check if the plugin class inherits from PluginBase
-                if not issubclass(plugin_class, PluginBase):
+                if not issubclass(plugin_class, BasePlugin):
                     logger.warning(f"Plugin {item} does not inherit from PluginBase. Skipping.")
                     continue
 

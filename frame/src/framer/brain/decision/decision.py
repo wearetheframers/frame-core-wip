@@ -3,6 +3,7 @@ from pydantic import Field
 from typing import Dict, Any, Optional, Union, List
 from frame.src.models.framer.brain.decision.decision import Decision as DecisionModel
 from frame.src.models.framer.agency.tasks import TaskStatus
+from frame.src.framer.agency.priority import Priority
 from frame.src.framer.agency import Role
 from frame.src.framer.agency import Goal
 
@@ -122,14 +123,26 @@ class Decision(DecisionModel):
             related_goals=related_goals or [],
         )
 
-    def update_status(self, new_status: TaskStatus) -> None:
+    @staticmethod
+    def convert_priority(priority: Union[str, int]) -> int:
         """
-        Update the task status of the decision.
+        Convert a priority level from string or integer to an integer value.
 
         Args:
-            new_status (TaskStatus): The new status to set.
+            priority (Union[str, int]): The priority level as a string or integer.
+
+        Returns:
+            int: The priority level as an integer.
         """
-        self.task_status = new_status
+        if isinstance(priority, int):
+            return priority
+        priority_map = {
+            "LOW": 1,
+            "MEDIUM": 5,
+            "HIGH": 10,
+            "CRITICAL": 15
+        }
+        return priority_map.get(priority.upper(), 5)
 
     def __str__(self) -> str:
         """

@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from frame.src.framer.agency.actions.respond import respond
+from frame.src.framer.agency.actions.respond import generate_response as respond
 from frame.src.services import ExecutionContext
 
 

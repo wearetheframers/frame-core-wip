@@ -2,7 +2,7 @@ import asyncio
 import logging
 import json
 from typing import Dict, Any, Callable, Optional, TYPE_CHECKING, Union
-from frame.src.framer.agency.actions.base_action import Action
+from frame.src.framer.agency.actions import BaseAction
 
 if TYPE_CHECKING:
     from frame.src.services import ExecutionContext
@@ -57,9 +57,9 @@ class ActionRegistry:
         self._register_default_actions()
 
     def register_action(
-        self, action: Union[str, Action, Callable], action_func: Optional[Callable] = None, description: str = "", priority: int = 5
+        self, action: Union[str, BaseAction, Callable], action_func: Optional[Callable] = None, description: str = "", priority: int = 5
     ):
-        if isinstance(action, Action):
+        if isinstance(action, BaseAction):
             name = action.name
             action_func = action.execute
             description = action.description

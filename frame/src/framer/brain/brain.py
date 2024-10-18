@@ -42,6 +42,7 @@ class Brain:
         default_model: str = "gpt-3.5-turbo",
         recent_memories_limit: int = 5,
         soul: Optional[Soul] = None,
+        execution_context: Optional[ExecutionContext] = None,
     ):
         """
         Initialize the Brain with the necessary components.
@@ -53,12 +54,21 @@ class Brain:
             default_model (str): The default language model to use.
             recent_memories_limit (int): The number of recent memories to keep. Defaults to 5.
             soul (Optional[Soul]): The Soul instance for the Brain.
+            execution_context (Optional[ExecutionContext]): The execution context for the Brain.
         """
         self.llm_service = llm_service
         self.default_model = default_model
         self.roles = roles
         self.goals = goals
         self.soul = soul
+        self.execution_context = execution_context or ExecutionContext(
+            llm_service=llm_service,
+            soul=soul,
+            config=FramerConfig(
+                name="DefaultFramer",
+                default_model=default_model
+            )
+        )
 
         self.mind = Mind(self, recent_memories_limit)
 
@@ -126,15 +136,14 @@ class Brain:
                 - new_prompt (str): The new prompt if generate_new_prompt is True.
         """
         # Gather context for thinking
-        soul_context = (
-            self.execution_context.soul.get_current_state()
-            if self.execution_context.soul
-            else {}
-        )
+        soul_context = {}
+        if self.execution_context and hasattr(self.execution_context, 'soul') and self.execution_context.soul:
+            soul_context = self.execution_context.soul.get_current_state()
+        
         roles_and_goals = {"roles": self.roles, "goals": self.goals}
         recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
         recent_perceptions = self.mind.get_recent_perceptions(5)
-        execution_state = self.execution_context.state
+        execution_state = self.execution_context.state if self.execution_context else {}
 
     def parse_json_response(self, response: str) -> Any:
         """
@@ -212,6 +221,17 @@ class Brain:
 
         self.mind.perceptions.append(perception)
         decision = await self.make_decision(perception)
+        if decision is None:
+            logger.error("Failed to make a decision. Returning default decision.")
+            decision = Decision(
+                action="error",
+                parameters={},
+                reasoning="Failed to make a decision",
+                confidence=0.0,
+                priority=1,
+                related_roles=[],
+                related_goals=[]
+            )
         if hasattr(self, "framer") and getattr(self.framer, "can_execute", False):
             await self.execute_decision(decision)
         return decision
@@ -229,7 +249,15 @@ class Brain:
                       and priority.
         """
         if perception is None:
-            return Decision(action="no_action", reasoning="No perception provided")
+            return Decision(
+                action="no_action",
+                parameters={},
+                reasoning="No perception provided",
+                confidence=0.0,
+                priority=1,
+                related_roles=[],
+                related_goals=[]
+            )
 
         response = await self._get_decision_prompt(perception)
         decision_data = self.parse_json_response(response)
@@ -286,21 +314,20 @@ class Brain:
         goals_priority = max(
             [goal.priority for goal in active_goals], default=Priority.MEDIUM
         )
-        decision_priority = Priority.from_value(decision_data.get("priority", "MEDIUM"))
         priority_value = decision_data.get("priority", "MEDIUM")
-        priority = Priority.from_string(priority_value) if isinstance(priority_value, str) else Priority(priority_value)
+        priority_int = Decision.convert_priority(priority_value)
 
-        return Decision(
+        decision = Decision(
             action=action,
             parameters=parameters,
             reasoning=reasoning,
             confidence=float(decision_data.get("confidence", 0.5)),
-            priority=priority,
+            priority=priority_int,
             related_roles=[
-                role for role in active_roles if role.priority >= priority.value
+                role for role in active_roles if role.priority >= priority_int
             ],
             related_goals=[
-                goal for goal in active_goals if goal.priority >= priority.value
+                goal for goal in active_goals if goal.priority >= priority_int
             ],
         )
 
@@ -364,7 +391,7 @@ class Brain:
         - parameters: Any relevant parameters for the action (e.g., new roles, goals, tasks, research topic, or response content)
         - reasoning: Your reasoning for this decision, including how it aligns with current roles and goals
         - confidence: A float between 0 and 1 indicating your confidence in this decision
-        - priority: A string representing the priority level (e.g., "MEDIUM", "HIGH", etc.) based on the urgency and importance of the action
+        - priority: A string representing the priority level (e.g., "LOW", "MEDIUM", "HIGH", "CRITICAL") or an integer between 1 and 10 based on the urgency and importance of the action
         - related_roles: A list of role names that are most relevant to this decision
         - related_goals: A list of goal names that are most relevant to this decision
 

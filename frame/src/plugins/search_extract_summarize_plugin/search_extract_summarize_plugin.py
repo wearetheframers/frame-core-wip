@@ -3,7 +3,7 @@
 # import urllib.parse
 # from typing import Any, Dict, List, Optional
 
-# from frame.src.framer.brain.plugins.base import PluginBase
+# from frame.src.framer.brain.plugins.base import BasePlugin
 # from frame.src.models.framer.agency.goals import Goal, GoalStatus
 # from frame.src.models.framer.agency.roles import Role, RoleStatus
 # from frame.src.models.framer.agency.priority import Priority
@@ -19,7 +19,7 @@
 # from vectordb import Memory
 
 
-# class SearchExtractSummarizePlugin(PluginBase):
+# class SearchExtractSummarizePlugin(BasePlugin):
 #     def __init__(self, framer):
 #         super().__init__(framer)
 #         self.logger = logging.getLogger(__name__)

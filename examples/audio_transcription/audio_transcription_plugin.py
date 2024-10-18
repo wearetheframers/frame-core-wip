@@ -2,7 +2,7 @@ import asyncio
 import sounddevice as sd
 import numpy as np
 import whisper
-from frame.src.framer.agency.actions.base_action import Action
+from frame.src.framer.agency.actions import BaseAction
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 
@@ -10,7 +10,7 @@ class AudioTranscriptionPlugin:
     def __init__(self):
         self.model = whisper.load_model("base")
 
-    class RecordAndTranscribeAction(Action):
+    class RecordAndTranscribeAction(BaseAction):
         def __init__(self, plugin):
             super().__init__("record_and_transcribe", "Record and transcribe audio", Priority.HIGH)
             self.plugin = plugin
@@ -29,7 +29,7 @@ class AudioTranscriptionPlugin:
             print(f"Transcription result: {result}")
             return result["text"]
 
-    class AnalyzeTranscriptionAction(Action):
+    class AnalyzeTranscriptionAction(BaseAction):
         def __init__(self):
             super().__init__("analyze_transcription", "Analyze transcription and create notes", Priority.MEDIUM)
 
@@ -38,7 +38,7 @@ class AudioTranscriptionPlugin:
             print(f"{execution_context.framer.config.name}: Analysis completed")
             return notes
 
-    class ContinuousRecordAndTranscribeAction(Action):
+    class ContinuousRecordAndTranscribeAction(BaseAction):
         def __init__(self, plugin):
             super().__init__("continuous_record_and_transcribe", "Continuously record and transcribe audio", Priority.HIGH)
             self.plugin = plugin

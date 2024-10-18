@@ -23,6 +23,8 @@ nav:
                   - Agency: API/frame/framer/agency/agency.md
                   - Action Registry: API/frame/framer/agency/action_registry.md
                   - Default Actions: API/frame/framer/agency/default_actions.md
+                  - Actions:
+                    - Base Action: API/frame/framer/agency/actions/base.md
                   - Tasks:
                     - Task: API/frame/framer/agency/tasks/task.md
                   - Workflow:

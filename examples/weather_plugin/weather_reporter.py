@@ -1,14 +1,14 @@
 import aiohttp
-from frame.src.framer.agency.actions.base_action import Action
+from frame.src.framer.agency.actions import BaseAction
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.models.framer.agency.priority import Priority
+from frame.src.framer.agency.priority import Priority
 
 class WeatherReporter:
     def __init__(self, api_key):
         self.api_key = api_key
         self.base_url = "http://api.openweathermap.org/data/2.5/weather"
 
-    class GetWeatherAction(Action):
+    class GetWeatherAction(BaseAction):
         def __init__(self, plugin):
             super().__init__("get_weather", "Get weather information for a city", Priority.MEDIUM)
             self.plugin = plugin

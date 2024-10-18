@@ -4,7 +4,9 @@ from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.services import ExecutionContext
 from unittest.mock import Mock
 from frame.src.services.llm.main import LLMService
-
+from unittest.mock import Mock, AsyncMock
+from frame.src.framer.agency.actions.base import BaseAction
+from frame.src.services.execution_context import ExecutionContext
 
 @pytest.fixture
 def action_registry():
@@ -131,3 +133,47 @@ async def test_default_actions(action_registry):
                 action, execution_context=action_registry.execution_context
             )
         assert result is not None or isinstance(result, (str, dict))
+
+
+@pytest.fixture
+def mock_execution_context():
+    return Mock(spec=ExecutionContext)
+
+
+@pytest.mark.asyncio
+async def test_base_action_execute():
+    class TestAction(BaseAction):
+        async def execute(self, execution_context):
+            return "Test result"
+
+    action = TestAction(name="Test Action", description="A test action")
+    result = await action.execute(Mock())
+    assert result == "Test result"
+
+
+@pytest.mark.asyncio
+async def test_base_action_abstract_method():
+    with pytest.raises(TypeError):
+        BaseAction(name="Abstract Action", description="This should fail")
+
+
+def test_base_action_properties():
+    class ConcreteAction(BaseAction):
+        async def execute(self, execution_context):
+            pass
+
+    action = ConcreteAction(name="Concrete Action", description="A concrete action")
+    assert action.name == "Concrete Action"
+    assert action.description == "A concrete action"
+
+
+@pytest.mark.asyncio
+async def test_base_action_with_execution_context(mock_execution_context):
+    class ContextAwareAction(BaseAction):
+        async def execute(self, execution_context):
+            return f"Executed with {execution_context}"
+
+    action = ContextAwareAction(name="Context Action", description="Uses context")
+    result = await action.execute(mock_execution_context)
+    assert "Executed with" in result
+    assert str(mock_execution_context) in result

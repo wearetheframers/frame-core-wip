@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
-from frame.src.framer.agency.tasks.task import Task
-from frame.src.models.framer.agency.tasks.task import TaskStatus
+from frame.src.framer.agency.tasks import Task
+from frame.src.framer.agency.tasks import TaskStatus
 import json
 from unittest.mock import patch
 
@@ -98,13 +98,6 @@ def test_workflow_metrics(sample_task):
         "total_time": 10.5,
     }
     assert workflow_id in sample_task.get_all_workflow_metrics()
-
-
-import pytest
-from datetime import datetime
-from frame.src.framer.agency.tasks.task import Task
-from frame.src.models.framer.agency.tasks.task import TaskStatus
-from unittest.mock import patch
 
 
 @pytest.fixture

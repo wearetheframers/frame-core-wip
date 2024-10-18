@@ -1,8 +1,8 @@
 from typing import Tuple, List, Dict, Any
-from frame.src.framer.agency.actions.base_action import Action
+from frame.src.framer.agency.actions.base import BaseAction
 from frame.src.services.execution_context import ExecutionContext
 
-class GenerateRolesAndGoalsAction(Action):
+class GenerateRolesAndGoalsAction(BaseAction):
     def __init__(self):
         super().__init__("generate_roles_and_goals", "Generate roles and goals for the Framer")
 

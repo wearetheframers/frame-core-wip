@@ -1,5 +1,5 @@
 import pytest
-from frame.src.framer.brain.memory.memory_adapters.mem0.mem0 import Mem0Adapter
+from frame.src.framer.brain.memory.memory_adapters.mem0.adapter import Mem0Adapter
 from frame.src.services import ExecutionContext
 
 

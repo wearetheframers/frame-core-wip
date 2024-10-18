@@ -1,9 +1,9 @@
 from typing import Dict, Any
 from frame.src.framer.config import FramerConfig
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.framer.agency.actions.base_action import Action
+from frame.src.framer.agency.actions.base import BaseAction
 
-class CreateNewAgentAction(Action):
+class CreateNewAgentAction(BaseAction):
     def __init__(self):
         super().__init__("create_new_agent", "Create a new agent with the required properties")
 
