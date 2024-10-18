@@ -1,12 +1,14 @@
 import sys
 import os
 import asyncio
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
 from frame import Frame, FramerConfig
 from frame.src.framer.agency.actions import BaseAction
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 
 class StreamingResponseAction(BaseAction):

@@ -1,16 +1,17 @@
 import sys
 import os
 import asyncio
-from frame import Frame, FramerConfig
-from frame.src.utils.config_parser import parse_markdown_config
-from frame.src.framer.agency.actions.base_action import Action
-from frame.src.services.execution_context import ExecutionContext
-from frame.src.models.framer.agency.priority import Priority
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
+from frame import Frame, FramerConfig
+from frame.src.utils.config_parser import parse_markdown_config
+from frame.src.framer.agency.actions import BaseAction
+from frame.src.services.execution_context import ExecutionContext
+from frame.src.framer.agency.priority import Priority
 
-class EngageConversationAction(Action):
+
+class EngageConversationAction(BaseAction):
     def __init__(self):
         super().__init__(
             "engage_conversation", "Engage in a deep conversation", Priority.HIGH
