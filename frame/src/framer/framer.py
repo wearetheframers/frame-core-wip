@@ -80,58 +80,46 @@ class Framer:
         self.permissions = config.permissions
 
         # Initialize services and plugins based on permissions
-        if "withMemory" in self.permissions and memory_adapter:
+        if "with_memory" in self.permissions and memory_adapter:
             self.memory_service = memory_service or MemoryService(adapter=memory_adapter)
 
-        if "withEQ" in self.permissions:
+        if "with_eq" in self.permissions:
             self.eq_service = eq_service or EQService()
 
-        if "withSharedContext" in self.permissions:
+        if "with_shared_context" in self.permissions:
             self.shared_context_service = SharedContext()
 
         # Initialize custom plugins
         self.plugins = {}
         for permission in self.permissions:
             if permission.startswith("with") and permission not in [
-                "withMemory",
-                "withEQ",
-                "withSharedContext",
+                "with_memory",
+                "with_eq",
+                "with_shared_context",
             ]:
-                plugin_name = permission[4:]  # Remove 'with' prefix
+                plugin_name = permission[5:]  # Remove 'with_' prefix
                 try:
                     plugin_module = importlib.import_module(
-                        f"frame.src.plugins.{plugin_name.lower()}"
+                        f"frame.src.plugins.{plugin_name}.{plugin_name}"
                     )
-                    plugin_class = getattr(plugin_module, plugin_name)
+                    # Construct the plugin class name by converting the plugin name to CamelCase
+                    plugin_class_name = ''.join(word.capitalize() for word in plugin_name.split('_'))
+                    plugin_class = getattr(plugin_module, plugin_class_name)
                     self.plugins[plugin_name] = plugin_class(self)
-                except ImportError:
+                except (ImportError, AttributeError) as e:
+                    logger.warning(f"{plugin_name} is not available. Error: {str(e)}")
                     logger.warning(
                         f"{plugin_name} is not available. To use it, install the required dependencies."
                     )
-
+        logger.info(f"Loaded plugins: {list(self.plugins.keys())}")
         # Initialize Mem0Adapter if API key is provided and permission is granted
-        if config.mem0_api_key and "withMemory" in self.permissions:
+        if config.mem0_api_key and "with_memory" in self.permissions:
             self.mem0_adapter = Mem0Adapter(api_key=config.mem0_api_key)
         else:
             self.mem0_adapter = None
             logger.warning(
                 "Mem0 API key not provided or permission not granted. Mem0Adapter will not be available."
             )
-        """
-        Initialize a Framer instance.
-
-        Args:
-            config (FramerConfig): Configuration settings for the Framer.
-            llm_service (LLMService): The language model service to be used by the Framer.
-            agency (Agency): Manages roles, goals, tasks, and workflows for the Framer.
-            brain (Brain): Handles decision-making processes, integrating perceptions, memories, and thoughts.
-            soul (Soul): Represents the core essence and personality of a Framer.
-            workflow_manager (WorkflowManager): Manages workflows and tasks.
-            memory_service (Optional[MemoryService]): Service for managing memory. Default is None.
-            eq_service (Optional[EQService]): Service for managing emotional intelligence. Default is None.
-            roles (Optional[List[Dict[str, Any]]]): List of roles for the Framer. Default is None.
-            goals (Optional[List[Dict[str, Any]]]): List of goals for the Framer. Default is None.
-        """
         self._streamed_response = {"status": "pending", "result": ""}
         self.config = config
         self.llm_service = llm_service
@@ -143,7 +131,6 @@ class Framer:
         self.eq_service = eq_service
         self._dynamic_model_choice = False
         self.observers: List[Observer] = []
-        self.plugins: Dict[str, Any] = {}  # Initialize plugins attribute
         self.can_execute = True  # Add can_execute attribute
         self.acting = False
 
@@ -324,9 +311,11 @@ class Framer:
         Returns:
             Any: The result of the action execution.
         """
+        # Get the plugin instance
         plugin = self.plugins.get(plugin_name)
         if not plugin:
-            raise ValueError(f"Plugin {plugin_name} not found.")
+            logger.warning(f"Plugin {plugin_name} not found. Skipping action.")
+            return {"error": f"Plugin {plugin_name} not found."}
         
         action = getattr(plugin, action_name, None)
         if not action:

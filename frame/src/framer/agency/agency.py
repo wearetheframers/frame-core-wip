@@ -302,6 +302,8 @@ class Agency:
             for r in role_data:
                 r["priority"] = max(1, min(10, int(r.get("priority", 5))))
                 r["status"] = RoleStatus[r.get("status", "ACTIVE")]
+                # Ensure permissions are a list
+                r["permissions"] = list(r.get("permissions", []))
                 roles.append(Role(**r))
             return roles
         except Exception as e:

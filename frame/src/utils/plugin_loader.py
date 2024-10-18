@@ -35,14 +35,20 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
 
     for item in os.listdir(plugins_dir):
         plugin_dir = os.path.join(plugins_dir, item)
-        if os.path.isdir(plugin_dir) and not item.startswith("__"):
+        if os.path.isdir(plugin_dir) and not item.startswith("_"):
             try:
                 # Load plugin-specific configuration
                 config = load_plugin_config(plugin_dir)
 
                 # Import the plugin module
-                module = importlib.import_module(f"frame.src.plugins.{item}")
-                plugin_class = getattr(module, f"{item.capitalize()}Plugin")
+                logger.debug(f"Attempting to import module for plugin: {item}")
+                module = importlib.import_module(f"frame.src.plugins.{item}.{item}")
+                logger.debug(f"Module imported successfully for plugin: {item}")
+
+                # Construct the plugin class name by converting the directory name to CamelCase
+                plugin_class_name = ''.join(word.capitalize() for word in item.split('_'))
+                logger.debug(f"Looking for class {plugin_class_name} in module {item}")
+                plugin_class = getattr(module, plugin_class_name)
 
                 # Check if the plugin class inherits from PluginBase
                 if not issubclass(plugin_class, BasePlugin):
@@ -52,6 +58,7 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
                     continue
 
                 # Initialize the plugin with its configuration
+                logger.debug(f"Initializing plugin {item} with configuration")
                 plugin_instance = plugin_class(config)
 
                 # Check for conflicting actions
@@ -68,7 +75,7 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
                 plugins[item] = plugin_instance
                 logger.info(f"Loaded plugin: {item}")
             except (ImportError, AttributeError) as e:
-                logger.warning(f"Failed to load plugin {item}: {str(e)}")
+                logger.error(f"Failed to load plugin {item}: {str(e)}", exc_info=True)
 
     for warning in conflict_warnings:
         logger.warning(warning)
