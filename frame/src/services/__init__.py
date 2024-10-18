@@ -1,17 +1,15 @@
-from .llm.main import LLMService
-from .eq.main import EQService
-from .service_locator import (
-    get_local_context,
-    get_shared_context,
-    get_execution_context,
-    get_memory_service
-)
+from .llm_service import LLMService
+from .eq_service import EQService
+from .local_context_service import LocalContext
+from .shared_context_service import SharedContext
+from .execution_context_service import ExecutionContext
+from .memory_service import MemoryService
 
 __all__ = [
     'LLMService',
     'EQService',
-    'get_local_context',
-    'get_shared_context',
-    'get_execution_context',
-    'get_memory_service'
+    'LocalContext',
+    'SharedContext',
+    'ExecutionContext',
+    'MemoryService'
 ]
