@@ -1,3 +1,4 @@
+import os
 import pytest
 from unittest.mock import patch, MagicMock
 from frame.src.utils.plugin_loader import load_plugins, load_plugin_config
