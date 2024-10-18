@@ -13,5 +13,5 @@ __all__ = [
     "ResearchAction",
     "RespondAction",
     "ThinkAction",
-    "ObserveAction"
+    "ObserveAction",
 ]

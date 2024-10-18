@@ -2,11 +2,16 @@ from typing import Tuple, List, Dict, Any
 from frame.src.framer.agency.actions.base import BaseAction
 from frame.src.services.execution_context import ExecutionContext
 
+
 class GenerateRolesAndGoalsAction(BaseAction):
     def __init__(self):
-        super().__init__("generate_roles_and_goals", "Generate roles and goals for the Framer")
+        super().__init__(
+            "generate_roles_and_goals", "Generate roles and goals for the Framer"
+        )
 
-    async def execute(self, execution_context: ExecutionContext) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    async def execute(
+        self, execution_context: ExecutionContext
+    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """
         Generate roles and goals for the Framer.
 

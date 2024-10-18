@@ -8,6 +8,7 @@ from unittest.mock import Mock, AsyncMock
 from frame.src.framer.agency.actions.base import BaseAction
 from frame.src.services.execution_context import ExecutionContext
 
+
 @pytest.fixture
 def action_registry():
     llm_service = Mock(spec=LLMService, default_model="gpt-3.5-turbo")

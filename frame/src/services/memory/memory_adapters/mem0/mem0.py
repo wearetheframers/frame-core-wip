@@ -3,7 +3,10 @@ from typing import Dict, Any, List, Optional
 
 from typing import Any, Dict, List, Optional
 
-from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
+from frame.src.framer.brain.memory.memory_adapter_interface import (
+    MemoryAdapterInterface,
+)
+
 
 class Mem0Adapter(MemoryAdapterInterface):
     """

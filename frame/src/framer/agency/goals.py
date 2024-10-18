@@ -3,10 +3,12 @@ from pydantic import BaseModel, Field
 from typing import Optional, Any
 from .priority import Priority
 
+
 class GoalStatus(Enum):
     ACTIVE = "active"
     COMPLETED = "completed"
     ABANDONED = "abandoned"
+
 
 class Goal(BaseModel):
     name: str
@@ -16,4 +18,3 @@ class Goal(BaseModel):
 
     def get(self, key: str, default: Any = None) -> Any:
         return getattr(self, key, default)
-

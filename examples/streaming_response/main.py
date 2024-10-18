@@ -8,9 +8,12 @@ from frame.src.framer.agency.priority import Priority
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
+
 class StreamingResponseAction(BaseAction):
     def __init__(self):
-        super().__init__("streaming_response", "Generate a streaming response", Priority.MEDIUM)
+        super().__init__(
+            "streaming_response", "Generate a streaming response", Priority.MEDIUM
+        )
 
     async def execute(self, execution_context: ExecutionContext, prompt: str) -> str:
         result = await execution_context.llm_service.get_completion(prompt, stream=True)
@@ -21,6 +24,7 @@ class StreamingResponseAction(BaseAction):
             streamed_response += chunk
         print("\n")
         return streamed_response
+
 
 async def main():
     frame = Frame()
@@ -34,11 +38,14 @@ async def main():
     prompt = "Write a short story about an AI learning to understand human emotions."
 
     # Execute the streaming response action
-    result = await framer.brain.action_registry.execute_action("streaming_response", {"prompt": prompt})
+    result = await framer.brain.action_registry.execute_action(
+        "streaming_response", {"prompt": prompt}
+    )
 
     print("Final Streamed Response Result:", result)
 
     await framer.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

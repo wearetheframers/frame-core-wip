@@ -3,11 +3,18 @@ from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.actions.base import BaseAction
 from frame.src.framer.agency.priority import Priority
 
+
 class ResearchAction(BaseAction):
     def __init__(self):
-        super().__init__("research", "Perform research on a given topic and summarize findings", Priority.HIGH)
+        super().__init__(
+            "research",
+            "Perform research on a given topic and summarize findings",
+            Priority.HIGH,
+        )
 
-    async def execute(self, execution_context: ExecutionContext, research_topic: str) -> Dict[str, Any]:
+    async def execute(
+        self, execution_context: ExecutionContext, research_topic: str
+    ) -> Dict[str, Any]:
         """
         Perform research on a given topic and summarize findings.
 
@@ -21,7 +28,9 @@ class ResearchAction(BaseAction):
         print(f"Performing research on topic: {research_topic}")
 
         if execution_context.llm_service is None:
-            return {"error": f"Unable to perform research on '{research_topic}' due to missing LLM service."}
+            return {
+                "error": f"Unable to perform research on '{research_topic}' due to missing LLM service."
+            }
 
         # Use the LLM service from the execution context
         result = await execution_context.llm_service.get_completion(
@@ -38,5 +47,5 @@ class ResearchAction(BaseAction):
         return {
             "topic": research_topic,
             "findings": result,
-            "summary": f"Research findings for topic '{research_topic}':\n{result}"
+            "summary": f"Research findings for topic '{research_topic}':\n{result}",
         }

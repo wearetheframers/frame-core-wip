@@ -3,11 +3,18 @@ from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.actions.base import BaseAction
 from frame.src.framer.agency.priority import Priority
 
+
 class ThinkAction(BaseAction):
     def __init__(self):
-        super().__init__("think", "Ponder and reflect on the current situation", Priority.HIGH)
+        super().__init__(
+            "think", "Ponder and reflect on the current situation", Priority.HIGH
+        )
 
-    async def execute(self, execution_context: ExecutionContext, thought: str = "Processing information...") -> Dict[str, Any]:
+    async def execute(
+        self,
+        execution_context: ExecutionContext,
+        thought: str = "Processing information...",
+    ) -> Dict[str, Any]:
         """
         Ponder and reflect on the current situation, potentially creating new tasks or generating a new prompt.
         This action is only necessary if a new prompt should be generated with new pretext and context for better results.

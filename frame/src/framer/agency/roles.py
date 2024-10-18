@@ -3,10 +3,12 @@ from typing import List, Dict, Any
 from enum import Enum
 from frame.src.framer.agency.priority import Priority
 
+
 class RoleStatus(Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     ABANDONED = "abandoned"
+
 
 class Role(BaseModel):
     id: str
@@ -27,9 +29,8 @@ class Role(BaseModel):
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Role':
+    def from_dict(cls, data: Dict[str, Any]) -> "Role":
         return cls(**data)
 
     def get(self, key: str, default: Any = None) -> Any:
         return getattr(self, key, default)
-

@@ -11,6 +11,7 @@ from frame.src.services import EQService
 from frame.src.services import ExecutionContext
 from frame.src.services import LLMService
 
+
 class FramedFactory:
     """
     Factory class for creating Framed instances.

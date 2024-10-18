@@ -3,6 +3,7 @@ from frame.src.framer.agency.actions import BaseAction
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 
+
 class WeatherReporter:
     def __init__(self, api_key):
         self.api_key = api_key
@@ -10,7 +11,9 @@ class WeatherReporter:
 
     class GetWeatherAction(BaseAction):
         def __init__(self, plugin):
-            super().__init__("get_weather", "Get weather information for a city", Priority.MEDIUM)
+            super().__init__(
+                "get_weather", "Get weather information for a city", Priority.MEDIUM
+            )
             self.plugin = plugin
 
         async def execute(self, execution_context: ExecutionContext, city: str) -> str:

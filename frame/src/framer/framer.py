@@ -80,31 +80,41 @@ class Framer:
         # Initialize services and plugins based on permissions
         if "withMemory" in self.permissions:
             self.memory_service = memory_service or MemoryService()
-        
+
         if "withEQ" in self.permissions:
             self.eq_service = eq_service or EQService()
-        
+
         if "withSharedContext" in self.permissions:
             self.shared_context_service = SharedContext()
 
         # Initialize custom plugins
         self.plugins = {}
         for permission in self.permissions:
-            if permission.startswith("with") and permission not in ["withMemory", "withEQ", "withSharedContext"]:
+            if permission.startswith("with") and permission not in [
+                "withMemory",
+                "withEQ",
+                "withSharedContext",
+            ]:
                 plugin_name = permission[4:]  # Remove 'with' prefix
                 try:
-                    plugin_module = importlib.import_module(f"frame.src.plugins.{plugin_name.lower()}")
+                    plugin_module = importlib.import_module(
+                        f"frame.src.plugins.{plugin_name.lower()}"
+                    )
                     plugin_class = getattr(plugin_module, plugin_name)
                     self.plugins[plugin_name] = plugin_class(self)
                 except ImportError:
-                    logger.warning(f"{plugin_name} is not available. To use it, install the required dependencies.")
+                    logger.warning(
+                        f"{plugin_name} is not available. To use it, install the required dependencies."
+                    )
 
         # Initialize Mem0Adapter if API key is provided and permission is granted
         if config.mem0_api_key and "withMemory" in self.permissions:
             self.mem0_adapter = Mem0Adapter(api_key=config.mem0_api_key)
         else:
             self.mem0_adapter = None
-            logger.warning("Mem0 API key not provided or permission not granted. Mem0Adapter will not be available.")
+            logger.warning(
+                "Mem0 API key not provided or permission not granted. Mem0Adapter will not be available."
+            )
         """
         Initialize a Framer instance.
 

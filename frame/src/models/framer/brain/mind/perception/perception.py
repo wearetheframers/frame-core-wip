@@ -6,21 +6,28 @@ from datetime import datetime
 class Perception(BaseModel):
     """
     Represents a perception in the Frame system.
-    
+
     Perceptions in Frame can be any type of information or stimulus, not limited to human senses.
     This includes traditional inputs like text, images, or sounds, but also extends to more abstract
     or non-human sensory data such as magnetic fields, vibrations, internal states like hunger,
     or any other data that can be analyzed by the language model.
-    
+
     The "prompt" action in a Framer is essentially processing a perception of hearing for text input
     and responding to it.
     """
-    
-    type: str = Field(..., description="The type of perception (e.g., 'visual', 'auditory', 'text', 'magnetic', 'internal_state', etc.)")
-    data: Dict[str, Any] = Field(
-        ..., description="The data associated with the perception. Can contain any type of information."
+
+    type: str = Field(
+        ...,
+        description="The type of perception (e.g., 'visual', 'auditory', 'text', 'magnetic', 'internal_state', etc.)",
     )
-    source: Optional[str] = Field(None, description="The source of the perception (e.g., 'camera', 'microphone', 'text_input', 'magnetometer', 'internal_sensor', etc.)")
+    data: Dict[str, Any] = Field(
+        ...,
+        description="The data associated with the perception. Can contain any type of information.",
+    )
+    source: Optional[str] = Field(
+        None,
+        description="The source of the perception (e.g., 'camera', 'microphone', 'text_input', 'magnetometer', 'internal_sensor', etc.)",
+    )
     timestamp: datetime = Field(
         default_factory=datetime.utcnow,
         description="The timestamp of when the perception was created",

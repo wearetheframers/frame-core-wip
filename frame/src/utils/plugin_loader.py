@@ -8,6 +8,7 @@ from frame.src.framer.brain.plugins import BasePlugin
 
 logger = logging.getLogger(__name__)
 
+
 def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
     """
     Load all plugins from the specified directory.
@@ -34,7 +35,7 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
 
     for item in os.listdir(plugins_dir):
         plugin_dir = os.path.join(plugins_dir, item)
-        if os.path.isdir(plugin_dir) and not item.startswith('__'):
+        if os.path.isdir(plugin_dir) and not item.startswith("__"):
             try:
                 # Load plugin-specific configuration
                 config = load_plugin_config(plugin_dir)
@@ -45,7 +46,9 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
 
                 # Check if the plugin class inherits from PluginBase
                 if not issubclass(plugin_class, BasePlugin):
-                    logger.warning(f"Plugin {item} does not inherit from PluginBase. Skipping.")
+                    logger.warning(
+                        f"Plugin {item} does not inherit from PluginBase. Skipping."
+                    )
                     continue
 
                 # Initialize the plugin with its configuration
@@ -55,7 +58,9 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
                 plugin_actions = plugin_instance.get_actions()
                 for action_name, action_func in plugin_actions.items():
                     if action_name in loaded_actions:
-                        conflict_warnings.append(f"Action '{action_name}' in plugin '{item}' conflicts with an existing action. Skipping.")
+                        conflict_warnings.append(
+                            f"Action '{action_name}' in plugin '{item}' conflicts with an existing action. Skipping."
+                        )
                     else:
                         loaded_actions[action_name] = action_func
 
@@ -69,6 +74,7 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
         logger.warning(warning)
 
     return plugins, conflict_warnings
+
 
 def load_plugin_config(plugin_dir: str) -> Dict[str, Any]:
     """
@@ -86,9 +92,9 @@ def load_plugin_config(plugin_dir: str) -> Dict[str, Any]:
     config = {}
 
     # Try to load from config.json
-    config_file = os.path.join(plugin_dir, 'config.json')
+    config_file = os.path.join(plugin_dir, "config.json")
     if os.path.exists(config_file):
-        with open(config_file, 'r') as f:
+        with open(config_file, "r") as f:
             config = json.load(f)
 
     # Override with environment variables if they exist

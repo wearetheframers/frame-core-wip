@@ -136,12 +136,7 @@ class Decision(DecisionModel):
         """
         if isinstance(priority, int):
             return priority
-        priority_map = {
-            "LOW": 1,
-            "MEDIUM": 5,
-            "HIGH": 10,
-            "CRITICAL": 15
-        }
+        priority_map = {"LOW": 1, "MEDIUM": 5, "HIGH": 10, "CRITICAL": 15}
         return priority_map.get(priority.upper(), 5)
 
     def __str__(self) -> str:

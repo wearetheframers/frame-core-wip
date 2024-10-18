@@ -1,6 +1,8 @@
 import pytest
 from frame.src.framer.brain.memory.memory import Memory
-from frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter import Mem0Adapter
+from frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter import (
+    Mem0Adapter,
+)
 from unittest.mock import Mock, patch
 from frame.src.services import ExecutionContext
 

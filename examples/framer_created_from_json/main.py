@@ -9,20 +9,30 @@ from frame.src.framer.agency.priority import Priority
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
+
 class ExploreEnvironmentAction(BaseAction):
     def __init__(self):
-        super().__init__("explore_environment", "Explore the environment", Priority.MEDIUM)
+        super().__init__(
+            "explore_environment", "Explore the environment", Priority.MEDIUM
+        )
 
     async def execute(self, execution_context: ExecutionContext) -> str:
         prompt = "Describe an interesting environment that an AI agent might explore."
         response = await execution_context.llm_service.get_completion(prompt)
         return f"Explored environment: {response}"
 
+
 async def main():
     possible_paths = [
         os.path.join(os.path.dirname(__file__), "framer.json"),
-        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), "framer.json"),
-        os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")), "framer.json"),
+        os.path.join(
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..")),
+            "framer.json",
+        ),
+        os.path.join(
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")),
+            "framer.json",
+        ),
     ]
 
     config = None
@@ -34,7 +44,9 @@ async def main():
             continue
 
     if config is None:
-        raise FileNotFoundError("config.json not found in any of the expected locations.")
+        raise FileNotFoundError(
+            "config.json not found in any of the expected locations."
+        )
 
     frame = Frame()
     config_dict = config.__dict__ if isinstance(config, FramerConfig) else config
@@ -51,6 +63,7 @@ async def main():
     print(f"Task result: {result}")
 
     await framer.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

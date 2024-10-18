@@ -1,7 +1,10 @@
 from typing import Any, Dict, List, Optional
-from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
+from frame.src.framer.brain.memory.memory_adapter_interface import (
+    MemoryAdapterInterface,
+)
 from mem0 import Memory
 from frame.src.constants.api_keys import MEM0_SERVER_HOST
+
 
 class Mem0Adapter(MemoryAdapterInterface):
     """
@@ -22,7 +25,7 @@ class Mem0Adapter(MemoryAdapterInterface):
         metadata: Optional[Dict[str, Any]] = None,
         run_id: Optional[str] = None,
         agent_id: Optional[str] = None,
-        output_format: str = "v1.1"
+        output_format: str = "v1.1",
     ) -> Dict[str, Any]:
         """
         Add a new memory to the Mem0 system.
@@ -56,7 +59,7 @@ class Mem0Adapter(MemoryAdapterInterface):
         run_id: Optional[str] = None,
         filters: Optional[Dict[str, Any]] = None,
         limit: int = 5,
-        output_format: str = "v1.1"
+        output_format: str = "v1.1",
     ) -> List[Dict[str, Any]]:
         """
         Search for memories in the Mem0 system.
@@ -92,7 +95,7 @@ class Mem0Adapter(MemoryAdapterInterface):
         agent_id: Optional[str] = None,
         run_id: Optional[str] = None,
         filters: Optional[Dict[str, Any]] = None,
-        output_format: str = "v1.1"
+        output_format: str = "v1.1",
     ) -> List[Dict[str, Any]]:
         """
         Retrieve all memories for a specific user, agent, or run.
@@ -135,7 +138,7 @@ class Mem0Adapter(MemoryAdapterInterface):
         self,
         user_id: Optional[str] = None,
         agent_id: Optional[str] = None,
-        run_id: Optional[str] = None
+        run_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Delete all memories for a specific user, agent, or run.

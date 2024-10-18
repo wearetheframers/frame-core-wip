@@ -1,6 +1,8 @@
 import pytest
 from unittest.mock import Mock
-from frame.src.framer.agency.actions.create_new_agent import create_new_framer as create_new_agent
+from frame.src.framer.agency.actions.create_new_agent import (
+    create_new_framer as create_new_agent,
+)
 from frame.src.framer.config import FramerConfig
 from frame.src.services import ExecutionContext
 

@@ -22,7 +22,5 @@ class AutonomousVehiclePlugin:
 
     async def change_lane(self, execution_context):
         self.lane = 3 - self.lane  # Toggle between lane 1 and 2
-        print(
-            f"{execution_context.config.name}: Vehicle changing to lane {self.lane}"
-        )
+        print(f"{execution_context.config.name}: Vehicle changing to lane {self.lane}")
         await asyncio.sleep(0.1)

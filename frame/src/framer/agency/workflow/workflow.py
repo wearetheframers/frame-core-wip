@@ -1,6 +1,7 @@
 from typing import List, Optional
 from frame.src.framer.agency.tasks.task import Task
 
+
 class Workflow:
     def __init__(self, name: str, is_async: bool = False):
         self.name = name

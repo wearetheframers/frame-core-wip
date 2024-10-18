@@ -4,12 +4,14 @@ from enum import Enum
 from frame.src.framer.agency.priority import Priority
 from .task_status import TaskStatus
 
+
 class TaskStatus(Enum):
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELED = "canceled"
+
 
 class TaskModel(BaseModel):
     id: str

@@ -2,6 +2,7 @@ from typing import Dict, List, Optional
 from frame.src.framer.agency.tasks.task import Task
 from frame.src.framer.agency.workflow.workflow import Workflow
 
+
 class WorkflowManager:
     def __init__(self):
         self.workflows: Dict[str, Workflow] = {}

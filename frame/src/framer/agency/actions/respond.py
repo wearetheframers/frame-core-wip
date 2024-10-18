@@ -2,11 +2,14 @@ from typing import Dict, Any
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.actions.base import BaseAction
 
+
 class RespondAction(BaseAction):
     def __init__(self):
         super().__init__("respond", "Generate a response based on the current context")
 
-    async def execute(self, execution_context: ExecutionContext, **kwargs) -> Dict[str, Any]:
+    async def execute(
+        self, execution_context: ExecutionContext, **kwargs
+    ) -> Dict[str, Any]:
         """
         Generate a response based on the current context, emphasizing the most recent perception.
 

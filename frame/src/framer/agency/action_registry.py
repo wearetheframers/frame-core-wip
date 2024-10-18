@@ -18,7 +18,7 @@ from frame.src.framer.agency.actions import (
     ObserveAction,
     RespondAction,
     ThinkAction,
-    ResearchAction
+    ResearchAction,
 )
 
 
@@ -38,11 +38,11 @@ class ActionRegistry:
             ObserveAction(),
             RespondAction(),
             ThinkAction(),
-            ResearchAction()
+            ResearchAction(),
         ]
         for action in default_actions:
             self.register_action(action)
-        
+
         for action, info in VALID_ACTIONS.items():
             if action not in [a.name for a in default_actions]:
                 self.register_action(
@@ -57,7 +57,11 @@ class ActionRegistry:
         self._register_default_actions()
 
     def register_action(
-        self, action: Union[str, BaseAction, Callable], action_func: Optional[Callable] = None, description: str = "", priority: int = 5
+        self,
+        action: Union[str, BaseAction, Callable],
+        action_func: Optional[Callable] = None,
+        description: str = "",
+        priority: int = 5,
     ):
         if isinstance(action, BaseAction):
             name = action.name
@@ -70,13 +74,17 @@ class ActionRegistry:
         else:
             name = action
             if action_func is None:
-                raise ValueError("action_func must be provided when registering a string action name")
+                raise ValueError(
+                    "action_func must be provided when registering a string action name"
+                )
 
         if not (1 <= priority <= 10):
             raise ValueError("Priority must be between 1 and 10")
         if not asyncio.iscoroutinefunction(action_func):
+
             async def wrapper(*args, **kwargs):
                 return action_func(*args, **kwargs)
+
             action_func = wrapper
         self.actions[name] = {
             "action_func": action_func,

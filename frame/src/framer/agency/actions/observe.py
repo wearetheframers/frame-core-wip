@@ -3,11 +3,21 @@ from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.actions.base import BaseAction
 from frame.src.framer.agency.priority import Priority
 
+
 class ObserveAction(BaseAction):
     def __init__(self):
-        super().__init__("observe", "Process an observation and generate insights or actions", Priority.MEDIUM)
+        super().__init__(
+            "observe",
+            "Process an observation and generate insights or actions",
+            Priority.MEDIUM,
+        )
 
-    async def execute(self, execution_context: ExecutionContext, observation: Optional[str] = None, insights: Optional[Dict[str, Any]] = None) -> str:
+    async def execute(
+        self,
+        execution_context: ExecutionContext,
+        observation: Optional[str] = None,
+        insights: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """
         Process an observation and generate insights or actions.
 

@@ -5,6 +5,7 @@ from frame.src.services.eq.main import EQService
 from frame.src.framer.soul.soul import Soul
 from frame.src.framer.config import FramerConfig
 
+
 class ExecutionContext:
     """
     ExecutionContext provides a centralized container for various services and state
@@ -31,7 +32,7 @@ class ExecutionContext:
         state: Optional[Dict[str, Any]] = None,
         process_perception: Optional[Callable] = None,
         execute_decision: Optional[Callable] = None,
-        config: Optional[FramerConfig] = None
+        config: Optional[FramerConfig] = None,
     ):
         self.llm_service = llm_service
         self.memory_service = memory_service
