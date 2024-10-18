@@ -1,6 +1,6 @@
 from typing import Optional, Dict, Any
+from frame.src.framer.agency.actions import BaseAction
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.framer.agency.actions.base import BaseAction
 from frame.src.framer.agency.priority import Priority
 
 

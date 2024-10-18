@@ -96,14 +96,8 @@ class FramerFactory:
                 role.status = RoleStatus.ACTIVE
 
         # Sort roles and goals by priority
-        roles.sort(
-            key=lambda x: x.priority.value if hasattr(x, "priority") else 5,
-            reverse=True,
-        )
-        goals.sort(
-            key=lambda x: x.priority.value if hasattr(x, "priority") else 5,
-            reverse=True,
-        )
+        roles.sort(key=lambda x: x.priority.value if hasattr(x, 'priority') else 5, reverse=True)
+        goals.sort(key=lambda x: x.priority.value if hasattr(x, 'priority') else 5, reverse=True)
 
         execution_context = ExecutionContext(llm_service=self.llm_service)
         brain = Brain(

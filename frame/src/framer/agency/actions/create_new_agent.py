@@ -1,4 +1,5 @@
 from typing import Dict, Any
+from frame.src.framer.agency.actions import BaseAction
 from frame.src.framer.config import FramerConfig
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.actions.base import BaseAction

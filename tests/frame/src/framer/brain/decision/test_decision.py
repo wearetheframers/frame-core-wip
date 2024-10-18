@@ -1,6 +1,6 @@
 import pytest
 from frame.src.models.framer.brain.decision.decision import Decision
-from frame.src.framer.agency.tasks.task_status import TaskStatus
+from frame.src.models.framer.agency.tasks.task_status import TaskStatus
 from frame.src.framer.agency.priority import Priority
 
 

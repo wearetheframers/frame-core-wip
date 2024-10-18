@@ -1,5 +1,5 @@
 from typing import Tuple, List, Dict, Any
-from frame.src.framer.agency.actions.base import BaseAction
+from frame.src.framer.agency.actions import BaseAction
 from frame.src.services.execution_context import ExecutionContext
 
 

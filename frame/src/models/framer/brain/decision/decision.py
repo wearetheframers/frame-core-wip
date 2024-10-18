@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 from frame.src.models.framer.agency.tasks import TaskStatus
 
 
@@ -15,8 +15,8 @@ class Decision(BaseModel):
     confidence: float = Field(
         default=0.7, ge=0, le=1, description="Confidence level of the decision"
     )
-    priority: int = Field(
-        default=1, ge=1, le=10, description="Priority of the decision"
+    priority: Union[int, str] = Field(
+        default=1, description="Priority of the decision"
     )
     task_status: TaskStatus = Field(
         default=TaskStatus.PENDING, description="Status of the associated task"
@@ -26,7 +26,7 @@ class Decision(BaseModel):
     )
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
     def to_dict(self) -> Dict[str, Any]:
         return {

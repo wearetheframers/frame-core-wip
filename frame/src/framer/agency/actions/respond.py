@@ -1,7 +1,6 @@
 from typing import Dict, Any
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.framer.agency.actions.base import BaseAction
-
+from frame.src.framer.agency.actions import BaseAction
 
 class RespondAction(BaseAction):
     def __init__(self):

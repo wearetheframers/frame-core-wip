@@ -1,11 +1,12 @@
+from __future__ import annotations
 import json
 from pydantic import Field
 from typing import Dict, Any, Optional, Union, List
 from frame.src.models.framer.brain.decision.decision import Decision as DecisionModel
 from frame.src.models.framer.agency.tasks import TaskStatus
 from frame.src.framer.agency.priority import Priority
-from frame.src.framer.agency import Role
-from frame.src.framer.agency import Goal
+from frame.src.framer.agency.roles import Role, RoleStatus
+from frame.src.framer.agency.goals import Goal, GoalStatus
 
 
 class Decision(DecisionModel):
@@ -39,6 +40,9 @@ class Decision(DecisionModel):
     related_goals: List[Goal] = Field(
         default_factory=list, description="Goals related to this decision"
     )
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @classmethod
     def from_json(cls, json_data: Union[str, Dict[str, Any]]) -> "Decision":
@@ -124,20 +128,29 @@ class Decision(DecisionModel):
         )
 
     @staticmethod
-    def convert_priority(priority: Union[str, int]) -> int:
+    def convert_priority(priority: Union[str, int, Priority]) -> Priority:
         """
-        Convert a priority level from string or integer to an integer value.
+        Convert a priority level from string, integer, or Priority enum to a Priority enum value.
 
         Args:
-            priority (Union[str, int]): The priority level as a string or integer.
+            priority (Union[str, int, Priority]): The priority level as a string, integer, or Priority enum.
 
         Returns:
-            int: The priority level as an integer.
+            Priority: The priority level as a Priority enum.
         """
-        if isinstance(priority, int):
+        if isinstance(priority, Priority):
             return priority
-        priority_map = {"LOW": 1, "MEDIUM": 5, "HIGH": 10, "CRITICAL": 15}
-        return priority_map.get(priority.upper(), 5)
+        if isinstance(priority, str):
+            try:
+                return Priority[priority.upper()]
+            except KeyError:
+                return Priority.MEDIUM
+        if isinstance(priority, int):
+            try:
+                return Priority(priority)
+            except ValueError:
+                return Priority.MEDIUM
+        return Priority.MEDIUM
 
     def __str__(self) -> str:
         """
@@ -171,8 +184,10 @@ class Decision(DecisionModel):
         action_func = action_registry.actions[self.action]["action_func"]
         try:
             result = await action_func(**self.parameters)
+            self.task_status = TaskStatus.COMPLETED
             return {"result": result, "error": None}
         except Exception as e:
+            self.task_status = TaskStatus.FAILED
             return {"result": None, "error": str(e)}
 
     def add_related_role(self, role: Role) -> None:

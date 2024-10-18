@@ -8,8 +8,9 @@ from frame.src.services.llm import LLMService
 from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.framer.agency.roles import Role, RoleStatus
 from frame.src.framer.agency.goals import Goal, GoalStatus
-
+# Remove this import
 from frame.src.services.execution_context import ExecutionContext
+from frame.src.framer.brain.decision import Decision
 
 import json
 import logging
@@ -43,7 +44,7 @@ class Agency:
         self,
         llm_service: LLMService,
         context: Optional[Dict[str, Any]] = None,
-        execution_context: Optional["ExecutionContext"] = None,
+        execution_context: Optional[ExecutionContext] = None,
         roles: Optional[List[Role]] = None,
         goals: Optional[List[Goal]] = None,
     ):
@@ -69,8 +70,7 @@ class Agency:
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, "default_model", DEFAULT_MODEL)
-        self.action_registry = ActionRegistry()
-        self.action_registry.execution_context = self.execution_context
+        self.action_registry = ActionRegistry(execution_context=self.execution_context)
 
     def set_roles(self, roles: Optional[List[Role]] = None) -> None:
         self.roles = roles if roles is not None else []
@@ -102,10 +102,9 @@ class Agency:
             Task: The created Task object.
         """
         if isinstance(priority, str):
-            priority = Priority.from_string(priority)
+            priority = Priority.get(priority)
         elif not isinstance(priority, Priority):
             raise ValueError("Priority must be a string or Priority enum")
-
         return Task(description=description, priority=priority, workflow_id=workflow_id)
 
     def add_task(self, task: Task, workflow_id: str = "default") -> None:
@@ -235,6 +234,27 @@ class Agency:
             self.completion_calls[task.workflow_id] = {}
         if task.id not in self.completion_calls[task.workflow_id]:
             self.completion_calls[task.workflow_id][task.id] = 0
+
+        # Perform the task
+        prompt = f"Execute the following task: {task.description}"
+        response = await self.llm_service.get_completion(
+            prompt,
+            model=self.default_model,
+            max_tokens=200,
+            temperature=0.7,
+        )
+
+        # Update task status and result
+        task.update_status(TaskStatus.COMPLETED)
+        task.set_result(response)
+
+        # Log task completion
+        end_time = time.time()
+        duration = end_time - start_time
+        logger.debug(f"Task '{task.description}' completed in {duration:.2f} seconds.")
+        logger.debug(f"Task result: {response}")
+
+        return {"output": response}
 
     async def generate_roles(self) -> List[Role]:
         """
@@ -416,6 +436,47 @@ class Agency:
         logger.debug(f"Cost incurred: ${cost_incurred:.4f}")
 
         return response
+
+    async def execute_decision(self, decision: Decision) -> Any:
+        """
+        Execute the decision made by the brain.
+
+        Args:
+            decision (Decision): The decision to execute.
+
+        Returns:
+            Any: The result of executing the decision.
+        """
+        logger.debug(f"Executing decision: {decision.action}")
+        logger.debug(f"Decision parameters: {decision.parameters}")
+
+        try:
+            if decision.action == "think":
+                result = await self._execute_think_action(decision)
+            else:
+                if decision.action not in self.action_registry.actions:
+                    raise ValueError(f"Action '{decision.action}' not found in registry.")
+
+                if decision.action == "respond":
+                    result = await self.perform_task(
+                        {
+                            "description": decision.parameters.get("content", ""),
+                            "workflow_id": "default",
+                        }
+                    )
+                else:
+                    result = await self.action_registry.execute_action(decision.action, decision.parameters)
+
+            logger.info(f"Executed action: {decision.action}")
+            logger.debug(f"Action result: {result}")
+            logger.debug(f"Decision reasoning: {decision.reasoning}")
+
+        except Exception as e:
+            logger.error(f"Error executing decision: {e}")
+            logger.exception("Detailed traceback:")
+            result = {"error": str(e)}
+
+        return result
 
     def update_role_status(self, role_id: str, new_status: RoleStatus) -> None:
         for role in self.roles:

@@ -37,7 +37,7 @@ def execute_framer(
     logger.info(f"Executing action '{action}' with parameters: {parameters}")
     # Placeholder for actual execution logic
     # This should be replaced with the actual implementation
-    pass
+    framer.brain.execute_decision(Decision(action=action, parameters=parameters))
 
 
 def pretty_log(obj: Any) -> str:
