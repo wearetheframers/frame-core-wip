@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from .hosts import MEM0_SERVER_HOST
 
 # Load environment variables from .env file
 load_dotenv()
