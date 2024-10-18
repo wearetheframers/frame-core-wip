@@ -16,7 +16,9 @@ nav:
           - Frame:
             - Framer:
                 - Framer: API/frame/framer/framer.md
-                - Framer Factory: API/frame/framer/framer_factory.md
+                - Framer Factory: 
+                    - Overview: API/frame/framer/framer_factory.md
+                    - API Reference: API/frame/framer/framer_factory_api.md
                 - Agency:
                   - Agency: API/frame/framer/agency/agency.md
                   - Action Registry: API/frame/framer/agency/action_registry.md
@@ -59,9 +61,15 @@ nav:
     - Basic: Usage/basic/basic_usage.md
     - Testing: Usage/testing/testing.md
     - Advanced: Usage/advanced/advanced_usage.md
-  - Plugins: plugins.md
+  - Plugins: 
+    - Overview: plugins/overview.md
+    - Plugin Base: plugins/plugin_base.md
+    - Search Extract Summarize Plugin: plugins/search_extract_summarize_plugin.md
+    - Creating Custom Plugins: plugins/creating_custom_plugins.md
   - CLI: CLI.md
   - Glossary: glossary.md
+  - Utils:
+    - Plugin Loader: utils/plugin_loader.md
 docs_dir: ./docs
 site_dir: ../site
 theme:
