@@ -104,7 +104,7 @@ Frame
     │   └── Core Traits
     ├── Context
     ├── Observers
-    └── SharedContext
+    └── ActionRegistry
 Framed
 └── Multiple Framers
 LLM Adapters
@@ -113,7 +113,12 @@ LLM Adapters
 └── LMQL Adapter
 Services
 ├── LLMService
+│   ├── DSPy Adapter
+│   ├── HuggingFace Adapter
+│   └── LMQL Adapter
 ├── MemoryService
+│   └── Memory Adapters
+│       └── Mem0Adapter
 ├── EQService
 └── ContextService
 ```
