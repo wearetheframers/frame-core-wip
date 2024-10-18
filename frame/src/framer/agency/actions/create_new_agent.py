@@ -1,20 +1,25 @@
 from typing import Dict, Any
 from frame.src.framer.config import FramerConfig
+from frame.src.services.execution_context import ExecutionContext
+from frame.src.framer.agency.actions.base_action import Action
 
+class CreateNewAgentAction(Action):
+    def __init__(self):
+        super().__init__("create_new_agent", "Create a new agent with the required properties")
 
-def create_new_agent(self, config: Dict[str, Any]):
-    """
-    Create a new agent with the required properties.
+    async def execute(self, execution_context: ExecutionContext, config: Dict[str, Any]) -> Any:
+        """
+        Create a new agent with the required properties.
 
-    Args:
-        self: The current Framer instance.
-        config (Dict[str, Any]): Configuration for the new agent.
+        Args:
+            execution_context (ExecutionContext): The execution context containing necessary services.
+            config (Dict[str, Any]): Configuration for the new agent.
 
-    Returns:
-        Framer: The newly created Framer instance.
-    """
-    new_config = FramerConfig(
-        name=config.get("name", "New Framer"), model=config.get("model")
-    )
-    new_framer = self.create_framer(new_config)
-    return new_framer
+        Returns:
+            Framer: The newly created Framer instance.
+        """
+        new_config = FramerConfig(
+            name=config.get("name", "New Framer"), model=config.get("model")
+        )
+        new_framer = await execution_context.create_framer(new_config)
+        return new_framer

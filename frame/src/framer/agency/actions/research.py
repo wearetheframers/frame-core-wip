@@ -1,10 +1,12 @@
-from typing import Any
-from typing import Optional
-from frame.src.services import ExecutionContext
+from typing import Any, Optional
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from frame.src.services.context.execution_context_service import ExecutionContext
 
 
 async def research(
-    execution_context: Optional[ExecutionContext], research_topic: str
+    execution_context: Optional["ExecutionContext"], research_topic: str
 ) -> str:
     """
     Perform research on a given topic and summarize findings.
