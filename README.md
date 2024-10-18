@@ -193,9 +193,14 @@ LLM Adapters
 └── LMQL Adapter
 Services
 ├── LLMService
+│   ├── DSPy Adapter
+│   ├── HuggingFace Adapter
+│   └── LMQL Adapter
 ├── MemoryService
+│   └── Memory Adapters
+│       └── Mem0Adapter
 ├── EQService
-└── ExecutionContextService
+└── ContextService
 ```
 
 ## Usage
