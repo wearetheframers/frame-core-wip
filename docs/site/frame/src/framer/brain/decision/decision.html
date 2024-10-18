@@ -31,6 +31,25 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="frame.src.framer.brain.decision.decision.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, action_registry: Any) ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute the decision using the provided action registry.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>action_registry</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The action registry containing available actions.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Dict[str, Any]</code></dt>
+<dd>The result of executing the action.</dd>
+</dl></div>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -97,15 +116,12 @@ validated to form a valid model.</p>
     task_status: TaskStatus = Field(
         default=TaskStatus.PENDING, description=&#34;Status of the associated task&#34;
     )
-    related_roles: List[Role] = Field(
+    related_roles: List[&#34;Role&#34;] = Field(
         default_factory=list, description=&#34;Roles related to this decision&#34;
     )
-    related_goals: List[Goal] = Field(
+    related_goals: List[&#34;Goal&#34;] = Field(
         default_factory=list, description=&#34;Goals related to this decision&#34;
     )
-
-    class Config:
-        arbitrary_types_allowed = True
 
     @classmethod
     def from_json(cls, json_data: Union[str, Dict[str, Any]]) -&gt; &#34;Decision&#34;:
@@ -158,8 +174,8 @@ validated to form a valid model.</p>
         priority: int = 5,
         expected_results: Optional[Any] = None,
         task_status: TaskStatus = TaskStatus.PENDING,
-        related_roles: List[Role] = None,
-        related_goals: List[Goal] = None,
+        related_roles: List[&#34;Role&#34;] = None,
+        related_goals: List[&#34;Goal&#34;] = None,
     ) -&gt; &#34;Decision&#34;:
         &#34;&#34;&#34;
         Create a new Decision instance with the given parameters.
@@ -191,29 +207,19 @@ validated to form a valid model.</p>
         )
 
     @staticmethod
-    def convert_priority(priority: Union[str, int, Priority]) -&gt; Priority:
+    def convert_priority(priority: Union[str, int]) -&gt; int:
         &#34;&#34;&#34;
-        Convert a priority level from string, integer, or Priority enum to a Priority enum value.
+        Convert a priority level from string or integer to an integer value.
 
         Args:
-            priority (Union[str, int, Priority]): The priority level as a string, integer, or Priority enum.
+            priority (Union[str, int]): The priority level as a string or integer.
 
         Returns:
-            Priority: The priority level as a Priority enum.
+            int: The priority level as an integer.
         &#34;&#34;&#34;
-        if isinstance(priority, Priority):
-            return priority
-        if isinstance(priority, str):
-            try:
-                return Priority[priority.upper()]
-            except KeyError:
-                return Priority.MEDIUM
         if isinstance(priority, int):
-            try:
-                return Priority(priority)
-            except ValueError:
-                return Priority.MEDIUM
-        return Priority.MEDIUM
+            return priority
+        return Priority.get(priority.upper(), 5)
 
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;
@@ -231,67 +237,8 @@ validated to form a valid model.</p>
             f&#34;related_goals={len(self.related_goals)})&#34;
         )
 
-    async def execute(self, action_registry: Any) -&gt; Dict[str, Any]:
-        &#34;&#34;&#34;
-        Execute the decision using the provided action registry.
-
-        Args:
-            action_registry (Any): The action registry containing available actions.
-
-        Returns:
-            Dict[str, Any]: The result of executing the action.
-        &#34;&#34;&#34;
-        if self.action not in action_registry.actions:
-            raise ValueError(f&#34;Action &#39;{self.action}&#39; not found in action registry&#34;)
-
-        action_func = action_registry.actions[self.action][&#34;action_func&#34;]
-        try:
-            result = await action_func(**self.parameters)
-            self.task_status = TaskStatus.COMPLETED
-            return {&#34;result&#34;: result, &#34;error&#34;: None}
-        except Exception as e:
-            self.task_status = TaskStatus.FAILED
-            return {&#34;result&#34;: None, &#34;error&#34;: str(e)}
-
-    def add_related_role(self, role: Role) -&gt; None:
-        &#34;&#34;&#34;
-        Add a related role to the decision.
-
-        Args:
-            role (Role): The role to add to the related roles.
-        &#34;&#34;&#34;
-        if role not in self.related_roles:
-            self.related_roles.append(role)
-
-    def add_related_goal(self, goal: Goal) -&gt; None:
-        &#34;&#34;&#34;
-        Add a related goal to the decision.
-
-        Args:
-            goal (Goal): The goal to add to the related goals.
-        &#34;&#34;&#34;
-        if goal not in self.related_goals:
-            self.related_goals.append(goal)
-
-    def remove_related_role(self, role_id: str) -&gt; None:
-        &#34;&#34;&#34;
-        Remove a related role from the decision.
-
-        Args:
-            role_id (str): The ID of the role to remove from the related roles.
-        &#34;&#34;&#34;
-        self.related_roles = [role for role in self.related_roles if role.id != role_id]
-
-    def remove_related_goal(self, goal_name: str) -&gt; None:
-        &#34;&#34;&#34;
-        Remove a related goal from the decision.
-
-        Args:
-            goal_name (str): The name of the goal to remove from the related goals.
-        &#34;&#34;&#34;
-        self.related_goals = [
-            goal for goal in self.related_goals if goal.name != goal_name
-        ]</code></pre>
+    class Config:
+        arbitrary_types_allowed = True</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -336,23 +283,23 @@ validated to form a valid model.</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.decision.decision.Decision.convert_priority"><code class="name flex">
-<span>def <span class="ident">convert_priority</span></span>(<span>priority: Union[str, int, Priority]) ‑> <a title="frame.src.framer.agency.priority.Priority" href="../../agency/priority.html#frame.src.framer.agency.priority.Priority">Priority</a></span>
+<span>def <span class="ident">convert_priority</span></span>(<span>priority: Union[str, int]) ‑> int</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Convert a priority level from string, integer, or Priority enum to a Priority enum value.</p>
+<div class="desc"><p>Convert a priority level from string or integer to an integer value.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>priority</code></strong> :&ensp;<code>Union[str, int, Priority]</code></dt>
-<dd>The priority level as a string, integer, or Priority enum.</dd>
+<dt><strong><code>priority</code></strong> :&ensp;<code>Union[str, int]</code></dt>
+<dd>The priority level as a string or integer.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Priority</code></dt>
-<dd>The priority level as a Priority enum.</dd>
+<dt><code>int</code></dt>
+<dd>The priority level as an integer.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.decision.decision.Decision.create"><code class="name flex">
-<span>def <span class="ident">create</span></span>(<span>action: str, parameters: Dict[str, Any], reasoning: str, confidence: float = 0.7, priority: int = 5, expected_results: Optional[Any] = None, task_status: TaskStatus = TaskStatus.PENDING, related_roles: List[Role] = None, related_goals: List[Goal] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+<span>def <span class="ident">create</span></span>(<span>action: str, parameters: Dict[str, Any], reasoning: str, confidence: float = 0.7, priority: int = 5, expected_results: Optional[Any] = None, task_status: <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../../models/framer/agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a> = TaskStatus.PENDING, related_roles: List[ForwardRef('Role')] = None, related_goals: List[ForwardRef('Goal')] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new Decision instance with the given parameters.</p>
@@ -402,66 +349,6 @@ validated to form a valid model.</p>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="frame.src.framer.brain.decision.decision.Decision.add_related_goal"><code class="name flex">
-<span>def <span class="ident">add_related_goal</span></span>(<span>self, goal: Goal) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add a related goal to the decision.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>goal</code></strong> :&ensp;<code>Goal</code></dt>
-<dd>The goal to add to the related goals.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.brain.decision.decision.Decision.add_related_role"><code class="name flex">
-<span>def <span class="ident">add_related_role</span></span>(<span>self, role: Role) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add a related role to the decision.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>role</code></strong> :&ensp;<code>Role</code></dt>
-<dd>The role to add to the related roles.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.brain.decision.decision.Decision.execute"><code class="name flex">
-<span>async def <span class="ident">execute</span></span>(<span>self, action_registry: Any) ‑> Dict[str, Any]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Execute the decision using the provided action registry.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>action_registry</code></strong> :&ensp;<code>Any</code></dt>
-<dd>The action registry containing available actions.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Dict[str, Any]</code></dt>
-<dd>The result of executing the action.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.brain.decision.decision.Decision.remove_related_goal"><code class="name flex">
-<span>def <span class="ident">remove_related_goal</span></span>(<span>self, goal_name: str) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Remove a related goal from the decision.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>goal_name</code></strong> :&ensp;<code>str</code></dt>
-<dd>The name of the goal to remove from the related goals.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.brain.decision.decision.Decision.remove_related_role"><code class="name flex">
-<span>def <span class="ident">remove_related_role</span></span>(<span>self, role_id: str) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Remove a related role from the decision.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>role_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>The ID of the role to remove from the related roles.</dd>
-</dl></div>
-</dd>
 <dt id="frame.src.framer.brain.decision.decision.Decision.to_dict"><code class="name flex">
 <span>def <span class="ident">to_dict</span></span>(<span>self) ‑> Dict[str, Any]</span>
 </code></dt>
@@ -488,17 +375,19 @@ validated to form a valid model.</p>
 <li><code><a title="frame.src.framer.brain.decision" href="index.html">frame.src.framer.brain.decision</a></code></li>
 </ul>
 </li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="frame.src.framer.brain.decision.decision.execute" href="#frame.src.framer.brain.decision.decision.execute">execute</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
 <h4><code><a title="frame.src.framer.brain.decision.decision.Decision" href="#frame.src.framer.brain.decision.decision.Decision">Decision</a></code></h4>
 <ul class="">
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.Config" href="#frame.src.framer.brain.decision.decision.Decision.Config">Config</a></code></li>
-<li><code><a title="frame.src.framer.brain.decision.decision.Decision.add_related_goal" href="#frame.src.framer.brain.decision.decision.Decision.add_related_goal">add_related_goal</a></code></li>
-<li><code><a title="frame.src.framer.brain.decision.decision.Decision.add_related_role" href="#frame.src.framer.brain.decision.decision.Decision.add_related_role">add_related_role</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.convert_priority" href="#frame.src.framer.brain.decision.decision.Decision.convert_priority">convert_priority</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.create" href="#frame.src.framer.brain.decision.decision.Decision.create">create</a></code></li>
-<li><code><a title="frame.src.framer.brain.decision.decision.Decision.execute" href="#frame.src.framer.brain.decision.decision.Decision.execute">execute</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.expected_results" href="#frame.src.framer.brain.decision.decision.Decision.expected_results">expected_results</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.from_json" href="#frame.src.framer.brain.decision.decision.Decision.from_json">from_json</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.model_computed_fields" href="#frame.src.framer.brain.decision.decision.Decision.model_computed_fields">model_computed_fields</a></code></li>
@@ -506,8 +395,6 @@ validated to form a valid model.</p>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.model_fields" href="#frame.src.framer.brain.decision.decision.Decision.model_fields">model_fields</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.related_goals" href="#frame.src.framer.brain.decision.decision.Decision.related_goals">related_goals</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.related_roles" href="#frame.src.framer.brain.decision.decision.Decision.related_roles">related_roles</a></code></li>
-<li><code><a title="frame.src.framer.brain.decision.decision.Decision.remove_related_goal" href="#frame.src.framer.brain.decision.decision.Decision.remove_related_goal">remove_related_goal</a></code></li>
-<li><code><a title="frame.src.framer.brain.decision.decision.Decision.remove_related_role" href="#frame.src.framer.brain.decision.decision.Decision.remove_related_role">remove_related_role</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.task_status" href="#frame.src.framer.brain.decision.decision.Decision.task_status">task_status</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.to_dict" href="#frame.src.framer.brain.decision.decision.Decision.to_dict">to_dict</a></code></li>
 </ul>

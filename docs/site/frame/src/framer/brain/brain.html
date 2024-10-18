@@ -105,10 +105,7 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         self.execution_context = execution_context or ExecutionContext(
             llm_service=llm_service,
             soul=soul,
-            config=FramerConfig(
-                name=&#34;DefaultFramer&#34;,
-                default_model=default_model
-            )
+            config=FramerConfig(name=&#34;DefaultFramer&#34;, default_model=default_model),
         )
 
         self.mind = Mind(self, recent_memories_limit)
@@ -135,10 +132,14 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
                 process_perception=self.process_perception,
                 execute_decision=self.execute_decision,
                 config=FramerConfig(
-                    name=self.framer.config.name if hasattr(self, &#39;framer&#39;) else &#34;DefaultFramer&#34;,
-                    default_model=self.default_model
-                )
-            )
+                    name=(
+                        self.framer.config.name
+                        if hasattr(self, &#34;framer&#34;)
+                        else &#34;DefaultFramer&#34;
+                    ),
+                    default_model=self.default_model,
+                ),
+            ),
         )
 
         # Register the respond action using the agency&#39;s perform_task method
@@ -154,10 +155,12 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
 
     def set_framer(self, framer):
         self.framer = framer
-        if hasattr(self.agency, &#39;set_framer&#39;):
+        if hasattr(self.agency, &#34;set_framer&#34;):
             self.agency.set_framer(framer)
         else:
-            logger.warning(&#34;Agency does not have a set_framer method. This might cause issues.&#34;)
+            logger.warning(
+                &#34;Agency does not have a set_framer method. This might cause issues.&#34;
+            )
 
     def get_framer(self):
         return self.framer
@@ -178,9 +181,13 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         &#34;&#34;&#34;
         # Gather context for thinking
         soul_context = {}
-        if self.execution_context and hasattr(self.execution_context, &#39;soul&#39;) and self.execution_context.soul:
+        if (
+            self.execution_context
+            and hasattr(self.execution_context, &#34;soul&#34;)
+            and self.execution_context.soul
+        ):
             soul_context = self.execution_context.soul.get_current_state()
-        
+
         roles_and_goals = {&#34;roles&#34;: self.roles, &#34;goals&#34;: self.goals}
         recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
         recent_perceptions = self.mind.get_recent_perceptions(5)
@@ -271,7 +278,7 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
                 confidence=0.0,
                 priority=1,
                 related_roles=[],
-                related_goals=[]
+                related_goals=[],
             )
         if hasattr(self, &#34;framer&#34;) and getattr(self.framer, &#34;can_execute&#34;, False):
             await self.execute_decision(decision)
@@ -297,7 +304,7 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
                 confidence=0.0,
                 priority=1,
                 related_roles=[],
-                related_goals=[]
+                related_goals=[],
             )
 
         response = await self._get_decision_prompt(perception)
@@ -371,6 +378,8 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
                 goal for goal in active_goals if goal.priority &gt;= priority_int
             ],
         )
+        logger.info(f&#34;Decision made: {decision}&#34;)
+        return decision
 
     async def _get_decision_prompt(self, perception: Optional[Perception]) -&gt; str:
         &#34;&#34;&#34;
