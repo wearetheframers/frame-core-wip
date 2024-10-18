@@ -4,7 +4,7 @@ from frame.src.models.framer.agency.priority import Priority
 from frame.src.framer.agency.tasks.task import Task, TaskStatus
 from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services.llm.main import LLMService
-from frame.src.services import ExecutionContext
+from frame.src.services import get_execution_context
 from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.framer.agency.roles import Role, Roles, RoleStatus
 from frame.src.framer.agency.goals import Goal, Goals, GoalStatus

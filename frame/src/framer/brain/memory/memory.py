@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any, List, Optional
 from typing import Dict, Any, List, Optional
-from frame.src.services.memory.memory_adapters.mem0.mem0 import Mem0Adapter
+from frame.src.framer.brain.memory.memory_adapters.mem0.mem0_adapter import Mem0Adapter
 
 logger = logging.getLogger(__name__)
 
