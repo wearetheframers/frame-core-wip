@@ -4,11 +4,7 @@ from frame.src.models.framer.agency.priority import Priority
 from frame.src.framer.agency.tasks.task import Task, TaskStatus
 from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services.llm.main import LLMService
-from frame.src.services import get_execution_context, get_memory_service, get_local_context, get_shared_context
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from frame.src.services.context.execution_context_service import ExecutionContext
+from frame.src.services import ExecutionContext
 from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.framer.agency.roles import Role, Roles, RoleStatus
 from frame.src.framer.agency.goals import Goal, Goals, GoalStatus
@@ -46,7 +42,7 @@ class Agency:
         self,
         llm_service: LLMService,
         context: Optional[Dict[str, Any]] = None,
-        execution_context: Optional['ExecutionContext'] = None,
+        execution_context: Optional[ExecutionContext] = None,
         roles: Optional[List[Role]] = None,
         goals: Optional[List[Goal]] = None,
     ):
@@ -62,7 +58,6 @@ class Agency:
         """
         self.llm_service = llm_service
         self.context = context or {}
-        ExecutionContext = get_execution_context()
         self.execution_context = execution_context or ExecutionContext(
             llm_service=llm_service
         )

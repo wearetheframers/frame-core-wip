@@ -1,9 +1,9 @@
-from .llm_service import LLMService
-from .eq_service import EQService
-from .local_context_service import LocalContext
-from .shared_context_service import SharedContext
-from .execution_context_service import ExecutionContext
-from .memory_service import MemoryService
+from .llm import LLMService
+from .eq import EQService
+from .context import LocalContext
+from .context import SharedContext
+from .context import ExecutionContext
+from .memory import MemoryService
 
 __all__ = [
     'LLMService',
