@@ -362,8 +362,8 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         goals_priority = max(
             [goal.priority for goal in active_goals], default=Priority.MEDIUM
         )
-        priority_value = decision_data.get(&#34;priority&#34;, &#34;MEDIUM&#34;)
-        priority_int = Decision.convert_priority(priority_value)
+        priority_value = decision_data.get(&#34;priority&#34;, Priority.MEDIUM)
+        priority_int = Priority.from_value(priority_value).value
 
         decision = Decision(
             action=action,

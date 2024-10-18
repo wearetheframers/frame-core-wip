@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter"><code class="flex name class">
 <span>class <span class="ident">Mem0Adapter</span></span>
-<span>(</span><span>api_key: str)</span>
+<span>(</span><span>api_key: Optional[str] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Mem0Adapter is responsible for interfacing with the Mem0 memory system.
@@ -52,11 +52,47 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
     It provides methods to store, retrieve, and manage memory data.
     &#34;&#34;&#34;
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: Optional[str] = None):
+        if api_key is None:
+            api_key = os.getenv(&#34;MEM0_API_KEY&#34;)
         if MEM0_SERVER_HOST:
-            self.client = Memory(api_key=api_key, server_url=MEM0_SERVER_HOST)
+            self.client = MemoryClient(api_key=api_key, server_url=MEM0_SERVER_HOST)
         else:
-            self.client = Memory(api_key=api_key)
+            self.client = MemoryClient(api_key=api_key)
+
+    def store(
+        self,
+        memory: str,
+        user_id: str = &#34;default&#34;,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -&gt; int:
+        &#34;&#34;&#34;
+        Store a new memory entry in the Mem0 system.
+
+        Args:
+            memory (str): The memory content to store.
+            user_id (str, optional): The user ID associated with the memory. Defaults to &#34;default&#34;.
+            metadata (Optional[Dict[str, Any]], optional): Metadata for the memory. Defaults to None.
+
+        Returns:
+            int: The ID of the stored memory.
+        &#34;&#34;&#34;
+        response = self.add(memory, user_id, metadata)
+        return response.get(&#34;id&#34;, -1)
+
+    def retrieve(self, memory_id: int, user_id: str = &#34;default&#34;) -&gt; Optional[Any]:
+        &#34;&#34;&#34;
+        Retrieve a specific memory entry from the Mem0 system.
+
+        Args:
+            memory_id (int): The ID of the memory to retrieve.
+            user_id (str, optional): The user ID associated with the memory. Defaults to &#34;default&#34;.
+
+        Returns:
+            Optional[Any]: The retrieved memory content, or None if not found.
+        &#34;&#34;&#34;
+        memory = self.get_memory(str(memory_id))
+        return memory.get(&#34;content&#34;) if memory else None
 
     def add(
         self,
@@ -260,6 +296,10 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
 <li><a title="frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface" href="../../memory_adapter_interface.html#frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface">MemoryAdapterInterface</a></li>
 <li>abc.ABC</li>
 </ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.concrete_mem0_adapter.ConcreteMem0Adapter" href="concrete_mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.concrete_mem0_adapter.ConcreteMem0Adapter">ConcreteMem0Adapter</a></li>
+</ul>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.add"><code class="name flex">
@@ -402,6 +442,24 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
 <dd>The response from the Mem0 system.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.retrieve"><code class="name flex">
+<span>def <span class="ident">retrieve</span></span>(<span>self, memory_id: int, user_id: str = 'default') ‑> Optional[Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve a specific memory entry from the Mem0 system.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>memory_id</code></strong> :&ensp;<code>int</code></dt>
+<dd>The ID of the memory to retrieve.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>The user ID associated with the memory. Defaults to "default".</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Optional[Any]</code></dt>
+<dd>The retrieved memory content, or None if not found.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.search"><code class="name flex">
 <span>def <span class="ident">search</span></span>(<span>self, query: str, user_id: Optional[str] = None, agent_id: Optional[str] = None, run_id: Optional[str] = None, filters: Optional[Dict[str, Any]] = None, limit: int = 5, output_format: str = 'v1.1') ‑> List[Dict[str, Any]]</span>
 </code></dt>
@@ -428,6 +486,26 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
 <dl>
 <dt><code>List[Dict[str, Any]]</code></dt>
 <dd>A list of matching memories.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.store"><code class="name flex">
+<span>def <span class="ident">store</span></span>(<span>self, memory: str, user_id: str = 'default', metadata: Optional[Dict[str, Any]] = None) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Store a new memory entry in the Mem0 system.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>memory</code></strong> :&ensp;<code>str</code></dt>
+<dd>The memory content to store.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>The user ID associated with the memory. Defaults to "default".</dd>
+<dt><strong><code>metadata</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code>, optional</dt>
+<dd>Metadata for the memory. Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>The ID of the stored memory.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.update"><code class="name flex">
@@ -476,7 +554,9 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_memory" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_memory">get_memory</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_users" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_users">get_users</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.reset" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.reset">reset</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.retrieve" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.retrieve">retrieve</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.search" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.search">search</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.store" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.store">store</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.update" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.update">update</a></code></li>
 </ul>
 </li>

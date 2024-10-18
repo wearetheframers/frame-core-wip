@@ -86,7 +86,11 @@ hljs.highlightAll();
         else:
             raise ValueError(
                 &#34;Priority must be an integer, string, or Priority instance&#34;
-            )</code></pre>
+            )
+
+    @classmethod
+    def get(cls, value: Union[int, str, &#34;Priority&#34;]) -&gt; &#34;Priority&#34;:
+        return cls.from_value(value)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -152,6 +156,12 @@ hljs.highlightAll();
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.framer.agency.priority.Priority.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>value: Union[int, str, ForwardRef('<a title="frame.src.framer.agency.priority.Priority" href="#frame.src.framer.agency.priority.Priority">Priority</a>')]) ‑> <a title="frame.src.framer.agency.priority.Priority" href="#frame.src.framer.agency.priority.Priority">Priority</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -184,6 +194,7 @@ hljs.highlightAll();
 <li><code><a title="frame.src.framer.agency.priority.Priority.VERY_LOW" href="#frame.src.framer.agency.priority.Priority.VERY_LOW">VERY_LOW</a></code></li>
 <li><code><a title="frame.src.framer.agency.priority.Priority.from_string" href="#frame.src.framer.agency.priority.Priority.from_string">from_string</a></code></li>
 <li><code><a title="frame.src.framer.agency.priority.Priority.from_value" href="#frame.src.framer.agency.priority.Priority.from_value">from_value</a></code></li>
+<li><code><a title="frame.src.framer.agency.priority.Priority.get" href="#frame.src.framer.agency.priority.Priority.get">get</a></code></li>
 </ul>
 </li>
 </ul>

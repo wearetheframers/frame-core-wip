@@ -15,19 +15,25 @@ The plugin system works in conjunction with the Framer's permission system, whic
 
 Frame features a plugin marketplace where premium plugins and community plugins can be developed, given away, or sold. This marketplace fosters a rich ecosystem of extensions and customizations, similar to mod communities in popular games.
 
+## Default Plugins and Services
+
+Frame includes several default plugins known as services, such as `memory`, `eq`, and `shared_context`. These services operate much like plugins but do not require explicit permissions to be accessed. They are automatically available to Framers when included in the configuration. However, you still need to pass them into a Framer to have access to them.
+
+These services enhance the Framer's capabilities by providing essential functionalities without the need for additional permissions, making them integral to the Framer's operation.
+
 ## Plugin Permissions
 
 Plugins are controlled by a permission system. Each plugin has a corresponding permission that must be granted to a Framer for it to use that plugin. Permissions are specified in the FramerConfig when creating a Framer.
 
 The permission format for plugins is `with<PluginName>`. For example:
-- `withSearchExtractSummarizePlugin`: Enables access to the Search Extract Summarize plugin
+- `with_search_extract_summarize_plugin`: Enables access to the Search Extract Summarize plugin
 
 To give a Framer access to a plugin, include its permission in the FramerConfig:
 
 ```python
 config = FramerConfig(
     name="Example Framer",
-    permissions=["withMemory", "withEQ", "withSearchExtractSummarizePlugin"]
+    permissions=["with_memory", "with_eq", "with_search_extract_summarize_plugin"]
 )
 framer = await frame.create_framer(config)
 ```
@@ -119,6 +125,14 @@ print(result)
 ```
 
 ## Plugin Loading
+
+### Ignoring Folders
+
+The plugin loader is designed to ignore any folders that start with an underscore (`_`). This allows you to keep certain directories in the plugins folder without them being loaded as plugins. This can be useful for storing shared resources, documentation, or other non-plugin files.
+
+### Ignoring Folders
+
+The plugin loader is designed to ignore any folders that start with an underscore (`_`). This allows you to keep certain directories in the plugins folder without them being loaded as plugins. This can be useful for storing shared resources, documentation, or other non-plugin files.
 
 Plugins are loaded automatically by the Frame system. The `load_plugins` function in `frame/src/utils/plugin_loader.py` is responsible for discovering and loading plugins. Here's an overview of how it works:
 

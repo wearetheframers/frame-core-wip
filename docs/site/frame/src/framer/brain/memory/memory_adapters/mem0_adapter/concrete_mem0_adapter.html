@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
-<title>frame.src.plugins API documentation</title>
+<title>frame.src.framer.brain.memory.memory_adapters.mem0_adapter.concrete_mem0_adapter API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -22,24 +22,66 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>frame.src.plugins</code></h1>
+<h1 class="title">Module <code>frame.src.framer.brain.memory.memory_adapters.mem0_adapter.concrete_mem0_adapter</code></h1>
 </header>
 <section id="section-intro">
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt><code class="name"><a title="frame.src.plugins.mem0_search_extract_summarize_plugin" href="mem0_search_extract_summarize_plugin/index.html">frame.src.plugins.mem0_search_extract_summarize_plugin</a></code></dt>
+<dt id="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.concrete_mem0_adapter.ConcreteMem0Adapter"><code class="flex name class">
+<span>class <span class="ident">ConcreteMem0Adapter</span></span>
+<span>(</span><span>api_key: Optional[str] = None)</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Mem0Adapter is responsible for interfacing with the Mem0 memory system.
+It provides methods to store, retrieve, and manage memory data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ConcreteMem0Adapter(Mem0Adapter):
+    def retrieve(self, key: str) -&gt; Any:
+        # Implement the logic to retrieve data from Mem0
+        pass
+
+    def store(self, key: str, value: Any) -&gt; None:
+        # Implement the logic to store data in Mem0
+        pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter">Mem0Adapter</a></li>
+<li><a title="frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface" href="../../memory_adapter_interface.html#frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface">MemoryAdapterInterface</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter">Mem0Adapter</a></b></code>:
+<ul class="hlist">
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.add" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.add">add</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.delete" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.delete">delete</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.delete_all" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.delete_all">delete_all</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_all" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_all">get_all</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_history" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_history">get_history</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_memory" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_memory">get_memory</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_users" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_users">get_users</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.reset" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.reset">reset</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.retrieve" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.retrieve">retrieve</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.search" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.search">search</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.store" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.store">store</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.update" href="mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.update">update</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
-</section>
-<section>
 </section>
 </article>
 <nav id="sidebar">
@@ -49,12 +91,14 @@ hljs.highlightAll();
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="frame.src" href="../index.html">frame.src</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter" href="index.html">frame.src.framer.brain.memory.memory_adapters.mem0_adapter</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li><code><a title="frame.src.plugins.mem0_search_extract_summarize_plugin" href="mem0_search_extract_summarize_plugin/index.html">frame.src.plugins.mem0_search_extract_summarize_plugin</a></code></li>
+<li>
+<h4><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.concrete_mem0_adapter.ConcreteMem0Adapter" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.concrete_mem0_adapter.ConcreteMem0Adapter">ConcreteMem0Adapter</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>

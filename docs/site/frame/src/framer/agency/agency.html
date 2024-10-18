@@ -362,6 +362,8 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             for r in role_data:
                 r[&#34;priority&#34;] = max(1, min(10, int(r.get(&#34;priority&#34;, 5))))
                 r[&#34;status&#34;] = RoleStatus[r.get(&#34;status&#34;, &#34;ACTIVE&#34;)]
+                # Ensure permissions are a list
+                r[&#34;permissions&#34;] = list(r.get(&#34;permissions&#34;, []))
                 roles.append(Role(**r))
             return roles
         except Exception as e:

@@ -37,6 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.memory.memory_adapters.mem0.mem0_adapter.Mem0Adapter"><code class="flex name class">
 <span>class <span class="ident">Mem0Adapter</span></span>
+<span>(</span><span>api_key: Optional[str] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Mem0Adapter is responsible for interfacing with the Mem0 memory system.
@@ -51,7 +52,9 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
     It provides methods to store, retrieve, and manage memory data.
     &#34;&#34;&#34;
 
-    def __init__(self):
+    def __init__(self, api_key: Optional[str] = None):
+        if api_key is None:
+            api_key = os.getenv(&#34;MEM0_API_KEY&#34;)
         self.memories = {}
 
     def store(
@@ -146,7 +149,7 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
         &#34;&#34;&#34;
         return self.memories.get(user_id, [])
 
-    def search(self, query: str, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
+    def search(self, query: str, user_id: str = &#34;default&#34;, limit: int = 10) -&gt; List[Dict[str, Any]]:
         &#34;&#34;&#34;
         Search for memory entries containing the query string for a specific user.
 
@@ -161,7 +164,7 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
             mem
             for mem in self.memories.get(user_id, [])
             if query.lower() in str(mem[&#34;memory&#34;]).lower()
-        ]
+        ][:limit]
 
     def history(self, memory_id: int, user_id: str = &#34;default&#34;) -&gt; List[str]:
         &#34;&#34;&#34;
@@ -271,7 +274,7 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.memory.memory_adapters.mem0.mem0_adapter.Mem0Adapter.search"><code class="name flex">
-<span>def <span class="ident">search</span></span>(<span>self, query: str, user_id: str = 'default') ‑> List[Dict[str, Any]]</span>
+<span>def <span class="ident">search</span></span>(<span>self, query: str, user_id: str = 'default', limit: int = 10) ‑> List[Dict[str, Any]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Search for memory entries containing the query string for a specific user.</p>

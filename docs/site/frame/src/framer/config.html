@@ -93,7 +93,9 @@ validated to form a valid model.</p>
     model: Optional[str] = None
     soul_seed: Optional[Union[str, Dict[str, Any]]] = &#34;You are a helpful AI assistant.&#34;
     use_local_model: bool = False
-    permissions: Optional[List[str]] = Field(default_factory=list)
+    # Default permissions include services like memory, eq, and shared_context.
+    # These services do not require explicit permissions to be accessed.
+    permissions: Optional[List[str]] = Field(default_factory=lambda: [&#34;with_memory&#34;, &#34;with_mem0_search_extract_summarize_plugin&#34;, &#34;with_shared_context&#34;])
     mem0_api_key: Optional[str] = MEM0_API_KEY
     &#34;&#34;&#34;
     Configuration class for Framer instances.

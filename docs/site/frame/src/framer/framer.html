@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.framer.Framer"><code class="flex name class">
 <span>class <span class="ident">Framer</span></span>
-<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.workflow.workflow_manager.WorkflowManager" href="agency/workflow/workflow_manager.html#frame.src.framer.agency.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [])</span>
+<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.workflow.workflow_manager.WorkflowManager" href="agency/workflow/workflow_manager.html#frame.src.framer.agency.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, memory_adapter: Optional[<a title="frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface" href="brain/memory/memory_adapter_interface.html#frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface">MemoryAdapterInterface</a>] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Framer class represents an AI agent with cognitive capabilities. It integrates various components
@@ -106,6 +106,7 @@ processing perceptions, making decisions, and executing tasks.</p>
         brain: Brain,
         soul: Soul,
         workflow_manager: WorkflowManager,
+        memory_adapter: Optional[MemoryAdapterInterface] = None,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
         roles: List[Dict[str, Any]] = [],
@@ -114,61 +115,53 @@ processing perceptions, making decisions, and executing tasks.</p>
         # Existing initialization code...
 
         self.config = config
-        self.permissions = config.permissions
+        self.permissions = config.permissions or [&#34;with_memory&#34;, &#34;with_mem0_search_extract_summarize_plugin&#34;, &#34;with_shared_context&#34;]
 
         # Initialize services and plugins based on permissions
-        if &#34;withMemory&#34; in self.permissions:
-            self.memory_service = memory_service or MemoryService()
+        # Services like memory, eq, and shared_context are special plugins called services.
+        # They do not require explicit permissions to be accessed but must be passed into a Framer.
+        # The Mem0SearchExtractSummarizePlugin is a default plugin that provides a response mechanism
+        # requiring memory retrieval, functioning as a RAG mechanism.
+        if &#34;with_memory&#34; in self.permissions and memory_adapter:
+            self.memory_service = memory_service or MemoryService(adapter=memory_adapter)
 
-        if &#34;withEQ&#34; in self.permissions:
+        if &#34;with_eq&#34; in self.permissions:
             self.eq_service = eq_service or EQService()
 
-        if &#34;withSharedContext&#34; in self.permissions:
+        if &#34;with_shared_context&#34; in self.permissions:
             self.shared_context_service = SharedContext()
 
         # Initialize custom plugins
         self.plugins = {}
         for permission in self.permissions:
             if permission.startswith(&#34;with&#34;) and permission not in [
-                &#34;withMemory&#34;,
-                &#34;withEQ&#34;,
-                &#34;withSharedContext&#34;,
+                &#34;with_memory&#34;,
+                &#34;with_eq&#34;,
+                &#34;with_shared_context&#34;,
             ]:
-                plugin_name = permission[4:]  # Remove &#39;with&#39; prefix
+                plugin_name = permission[5:]  # Remove &#39;with_&#39; prefix
                 try:
                     plugin_module = importlib.import_module(
-                        f&#34;frame.src.plugins.{plugin_name.lower()}&#34;
+                        f&#34;frame.src.plugins.{plugin_name}.{plugin_name}&#34;
                     )
-                    plugin_class = getattr(plugin_module, plugin_name)
+                    # Construct the plugin class name by converting the plugin name to CamelCase
+                    plugin_class_name = &#39;&#39;.join(word.capitalize() for word in plugin_name.split(&#39;_&#39;))
+                    plugin_class = getattr(plugin_module, plugin_class_name)
                     self.plugins[plugin_name] = plugin_class(self)
-                except ImportError:
+                except (ImportError, AttributeError) as e:
+                    logger.warning(f&#34;{plugin_name} is not available. Error: {str(e)}&#34;)
                     logger.warning(
                         f&#34;{plugin_name} is not available. To use it, install the required dependencies.&#34;
                     )
-
+        logger.info(f&#34;Loaded plugins: {list(self.plugins.keys())}&#34;)
         # Initialize Mem0Adapter if API key is provided and permission is granted
-        if config.mem0_api_key and &#34;withMemory&#34; in self.permissions:
+        if config.mem0_api_key and &#34;with_memory&#34; in self.permissions:
             self.mem0_adapter = Mem0Adapter(api_key=config.mem0_api_key)
         else:
             self.mem0_adapter = None
             logger.warning(
                 &#34;Mem0 API key not provided or permission not granted. Mem0Adapter will not be available.&#34;
             )
-        &#34;&#34;&#34;
-        Initialize a Framer instance.
-
-        Args:
-            config (FramerConfig): Configuration settings for the Framer.
-            llm_service (LLMService): The language model service to be used by the Framer.
-            agency (Agency): Manages roles, goals, tasks, and workflows for the Framer.
-            brain (Brain): Handles decision-making processes, integrating perceptions, memories, and thoughts.
-            soul (Soul): Represents the core essence and personality of a Framer.
-            workflow_manager (WorkflowManager): Manages workflows and tasks.
-            memory_service (Optional[MemoryService]): Service for managing memory. Default is None.
-            eq_service (Optional[EQService]): Service for managing emotional intelligence. Default is None.
-            roles (Optional[List[Dict[str, Any]]]): List of roles for the Framer. Default is None.
-            goals (Optional[List[Dict[str, Any]]]): List of goals for the Framer. Default is None.
-        &#34;&#34;&#34;
         self._streamed_response = {&#34;status&#34;: &#34;pending&#34;, &#34;result&#34;: &#34;&#34;}
         self.config = config
         self.llm_service = llm_service
@@ -180,7 +173,6 @@ processing perceptions, making decisions, and executing tasks.</p>
         self.eq_service = eq_service
         self._dynamic_model_choice = False
         self.observers: List[Observer] = []
-        self.plugins: Dict[str, Any] = {}  # Initialize plugins attribute
         self.can_execute = True  # Add can_execute attribute
         self.acting = False
 
@@ -349,6 +341,30 @@ processing perceptions, making decisions, and executing tasks.</p>
 
         export_config_to_markdown(self.config, file_path)
 
+    async def use_plugin_action(self, plugin_name: str, action_name: str, parameters: Dict[str, Any]) -&gt; Any:
+        &#34;&#34;&#34;
+        Execute a plugin action directly.
+
+        Args:
+            plugin_name (str): The name of the plugin.
+            action_name (str): The name of the action to execute.
+            parameters (Dict[str, Any]): Parameters for the action.
+
+        Returns:
+            Any: The result of the action execution.
+        &#34;&#34;&#34;
+        # Get the plugin instance
+        plugin = self.plugins.get(plugin_name)
+        if not plugin:
+            logger.warning(f&#34;Plugin {plugin_name} not found. Skipping action.&#34;)
+            return {&#34;error&#34;: f&#34;Plugin {plugin_name} not found.&#34;}
+        
+        action = getattr(plugin, action_name, None)
+        if not action:
+            raise ValueError(f&#34;Action {action_name} not found in plugin {plugin_name}.&#34;)
+        
+        return await action(**parameters)
+    
     async def perform_task(self, task: Dict[str, Any]) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Perform a task asynchronously.
@@ -714,6 +730,26 @@ systems, facilitating interoperability and reuse.</p>
 <dd>The decision made based on the perception.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.framer.framer.Framer.use_plugin_action"><code class="name flex">
+<span>async def <span class="ident">use_plugin_action</span></span>(<span>self, plugin_name: str, action_name: str, parameters: Dict[str, Any]) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute a plugin action directly.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>plugin_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the plugin.</dd>
+<dt><strong><code>action_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the action to execute.</dd>
+<dt><strong><code>parameters</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>Parameters for the action.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Any</code></dt>
+<dd>The result of the action execution.</dd>
+</dl></div>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -748,6 +784,7 @@ systems, facilitating interoperability and reuse.</p>
 <li><code><a title="frame.src.framer.framer.Framer.prompt" href="#frame.src.framer.framer.Framer.prompt">prompt</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.remove_observer" href="#frame.src.framer.framer.Framer.remove_observer">remove_observer</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.sense" href="#frame.src.framer.framer.Framer.sense">sense</a></code></li>
+<li><code><a title="frame.src.framer.framer.Framer.use_plugin_action" href="#frame.src.framer.framer.Framer.use_plugin_action">use_plugin_action</a></code></li>
 </ul>
 </li>
 </ul>

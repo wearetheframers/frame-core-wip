@@ -219,7 +219,12 @@ validated to form a valid model.</p>
         &#34;&#34;&#34;
         if isinstance(priority, int):
             return priority
-        return Priority.get(priority.upper(), 5)
+        if isinstance(priority, str):
+            try:
+                return Priority[priority.upper()].value
+            except KeyError:
+                raise ValueError(f&#34;Invalid priority level: {priority}&#34;)
+        raise ValueError(&#34;Priority must be a string or Priority enum&#34;)
 
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;

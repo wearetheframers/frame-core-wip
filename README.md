@@ -91,6 +91,14 @@ print(f"Task result: {result}")
 await framer.close()
 ```
 
+## Default Plugins and Services
+
+Frame includes several default plugins known as services, such as `memory`, `eq`, and `shared_context`. These services operate much like plugins but do not require explicit permissions to be accessed. They are automatically available to Framers when included in the configuration. However, you still need to pass them into a Framer to have access to them.
+
+These services enhance the Framer's capabilities by providing essential functionalities without the need for additional permissions, making them integral to the Framer's operation.
+
+Additionally, the `Mem0SearchExtractSummarizePlugin` is included as a default plugin. This plugin is crucial for Framers as it provides a response mechanism that requires memory retrieval, functioning as a Retrieval-Augmented Generation (RAG) mechanism. By default, all Framers inherit this action, enabling them to search, extract, and summarize information effectively.
+
 ## Permissions and Plugins
 
 Frame uses a permissions system to control which plugins and services a Framer can access. Permissions are specified in the FramerConfig when creating a Framer.
@@ -98,7 +106,7 @@ Frame uses a permissions system to control which plugins and services a Framer c
 ### Plugin Permissions
 
 Plugin permissions follow the format `with<PluginName>`. For example:
-- `withSearchExtractSummarizePlugin`: Enables access to the Search Extract Summarize plugin
+- `with_search_extract_summarize_plugin`: Enables access to the Search Extract Summarize plugin
 
 ### Setting Permissions
 
@@ -107,7 +115,7 @@ Set permissions when creating a Framer:
 ```python
 config = FramerConfig(
     name="Example Framer",
-    permissions=["withMemory", "withEQ", "withSearchExtractSummarizePlugin"]
+    permissions=["with_memory", "with_mem0_search_extract_summarize_plugin", "with_shared_context"]
 )
 framer = await frame.create_framer(config)
 ```

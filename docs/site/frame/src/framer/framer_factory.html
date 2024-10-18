@@ -163,7 +163,8 @@ enabling developers to create a wide range of extensions and enhancements.</p>
             execution_context=execution_context,
             context=None,
         )
-        # Initialize the Agency component
+        # Initialize the Agency component with default permissions
+        self.config.permissions = self.config.permissions or [&#34;with_memory&#34;, &#34;with_mem0_search_extract_summarize_plugin&#34;, &#34;with_shared_context&#34;]
         # Generate roles and goals. The Framer must be acting to respond to perceptions.
         if roles is None or goals is None:
             roles, goals = await agency.generate_roles_and_goals()

@@ -328,6 +328,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
         execution_context: ExecutionContext,
         observation: Optional[str] = None,
         insights: Optional[Dict[str, Any]] = None,
+        actions: Optional[Dict[str, Any]] = None,
+        context: Optional[Dict[str, Any]] = None,
+        next_steps: Optional[Dict[str, Any]] = None,
     ) -&gt; str:
         &#34;&#34;&#34;
         Process an observation and generate insights or actions.
@@ -357,7 +360,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.agency.actions.ObserveAction.execute"><code class="name flex">
-<span>async def <span class="ident">execute</span></span>(<span>self, execution_context: <a title="frame.src.services.execution_context.ExecutionContext" href="../../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>, observation: Optional[str] = None, insights: Optional[Dict[str, Any]] = None) ‑> str</span>
+<span>async def <span class="ident">execute</span></span>(<span>self, execution_context: <a title="frame.src.services.execution_context.ExecutionContext" href="../../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>, observation: Optional[str] = None, insights: Optional[Dict[str, Any]] = None, actions: Optional[Dict[str, Any]] = None, context: Optional[Dict[str, Any]] = None, next_steps: Optional[Dict[str, Any]] = None) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Process an observation and generate insights or actions.</p>
