@@ -26,12 +26,14 @@ def mock_plugin_dir(tmp_path):
 def test_load_plugins(mock_plugin_dir):
     with patch('frame.src.utils.plugin_loader.importlib.import_module') as mock_import, \
          patch('frame.src.utils.plugin_loader.os.listdir') as mock_listdir, \
-         patch('frame.src.utils.plugin_loader.os.path.isdir') as mock_isdir:
+         patch('frame.src.utils.plugin_loader.os.path.isdir') as mock_isdir, \
+         patch('frame.src.utils.plugin_loader.load_plugin_config') as mock_load_config:
         mock_module = MagicMock()
         mock_module.MockPlugin = MockPlugin
         mock_import.return_value = mock_module
         mock_listdir.return_value = ['mock_plugin']
         mock_isdir.return_value = True
+        mock_load_config.return_value = {}
 
         plugins, warnings = load_plugins(mock_plugin_dir)
 
@@ -43,7 +45,8 @@ def test_load_plugins(mock_plugin_dir):
 def test_load_plugins_with_conflict(mock_plugin_dir):
     with patch('frame.src.utils.plugin_loader.importlib.import_module') as mock_import, \
          patch('frame.src.utils.plugin_loader.os.listdir') as mock_listdir, \
-         patch('frame.src.utils.plugin_loader.os.path.isdir') as mock_isdir:
+         patch('frame.src.utils.plugin_loader.os.path.isdir') as mock_isdir, \
+         patch('frame.src.utils.plugin_loader.load_plugin_config') as mock_load_config:
         mock_module1 = MagicMock()
         mock_module1.MockPlugin1 = MockPlugin
         mock_module2 = MagicMock()
@@ -51,6 +54,7 @@ def test_load_plugins_with_conflict(mock_plugin_dir):
         mock_import.side_effect = [mock_module1, mock_module2]
         mock_listdir.return_value = ['mock_plugin1', 'mock_plugin2']
         mock_isdir.return_value = True
+        mock_load_config.return_value = {}
 
         plugins, warnings = load_plugins(mock_plugin_dir)
 
