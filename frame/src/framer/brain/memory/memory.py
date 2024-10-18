@@ -22,6 +22,7 @@ class Memory:
         self.core = {}
         self.short_term = []
         self.mem0 = Mem0Adapter()
+        self.user_id = "default"  # You might want to make this configurable
 
     def get_core_memory(self, key: str) -> Any:
         """
