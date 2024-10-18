@@ -102,13 +102,25 @@ Plugins are loaded automatically by the Frame system. The `load_plugins` functio
 1. The function scans the specified plugins directory (default is `frame/src/plugins/`).
 2. For each subdirectory, it attempts to import a module and find a plugin class.
 3. If a valid plugin class is found (inheriting from `PluginBase`), it's instantiated and added to the plugins dictionary.
-4. The function also loads plugin-specific configurations from environment variables or a `config.json` file in the plugin's directory.
+4. The function checks for conflicting action names across all plugins.
+5. If conflicts are found, warnings are logged, and only the first occurrence of an action name is kept.
+6. The function also loads plugin-specific configurations from environment variables or a `config.json` file in the plugin's directory.
 
 You can customize the plugins directory by setting the `plugins_dir` parameter when initializing the Frame instance:
 
 ```python
 frame = Frame(plugins_dir="/path/to/custom/plugins")
 ```
+
+### Handling Conflicting Actions
+
+When loading plugins, Frame checks for conflicting action names across all plugins. If a conflict is detected:
+
+1. A warning message is logged for each conflicting action.
+2. Only the first occurrence of an action name is kept and made available for use.
+3. Subsequent actions with the same name are skipped.
+
+This behavior ensures that the system remains stable while still allowing for a wide range of plugins to be loaded. Developers should be aware of this behavior and design their plugins accordingly, using unique action names when possible.
 
 ## Best Practices
 

@@ -1,31 +1,37 @@
 import os
 import importlib
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
 from dotenv import load_dotenv
 import json
 from frame.src.framer.brain.plugins import PluginBase
 
 logger = logging.getLogger(__name__)
 
-def load_plugins(plugins_dir: str) -> Dict[str, Any]:
+def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
     """
     Load all plugins from the specified directory.
 
     This function scans the given directory for plugin modules, loads them,
     and returns a dictionary of plugin names and their corresponding classes.
+    It also checks for conflicting action names across plugins and handles them.
 
     Args:
         plugins_dir (str): The directory containing the plugins.
 
     Returns:
-        Dict[str, Any]: A dictionary of loaded plugins, where the key is the plugin name
-                        and the value is the plugin class.
+        Tuple[Dict[str, Any], List[str]]: A tuple containing:
+            - A dictionary of loaded plugins, where the key is the plugin name
+              and the value is the plugin class.
+            - A list of warning messages for conflicting actions.
     """
     # Load environment variables from .env file
     load_dotenv()
 
     plugins = {}
+    loaded_actions = {}
+    conflict_warnings = []
+
     for item in os.listdir(plugins_dir):
         plugin_dir = os.path.join(plugins_dir, item)
         if os.path.isdir(plugin_dir) and not item.startswith('__'):
@@ -43,11 +49,26 @@ def load_plugins(plugins_dir: str) -> Dict[str, Any]:
                     continue
 
                 # Initialize the plugin with its configuration
-                plugins[item] = plugin_class(config)
+                plugin_instance = plugin_class(config)
+
+                # Check for conflicting actions
+                plugin_actions = plugin_instance.get_actions()
+                for action_name, action_func in plugin_actions.items():
+                    if action_name in loaded_actions:
+                        conflict_warnings.append(f"Action '{action_name}' in plugin '{item}' conflicts with an existing action. Skipping.")
+                    else:
+                        loaded_actions[action_name] = action_func
+
+                # Add the plugin to the plugins dictionary
+                plugins[item] = plugin_instance
                 logger.info(f"Loaded plugin: {item}")
             except (ImportError, AttributeError) as e:
                 logger.warning(f"Failed to load plugin {item}: {str(e)}")
-    return plugins
+
+    for warning in conflict_warnings:
+        logger.warning(warning)
+
+    return plugins, conflict_warnings
 
 def load_plugin_config(plugin_dir: str) -> Dict[str, Any]:
     """
