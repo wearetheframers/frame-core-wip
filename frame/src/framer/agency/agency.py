@@ -1,13 +1,15 @@
-from typing import List, Dict, Any, Optional, Tuple, Union
+from typing import List, Dict, Any, Optional, Tuple, Union, TYPE_CHECKING
 from frame.src.constants.models import DEFAULT_MODEL
 from frame.src.models.framer.agency.priority import Priority
 from frame.src.framer.agency.tasks.task import Task, TaskStatus
 from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services.llm.main import LLMService
-from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.framer.agency.roles import Role, Roles, RoleStatus
 from frame.src.framer.agency.goals import Goal, Goals, GoalStatus
+
+if TYPE_CHECKING:
+    from frame.src.services.execution_context import ExecutionContext
 from frame.src.models.framer.agency.roles import (
     Role as RoleModel,
     RoleStatus as RoleStatusModel,
@@ -42,7 +44,7 @@ class Agency:
         self,
         llm_service: LLMService,
         context: Optional[Dict[str, Any]] = None,
-        execution_context: Optional[ExecutionContext] = None,
+        execution_context: Optional["ExecutionContext"] = None,
         roles: Optional[List[Role]] = None,
         goals: Optional[List[Goal]] = None,
     ):

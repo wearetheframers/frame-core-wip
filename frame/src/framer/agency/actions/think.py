@@ -5,7 +5,7 @@ from frame.src.models.framer.agency.priority import Priority
 
 class ThinkAction(Action):
     def __init__(self):
-        super().__init__("think", "Ponder and reflect on the current situation", Priority.HIGH, Dict[str, Any])
+        super().__init__("think", "Ponder and reflect on the current situation", Priority.HIGH)
 
     async def execute(self, execution_context: ExecutionContext, thought: str = "Processing information...") -> Dict[str, Any]:
         """

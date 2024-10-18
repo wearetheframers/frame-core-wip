@@ -3,6 +3,7 @@ import logging
 import ast
 import time
 import asyncio
+from asyncio import Future
 import re
 from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 from frame.src.framer.agency import Agency
@@ -13,16 +14,14 @@ from frame.src.framer.brain.mind import Mind
 from frame.src.framer.brain.memory import Memory
 from frame.src.utils.llm_utils import get_llm_provider, get_completion
 from frame.src.services.llm.main import LLMService
-from asyncio import Future
 from frame.src.services.llm.llm_adapters.lmql.lmql_adapter import LMQLConfig
 from frame.src.framer.soul.soul import Soul
-from frame.src.services import ExecutionContext
-from frame.src.framer.soul.soul import Soul
-from frame.src.models.framer.agency.roles import Role
+from frame.src.models.framer.agency.roles import Role, RoleStatus
 from frame.src.models.framer.agency.goals import Goal, GoalStatus
-from frame.src.models.framer.agency.goals import Goal
-from frame.src.models.framer.agency.roles import RoleStatus
 from frame.src.models.framer.agency.priority import Priority
+
+if TYPE_CHECKING:
+    from frame.src.services import ExecutionContext
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +43,7 @@ class Brain:
         goals: List[Dict[str, Any]],
         default_model: str = "gpt-3.5-turbo",
         recent_memories_limit: int = 5,
-        execution_context: Optional[ExecutionContext] = None,
+        execution_context: Optional['ExecutionContext'] = None,
         soul: Optional[Soul] = None,
     ):
         """

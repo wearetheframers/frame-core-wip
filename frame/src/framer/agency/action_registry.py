@@ -1,38 +1,57 @@
 import asyncio
 import logging
 import json
-from typing import Dict, Any, Callable, Optional
-from frame.src.framer.agency.actions.observe import observe
-from frame.src.framer.agency.actions.think import think
-from frame.src.framer.agency.actions.respond import respond
+from typing import Dict, Any, Callable, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from frame.src.services import ExecutionContext
 
 logger = logging.getLogger(__name__)
 from frame.src.framer.agency.default_actions import (
     VALID_ACTIONS,
     extend_valid_actions,
 )
-from frame.src.services import ExecutionContext
+from frame.src.framer.agency.actions import (
+    CreateNewAgentAction,
+    GenerateRolesAndGoalsAction,
+    ObserveAction,
+    RespondAction,
+    ThinkAction,
+    ResearchAction
+)
 
 
 class ActionRegistry:
-    def __init__(self, execution_context_service: ExecutionContext):
+    def __init__(self, execution_context_service: 'ExecutionContext'):
         self.actions: Dict[str, Dict[str, Any]] = {}
         self.execution_context_service = execution_context_service
         self._register_default_actions()
 
     def set_execution_context_service(
-        self, execution_context_service: ExecutionContext
+        self, execution_context_service: 'ExecutionContext'
     ):
         self.execution_context_service = execution_context_service
 
     def _register_default_actions(self):
+        default_actions = [
+            CreateNewAgentAction(),
+            GenerateRolesAndGoalsAction(),
+            ObserveAction(),
+            RespondAction(),
+            ThinkAction(),
+            ResearchAction()
+        ]
+        for action in default_actions:
+            self.register_action(action)
+        
         for action, info in VALID_ACTIONS.items():
-            self.register_action(
-                action,
-                info["func"],
-                description=info["description"],
-                priority=info["priority"],
-            )
+            if action not in [a.name for a in default_actions]:
+                self.register_action(
+                    action,
+                    info["func"],
+                    description=info["description"],
+                    priority=info["priority"],
+                )
 
     def extend_actions(self, new_actions: Dict[str, Dict[str, Any]]):
         extend_valid_actions(new_actions)

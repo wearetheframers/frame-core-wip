@@ -1,6 +1,6 @@
 from typing import Tuple, List, Dict, Any
-from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.actions.base_action import Action
+from frame.src.services.execution_context import ExecutionContext
 
 class GenerateRolesAndGoalsAction(Action):
     def __init__(self):
@@ -11,7 +11,7 @@ class GenerateRolesAndGoalsAction(Action):
         Generate roles and goals for the Framer.
 
         Args:
-            execution_context (ExecutionContext): The execution context containing necessary services.
+            execution_context ('ExecutionContext'): The execution context containing necessary services.
 
         Returns:
             Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]: A tuple containing the generated roles and goals.

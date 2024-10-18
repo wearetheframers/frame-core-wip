@@ -18,31 +18,41 @@ The `ActionRegistry` class is responsible for managing actions within the Framer
 
 ### `register_action`
 
-Registers a new action with the specified name, function, description, and priority.
+Registers a new action with the specified name, function, description, and priority. It can now accept an `Action` object directly.
 
-### `perform_action`
+### `execute_action`
 
-Executes a registered action by its name, passing any required arguments and an optional callback.
+Executes a registered action by its name, passing any required parameters.
 
 ### `get_all_actions`
 
 Retrieves all registered actions as a dictionary.
+
+## Default Actions
+
+The ActionRegistry now includes the following default actions:
+
+- CreateNewAgentAction
+- GenerateRolesAndGoalsAction
+- ObserveAction
+- RespondAction
+- ThinkAction
+
+These actions are automatically registered when the ActionRegistry is initialized.
 
 ## Usage
 
 To register a new action:
 
 ```python
-action_registry.register_action(
-    "new_action",
-    new_action_function,
-    "Description of the new action",
-    priority=5
-)
+from frame.src.framer.agency.actions import CustomAction
+
+custom_action = CustomAction()
+action_registry.register_action(custom_action)
 ```
 
-To perform an action:
+To execute an action:
 
 ```python
-result = await action_registry.perform_action("new_action", arg1, arg2)
+result = await action_registry.execute_action("custom_action", parameters={})
 ```

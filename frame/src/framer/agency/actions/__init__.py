@@ -1,15 +1,15 @@
-from .create_new_agent import create_new_agent
-from .generate_roles_and_goals import generate_roles_and_goals
-from .research import research
-from .respond import respond
-from .think import think
-from .observe import observe
+from .create_new_agent import CreateNewAgentAction
+from .generate_roles_and_goals import GenerateRolesAndGoalsAction
+from .research import ResearchAction
+from .respond import RespondAction
+from .think import ThinkAction
+from .observe import ObserveAction
 
 __all__ = [
-    "create_new_agent",
-    "generate_roles_and_goals",
-    "research",
-    "respond",
-    "think",
-    "observe",
+    "CreateNewAgentAction",
+    "GenerateRolesAndGoalsAction",
+    "ResearchAction",
+    "RespondAction",
+    "ThinkAction",
+    "ObserveAction"
 ]
