@@ -182,11 +182,6 @@ class Frame:
 
         return result
 
-    def calculate_tokens_used(self, prompt: str, result: str) -> int:
-        # Implement token calculation logic here
-        # This is a simple estimation, you may want to use a more accurate method
-        return len(prompt.split()) + len(result.split())
-
     def get_metrics(self) -> Dict[str, Any]:
         """
         Get the current LLM usage metrics.
