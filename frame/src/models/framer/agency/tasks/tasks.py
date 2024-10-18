@@ -20,7 +20,8 @@ class TaskModel(BaseModel):
     status: TaskStatus = TaskStatus.PENDING
     workflow_id: Optional[str] = None
     expected_results: List[Any] = Field(default_factory=list)
-
+    updated_at: Optional[str] = None
+    created_at: Optional[str] = None
 
 class TasksModel(BaseModel):
     tasks: list[TaskModel] = []

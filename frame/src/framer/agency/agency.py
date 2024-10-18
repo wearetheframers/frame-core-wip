@@ -115,6 +115,9 @@ class Agency:
             task (Task): The task to add.
             workflow_id (str, optional): The ID of the workflow to add the task to. Defaults to "default".
         """
+        # Ensure the workflow exists before adding a task
+        if not self.workflow_manager.get_workflow(workflow_id):
+            self.workflow_manager.create_workflow(workflow_id)
         self.workflow_manager.add_task(workflow_id, task)
 
     def get_next_task(self, workflow_id: str = "default") -> Optional[Task]:
@@ -236,7 +239,29 @@ class Agency:
             self.completion_calls[task.workflow_id][task.id] = 0
 
         # Perform the task
-        prompt = f"Execute the following task: {task.description}"
+        priority_explanation = """
+        Priority levels are defined as follows:
+        1 - LOWEST
+        2 - VERY LOW
+        3 - LOW
+        4 - MEDIUM LOW
+        5 - MEDIUM
+        6 - MEDIUM HIGH
+        7 - HIGH
+        8 - VERY HIGH
+        9 - HIGHEST
+        10 - CRITICAL
+
+        When making decisions, prioritize tasks with higher priority levels, but introduce some variability to avoid always selecting the same task. Consider the context and relevance of each task to determine the best course of action.
+        """
+
+        prompt = f"""
+        Execute the following task: {task.description}
+
+        {priority_explanation}
+
+        Consider the context and relevance of each task, and introduce some variability in your decision-making process.
+        """
         response = await self.llm_service.get_completion(
             prompt,
             model=self.default_model,
@@ -453,21 +478,23 @@ class Agency:
         logger.debug(f"Decision parameters: {decision.parameters}")
 
         try:
-            if decision.action == "think":
-                result = await self._execute_think_action(decision)
+            # Pass priorities to the LLM to help prioritize tasks based on relevance
+            for action_name, action_info in self.action_registry.actions.items():
+                if action_name == decision.action:
+                    if action_name == "think":
+                        result = await self._execute_think_action(decision)
+                    elif action_name == "respond":
+                        result = await self.perform_task(
+                            {
+                                "description": decision.parameters.get("content", ""),
+                                "workflow_id": "default",
+                            }
+                        )
+                    else:
+                        result = await self.action_registry.execute_action(action_name, decision.parameters)
+                    break
             else:
-                if decision.action not in self.action_registry.actions:
-                    raise ValueError(f"Action '{decision.action}' not found in registry.")
-
-                if decision.action == "respond":
-                    result = await self.perform_task(
-                        {
-                            "description": decision.parameters.get("content", ""),
-                            "workflow_id": "default",
-                        }
-                    )
-                else:
-                    result = await self.action_registry.execute_action(decision.action, decision.parameters)
+                raise ValueError(f"Action '{decision.action}' not found in registry.")
 
             logger.info(f"Executed action: {decision.action}")
             logger.debug(f"Action result: {result}")

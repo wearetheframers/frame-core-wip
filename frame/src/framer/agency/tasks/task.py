@@ -2,8 +2,27 @@ from datetime import datetime
 from frame.src.utils.id_generator import generate_id
 import logging
 from typing import Any, Dict, Optional, List, Callable
+from pydantic import BaseModel, Field
 from enum import Enum
 from frame.src.models.framer.agency.tasks import TaskModel, TaskStatus
+
+class TaskModel(BaseModel):
+    id: str
+    description: str
+    priority: int
+    workflow_id: str
+    status: TaskStatus = TaskStatus.PENDING
+    expected_results: List[Any] = Field(default_factory=list)
+    dependencies: List[str] = Field(default_factory=list)
+    parent_task_id: Optional[str] = None
+    assigned_to: Optional[str] = None
+    estimated_duration: Optional[float] = None
+    tags: List[str] = Field(default_factory=list)
+    type: Optional[str] = None
+    data: Dict[str, Any] = Field(default_factory=dict)
+    result: Optional[Any] = None
+    updated_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +44,7 @@ class Task(TaskModel):
         description: str,
         workflow_id: str,
         priority: int = 5,
+        status: TaskStatus = TaskStatus.PENDING,
         expected_results: Optional[List[Any]] = None,
         dependencies: List[str] = None,
         parent_task_id: Optional[str] = None,
@@ -33,6 +53,8 @@ class Task(TaskModel):
         tags: List[str] = None,
         type: Optional[str] = None,
         data: Optional[Dict[str, Any]] = None,
+        updated_at: Optional[datetime] = None,
+        completed_at: Optional[datetime] = None,
     ):
         task_id = generate_id()
         if not (1 <= priority <= 10):
@@ -50,7 +72,12 @@ class Task(TaskModel):
             tags=tags or [],
             type=type,
             data=data or {},
+            updated_at=updated_at,
+            completed_at=completed_at,
         )
+        self.result = None
+        self.updated_at = datetime.now()
+        self.completed_at = completed_at
         logger.info(
             f"Created new task with ID: {self.id} and expected results: {self.expected_results}"
         )
