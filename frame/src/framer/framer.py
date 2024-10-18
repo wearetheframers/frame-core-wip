@@ -3,7 +3,8 @@ import time
 import json
 import importlib
 from typing import List, Dict, Any, Optional, Callable, Union, Tuple
-from frame.src.services import LLMService, SharedContext
+from frame.src.services.llm.main import LLMService
+from frame.src.services.context.shared_context_service import SharedContext
 from frame.src.framer.config import FramerConfig
 from frame.src.framer.agency import Agency
 from frame.src.framer.brain import Brain
