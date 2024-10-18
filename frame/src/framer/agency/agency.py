@@ -4,7 +4,7 @@ from frame.src.models.framer.agency.priority import Priority
 from frame.src.framer.agency.tasks.task import Task, TaskStatus
 from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
 from frame.src.services.llm.main import LLMService
-from frame.src.services import get_execution_context
+from frame.src.services import get_execution_context, get_memory_service
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
