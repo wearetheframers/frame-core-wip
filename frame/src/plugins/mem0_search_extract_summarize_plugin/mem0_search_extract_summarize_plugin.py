@@ -18,7 +18,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         self.logger.addHandler(logging.StreamHandler())
         self.mem0_adapter = Mem0Adapter()
 
-    async def on_load(self):
+    async def on_load(self) -> None:
         self.register_action(
             "mem0_search_extract_summarize",
             self.mem0_search_extract_summarize,
@@ -43,6 +43,32 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         )
         self.framer.agency.add_goal(comprehensive_answer_goal)
 
+    def get_actions(self) -> Dict[str, Any]:
+        """
+        Return a dictionary of actions provided by this plugin.
+        """
+        return {
+            "mem0_search_extract_summarize": self.mem0_search_extract_summarize
+        }
+        # Implement the execute method as required by BasePlugin
+        pass
+
+    async def execute(self, action_name: str, parameters: Dict[str, Any]) -> Any:
+        """
+        Execute a specified action with given parameters.
+
+        Args:
+            action_name (str): The name of the action to execute.
+            parameters (Dict[str, Any]): Parameters for the action.
+
+        Returns:
+            Any: The result of the action execution.
+        """
+        if action_name == "mem0_search_extract_summarize":
+            return await self.mem0_search_extract_summarize(**parameters)
+        else:
+            raise ValueError(f"Action {action_name} not found in plugin.")
+
     async def mem0_search_extract_summarize(
         self,
         query: str,
@@ -53,6 +79,10 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         model_name: str = "gpt-4o-mini",
     ) -> str:
         self.logger.info(f"Searching Mem0 for query: {query}")
+
+        # Ensure at least one required filter is provided
+        if not any([user_id, agent_id, run_id]):
+            user_id = "default"
 
         search_results = self.mem0_adapter.search(
             query, user_id=user_id, agent_id=agent_id, run_id=run_id, filters=filters

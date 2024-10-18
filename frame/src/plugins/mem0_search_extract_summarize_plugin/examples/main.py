@@ -17,7 +17,7 @@ async def main():
     config = FramerConfig(
         name="Research Assistant",
         default_model="gpt-3.5-turbo",
-        permissions=["withMemory"]
+        permissions=["with_memory", "with_mem0_search_extract_summarize_plugin", "with_shared_context"]
     )
     api_key = os.getenv("MEM0_API_KEY", "your_api_key_here")
     mem0_adapter = ConcreteMem0Adapter(api_key=api_key)
