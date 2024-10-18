@@ -10,7 +10,7 @@ class Perception(BaseModel):
     )
     source: Optional[str] = Field(None, description="The source of the perception")
     timestamp: datetime = Field(
-        default_factory=datetime.now,
+        default_factory=datetime.utcnow,
         description="The timestamp of when the perception was created",
     )
 

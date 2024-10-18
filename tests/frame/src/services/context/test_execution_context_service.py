@@ -15,21 +15,21 @@ def soul():
 
 
 def test_execution_context_service_initialization(llm_service, soul):
-    execution_context = ExecutionContextService(llm_service=llm_service, soul=soul)
+    execution_context = ExecutionContext(llm_service=llm_service, soul=soul)
     assert execution_context.get_llm_service() == llm_service
     assert execution_context.get_soul() == soul
     assert execution_context.get_state() == {}
 
 
 def test_execution_context_service_update_state(llm_service, soul):
-    execution_context = ExecutionContextService(llm_service=llm_service, soul=soul)
+    execution_context = ExecutionContext(llm_service=llm_service, soul=soul)
     new_state = {"key": "value"}
     execution_context.update_state(new_state)
     assert execution_context.get_state() == new_state
 
 
 def test_execution_context_service_without_soul(llm_service):
-    execution_context = ExecutionContextService(llm_service=llm_service)
+    execution_context = ExecutionContext(llm_service=llm_service)
     assert execution_context.get_soul() is None
 
 
@@ -38,7 +38,7 @@ async def test_execution_context_service_in_action_registry():
     from frame.src.framer.agency.action_registry import ActionRegistry
 
     llm_service = LLMService()
-    execution_context = ExecutionContextService(llm_service=llm_service)
+    execution_context = ExecutionContext(llm_service=llm_service)
     action_registry = ActionRegistry(execution_context)
 
     def test_action(execution_context, param):

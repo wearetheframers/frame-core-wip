@@ -1,3 +1,4 @@
+import os
 from typing import Optional, Dict, Any
 from .src.framer.framer import Framer, FramerConfig
 from .src.framer.framer_factory import FramerBuilder, FramerFactory
@@ -10,6 +11,7 @@ from .src.services.llm.main import LLMService
 from .src.utils.llm_utils import LLMMetrics, llm_metrics, track_llm_usage
 from frame.src.utils.llm_utils import track_llm_usage
 from .src.services.context.execution_context_service import ExecutionContext
+from .src.utils.plugin_loader import load_plugins
 
 
 class Frame:
@@ -25,10 +27,13 @@ class Frame:
     2. Creating new Framer instances with specified configurations.
     3. Setting and managing the default language model.
     4. Providing a high-level interface for language model completions.
+    5. Loading and managing plugins.
 
     Attributes:
         _default_model (str): The default language model to use.
         llm_service (LLMService): The language model service instance.
+        plugins_dir (str): The directory containing plugins.
+        plugins (Dict[str, Any]): Loaded plugins.
     """
 
     def reset_metrics(self):
@@ -41,19 +46,21 @@ class Frame:
         mistral_api_key: str = "",
         huggingface_api_key: str = "",
         default_model: str = DEFAULT_MODEL,
+        plugins_dir: Optional[str] = None,
     ):
         """
         Initialize the Frame instance.
 
         This constructor sets up the Frame with the necessary API keys and
         initializes the language model service. It also sets the default
-        model to be used for completions.
+        model to be used for completions and loads plugins.
 
         Args:
             openai_api_key (Optional[str]): API key for OpenAI services.
             mistral_api_key (Optional[str]): API key for Mistral services.
             huggingface_api_key (Optional[str]): API key for Hugging Face services.
             default_model (Optional[str]): The default language model to use.
+            plugins_dir (Optional[str]): The directory containing plugins.
         """
         self._default_model = default_model
         # Initialize the language model service with provided API keys
@@ -63,6 +70,18 @@ class Frame:
             huggingface_api_key=huggingface_api_key,
             default_model=self._default_model,
         )
+        self.plugins_dir = plugins_dir or os.path.join(os.path.dirname(__file__), 'src', 'plugins')
+        self.plugins = load_plugins(self.plugins_dir)
+
+    def set_plugins_dir(self, plugins_dir: str):
+        """
+        Set a custom directory for loading plugins.
+
+        Args:
+            plugins_dir (str): The directory path where plugins are located.
+        """
+        self.plugins_dir = plugins_dir
+        self.plugins = load_plugins(self.plugins_dir)
 
     async def create_framer(self, config: FramerConfig, **kwargs: Any) -> "Framer":
         """

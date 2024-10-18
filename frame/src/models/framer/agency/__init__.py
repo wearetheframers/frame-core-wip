@@ -1,3 +1,3 @@
-from .goals import Goal, GoalStatus
-from .roles import Role, RoleStatus
+from .goals import Goal, Goals, GoalStatus
+from .roles import Role, Roles, RoleStatus
 from .priority import Priority

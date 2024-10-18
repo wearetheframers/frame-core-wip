@@ -15,6 +15,7 @@ from frame.src.utils.config_parser import (
     parse_markdown_config,
     export_config_to_markdown,
 )
+from frame.src.plugins.search_extract_summarize_plugin import SearchExtractSummarizePlugin
 from frame.src.utils.llm_utils import (
     get_completion,
     choose_best_model_for_tokens,
@@ -69,6 +70,15 @@ class Framer:
         roles: List[Dict[str, Any]] = [],
         goals: List[Dict[str, Any]] = [],
     ):
+        # Existing initialization code...
+
+        # Initialize the SearchExtractSummarizePlugin if available
+        try:
+            from frame.src.plugins.search_extract_summarize_plugin import SearchExtractSummarizePlugin
+            self.search_extract_summarize_plugin = SearchExtractSummarizePlugin(self)
+            self.plugins["search_extract_summarize"] = self.search_extract_summarize_plugin
+        except ImportError:
+            self.logger.warning("SearchExtractSummarizePlugin is not available. To use it, install the required dependencies.")
         """
         Initialize a Framer instance.
 
@@ -180,6 +190,10 @@ class Framer:
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
+
+        # Load the SearchExtractSummarizePlugin
+        await self.search_extract_summarize_plugin.on_load()
+
         self.act()  # Start acting after initialization
 
     async def export_to_file(self, file_path: str, llm) -> None:

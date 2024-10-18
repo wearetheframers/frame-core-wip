@@ -148,7 +148,9 @@ Frame's CLI supports both JSON input and traditional CLI arguments for flexible 
 
 ## Plugins and Actions
 
-Frame supports a powerful plugin system that allows you to extend the functionality of Framers by adding new actions. For a detailed overview, refer to the [Plugins and Actions](docs/plugins.md) documentation.
+Frame supports a powerful plugin system that allows you to extend the functionality of Framers by adding new actions. This system is designed to be flexible and expansive, similar to mods in games, allowing for unlimited plugins and expansions to be developed. For a detailed overview, refer to the [Plugins and Actions](docs/plugins.md) documentation.
+
+Frame will also feature a plugin marketplace where premium plugins and community plugins can be developed, given away, or sold, fostering a rich ecosystem of extensions and customizations.
 
 ## Development
 

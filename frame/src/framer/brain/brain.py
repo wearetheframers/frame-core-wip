@@ -20,6 +20,7 @@ from frame.src.services import ExecutionContext
 from frame.src.framer.soul.soul import Soul
 from frame.src.models.framer.agency.roles import Role
 from frame.src.models.framer.agency.goals import Goal, GoalStatus
+from frame.src.models.framer.agency.goals import Goal
 from frame.src.models.framer.agency.roles import RoleStatus
 from frame.src.models.framer.agency.priority import Priority
 
@@ -232,16 +233,25 @@ class Brain:
 
         # Check if the action is valid
         if action not in valid_actions:
-            invalid_action = action
-            action = "respond"
-            logger.warning(
-                f"Invalid action '{invalid_action}' generated. "
-                f"Valid actions are: {', '.join(valid_actions)}"
-            )
-            decision_data["action"] = action
-            decision_data["reasoning"] = (
-                f"Invalid action '{invalid_action}' was generated. Defaulted to '{action}'."
-            )
+            # If the action is not valid, check if it's related to web search or summarization
+            if any(keyword in action for keyword in ["search", "summarize", "extract"]):
+                action = "search_extract_summarize"
+                decision_data["action"] = action
+                decision_data["reasoning"] = (
+                    f"Action '{action}' was generated based on the perception. "
+                    f"Using the search_extract_summarize plugin to process this request."
+                )
+            else:
+                invalid_action = action
+                action = "respond"
+                logger.warning(
+                    f"Invalid action '{invalid_action}' generated. "
+                    f"Valid actions are: {', '.join(valid_actions)}"
+                )
+                decision_data["action"] = action
+                decision_data["reasoning"] = (
+                    f"Invalid action '{invalid_action}' was generated. Defaulted to '{action}'."
+                )
 
         logger.info(f"Action '{action}' generated: {decision_data}")
 

@@ -23,10 +23,11 @@ class FramerFactory:
     ensuring that all necessary components are properly initialized.
 
     The Framer includes a `halt()` method to stop its actions and task processing.
-    Factory class for creating Framer instances.
 
-    This class encapsulates the logic for constructing Framer objects,
-    ensuring that all necessary components are properly initialized.
+    The FramerFactory supports the creation of Framers with custom plugins,
+    allowing for extensive customization and expansion of capabilities.
+    This plugin system is designed to be as flexible and powerful as mods in games,
+    enabling developers to create a wide range of extensions and enhancements.
     """
 
     def __init__(self, config: FramerConfig, llm_service: LLMService):
