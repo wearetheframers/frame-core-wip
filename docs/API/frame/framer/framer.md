@@ -37,6 +37,10 @@ Represents the core essence and personality of a Framer.
 
 Manages workflows and tasks.
 
+### ExecutionContext
+
+Provides a centralized container for various services (LLM, memory, EQ), state information, and functions needed during execution. This component ensures consistency across actions, promotes flexibility in service management, and facilitates easier testing and modular design.
+
 ## Key Methods
 
 ### `sense`

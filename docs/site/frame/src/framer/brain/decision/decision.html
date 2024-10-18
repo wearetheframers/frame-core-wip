@@ -135,8 +135,14 @@ validated to form a valid model.</p>
             &#34;priority&#34;: self.priority,
             &#34;expected_results&#34;: self.expected_results,
             &#34;task_status&#34;: self.task_status.value,
-            &#34;related_roles&#34;: [role.to_dict() if hasattr(role, &#39;to_dict&#39;) else str(role) for role in self.related_roles],
-            &#34;related_goals&#34;: [goal.dict() if hasattr(goal, &#39;dict&#39;) else str(goal) for goal in self.related_goals],
+            &#34;related_roles&#34;: [
+                role.to_dict() if hasattr(role, &#34;to_dict&#34;) else str(role)
+                for role in self.related_roles
+            ],
+            &#34;related_goals&#34;: [
+                goal.dict() if hasattr(goal, &#34;dict&#34;) else str(goal)
+                for goal in self.related_goals
+            ],
         }
 
     @classmethod
@@ -262,7 +268,9 @@ validated to form a valid model.</p>
         Args:
             goal_name (str): The name of the goal to remove from the related goals.
         &#34;&#34;&#34;
-        self.related_goals = [goal for goal in self.related_goals if goal.name != goal_name]</code></pre>
+        self.related_goals = [
+            goal for goal in self.related_goals if goal.name != goal_name
+        ]</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -287,15 +295,15 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.framer.brain.decision.decision.Decision.related_goals"><code class="name">var <span class="ident">related_goals</span> : List[<a title="frame.src.models.framer.agency.goals.Goal" href="../../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>]</code></dt>
+<dt id="frame.src.framer.brain.decision.decision.Decision.related_goals"><code class="name">var <span class="ident">related_goals</span> : List[<a title="frame.src.framer.agency.goals.Goal" href="../../agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.framer.brain.decision.decision.Decision.related_roles"><code class="name">var <span class="ident">related_roles</span> : List[<a title="frame.src.models.framer.agency.roles.Role" href="../../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>]</code></dt>
+<dt id="frame.src.framer.brain.decision.decision.Decision.related_roles"><code class="name">var <span class="ident">related_roles</span> : List[<a title="frame.src.framer.agency.roles.Role" href="../../agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : <a title="frame.src.models.framer.agency.tasks.task.TaskStatus" href="../../../models/framer/agency/tasks/task.html#frame.src.models.framer.agency.tasks.task.TaskStatus">TaskStatus</a></code></dt>
+<dt id="frame.src.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../../models/framer/agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -303,7 +311,7 @@ validated to form a valid model.</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.decision.decision.Decision.create"><code class="name flex">
-<span>def <span class="ident">create</span></span>(<span>action: str, parameters: Dict[str, Any], reasoning: str, confidence: float = 0.7, priority: int = 5, expected_results: Optional[Any] = None, task_status: <a title="frame.src.models.framer.agency.tasks.task.TaskStatus" href="../../../models/framer/agency/tasks/task.html#frame.src.models.framer.agency.tasks.task.TaskStatus">TaskStatus</a> = TaskStatus.PENDING, related_roles: List[<a title="frame.src.models.framer.agency.roles.Role" href="../../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>] = None, related_goals: List[<a title="frame.src.models.framer.agency.goals.Goal" href="../../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+<span>def <span class="ident">create</span></span>(<span>action: str, parameters: Dict[str, Any], reasoning: str, confidence: float = 0.7, priority: int = 5, expected_results: Optional[Any] = None, task_status: <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../../models/framer/agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a> = TaskStatus.PENDING, related_roles: List[<a title="frame.src.framer.agency.roles.Role" href="../../agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>] = None, related_goals: List[<a title="frame.src.framer.agency.goals.Goal" href="../../agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new Decision instance with the given parameters.</p>
@@ -354,7 +362,7 @@ validated to form a valid model.</p>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.decision.decision.Decision.add_related_goal"><code class="name flex">
-<span>def <span class="ident">add_related_goal</span></span>(<span>self, goal: <a title="frame.src.models.framer.agency.goals.Goal" href="../../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>) ‑> None</span>
+<span>def <span class="ident">add_related_goal</span></span>(<span>self, goal: <a title="frame.src.framer.agency.goals.Goal" href="../../agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a related goal to the decision.</p>
@@ -365,7 +373,7 @@ validated to form a valid model.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.decision.decision.Decision.add_related_role"><code class="name flex">
-<span>def <span class="ident">add_related_role</span></span>(<span>self, role: <a title="frame.src.models.framer.agency.roles.Role" href="../../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>) ‑> None</span>
+<span>def <span class="ident">add_related_role</span></span>(<span>self, role: <a title="frame.src.framer.agency.roles.Role" href="../../agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a related role to the decision.</p>
@@ -425,7 +433,7 @@ validated to form a valid model.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.decision.decision.Decision.update_status"><code class="name flex">
-<span>def <span class="ident">update_status</span></span>(<span>self, new_status: <a title="frame.src.models.framer.agency.tasks.task.TaskStatus" href="../../../models/framer/agency/tasks/task.html#frame.src.models.framer.agency.tasks.task.TaskStatus">TaskStatus</a>) ‑> None</span>
+<span>def <span class="ident">update_status</span></span>(<span>self, new_status: <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../../models/framer/agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a>) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Update the task status of the decision.</p>

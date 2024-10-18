@@ -11,7 +11,7 @@ Frame consists of three main components:
 
 the **[[frame]]**: The main interface for creating and managing Framer instances. It acts as the central hub for initializing and orchestrating the various components of the framework.
 
-the **[[framer]]**: Represents an individual AI agent with capabilities for task management, decision-making, and interaction with language models. Each Framer operates independently but can collaborate with others. Framers can be initialized with a `soul_seed` that is a string or a dictionary with a 'seed' key.
+the **[[framer]]**: Represents an individual AI agent with capabilities for task management, decision-making, and interaction with language models. Each Framer operates independently but can collaborate with others. Framers can be initialized with a `soul_seed` that is a string or a dictionary with a 'seed' key. The Framer utilizes an ExecutionContext, which provides a centralized container for various services, state information, and functions needed during execution.
 
 the **[[framed]]**: A collection of Framer objects working together to achieve complex tasks. It enables coordination and communication between multiple Framers, allowing for scalable and collaborative operations.
 

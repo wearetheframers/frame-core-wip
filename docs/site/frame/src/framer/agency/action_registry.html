@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry"><code class="flex name class">
 <span>class <span class="ident">ActionRegistry</span></span>
-<span>(</span><span>execution_context_service: <a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>)</span>
+<span>(</span><span>execution_context=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -46,39 +46,60 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ActionRegistry:
-    def __init__(self, execution_context_service: ExecutionContext):
+    def __init__(self, execution_context=None):
         self.actions: Dict[str, Dict[str, Any]] = {}
-        self.execution_context_service = execution_context_service
+        self.execution_context = execution_context
         self._register_default_actions()
 
-    def set_execution_context_service(
-        self, execution_context_service: ExecutionContext
-    ):
-        self.execution_context_service = execution_context_service
+    def set_framer(self, framer):
+        self.framer = framer
 
     def _register_default_actions(self):
+        default_actions = [
+            CreateNewAgentAction(),
+            GenerateRolesAndGoalsAction(),
+            ObserveAction(),
+            RespondAction(),
+            ThinkAction(),
+            ResearchAction()
+        ]
+        for action in default_actions:
+            self.register_action(action)
+        
         for action, info in VALID_ACTIONS.items():
-            self.register_action(
-                action,
-                info[&#34;func&#34;],
-                description=info[&#34;description&#34;],
-                priority=info[&#34;priority&#34;],
-            )
+            if action not in [a.name for a in default_actions]:
+                self.register_action(
+                    action,
+                    action_func=info[&#34;func&#34;],
+                    description=info[&#34;description&#34;],
+                    priority=info[&#34;priority&#34;],
+                )
 
     def extend_actions(self, new_actions: Dict[str, Dict[str, Any]]):
         extend_valid_actions(new_actions)
         self._register_default_actions()
 
     def register_action(
-        self, name: str, action_func: Callable, description: str = &#34;&#34;, priority: int = 5
+        self, action: Union[str, Action, Callable], action_func: Optional[Callable] = None, description: str = &#34;&#34;, priority: int = 5
     ):
+        if isinstance(action, Action):
+            name = action.name
+            action_func = action.execute
+            description = action.description
+            priority = action.priority.value
+        elif callable(action):
+            name = action.__name__
+            action_func = action
+        else:
+            name = action
+            if action_func is None:
+                raise ValueError(&#34;action_func must be provided when registering a string action name&#34;)
+
         if not (1 &lt;= priority &lt;= 10):
             raise ValueError(&#34;Priority must be between 1 and 10&#34;)
         if not asyncio.iscoroutinefunction(action_func):
-
             async def wrapper(*args, **kwargs):
                 return action_func(*args, **kwargs)
-
             action_func = wrapper
         self.actions[name] = {
             &#34;action_func&#34;: action_func,
@@ -240,7 +261,7 @@ hljs.highlightAll();
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry.register_action"><code class="name flex">
-<span>def <span class="ident">register_action</span></span>(<span>self, name: str, action_func: Callable, description: str = '', priority: int = 5)</span>
+<span>def <span class="ident">register_action</span></span>(<span>self, action: Union[str, <a title="frame.src.framer.agency.actions.base_action.Action" href="actions/base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a>, Callable], action_func: Optional[Callable] = None, description: str = '', priority: int = 5)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -256,8 +277,8 @@ hljs.highlightAll();
 <dd>The name of the action to remove.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.agency.action_registry.ActionRegistry.set_execution_context_service"><code class="name flex">
-<span>def <span class="ident">set_execution_context_service</span></span>(<span>self, execution_context_service: <a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>)</span>
+<dt id="frame.src.framer.agency.action_registry.ActionRegistry.set_framer"><code class="name flex">
+<span>def <span class="ident">set_framer</span></span>(<span>self, framer)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -281,7 +302,7 @@ hljs.highlightAll();
 <ul>
 <li>
 <h4><code><a title="frame.src.framer.agency.action_registry.ActionRegistry" href="#frame.src.framer.agency.action_registry.ActionRegistry">ActionRegistry</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.add_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.add_action">add_action</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.execute_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.execute_action">execute_action</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.extend_actions" href="#frame.src.framer.agency.action_registry.ActionRegistry.extend_actions">extend_actions</a></code></li>
@@ -290,7 +311,7 @@ hljs.highlightAll();
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.perform_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.perform_action">perform_action</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.register_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.register_action">register_action</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.remove_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.remove_action">remove_action</a></code></li>
-<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.set_execution_context_service" href="#frame.src.framer.agency.action_registry.ActionRegistry.set_execution_context_service">set_execution_context_service</a></code></li>
+<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.set_framer" href="#frame.src.framer.agency.action_registry.ActionRegistry.set_framer">set_framer</a></code></li>
 </ul>
 </li>
 </ul>

@@ -103,8 +103,8 @@ validated to form a valid model.</p>
     priority: int = Field(
         default=1, ge=1, le=10, description=&#34;Priority of the decision&#34;
     )
-    task_status: TaskStatusModel = Field(
-        default=TaskStatusModel.PENDING, description=&#34;Status of the associated task&#34;
+    task_status: TaskStatus = Field(
+        default=TaskStatus.PENDING, description=&#34;Status of the associated task&#34;
     )
     result: Optional[Dict[str, Any]] = Field(
         default=None, description=&#34;The result of executing the decision&#34;
@@ -179,7 +179,7 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : <a title="frame.src.framer.agency.tasks.TaskStatusModel" href="../../../../framer/agency/tasks/index.html#frame.src.framer.agency.tasks.TaskStatusModel">TaskStatusModel</a></code></dt>
+<dt id="frame.src.models.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>

@@ -33,6 +33,128 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.src.framer.agency.priority.Priority"><code class="flex name class">
+<span>class <span class="ident">Priority</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Enum where members are also (and must be) ints</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Priority(IntEnum):
+    LOWEST = 1
+    VERY_LOW = 2
+    LOW = 3
+    MEDIUM_LOW = 4
+    MEDIUM = 5
+    MEDIUM_HIGH = 6
+    HIGH = 7
+    VERY_HIGH = 8
+    HIGHEST = 9
+    CRITICAL = 10
+
+    @classmethod
+    def from_string(cls, value: Union[str, int]) -&gt; &#34;Priority&#34;:
+        if isinstance(value, int):
+            return cls(value)
+        string_to_priority = {
+            &#34;lowest&#34;: cls.LOWEST,
+            &#34;very low&#34;: cls.VERY_LOW,
+            &#34;low&#34;: cls.LOW,
+            &#34;medium low&#34;: cls.MEDIUM_LOW,
+            &#34;medium&#34;: cls.MEDIUM,
+            &#34;medium high&#34;: cls.MEDIUM_HIGH,
+            &#34;high&#34;: cls.HIGH,
+            &#34;very high&#34;: cls.VERY_HIGH,
+            &#34;highest&#34;: cls.HIGHEST,
+            &#34;critical&#34;: cls.CRITICAL,
+        }
+        return string_to_priority.get(value.lower(), cls.MEDIUM)
+
+    @classmethod
+    def from_value(cls, value: Union[int, str, &#34;Priority&#34;]) -&gt; &#34;Priority&#34;:
+        if isinstance(value, cls):
+            return value
+        elif isinstance(value, int):
+            return cls(min(max(value, 1), 10))
+        elif isinstance(value, str):
+            return cls.from_string(value)
+        else:
+            raise ValueError(
+                &#34;Priority must be an integer, string, or Priority instance&#34;
+            )</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.IntEnum</li>
+<li>builtins.int</li>
+<li>enum.ReprEnum</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.agency.priority.Priority.CRITICAL"><code class="name">var <span class="ident">CRITICAL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.priority.Priority.HIGH"><code class="name">var <span class="ident">HIGH</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.priority.Priority.HIGHEST"><code class="name">var <span class="ident">HIGHEST</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.priority.Priority.LOW"><code class="name">var <span class="ident">LOW</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.priority.Priority.LOWEST"><code class="name">var <span class="ident">LOWEST</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.priority.Priority.MEDIUM"><code class="name">var <span class="ident">MEDIUM</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.priority.Priority.MEDIUM_HIGH"><code class="name">var <span class="ident">MEDIUM_HIGH</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.priority.Priority.MEDIUM_LOW"><code class="name">var <span class="ident">MEDIUM_LOW</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.priority.Priority.VERY_HIGH"><code class="name">var <span class="ident">VERY_HIGH</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.priority.Priority.VERY_LOW"><code class="name">var <span class="ident">VERY_LOW</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.priority.Priority.from_string"><code class="name flex">
+<span>def <span class="ident">from_string</span></span>(<span>value: Union[str, int]) ‑> <a title="frame.src.framer.agency.priority.Priority" href="#frame.src.framer.agency.priority.Priority">Priority</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.priority.Priority.from_value"><code class="name flex">
+<span>def <span class="ident">from_value</span></span>(<span>value: Union[int, str, ForwardRef('<a title="frame.src.framer.agency.priority.Priority" href="#frame.src.framer.agency.priority.Priority">Priority</a>')]) ‑> <a title="frame.src.framer.agency.priority.Priority" href="#frame.src.framer.agency.priority.Priority">Priority</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -43,6 +165,27 @@ hljs.highlightAll();
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="frame.src.framer.agency" href="index.html">frame.src.framer.agency</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.src.framer.agency.priority.Priority" href="#frame.src.framer.agency.priority.Priority">Priority</a></code></h4>
+<ul class="two-column">
+<li><code><a title="frame.src.framer.agency.priority.Priority.CRITICAL" href="#frame.src.framer.agency.priority.Priority.CRITICAL">CRITICAL</a></code></li>
+<li><code><a title="frame.src.framer.agency.priority.Priority.HIGH" href="#frame.src.framer.agency.priority.Priority.HIGH">HIGH</a></code></li>
+<li><code><a title="frame.src.framer.agency.priority.Priority.HIGHEST" href="#frame.src.framer.agency.priority.Priority.HIGHEST">HIGHEST</a></code></li>
+<li><code><a title="frame.src.framer.agency.priority.Priority.LOW" href="#frame.src.framer.agency.priority.Priority.LOW">LOW</a></code></li>
+<li><code><a title="frame.src.framer.agency.priority.Priority.LOWEST" href="#frame.src.framer.agency.priority.Priority.LOWEST">LOWEST</a></code></li>
+<li><code><a title="frame.src.framer.agency.priority.Priority.MEDIUM" href="#frame.src.framer.agency.priority.Priority.MEDIUM">MEDIUM</a></code></li>
+<li><code><a title="frame.src.framer.agency.priority.Priority.MEDIUM_HIGH" href="#frame.src.framer.agency.priority.Priority.MEDIUM_HIGH">MEDIUM_HIGH</a></code></li>
+<li><code><a title="frame.src.framer.agency.priority.Priority.MEDIUM_LOW" href="#frame.src.framer.agency.priority.Priority.MEDIUM_LOW">MEDIUM_LOW</a></code></li>
+<li><code><a title="frame.src.framer.agency.priority.Priority.VERY_HIGH" href="#frame.src.framer.agency.priority.Priority.VERY_HIGH">VERY_HIGH</a></code></li>
+<li><code><a title="frame.src.framer.agency.priority.Priority.VERY_LOW" href="#frame.src.framer.agency.priority.Priority.VERY_LOW">VERY_LOW</a></code></li>
+<li><code><a title="frame.src.framer.agency.priority.Priority.from_string" href="#frame.src.framer.agency.priority.Priority.from_string">from_string</a></code></li>
+<li><code><a title="frame.src.framer.agency.priority.Priority.from_value" href="#frame.src.framer.agency.priority.Priority.from_value">from_value</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

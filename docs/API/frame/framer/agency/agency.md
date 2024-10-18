@@ -39,14 +39,26 @@ agency = Agency(execution_context, context)
 
 ## Execution Context
 
-The ExecutionContext is a crucial addition to the Agency architecture. It serves as a centralized container for various services that actions might need, such as the LLM service, memory service, and EQ service. This approach offers several benefits:
+The ExecutionContext is a crucial component in the Agency architecture. It serves as a centralized container for various services and state information that actions might need during execution. This approach offers several benefits:
 
-1. **Consistency**: Ensures that all actions have access to the same set of services, promoting consistency across the system.
+1. **Consistency**: Ensures that all actions have access to the same set of services and state, promoting consistency across the system.
 2. **Flexibility**: Makes it easier to add or modify services without changing the signature of every action.
 3. **Dependency Injection**: Facilitates better testing and modular design by allowing easy substitution of services.
 4. **Reduced Coupling**: Actions no longer need to be directly aware of specific services, reducing dependencies.
+5. **State Management**: Provides a centralized location for managing and accessing shared state across actions.
 
-By using the ExecutionContext, we can more easily manage the resources available to actions and ensure that they have everything they need to operate effectively within the Framer ecosystem.
+The ExecutionContext includes:
+
+- Language Model Service (LLMService)
+- Memory Service (MemoryService)
+- Emotional Intelligence Service (EQService)
+- Soul component
+- Shared state dictionary
+- Perception processing function
+- Decision execution function
+- Framer configuration
+
+By using the ExecutionContext, we can more effectively manage the resources and state available to actions, ensuring they have everything they need to operate within the Framer ecosystem. This design promotes modularity, testability, and flexibility in the Agency's architecture.
 
 ## Role and Goal Generation
 

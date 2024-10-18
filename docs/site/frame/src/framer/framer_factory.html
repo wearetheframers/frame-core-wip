@@ -95,10 +95,11 @@ creating Framer objects using the FramerFactory.</p></div>
 <div class="desc"><p>Factory class for creating Framer instances.</p>
 <p>This class encapsulates the logic for constructing Framer objects,
 ensuring that all necessary components are properly initialized.</p>
-<p>The Framer includes a <code>halt()</code> method to stop its actions and task processing.
-Factory class for creating Framer instances.</p>
-<p>This class encapsulates the logic for constructing Framer objects,
-ensuring that all necessary components are properly initialized.</p>
+<p>The Framer includes a <code>halt()</code> method to stop its actions and task processing.</p>
+<p>The FramerFactory supports the creation of Framers with custom plugins,
+allowing for extensive customization and expansion of capabilities.
+This plugin system is designed to be as flexible and powerful as mods in games,
+enabling developers to create a wide range of extensions and enhancements.</p>
 <p>Initialize the FramerBuilder with configuration and LLM service.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -119,10 +120,11 @@ ensuring that all necessary components are properly initialized.</p>
     ensuring that all necessary components are properly initialized.
 
     The Framer includes a `halt()` method to stop its actions and task processing.
-    Factory class for creating Framer instances.
 
-    This class encapsulates the logic for constructing Framer objects,
-    ensuring that all necessary components are properly initialized.
+    The FramerFactory supports the creation of Framers with custom plugins,
+    allowing for extensive customization and expansion of capabilities.
+    This plugin system is designed to be as flexible and powerful as mods in games,
+    enabling developers to create a wide range of extensions and enhancements.
     &#34;&#34;&#34;
 
     def __init__(self, config: FramerConfig, llm_service: LLMService):
@@ -152,8 +154,8 @@ ensuring that all necessary components are properly initialized.</p>
         self,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
-        roles: Optional[List[Dict[str, Any]]] = None,
-        goals: Optional[List[Dict[str, Any]]] = None,
+        roles: Optional[List[Role]] = None,
+        goals: Optional[List[Goal]] = None,
     ) -&gt; Framer:
         execution_context = ExecutionContext(llm_service=self.llm_service)
         agency = Agency(
@@ -165,13 +167,33 @@ ensuring that all necessary components are properly initialized.</p>
         # Generate roles and goals. The Framer must be acting to respond to perceptions.
         if roles is None or goals is None:
             roles, goals = await agency.generate_roles_and_goals()
-        
+        elif isinstance(roles, list) and len(roles) == 0:
+            roles = []
+            goals = []
+        elif isinstance(goals, list) and len(goals) == 0:
+            roles, goals = await agency.generate_roles_and_goals()
+            goals = []
+        elif isinstance(roles, list) and len(roles) == 0 and goals:
+            roles, new_goals = await agency.generate_roles_and_goals()
+            goals.extend(new_goals)
+
         # Ensure goals have a default status of ACTIVE
         for goal in goals:
-            if isinstance(goal, dict) and &#39;status&#39; not in goal:
-                goal[&#39;status&#39;] = GoalStatus.ACTIVE.value
-            elif isinstance(goal, Goal) and goal.status is None:
+            if isinstance(goal, dict):
+                if &#34;status&#34; not in goal:
+                    goal[&#34;status&#34;] = GoalStatus.ACTIVE.value
+            else:
                 goal.status = GoalStatus.ACTIVE
+        for role in roles:
+            if isinstance(role, dict):
+                if &#34;status&#34; not in role:
+                    role[&#34;status&#34;] = RoleStatus.ACTIVE.value
+            else:
+                role.status = RoleStatus.ACTIVE
+
+        # Sort roles and goals by priority
+        roles.sort(key=lambda x: x.priority.value if hasattr(x, &#39;priority&#39;) else 5, reverse=True)
+        goals.sort(key=lambda x: x.priority.value if hasattr(x, &#39;priority&#39;) else 5, reverse=True)
 
         execution_context = ExecutionContext(llm_service=self.llm_service)
         brain = Brain(
@@ -184,16 +206,11 @@ ensuring that all necessary components are properly initialized.</p>
                 if self.config.default_model
                 else DEFAULT_MODEL
             ),
-            execution_context=execution_context,
         )
-
-        soul = Soul(seed=self.config.soul_seed)
         # Initialize the Soul component with the provided or default seed
-        workflow_manager = WorkflowManager()
+        soul = Soul(seed=self.config.soul_seed)
         # Initialize the WorkflowManager component
-
-        from frame.src.framer.framer import Framer  # Import Framer within the function
-
+        workflow_manager = WorkflowManager()
         framer = Framer(
             # Create the Framer instance with all initialized components
             config=self.config,
@@ -206,8 +223,12 @@ ensuring that all necessary components are properly initialized.</p>
             eq_service=eq_service,
         )
 
-        framer.agency.set_roles(roles)
         framer.agency.set_goals(goals)
+        framer.agency.set_roles(roles)
+
+        # Set the Framer instance in Brain and ActionRegistry
+        framer.brain.set_framer(framer)
+        framer.brain.action_registry.set_framer(framer)
 
         return framer
 
@@ -226,7 +247,7 @@ ensuring that all necessary components are properly initialized.</p>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.framer_factory.FramerFactory.create_framer"><code class="name flex">
-<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[Dict[str, Any]]] = None, goals: Optional[List[Dict[str, Any]]] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>

@@ -40,46 +40,13 @@ hljs.highlightAll();
 <span>(</span><span>**data: Any)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
-<p>A base class for creating Pydantic models.</p>
-<h2 id="attributes">Attributes</h2>
-<dl>
-<dt><strong><code>__class_vars__</code></strong></dt>
-<dd>The names of the class variables defined on the model.</dd>
-<dt><strong><code>__private_attributes__</code></strong></dt>
-<dd>Metadata about the private attributes of the model.</dd>
-<dt><strong><code>__signature__</code></strong></dt>
-<dd>The synthesized <code>__init__</code> [<code>Signature</code>][inspect.Signature] of the model.</dd>
-<dt><strong><code>__pydantic_complete__</code></strong></dt>
-<dd>Whether model building is completed, or if there are still undefined fields.</dd>
-<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
-<dd>The core schema of the model.</dd>
-<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
-<dd>Whether the model has a custom <code>__init__</code> function.</dd>
-<dt><strong><code>__pydantic_decorators__</code></strong></dt>
-<dd>Metadata containing the decorators defined on the model.
-This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
-<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
-<dd>Metadata for generic models; contains data used for a similar purpose to
-<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
-<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
-<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
-<dt><strong><code>__pydantic_post_init__</code></strong></dt>
-<dd>The name of the post-init method for the model, if defined.</dd>
-<dt><strong><code>__pydantic_root_model__</code></strong></dt>
-<dd>Whether the model is a [<code>RootModel</code>][pydantic.root_model.RootModel].</dd>
-<dt><strong><code>__pydantic_serializer__</code></strong></dt>
-<dd>The <code>pydantic-core</code> <code>SchemaSerializer</code> used to dump instances of the model.</dd>
-<dt><strong><code>__pydantic_validator__</code></strong></dt>
-<dd>The <code>pydantic-core</code> <code>SchemaValidator</code> used to validate instances of the model.</dd>
-<dt><strong><code>__pydantic_extra__</code></strong></dt>
-<dd>A dictionary containing extra values, if [<code>extra</code>][pydantic.config.ConfigDict.extra]
-is set to <code>'allow'</code>.</dd>
-<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
-<dd>The names of fields explicitly set during instantiation.</dd>
-<dt><strong><code>__pydantic_private__</code></strong></dt>
-<dd>Values of private attributes set on the model instance.</dd>
-</dl>
+<div class="desc"><p>Represents a perception in the Frame system.</p>
+<p>Perceptions in Frame can be any type of information or stimulus, not limited to human senses.
+This includes traditional inputs like text, images, or sounds, but also extends to more abstract
+or non-human sensory data such as magnetic fields, vibrations, internal states like hunger,
+or any other data that can be analyzed by the language model.</p>
+<p>The "prompt" action in a Framer is essentially processing a perception of hearing for text input
+and responding to it.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -89,11 +56,23 @@ validated to form a valid model.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Perception(BaseModel):
-    type: str = Field(..., description=&#34;The type of perception&#34;)
+    &#34;&#34;&#34;
+    Represents a perception in the Frame system.
+    
+    Perceptions in Frame can be any type of information or stimulus, not limited to human senses.
+    This includes traditional inputs like text, images, or sounds, but also extends to more abstract
+    or non-human sensory data such as magnetic fields, vibrations, internal states like hunger,
+    or any other data that can be analyzed by the language model.
+    
+    The &#34;prompt&#34; action in a Framer is essentially processing a perception of hearing for text input
+    and responding to it.
+    &#34;&#34;&#34;
+    
+    type: str = Field(..., description=&#34;The type of perception (e.g., &#39;visual&#39;, &#39;auditory&#39;, &#39;text&#39;, &#39;magnetic&#39;, &#39;internal_state&#39;, etc.)&#34;)
     data: Dict[str, Any] = Field(
-        ..., description=&#34;The data associated with the perception&#34;
+        ..., description=&#34;The data associated with the perception. Can contain any type of information.&#34;
     )
-    source: Optional[str] = Field(None, description=&#34;The source of the perception&#34;)
+    source: Optional[str] = Field(None, description=&#34;The source of the perception (e.g., &#39;camera&#39;, &#39;microphone&#39;, &#39;text_input&#39;, &#39;magnetometer&#39;, &#39;internal_sensor&#39;, etc.)&#34;)
     timestamp: datetime = Field(
         default_factory=datetime.utcnow,
         description=&#34;The timestamp of when the perception was created&#34;,

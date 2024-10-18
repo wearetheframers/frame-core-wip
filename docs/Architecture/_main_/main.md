@@ -30,6 +30,8 @@ The `Framer` class represents an individual AI agent with capabilities for task 
 
 - **Memory and Emotional Intelligence**: Framers can be equipped with memory and emotional intelligence capabilities, allowing them to learn from past experiences and adapt their behavior.
 
+- **ExecutionContext**: Framers utilize an ExecutionContext, which provides a centralized container for various services (like LLM, memory, and EQ), state information, and functions needed during execution. This promotes consistency, flexibility, and modularity in the Framer's operations.
+
 ### Framed
 
 The `Framed` class represents a collection of `Framer` objects working together to achieve complex tasks. It enables coordination and communication between multiple Framers, allowing for scalable and collaborative operations. The `Framed` class provides:

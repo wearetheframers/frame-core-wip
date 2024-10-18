@@ -66,6 +66,7 @@ underlying storage solution and provides a flexible interface for memory operati
         self.core = {}
         self.short_term = []
         self.mem0 = Mem0Adapter()
+        self.user_id = config.get(&#34;user_id&#34;, &#34;default&#34;)
 
     def get_core_memory(self, key: str) -&gt; Any:
         &#34;&#34;&#34;
@@ -81,13 +82,10 @@ underlying storage solution and provides a flexible interface for memory operati
         if core_memory is not None:
             return core_memory
 
-        mem0_data = self.mem0.get_all(user_id=&#34;default&#34;)
-        if isinstance(mem0_data, dict):
-            return mem0_data.get(key)
-        elif isinstance(mem0_data, list):
-            for item in mem0_data:
-                if isinstance(item, dict) and item.get(&#34;key&#34;) == key:
-                    return item.get(&#34;value&#34;)
+        mem0_data = self.mem0.get_all(user_id=self.user_id)
+        for memory_id, item in enumerate(mem0_data):
+            if isinstance(item, dict) and item.get(&#34;metadata&#34;, {}).get(&#34;key&#34;) == key:
+                return item.get(&#34;memory&#34;)
         return None
 
     def set_core_memory(self, key: str, value: Any) -&gt; Any:
@@ -102,7 +100,8 @@ underlying storage solution and provides a flexible interface for memory operati
             Any: The stored value.
         &#34;&#34;&#34;
         self.core[key] = value
-        return self.core.get(key)
+        self.mem0.store(str(value), user_id=self.user_id, metadata={&#34;key&#34;: key})
+        return value
 
     def retrieve_memory(self, key: str) -&gt; Any:
         &#34;&#34;&#34;
@@ -119,10 +118,10 @@ underlying storage solution and provides a flexible interface for memory operati
     def add_long_term_memory(
         self,
         memory: str,
-        user_id: str = &#34;default&#34;,
+        user_id: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ):
-        self.mem0.add(memory, user_id=user_id, metadata=metadata)
+        self.mem0.store(memory, user_id=user_id or self.user_id, metadata=metadata)
 
     def add_short_term_memory(self, memory: Dict[str, Any]):
         self.short_term.append(memory)
@@ -132,7 +131,7 @@ underlying storage solution and provides a flexible interface for memory operati
     def get_all_memories(self) -&gt; Dict[str, Any]:
         return {
             &#34;core&#34;: self.core,
-            &#34;long_term&#34;: self.mem0.get_all(),
+            &#34;long_term&#34;: self.mem0.get_all(user_id=self.user_id),
             &#34;short_term&#34;: self.short_term,
         }
 
@@ -157,7 +156,7 @@ underlying storage solution and provides a flexible interface for memory operati
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.memory.memory.Memory.add_long_term_memory"><code class="name flex">
-<span>def <span class="ident">add_long_term_memory</span></span>(<span>self, memory: str, user_id: str = 'default', metadata: Optional[Dict[str, Any]] = None)</span>
+<span>def <span class="ident">add_long_term_memory</span></span>(<span>self, memory: str, user_id: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>

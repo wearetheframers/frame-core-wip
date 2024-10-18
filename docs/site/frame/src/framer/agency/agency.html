@@ -37,23 +37,29 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.agency.Agency"><code class="flex name class">
 <span>class <span class="ident">Agency</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, context: Optional[Dict[str, Any]] = None, execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>] = None, roles: Optional[List[<a title="frame.src.models.framer.agency.roles.Role" href="../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.models.framer.agency.goals.Goal" href="../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>]] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, context: Optional[Dict[str, Any]] = None, execution_context: Optional[ForwardRef('ExecutionContext')] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Agency class represents the decision-making and task management component of a Framer.</p>
 <p>To extend the Agency's capabilities, you can add new actions to the ActionRegistry.
 This allows the Agency to perform additional tasks and manage new workflows.
 It manages roles, goals, tasks, and workflows for the Framer.</p>
+<p>The Agency supports multiple active roles, goals, and tasks simultaneously. This means:
+- Multiple roles can be active at once, allowing the Framer to fulfill various functions concurrently.
+- Multiple goals can be pursued simultaneously, enabling the Framer to work towards various objectives.
+- Multiple tasks can be in progress at the same time, allowing for concurrent action execution.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
 <dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
 <dd>The execution context containing necessary services.</dd>
-<dt><strong><code>roles</code></strong> :&ensp;<code>Roles</code></dt>
-<dd>Roles assigned to the Agency.</dd>
-<dt><strong><code>goals</code></strong> :&ensp;<code>Goals</code></dt>
-<dd>Goals for the Agency.</dd>
+<dt><strong><code>roles</code></strong> :&ensp;<code>List[Role]</code></dt>
+<dd>Roles assigned to the Agency. Multiple roles can be active simultaneously.</dd>
+<dt><strong><code>goals</code></strong> :&ensp;<code>List[Goal]</code></dt>
+<dd>Goals for the Agency. Multiple goals can be active at the same time.</dd>
 <dt><strong><code>workflow_manager</code></strong> :&ensp;<code>WorkflowManager</code></dt>
-<dd>Manages workflows and tasks.</dd>
+<dd>Manages workflows and tasks, supporting concurrent task execution.</dd>
+<dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
+<dd>The Framer instance associated with this Agency.</dd>
 </dl>
 <p>Initialize an Agency instance.</p>
 <h2 id="args">Args</h2>
@@ -64,9 +70,9 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <dd>Additional context for the Agency. Defaults to None.</dd>
 <dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
 <dd>The execution context for the Agency. Defaults to None.</dd>
-<dt><strong><code>roles</code></strong> :&ensp;<code>Optional[List[RoleModel]]</code></dt>
+<dt><strong><code>roles</code></strong> :&ensp;<code>Optional[List[Role]]</code></dt>
 <dd>Initial roles for the Agency. Defaults to None.</dd>
-<dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[GoalModel]]</code></dt>
+<dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[Goal]]</code></dt>
 <dd>Initial goals for the Agency. Defaults to None.</dd>
 </dl></div>
 <details class="source">
@@ -81,18 +87,24 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
     This allows the Agency to perform additional tasks and manage new workflows.
     It manages roles, goals, tasks, and workflows for the Framer.
 
+    The Agency supports multiple active roles, goals, and tasks simultaneously. This means:
+    - Multiple roles can be active at once, allowing the Framer to fulfill various functions concurrently.
+    - Multiple goals can be pursued simultaneously, enabling the Framer to work towards various objectives.
+    - Multiple tasks can be in progress at the same time, allowing for concurrent action execution.
+
     Attributes:
         execution_context (ExecutionContext): The execution context containing necessary services.
-        roles (Roles): Roles assigned to the Agency.
-        goals (Goals): Goals for the Agency.
-        workflow_manager (WorkflowManager): Manages workflows and tasks.
+        roles (List[Role]): Roles assigned to the Agency. Multiple roles can be active simultaneously.
+        goals (List[Goal]): Goals for the Agency. Multiple goals can be active at the same time.
+        workflow_manager (WorkflowManager): Manages workflows and tasks, supporting concurrent task execution.
+        framer (Framer): The Framer instance associated with this Agency.
     &#34;&#34;&#34;
 
     def __init__(
         self,
         llm_service: LLMService,
         context: Optional[Dict[str, Any]] = None,
-        execution_context: Optional[ExecutionContext] = None,
+        execution_context: Optional[&#34;ExecutionContext&#34;] = None,
         roles: Optional[List[Role]] = None,
         goals: Optional[List[Goal]] = None,
     ):
@@ -103,83 +115,35 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             llm_service (LLMService): The language model service.
             context (Optional[Dict[str, Any]]): Additional context for the Agency. Defaults to None.
             execution_context (Optional[ExecutionContext]): The execution context for the Agency. Defaults to None.
-            roles (Optional[List[RoleModel]]): Initial roles for the Agency. Defaults to None.
-            goals (Optional[List[GoalModel]]): Initial goals for the Agency. Defaults to None.
+            roles (Optional[List[Role]]): Initial roles for the Agency. Defaults to None.
+            goals (Optional[List[Goal]]): Initial goals for the Agency. Defaults to None.
         &#34;&#34;&#34;
         self.llm_service = llm_service
         self.context = context or {}
-        self.execution_context = execution_context or ExecutionContext(
-            llm_service=llm_service
-        )
-        self.roles = Roles()
-        self.goals = Goals()
+        self.execution_context = execution_context
+        self.roles: List[Role] = []
+        self.goals: List[Goal] = []
         if roles:
-            for role in roles:
-                self.roles.add_role(role)
+            self.set_roles(roles)
         if goals:
-            for goal in goals:
-                self.goals.add_goal(goal)
+            self.set_goals(goals)
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, &#34;default_model&#34;, DEFAULT_MODEL)
-        self.action_registry = ActionRegistry(self.execution_context)
-
-    def add_role(self, role: Role) -&gt; None:
-        &#34;&#34;&#34;
-        Add a new role to the Agency.
-
-        Args:
-            role (RoleModel): The role to be added.
-        &#34;&#34;&#34;
-        self.roles.add_role(role)
+        self.action_registry = ActionRegistry()
+        self.action_registry.execution_context = self.execution_context
 
     def set_roles(self, roles: Optional[List[Role]] = None) -&gt; None:
-        &#34;&#34;&#34;
-        Set the roles for the Agency.
-
-        Args:
-            roles (Optional[List[RoleModel]]): List of Role objects.
-        &#34;&#34;&#34;
-        self.roles.clear_roles()
-        if roles:
-            for role in roles:
-                self.roles.add_role(role)
+        self.roles = roles if roles is not None else []
 
     def set_goals(self, goals: Optional[List[Goal]] = None) -&gt; None:
-        &#34;&#34;&#34;
-        Set the goals for the Agency.
-
-        Args:
-            goals (Optional[List[GoalModel]]): List of Goal objects.
-        &#34;&#34;&#34;
-        self.goals.goal_list = goals if goals is not None else []
-
-    def add_goal(self, goal: Goal) -&gt; None:
-        &#34;&#34;&#34;
-        Add a new goal to the Agency.
-
-        Args:
-            goal (GoalModel): The goal to be added.
-        &#34;&#34;&#34;
-        self.goals.add_goal(goal)
+        self.goals = goals if goals is not None else []
 
     def get_roles(self) -&gt; List[Role]:
-        &#34;&#34;&#34;
-        Get all roles of the Agency.
-
-        Returns:
-            List[RoleModel]: List of all roles.
-        &#34;&#34;&#34;
-        return self.roles.get_roles()
+        return self.roles
 
     def get_goals(self) -&gt; List[Goal]:
-        &#34;&#34;&#34;
-        Get all goals of the Agency.
-
-        Returns:
-            List[GoalModel]: List of all goals.
-        &#34;&#34;&#34;
-        return self.goals.goal_list
+        return [goal for goal in self.goals if goal.status == GoalStatus.ACTIVE]
 
     def create_task(
         self,
@@ -362,11 +326,19 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                 logger.warning(
                     &#34;Received empty response while generating role. Using default role.&#34;
                 )
-                return [Role(id=&#34;default&#34;, name=&#34;Task Assistant&#34;, description=&#34;Assist with the given task or query.&#34;, priority=5, status=RoleStatus.ACTIVE)]
-            
+                return [
+                    Role(
+                        id=&#34;default&#34;,
+                        name=&#34;Task Assistant&#34;,
+                        description=&#34;Assist with the given task or query.&#34;,
+                        priority=5,
+                        status=RoleStatus.ACTIVE,
+                    )
+                ]
+
             if isinstance(role_data, dict):
                 role_data = [role_data]
-            
+
             roles = []
             for r in role_data:
                 r[&#34;priority&#34;] = max(1, min(10, int(r.get(&#34;priority&#34;, 5))))
@@ -376,7 +348,15 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         except Exception as e:
             logger.error(f&#34;Error generating role: {str(e)}&#34;, exc_info=True)
             logger.error(f&#34;Prompt used for role generation: {prompt}&#34;)
-            return [Role(id=&#34;default&#34;, name=&#34;Task Assistant&#34;, description=&#34;Assist with the given task or query.&#34;, priority=5, status=RoleStatus.ACTIVE)]
+            return [
+                Role(
+                    id=&#34;default&#34;,
+                    name=&#34;Task Assistant&#34;,
+                    description=&#34;Assist with the given task or query.&#34;,
+                    priority=5,
+                    status=RoleStatus.ACTIVE,
+                )
+            ]
 
     async def generate_goals(self) -&gt; List[Goal]:
         &#34;&#34;&#34;
@@ -408,11 +388,18 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                 logger.warning(
                     &#34;Received empty response while generating goal. Using default goal.&#34;
                 )
-                return [Goal(name=&#34;Default Goal&#34;, description=&#34;Assist users based on the given input.&#34;, priority=5, status=GoalStatus.ACTIVE)]
-            
+                return [
+                    Goal(
+                        name=&#34;Default Goal&#34;,
+                        description=&#34;Assist users based on the given input.&#34;,
+                        priority=5,
+                        status=GoalStatus.ACTIVE,
+                    )
+                ]
+
             if isinstance(goal_data, dict):
                 goal_data = [goal_data]
-            
+
             goals = []
             for g in goal_data:
                 g[&#34;priority&#34;] = max(1, min(10, int(g.get(&#34;priority&#34;, 5))))
@@ -422,7 +409,14 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         except Exception as e:
             logger.error(f&#34;Error generating goal: {e}&#34;, exc_info=True)
             logger.error(f&#34;Prompt used for goal generation: {prompt}&#34;)
-            return [Goal(name=&#34;Default Goal&#34;, description=&#34;Assist users to the best of my abilities&#34;, priority=5, status=GoalStatus.ACTIVE)]
+            return [
+                Goal(
+                    name=&#34;Default Goal&#34;,
+                    description=&#34;Assist users to the best of my abilities&#34;,
+                    priority=5,
+                    status=GoalStatus.ACTIVE,
+                )
+            ]
 
     async def generate_roles_and_goals(self) -&gt; Tuple[List[Role], List[Goal]]:
         &#34;&#34;&#34;
@@ -434,10 +428,18 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         3. If both exist, generate new goals and add them to existing ones.
 
         Returns:
-            Tuple[List[RoleModel], List[GoalModel]]: A tuple containing the final roles and goals.
+            Tuple[List[Role], List[Goal]]: A tuple containing the final roles and goals.
         &#34;&#34;&#34;
-        roles = await self.generate_roles()
-        goals = await self.generate_goals()
+        new_roles = await self.generate_roles()
+        new_goals = await self.generate_goals()
+        if self.roles is None:
+            roles = new_roles
+        else:
+            roles = self.roles + new_roles
+        if self.goals is None:
+            goals = new_goals
+        else:
+            goals = self.goals + new_goals
         return roles, goals
 
     async def execute_task(self, task: Task) -&gt; str:
@@ -477,83 +479,32 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         return response
 
     def update_role_status(self, role_id: str, new_status: RoleStatus) -&gt; None:
-        &#34;&#34;&#34;
-        Update the status of a role.
-
-        Args:
-            role_id (str): The ID of the role to update.
-            new_status (RoleStatus): The new status to set for the role.
-        &#34;&#34;&#34;
-        self.roles.update_role_status(role_id, new_status)
+        for role in self.roles:
+            if role.id == role_id:
+                role.status = new_status
+                break
 
     def update_goal_status(self, goal_name: str, new_status: GoalStatus) -&gt; None:
-        &#34;&#34;&#34;
-        Update the status of a goal.
-
-        Args:
-            goal_name (str): The name of the goal to update.
-            new_status (GoalStatusModel): The new status to set for the goal.
-        &#34;&#34;&#34;
-        self.goals.set_goal_status(goal_name, new_status)
+        for goal in self.goals:
+            if goal.name == goal_name:
+                goal.status = new_status
+                break
 
     async def evaluate_roles_and_goals(self) -&gt; None:
+        # Implement role and goal evaluation logic here
+        pass
+
+    def set_framer(self, framer):
         &#34;&#34;&#34;
-        Evaluate and update the status of roles and goals based on the current context.
+        Set the Framer instance associated with this Agency.
+
+        Args:
+            framer (Framer): The Framer instance to associate with this Agency.
         &#34;&#34;&#34;
-        # Evaluate roles
-        for role in self.roles.get_roles():
-            prompt = f&#34;&#34;&#34;
-            Evaluate the following role based on the current context:
-            Role: {role.to_dict()}
-            Current context: {self.context}
-
-            Should this role&#39;s status be updated? If yes, what should be the new status?
-            Respond with a JSON object containing &#39;update_status&#39; (boolean) and &#39;new_status&#39; (string) fields.
-            &#34;&#34;&#34;
-            response = await self.llm_service.get_completion(prompt, model=self.default_model)
-            evaluation = json.loads(response)
-            if evaluation[&#39;update_status&#39;]:
-                self.update_role_status(role.id, RoleStatus[evaluation[&#39;new_status&#39;]])
-
-        # Evaluate goals
-        for goal in self.goals.goal_list:
-            prompt = f&#34;&#34;&#34;
-            Evaluate the following goal based on the current context:
-            Goal: {goal.dict()}
-            Current context: {self.context}
-
-            Should this goal&#39;s status be updated? If yes, what should be the new status?
-            Respond with a JSON object containing &#39;update_status&#39; (boolean) and &#39;new_status&#39; (string) fields.
-            &#34;&#34;&#34;
-            response = await self.llm_service.get_completion(prompt, model=self.default_model)
-            evaluation = json.loads(response)
-            if evaluation[&#39;update_status&#39;]:
-                self.update_goal_status(goal.name, GoalStatus[evaluation[&#39;new_status&#39;]])</code></pre>
+        self.framer = framer</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="frame.src.framer.agency.agency.Agency.add_goal"><code class="name flex">
-<span>def <span class="ident">add_goal</span></span>(<span>self, goal: <a title="frame.src.models.framer.agency.goals.Goal" href="../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add a new goal to the Agency.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>goal</code></strong> :&ensp;<code>GoalModel</code></dt>
-<dd>The goal to be added.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.agency.agency.Agency.add_role"><code class="name flex">
-<span>def <span class="ident">add_role</span></span>(<span>self, role: <a title="frame.src.models.framer.agency.roles.Role" href="../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add a new role to the Agency.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>role</code></strong> :&ensp;<code>RoleModel</code></dt>
-<dd>The role to be added.</dd>
-</dl></div>
-</dd>
 <dt id="frame.src.framer.agency.agency.Agency.add_task"><code class="name flex">
 <span>def <span class="ident">add_task</span></span>(<span>self, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>, workflow_id: str = 'default') ‑> None</span>
 </code></dt>
@@ -581,7 +532,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.create_task"><code class="name flex">
-<span>def <span class="ident">create_task</span></span>(<span>self, description: str, priority: Union[str, <a title="frame.src.models.framer.agency.priority.Priority" href="../../models/framer/agency/priority.html#frame.src.models.framer.agency.priority.Priority">Priority</a>] = 5, workflow_id: str = 'default') ‑> <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a></span>
+<span>def <span class="ident">create_task</span></span>(<span>self, description: str, priority: Union[str, <a title="frame.src.framer.agency.priority.Priority" href="priority.html#frame.src.framer.agency.priority.Priority">Priority</a>] = 5, workflow_id: str = 'default') ‑> <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new task with the given description and priority.</p>
@@ -601,7 +552,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.create_workflow"><code class="name flex">
-<span>def <span class="ident">create_workflow</span></span>(<span>self, name: str, is_async: bool = False) ‑> <a title="frame.src.framer.agency.tasks.workflow.workflow.Workflow" href="tasks/workflow/workflow.html#frame.src.framer.agency.tasks.workflow.workflow.Workflow">Workflow</a></span>
+<span>def <span class="ident">create_workflow</span></span>(<span>self, name: str, is_async: bool = False) ‑> <a title="frame.src.framer.agency.workflow.workflow.Workflow" href="workflow/workflow.html#frame.src.framer.agency.workflow.workflow.Workflow">Workflow</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new workflow.</p>
@@ -622,7 +573,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <span>async def <span class="ident">evaluate_roles_and_goals</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Evaluate and update the status of roles and goals based on the current context.</p></div>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.execute_task"><code class="name flex">
 <span>async def <span class="ident">execute_task</span></span>(<span>self, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>) ‑> str</span>
@@ -654,7 +605,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.generate_goals"><code class="name flex">
-<span>async def <span class="ident">generate_goals</span></span>(<span>self) ‑> List[<a title="frame.src.models.framer.agency.goals.Goal" href="../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>]</span>
+<span>async def <span class="ident">generate_goals</span></span>(<span>self) ‑> List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate goals based on the Framer's context.</p>
@@ -665,7 +616,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.generate_roles"><code class="name flex">
-<span>async def <span class="ident">generate_roles</span></span>(<span>self) ‑> List[<a title="frame.src.models.framer.agency.roles.Role" href="../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>]</span>
+<span>async def <span class="ident">generate_roles</span></span>(<span>self) ‑> List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate roles based on the Framer's context.</p>
@@ -676,7 +627,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.generate_roles_and_goals"><code class="name flex">
-<span>async def <span class="ident">generate_roles_and_goals</span></span>(<span>self) ‑> Tuple[List[<a title="frame.src.models.framer.agency.roles.Role" href="../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>], List[<a title="frame.src.models.framer.agency.goals.Goal" href="../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>]]</span>
+<span>async def <span class="ident">generate_roles_and_goals</span></span>(<span>self) ‑> Tuple[List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>], List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate roles and goals for the Framer.</p>
@@ -686,7 +637,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 3. If both exist, generate new goals and add them to existing ones.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Tuple[List[RoleModel], List[GoalModel]]</code></dt>
+<dt><code>Tuple[List[Role], List[Goal]]</code></dt>
 <dd>A tuple containing the final roles and goals.</dd>
 </dl></div>
 </dd>
@@ -702,15 +653,10 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.get_goals"><code class="name flex">
-<span>def <span class="ident">get_goals</span></span>(<span>self) ‑> List[<a title="frame.src.models.framer.agency.goals.Goal" href="../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>]</span>
+<span>def <span class="ident">get_goals</span></span>(<span>self) ‑> List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get all goals of the Agency.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>List[GoalModel]</code></dt>
-<dd>List of all goals.</dd>
-</dl></div>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.get_next_task"><code class="name flex">
 <span>def <span class="ident">get_next_task</span></span>(<span>self, workflow_id: str = 'default') ‑> Optional[<a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]</span>
@@ -729,15 +675,10 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.get_roles"><code class="name flex">
-<span>def <span class="ident">get_roles</span></span>(<span>self) ‑> List[<a title="frame.src.models.framer.agency.roles.Role" href="../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>]</span>
+<span>def <span class="ident">get_roles</span></span>(<span>self) ‑> List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get all roles of the Agency.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>List[RoleModel]</code></dt>
-<dd>List of all roles.</dd>
-</dl></div>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.perform_task"><code class="name flex">
 <span>async def <span class="ident">perform_task</span></span>(<span>self, task: Union[Dict[str, Any], <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]) ‑> Dict[str, Any]</span>
@@ -768,53 +709,40 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <dd>The task to be set as the final task.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.agency.agency.Agency.set_goals"><code class="name flex">
-<span>def <span class="ident">set_goals</span></span>(<span>self, goals: Optional[List[<a title="frame.src.models.framer.agency.goals.Goal" href="../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>]] = None) ‑> None</span>
+<dt id="frame.src.framer.agency.agency.Agency.set_framer"><code class="name flex">
+<span>def <span class="ident">set_framer</span></span>(<span>self, framer)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Set the goals for the Agency.</p>
+<div class="desc"><p>Set the Framer instance associated with this Agency.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[GoalModel]]</code></dt>
-<dd>List of Goal objects.</dd>
+<dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
+<dd>The Framer instance to associate with this Agency.</dd>
 </dl></div>
+</dd>
+<dt id="frame.src.framer.agency.agency.Agency.set_goals"><code class="name flex">
+<span>def <span class="ident">set_goals</span></span>(<span>self, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.set_roles"><code class="name flex">
-<span>def <span class="ident">set_roles</span></span>(<span>self, roles: Optional[List[<a title="frame.src.models.framer.agency.roles.Role" href="../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>]] = None) ‑> None</span>
+<span>def <span class="ident">set_roles</span></span>(<span>self, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Set the roles for the Agency.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>roles</code></strong> :&ensp;<code>Optional[List[RoleModel]]</code></dt>
-<dd>List of Role objects.</dd>
-</dl></div>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.update_goal_status"><code class="name flex">
-<span>def <span class="ident">update_goal_status</span></span>(<span>self, goal_name: str, new_status: <a title="frame.src.models.framer.agency.goals.GoalStatus" href="../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.GoalStatus">GoalStatus</a>) ‑> None</span>
+<span>def <span class="ident">update_goal_status</span></span>(<span>self, goal_name: str, new_status: <a title="frame.src.framer.agency.goals.GoalStatus" href="goals.html#frame.src.framer.agency.goals.GoalStatus">GoalStatus</a>) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Update the status of a goal.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>goal_name</code></strong> :&ensp;<code>str</code></dt>
-<dd>The name of the goal to update.</dd>
-<dt><strong><code>new_status</code></strong> :&ensp;<code>GoalStatusModel</code></dt>
-<dd>The new status to set for the goal.</dd>
-</dl></div>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.update_role_status"><code class="name flex">
-<span>def <span class="ident">update_role_status</span></span>(<span>self, role_id: str, new_status: <a title="frame.src.models.framer.agency.roles.RoleStatus" href="../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.RoleStatus">RoleStatus</a>) ‑> None</span>
+<span>def <span class="ident">update_role_status</span></span>(<span>self, role_id: str, new_status: <a title="frame.src.framer.agency.roles.RoleStatus" href="roles.html#frame.src.framer.agency.roles.RoleStatus">RoleStatus</a>) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Update the status of a role.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>role_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>The ID of the role to update.</dd>
-<dt><strong><code>new_status</code></strong> :&ensp;<code>RoleStatus</code></dt>
-<dd>The new status to set for the role.</dd>
-</dl></div>
+<div class="desc"></div>
 </dd>
 </dl>
 </dd>
@@ -836,8 +764,6 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <li>
 <h4><code><a title="frame.src.framer.agency.agency.Agency" href="#frame.src.framer.agency.agency.Agency">Agency</a></code></h4>
 <ul class="">
-<li><code><a title="frame.src.framer.agency.agency.Agency.add_goal" href="#frame.src.framer.agency.agency.Agency.add_goal">add_goal</a></code></li>
-<li><code><a title="frame.src.framer.agency.agency.Agency.add_role" href="#frame.src.framer.agency.agency.Agency.add_role">add_role</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.add_task" href="#frame.src.framer.agency.agency.Agency.add_task">add_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.complete_task" href="#frame.src.framer.agency.agency.Agency.complete_task">complete_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.create_task" href="#frame.src.framer.agency.agency.Agency.create_task">create_task</a></code></li>
@@ -854,6 +780,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <li><code><a title="frame.src.framer.agency.agency.Agency.get_roles" href="#frame.src.framer.agency.agency.Agency.get_roles">get_roles</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.perform_task" href="#frame.src.framer.agency.agency.Agency.perform_task">perform_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.set_final_task_for_workflow" href="#frame.src.framer.agency.agency.Agency.set_final_task_for_workflow">set_final_task_for_workflow</a></code></li>
+<li><code><a title="frame.src.framer.agency.agency.Agency.set_framer" href="#frame.src.framer.agency.agency.Agency.set_framer">set_framer</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.set_goals" href="#frame.src.framer.agency.agency.Agency.set_goals">set_goals</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.set_roles" href="#frame.src.framer.agency.agency.Agency.set_roles">set_roles</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.update_goal_status" href="#frame.src.framer.agency.agency.Agency.update_goal_status">update_goal_status</a></code></li>

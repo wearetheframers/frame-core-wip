@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.frame.Frame"><code class="flex name class">
 <span>class <span class="ident">Frame</span></span>
-<span>(</span><span>openai_api_key: str = '', mistral_api_key: str = '', huggingface_api_key: str = '', default_model: str = 'gpt-4o-mini')</span>
+<span>(</span><span>openai_api_key: str = '', mistral_api_key: str = '', huggingface_api_key: str = '', default_model: str = 'gpt-4o-mini', plugins_dir: Optional[str] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Frame is the main interface for creating and managing Framer instances.</p>
@@ -48,18 +48,23 @@ Framer creation.</p>
 1. Initializing and managing the language model service.
 2. Creating new Framer instances with specified configurations.
 3. Setting and managing the default language model.
-4. Providing a high-level interface for language model completions.</p>
+4. Providing a high-level interface for language model completions.
+5. Loading and managing plugins.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
 <dt><strong><code>_default_model</code></strong> :&ensp;<code>str</code></dt>
 <dd>The default language model to use.</dd>
 <dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
 <dd>The language model service instance.</dd>
+<dt><strong><code>plugins_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>The directory containing plugins.</dd>
+<dt><strong><code>plugins</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>Loaded plugins.</dd>
 </dl>
 <p>Initialize the Frame instance.</p>
 <p>This constructor sets up the Frame with the necessary API keys and
 initializes the language model service. It also sets the default
-model to be used for completions.</p>
+model to be used for completions and loads plugins.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>openai_api_key</code></strong> :&ensp;<code>Optional[str]</code></dt>
@@ -70,6 +75,8 @@ model to be used for completions.</p>
 <dd>API key for Hugging Face services.</dd>
 <dt><strong><code>default_model</code></strong> :&ensp;<code>Optional[str]</code></dt>
 <dd>The default language model to use.</dd>
+<dt><strong><code>plugins_dir</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The directory containing plugins.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -88,10 +95,13 @@ model to be used for completions.</p>
     2. Creating new Framer instances with specified configurations.
     3. Setting and managing the default language model.
     4. Providing a high-level interface for language model completions.
+    5. Loading and managing plugins.
 
     Attributes:
         _default_model (str): The default language model to use.
         llm_service (LLMService): The language model service instance.
+        plugins_dir (str): The directory containing plugins.
+        plugins (Dict[str, Any]): Loaded plugins.
     &#34;&#34;&#34;
 
     def reset_metrics(self):
@@ -104,19 +114,21 @@ model to be used for completions.</p>
         mistral_api_key: str = &#34;&#34;,
         huggingface_api_key: str = &#34;&#34;,
         default_model: str = DEFAULT_MODEL,
+        plugins_dir: Optional[str] = None,
     ):
         &#34;&#34;&#34;
         Initialize the Frame instance.
 
         This constructor sets up the Frame with the necessary API keys and
         initializes the language model service. It also sets the default
-        model to be used for completions.
+        model to be used for completions and loads plugins.
 
         Args:
             openai_api_key (Optional[str]): API key for OpenAI services.
             mistral_api_key (Optional[str]): API key for Mistral services.
             huggingface_api_key (Optional[str]): API key for Hugging Face services.
             default_model (Optional[str]): The default language model to use.
+            plugins_dir (Optional[str]): The directory containing plugins.
         &#34;&#34;&#34;
         self._default_model = default_model
         # Initialize the language model service with provided API keys
@@ -126,6 +138,20 @@ model to be used for completions.</p>
             huggingface_api_key=huggingface_api_key,
             default_model=self._default_model,
         )
+        self.plugins_dir = plugins_dir or os.path.join(
+            os.path.dirname(__file__), &#34;src&#34;, &#34;plugins&#34;
+        )
+        self.plugins = load_plugins(self.plugins_dir)
+
+    def set_plugins_dir(self, plugins_dir: str):
+        &#34;&#34;&#34;
+        Set a custom directory for loading plugins.
+
+        Args:
+            plugins_dir (str): The directory path where plugins are located.
+        &#34;&#34;&#34;
+        self.plugins_dir = plugins_dir
+        self.plugins = load_plugins(self.plugins_dir)
 
     async def create_framer(self, config: FramerConfig, **kwargs: Any) -&gt; &#34;Framer&#34;:
         &#34;&#34;&#34;
@@ -374,6 +400,17 @@ the entire Frame ecosystem.</p>
 <dd>The name of the model to set as default.</dd>
 </dl></div>
 </dd>
+<dt id="frame.frame.Frame.set_plugins_dir"><code class="name flex">
+<span>def <span class="ident">set_plugins_dir</span></span>(<span>self, plugins_dir: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set a custom directory for loading plugins.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>plugins_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>The directory path where plugins are located.</dd>
+</dl></div>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -403,6 +440,7 @@ the entire Frame ecosystem.</p>
 <li><code><a title="frame.frame.Frame.load_framer_from_file" href="#frame.frame.Frame.load_framer_from_file">load_framer_from_file</a></code></li>
 <li><code><a title="frame.frame.Frame.reset_metrics" href="#frame.frame.Frame.reset_metrics">reset_metrics</a></code></li>
 <li><code><a title="frame.frame.Frame.set_default_model" href="#frame.frame.Frame.set_default_model">set_default_model</a></code></li>
+<li><code><a title="frame.frame.Frame.set_plugins_dir" href="#frame.frame.Frame.set_plugins_dir">set_plugins_dir</a></code></li>
 </ul>
 </li>
 </ul>

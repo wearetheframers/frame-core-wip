@@ -268,7 +268,7 @@ validated to form a valid model.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Goals(BaseModel):
-    goals: list[Goal] = []</code></pre>
+    goals: list[Goal] = Field(default_factory=list)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

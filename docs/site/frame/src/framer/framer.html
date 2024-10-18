@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.framer.Framer"><code class="flex name class">
 <span>class <span class="ident">Framer</span></span>
-<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager" href="agency/tasks/workflow/workflow_manager.html#frame.src.framer.agency.tasks.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.eq_service.EQService" href="../services/eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [])</span>
+<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.workflow.workflow_manager.WorkflowManager" href="agency/workflow/workflow_manager.html#frame.src.framer.agency.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Framer class represents an AI agent with cognitive capabilities. It integrates various components
@@ -113,13 +113,37 @@ processing perceptions, making decisions, and executing tasks.</p>
     ):
         # Existing initialization code...
 
-        # Initialize the SearchExtractSummarizePlugin if available
-        try:
-            from frame.src.plugins.search_extract_summarize_plugin import SearchExtractSummarizePlugin
-            self.search_extract_summarize_plugin = SearchExtractSummarizePlugin(self)
-            self.plugins[&#34;search_extract_summarize&#34;] = self.search_extract_summarize_plugin
-        except ImportError:
-            self.logger.warning(&#34;SearchExtractSummarizePlugin is not available. To use it, install the required dependencies.&#34;)
+        self.config = config
+        self.permissions = config.permissions
+
+        # Initialize services and plugins based on permissions
+        if &#34;withMemory&#34; in self.permissions:
+            self.memory_service = memory_service or MemoryService()
+        
+        if &#34;withEQ&#34; in self.permissions:
+            self.eq_service = eq_service or EQService()
+        
+        if &#34;withSharedContext&#34; in self.permissions:
+            self.shared_context_service = SharedContext()
+
+        # Initialize custom plugins
+        self.plugins = {}
+        for permission in self.permissions:
+            if permission.startswith(&#34;with&#34;) and permission not in [&#34;withMemory&#34;, &#34;withEQ&#34;, &#34;withSharedContext&#34;]:
+                plugin_name = permission[4:]  # Remove &#39;with&#39; prefix
+                try:
+                    plugin_module = importlib.import_module(f&#34;frame.src.plugins.{plugin_name.lower()}&#34;)
+                    plugin_class = getattr(plugin_module, plugin_name)
+                    self.plugins[plugin_name] = plugin_class(self)
+                except ImportError:
+                    logger.warning(f&#34;{plugin_name} is not available. To use it, install the required dependencies.&#34;)
+
+        # Initialize Mem0Adapter if API key is provided and permission is granted
+        if config.mem0_api_key and &#34;withMemory&#34; in self.permissions:
+            self.mem0_adapter = Mem0Adapter(api_key=config.mem0_api_key)
+        else:
+            self.mem0_adapter = None
+            logger.warning(&#34;Mem0 API key not provided or permission not granted. Mem0Adapter will not be available.&#34;)
         &#34;&#34;&#34;
         Initialize a Framer instance.
 
@@ -226,14 +250,11 @@ processing perceptions, making decisions, and executing tasks.</p>
             _, self.goals = await self.agency.generate_roles_and_goals()
 
         # Sort roles and goals by priority
-        self.roles.sort(key=lambda x: x.get(&#39;priority&#39;, 5), reverse=True)
-        self.goals.sort(key=lambda x: x.get(&#39;priority&#39;, 5), reverse=True)
+        self.roles.sort(key=lambda x: x.get(&#34;priority&#34;, 5), reverse=True)
+        self.goals.sort(key=lambda x: x.get(&#34;priority&#34;, 5), reverse=True)
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
-
-        # Load the SearchExtractSummarizePlugin
-        await self.search_extract_summarize_plugin.on_load()
 
         self.act()  # Start acting after initialization
 
@@ -361,12 +382,14 @@ processing perceptions, making decisions, and executing tasks.</p>
             perception = Perception.from_dict(perception)
         current_goals = self.agency.get_goals()
         decision = await self.brain.process_perception(perception, current_goals)
-        
+
         # Consider goal status in decision-making
-        active_goals = [goal for goal in current_goals if goal.status == GoalStatus.ACTIVE]
+        active_goals = [
+            goal for goal in current_goals if goal.status == GoalStatus.ACTIVE
+        ]
         if active_goals:
             decision.reasoning += f&#34; (Aligned with {len(active_goals)} active goals)&#34;
-        
+
         if hasattr(self, &#34;can_execute&#34;) and self.can_execute:
             await self.brain.execute_decision(decision)
         logger.debug(f&#34;Processed perception: {perception}, Decision: {decision}&#34;)
@@ -420,7 +443,11 @@ processing perceptions, making decisions, and executing tasks.</p>
             if hasattr(plugin, &#34;on_decision_made&#34;):
                 plugin.on_decision_made(decision)
 
-    async def generate_tasks_from_perception(self, perception: Union[Perception, Dict[str, Any]], max_len: Optional[int] = None) -&gt; List[Task]:
+    async def generate_tasks_from_perception(
+        self,
+        perception: Union[Perception, Dict[str, Any]],
+        max_len: Optional[int] = None,
+    ) -&gt; List[Task]:
         &#34;&#34;&#34;
         Generate tasks based on the given perception.
 
@@ -432,15 +459,15 @@ processing perceptions, making decisions, and executing tasks.</p>
             List[Task]: A list of generated tasks.
         &#34;&#34;&#34;
         tasks = []
-        
+
         # Convert dictionary to Perception object if necessary
         if isinstance(perception, dict):
             perception = Perception.from_dict(perception)
-        
+
         # Example: Create a task to process the perception
         task = Task(
             description=f&#34;Process perception of type: {perception.type}&#34;,
-            workflow_id=&#34;perception_processing&#34;
+            workflow_id=&#34;perception_processing&#34;,
         )
         tasks.append(task)
 
@@ -488,13 +515,13 @@ processing perceptions, making decisions, and executing tasks.</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="frame.src.framer.framer.Framer.create"><code class="name flex">
-<span>async def <span class="ident">create</span></span>(<span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, soul_seed: Union[str, Dict[str, Any], ForwardRef(None)] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.eq_service.EQService" href="../services/eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="#frame.src.framer.framer.Framer">Framer</a></span>
+<span>async def <span class="ident">create</span></span>(<span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, soul_seed: Union[str, Dict[str, Any], ForwardRef(None)] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.framer.Framer.load_from_file"><code class="name flex">
-<span>def <span class="ident">load_from_file</span></span>(<span>file_path: str, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.eq_service.EQService" href="../services/eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="#frame.src.framer.framer.Framer">Framer</a></span>
+<span>def <span class="ident">load_from_file</span></span>(<span>file_path: str, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Load a Framer configuration from a file.</p>

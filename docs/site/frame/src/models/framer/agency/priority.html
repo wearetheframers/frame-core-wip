@@ -58,23 +58,25 @@ hljs.highlightAll();
     CRITICAL = 10
 
     @classmethod
-    def from_string(cls, value: str) -&gt; &#39;Priority&#39;:
+    def from_string(cls, value: Union[str, int]) -&gt; &#34;Priority&#34;:
+        if isinstance(value, int):
+            return cls(value)
         string_to_priority = {
-            &#39;lowest&#39;: cls.LOWEST,
-            &#39;very low&#39;: cls.VERY_LOW,
-            &#39;low&#39;: cls.LOW,
-            &#39;medium low&#39;: cls.MEDIUM_LOW,
-            &#39;medium&#39;: cls.MEDIUM,
-            &#39;medium high&#39;: cls.MEDIUM_HIGH,
-            &#39;high&#39;: cls.HIGH,
-            &#39;very high&#39;: cls.VERY_HIGH,
-            &#39;highest&#39;: cls.HIGHEST,
-            &#39;critical&#39;: cls.CRITICAL
+            &#34;lowest&#34;: cls.LOWEST,
+            &#34;very low&#34;: cls.VERY_LOW,
+            &#34;low&#34;: cls.LOW,
+            &#34;medium low&#34;: cls.MEDIUM_LOW,
+            &#34;medium&#34;: cls.MEDIUM,
+            &#34;medium high&#34;: cls.MEDIUM_HIGH,
+            &#34;high&#34;: cls.HIGH,
+            &#34;very high&#34;: cls.VERY_HIGH,
+            &#34;highest&#34;: cls.HIGHEST,
+            &#34;critical&#34;: cls.CRITICAL,
         }
         return string_to_priority.get(value.lower(), cls.MEDIUM)
 
     @classmethod
-    def from_value(cls, value: Union[int, str, &#39;Priority&#39;]) -&gt; &#39;Priority&#39;:
+    def from_value(cls, value: Union[int, str, &#34;Priority&#34;]) -&gt; &#34;Priority&#34;:
         if isinstance(value, cls):
             return value
         elif isinstance(value, int):
@@ -82,7 +84,9 @@ hljs.highlightAll();
         elif isinstance(value, str):
             return cls.from_string(value)
         else:
-            raise ValueError(&#34;Priority must be an integer, string, or Priority instance&#34;)</code></pre>
+            raise ValueError(
+                &#34;Priority must be an integer, string, or Priority instance&#34;
+            )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -137,7 +141,7 @@ hljs.highlightAll();
 <h3>Static methods</h3>
 <dl>
 <dt id="frame.src.models.framer.agency.priority.Priority.from_string"><code class="name flex">
-<span>def <span class="ident">from_string</span></span>(<span>value: str) ‑> <a title="frame.src.models.framer.agency.priority.Priority" href="#frame.src.models.framer.agency.priority.Priority">Priority</a></span>
+<span>def <span class="ident">from_string</span></span>(<span>value: Union[str, int]) ‑> <a title="frame.src.models.framer.agency.priority.Priority" href="#frame.src.models.framer.agency.priority.Priority">Priority</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>

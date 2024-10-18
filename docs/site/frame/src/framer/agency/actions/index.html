@@ -27,21 +27,91 @@ hljs.highlightAll();
 <section id="section-intro">
 </section>
 <section>
-</section>
-<section>
-</section>
-<section>
-<h2 class="section-title" id="header-functions">Functions</h2>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt id="frame.src.framer.agency.actions.create_new_agent"><code class="name flex">
-<span>def <span class="ident">create_new_agent</span></span>(<span>self, config: Dict[str, Any])</span>
+<dt><code class="name"><a title="frame.src.framer.agency.actions.base_action" href="base_action.html">frame.src.framer.agency.actions.base_action</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="frame.src.framer.agency.actions.create_new_agent" href="create_new_agent.html">frame.src.framer.agency.actions.create_new_agent</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="frame.src.framer.agency.actions.generate_roles_and_goals" href="generate_roles_and_goals.html">frame.src.framer.agency.actions.generate_roles_and_goals</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="frame.src.framer.agency.actions.observe" href="observe.html">frame.src.framer.agency.actions.observe</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="frame.src.framer.agency.actions.research" href="research.html">frame.src.framer.agency.actions.research</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="frame.src.framer.agency.actions.respond" href="respond.html">frame.src.framer.agency.actions.respond</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="frame.src.framer.agency.actions.think" href="think.html">frame.src.framer.agency.actions.think</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.src.framer.agency.actions.CreateNewAgentAction"><code class="flex name class">
+<span>class <span class="ident">CreateNewAgentAction</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all actions in the Frame framework.
+Actions can create Tasks, which can enforce output types.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CreateNewAgentAction(Action):
+    def __init__(self):
+        super().__init__(&#34;create_new_agent&#34;, &#34;Create a new agent with the required properties&#34;)
+
+    async def execute(self, execution_context: ExecutionContext, config: Dict[str, Any]) -&gt; Any:
+        &#34;&#34;&#34;
+        Create a new agent with the required properties.
+
+        Args:
+            execution_context (ExecutionContext): The execution context containing necessary services.
+            config (Dict[str, Any]): Configuration for the new agent.
+
+        Returns:
+            Framer: The newly created Framer instance.
+        &#34;&#34;&#34;
+        new_config = FramerConfig(
+            **config
+        )
+        new_framer = await execution_context.create_framer(new_config)
+        return new_framer</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.actions.CreateNewAgentAction.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, execution_context: <a title="frame.src.services.execution_context.ExecutionContext" href="../../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>, config: Dict[str, Any]) ‑> Any</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new agent with the required properties.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>self</code></strong></dt>
-<dd>The current Framer instance.</dd>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
+<dd>The execution context containing necessary services.</dd>
 <dt><strong><code>config</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
 <dd>Configuration for the new agent.</dd>
 </dl>
@@ -51,33 +121,130 @@ hljs.highlightAll();
 <dd>The newly created Framer instance.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.agency.actions.generate_roles_and_goals"><code class="name flex">
-<span>def <span class="ident">generate_roles_and_goals</span></span>(<span>self) ‑> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]</span>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<ul class="hlist">
+<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="frame.src.framer.agency.actions.GenerateRolesAndGoalsAction"><code class="flex name class">
+<span>class <span class="ident">GenerateRolesAndGoalsAction</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all actions in the Frame framework.
+Actions can create Tasks, which can enforce output types.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class GenerateRolesAndGoalsAction(Action):
+    def __init__(self):
+        super().__init__(&#34;generate_roles_and_goals&#34;, &#34;Generate roles and goals for the Framer&#34;)
+
+    async def execute(self, execution_context: ExecutionContext) -&gt; Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        &#34;&#34;&#34;
+        Generate roles and goals for the Framer.
+
+        Args:
+            execution_context (&#39;ExecutionContext&#39;): The execution context containing necessary services.
+
+        Returns:
+            Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]: A tuple containing the generated roles and goals.
+        &#34;&#34;&#34;
+        agency = execution_context.agency
+        roles, goals = await agency.generate_roles_and_goals()
+        agency.set_roles(roles)
+        agency.set_goals(goals)
+        return roles, goals</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.actions.GenerateRolesAndGoalsAction.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, execution_context: <a title="frame.src.services.execution_context.ExecutionContext" href="../../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>) ‑> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate roles and goals for the Framer.</p>
 <h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>self</code></strong></dt>
-<dd>The current Framer instance.</dd>
-</dl>
+<p>execution_context ('ExecutionContext'): The execution context containing necessary services.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]</code></dt>
 <dd>A tuple containing the generated roles and goals.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.agency.actions.observe"><code class="name flex">
-<span>def <span class="ident">observe</span></span>(<span>framer: Optional[ForwardRef('Framer')] = None, observation: Optional[str] = None)</span>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<ul class="hlist">
+<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="frame.src.framer.agency.actions.ObserveAction"><code class="flex name class">
+<span>class <span class="ident">ObserveAction</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all actions in the Frame framework.
+Actions can create Tasks, which can enforce output types.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ObserveAction(Action):
+    def __init__(self):
+        super().__init__(&#34;observe&#34;, &#34;Process an observation and generate insights or actions&#34;, Priority.MEDIUM)
+
+    async def execute(self, execution_context: ExecutionContext, observation: Optional[str] = None, insights: Optional[Dict[str, Any]] = None) -&gt; str:
+        &#34;&#34;&#34;
+        Process an observation and generate insights or actions.
+
+        Args:
+            execution_context (ExecutionContext): The execution context containing necessary services.
+            observation (Optional[str]): The observation to process.
+            insights (Optional[Dict[str, Any]]): Additional insights to consider during observation.
+
+        Returns:
+            str: Insights or actions based on the observation, or an error message if inputs are missing.
+        &#34;&#34;&#34;
+        if observation is None and insights is None:
+            return &#34;Observation skipped: missing observation and insights&#34;
+
+        # Placeholder for observation processing logic
+        print(f&#34;Processing observation: {observation}&#34;)
+        if insights:
+            print(f&#34;Additional insights: {insights}&#34;)
+
+        return f&#34;Processed observation: {observation}, Insights: {insights}&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.actions.ObserveAction.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, execution_context: <a title="frame.src.services.execution_context.ExecutionContext" href="../../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>, observation: Optional[str] = None, insights: Optional[Dict[str, Any]] = None) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Process an observation and generate insights or actions.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>framer</code></strong> :&ensp;<code>Optional[Framer]</code></dt>
-<dd>The current Framer instance.</dd>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
+<dd>The execution context containing necessary services.</dd>
 <dt><strong><code>observation</code></strong> :&ensp;<code>Optional[str]</code></dt>
 <dd>The observation to process.</dd>
+<dt><strong><code>insights</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code></dt>
+<dd>Additional insights to consider during observation.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -85,26 +252,180 @@ hljs.highlightAll();
 <dd>Insights or actions based on the observation, or an error message if inputs are missing.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.agency.actions.research"><code class="name flex">
-<span>async def <span class="ident">research</span></span>(<span>execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>], research_topic: str) ‑> str</span>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<ul class="hlist">
+<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="frame.src.framer.agency.actions.ResearchAction"><code class="flex name class">
+<span>class <span class="ident">ResearchAction</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all actions in the Frame framework.
+Actions can create Tasks, which can enforce output types.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ResearchAction(Action):
+    def __init__(self):
+        super().__init__(&#34;research&#34;, &#34;Perform research on a given topic and summarize findings&#34;, Priority.HIGH)
+
+    async def execute(self, execution_context: ExecutionContext, research_topic: str) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Perform research on a given topic and summarize findings.
+
+        Args:
+            execution_context (ExecutionContext): The execution context containing necessary services.
+            research_topic (str): The research topic.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the research findings and any additional information.
+        &#34;&#34;&#34;
+        print(f&#34;Performing research on topic: {research_topic}&#34;)
+
+        if execution_context.llm_service is None:
+            return {&#34;error&#34;: f&#34;Unable to perform research on &#39;{research_topic}&#39; due to missing LLM service.&#34;}
+
+        # Use the LLM service from the execution context
+        result = await execution_context.llm_service.get_completion(
+            f&#34;Provide a summary of the latest developments and top libraries for {research_topic}&#34;,
+            model=execution_context.llm_service.default_model,
+        )
+
+        # If memory service is available, store the research results
+        if execution_context.memory_service:
+            await execution_context.memory_service.add_memory(
+                f&#34;Research on {research_topic}&#34;, result
+            )
+
+        return {
+            &#34;topic&#34;: research_topic,
+            &#34;findings&#34;: result,
+            &#34;summary&#34;: f&#34;Research findings for topic &#39;{research_topic}&#39;:\n{result}&#34;
+        }</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.actions.ResearchAction.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, execution_context: <a title="frame.src.services.execution_context.ExecutionContext" href="../../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>, research_topic: str) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Perform research on a given topic and summarize findings.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
 <dd>The execution context containing necessary services.</dd>
 <dt><strong><code>research_topic</code></strong> :&ensp;<code>str</code></dt>
 <dd>The research topic.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>str</code></dt>
-<dd>A summary of the research findings.</dd>
+<dt><code>Dict[str, Any]</code></dt>
+<dd>A dictionary containing the research findings and any additional information.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.agency.actions.respond"><code class="name flex">
-<span>async def <span class="ident">respond</span></span>(<span>execution_context: <a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>, **kwargs) ‑> Dict[str, Any]</span>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<ul class="hlist">
+<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="frame.src.framer.agency.actions.RespondAction"><code class="flex name class">
+<span>class <span class="ident">RespondAction</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all actions in the Frame framework.
+Actions can create Tasks, which can enforce output types.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RespondAction(Action):
+    def __init__(self):
+        super().__init__(&#34;respond&#34;, &#34;Generate a response based on the current context&#34;)
+
+    async def execute(self, execution_context: ExecutionContext, **kwargs) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Generate a response based on the current context, emphasizing the most recent perception.
+
+        Args:
+            execution_context (ExecutionContext): The execution context containing necessary services.
+            **kwargs: Additional keyword arguments that might be passed to the action.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the generated response.
+        &#34;&#34;&#34;
+        llm_service = execution_context.llm_service
+        soul = execution_context.soul
+
+        # Get the most recent perception
+        recent_perception = execution_context.get_state(
+            &#34;recent_perception&#34;, &#34;No recent perception available.&#34;
+        )
+
+        # Get recent memories and perceptions
+        recent_memories = (
+            execution_context.memory_service.get_recent_memories(5)
+            if execution_context.memory_service
+            else []
+        )
+        recent_perceptions = execution_context.get_state(&#34;recent_perceptions&#34;, [])[-5:]
+
+        # Get roles, goals, and soul information
+        roles = execution_context.get_state(&#34;roles&#34;, [])
+        goals = execution_context.get_state(&#34;goals&#34;, [])
+        soul_state = soul.get_current_state() if soul else {}
+
+        # Get the content from kwargs if provided, otherwise use recent_perception
+        content = kwargs.get(&#34;content&#34;, recent_perception)
+
+        # Construct the prompt
+        prompt = f&#34;&#34;&#34;
+        As an AI assistant with the following characteristics:
+        
+        Roles: {roles}
+        Goals: {goals}
+        Soul: {soul_state}
+        
+        Recent memories: {recent_memories}
+        Recent perceptions: {recent_perceptions}
+        
+        You are responding to the following input:
+        {content}
+        
+        Please generate a response that takes into account all of the above information, 
+        with particular emphasis on addressing the given input.
+        
+        Response:
+        &#34;&#34;&#34;
+
+        # Get the completion from the language model
+        response = await llm_service.get_completion(prompt)
+
+        return {&#34;response&#34;: response.strip()}</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.actions.RespondAction.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, execution_context: <a title="frame.src.services.execution_context.ExecutionContext" href="../../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>, **kwargs) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate a response based on the current context, emphasizing the most recent perception.</p>
@@ -121,8 +442,59 @@ hljs.highlightAll();
 <dd>A dictionary containing the generated response.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.agency.actions.think"><code class="name flex">
-<span>async def <span class="ident">think</span></span>(<span>execution_context: <a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>, thought: str = 'Processing information...') ‑> Dict[str, Any]</span>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<ul class="hlist">
+<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="frame.src.framer.agency.actions.ThinkAction"><code class="flex name class">
+<span>class <span class="ident">ThinkAction</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all actions in the Frame framework.
+Actions can create Tasks, which can enforce output types.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ThinkAction(Action):
+    def __init__(self):
+        super().__init__(&#34;think&#34;, &#34;Ponder and reflect on the current situation&#34;, Priority.HIGH)
+
+    async def execute(self, execution_context: ExecutionContext, thought: str = &#34;Processing information...&#34;) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Ponder and reflect on the current situation, potentially creating new tasks or generating a new prompt.
+        This action is only necessary if a new prompt should be generated with new pretext and context for better results.
+
+        Args:
+            execution_context (ExecutionContext): The execution context containing necessary services.
+            thought (str): The initial thought or idea to process.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the results of the thinking process.
+        &#34;&#34;&#34;
+        if execution_context and execution_context.brain:
+            return await execution_context.brain._execute_think_action(
+                execution_context.brain.make_decision(
+                    {&#34;action&#34;: &#34;think&#34;, &#34;parameters&#34;: {&#34;thought&#34;: thought}}
+                )
+            )
+        else:
+            return {&#34;error&#34;: &#34;Brain not available in execution context&#34;}</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.actions.ThinkAction.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, execution_context: <a title="frame.src.services.execution_context.ExecutionContext" href="../../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>, thought: str = 'Processing information...') ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Ponder and reflect on the current situation, potentially creating new tasks or generating a new prompt.
@@ -141,8 +513,16 @@ This action is only necessary if a new prompt should be generated with new prete
 </dl></div>
 </dd>
 </dl>
-</section>
-<section>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<ul class="hlist">
+<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -155,14 +535,55 @@ This action is only necessary if a new prompt should be generated with new prete
 <li><code><a title="frame.src.framer.agency" href="../index.html">frame.src.framer.agency</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="frame.src.framer.agency.actions.base_action" href="base_action.html">frame.src.framer.agency.actions.base_action</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.create_new_agent" href="create_new_agent.html">frame.src.framer.agency.actions.create_new_agent</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.generate_roles_and_goals" href="generate_roles_and_goals.html">frame.src.framer.agency.actions.generate_roles_and_goals</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.observe" href="observe.html">frame.src.framer.agency.actions.observe</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.research" href="research.html">frame.src.framer.agency.actions.research</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.respond" href="respond.html">frame.src.framer.agency.actions.respond</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.think" href="think.html">frame.src.framer.agency.actions.think</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.src.framer.agency.actions.CreateNewAgentAction" href="#frame.src.framer.agency.actions.CreateNewAgentAction">CreateNewAgentAction</a></code></h4>
 <ul class="">
-<li><code><a title="frame.src.framer.agency.actions.create_new_agent" href="#frame.src.framer.agency.actions.create_new_agent">create_new_agent</a></code></li>
-<li><code><a title="frame.src.framer.agency.actions.generate_roles_and_goals" href="#frame.src.framer.agency.actions.generate_roles_and_goals">generate_roles_and_goals</a></code></li>
-<li><code><a title="frame.src.framer.agency.actions.observe" href="#frame.src.framer.agency.actions.observe">observe</a></code></li>
-<li><code><a title="frame.src.framer.agency.actions.research" href="#frame.src.framer.agency.actions.research">research</a></code></li>
-<li><code><a title="frame.src.framer.agency.actions.respond" href="#frame.src.framer.agency.actions.respond">respond</a></code></li>
-<li><code><a title="frame.src.framer.agency.actions.think" href="#frame.src.framer.agency.actions.think">think</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.CreateNewAgentAction.execute" href="#frame.src.framer.agency.actions.CreateNewAgentAction.execute">execute</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.agency.actions.GenerateRolesAndGoalsAction" href="#frame.src.framer.agency.actions.GenerateRolesAndGoalsAction">GenerateRolesAndGoalsAction</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.actions.GenerateRolesAndGoalsAction.execute" href="#frame.src.framer.agency.actions.GenerateRolesAndGoalsAction.execute">execute</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.agency.actions.ObserveAction" href="#frame.src.framer.agency.actions.ObserveAction">ObserveAction</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.actions.ObserveAction.execute" href="#frame.src.framer.agency.actions.ObserveAction.execute">execute</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.agency.actions.ResearchAction" href="#frame.src.framer.agency.actions.ResearchAction">ResearchAction</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.actions.ResearchAction.execute" href="#frame.src.framer.agency.actions.ResearchAction.execute">execute</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.agency.actions.RespondAction" href="#frame.src.framer.agency.actions.RespondAction">RespondAction</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.actions.RespondAction.execute" href="#frame.src.framer.agency.actions.RespondAction.execute">execute</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.agency.actions.ThinkAction" href="#frame.src.framer.agency.actions.ThinkAction">ThinkAction</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.actions.ThinkAction.execute" href="#frame.src.framer.agency.actions.ThinkAction.execute">execute</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

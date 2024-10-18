@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.brain.Brain"><code class="flex name class">
 <span>class <span class="ident">Brain</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, roles: List[Dict[str, Any]], goals: List[Dict[str, Any]], default_model: str = 'gpt-3.5-turbo', recent_memories_limit: int = 5, execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>] = None, soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, roles: List[Dict[str, Any]], goals: List[Dict[str, Any]], default_model: str = 'gpt-3.5-turbo', recent_memories_limit: int = 5, soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Brain class represents the decision-making component of the Framer.</p>
@@ -57,8 +57,6 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
 <dd>The default language model to use.</dd>
 <dt><strong><code>recent_memories_limit</code></strong> :&ensp;<code>int</code></dt>
 <dd>The number of recent memories to keep. Defaults to 5.</dd>
-<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
-<dd>The execution context for actions.</dd>
 <dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Soul]</code></dt>
 <dd>The Soul instance for the Brain.</dd>
 </dl></div>
@@ -75,7 +73,6 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
     VALID_ACTIONS are derived from the ActionRegistry and default actions.
     &#34;&#34;&#34;
 
-    # VALID_ACTIONS will be initialized in the __init__ method
     def __init__(
         self,
         llm_service: LLMService,
@@ -83,7 +80,6 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         goals: List[Dict[str, Any]],
         default_model: str = &#34;gpt-3.5-turbo&#34;,
         recent_memories_limit: int = 5,
-        execution_context: Optional[ExecutionContext] = None,
         soul: Optional[Soul] = None,
     ):
         &#34;&#34;&#34;
@@ -95,7 +91,6 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
             goals (List[Dict[str, Any]]): Initial goals for the Brain.
             default_model (str): The default language model to use.
             recent_memories_limit (int): The number of recent memories to keep. Defaults to 5.
-            execution_context (Optional[ExecutionContext]): The execution context for actions.
             soul (Optional[Soul]): The Soul instance for the Brain.
         &#34;&#34;&#34;
         self.llm_service = llm_service
@@ -116,19 +111,22 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         }
         self.memory = Memory(memory_config)
 
-        # Initialize ExecutionContext if not provided
-        self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service, soul=self.soul, state={}
-        )
-
         # Initialize ActionRegistry
-        self.action_registry = ActionRegistry(self.execution_context)
+        self.action_registry = ActionRegistry()
 
         # Initialize Agency
         self.agency = Agency(
             llm_service=self.llm_service,
             context=None,
-            execution_context=self.execution_context,
+            execution_context=ExecutionContext(
+                llm_service=self.llm_service,
+                process_perception=self.process_perception,
+                execute_decision=self.execute_decision,
+                config=FramerConfig(
+                    name=self.framer.config.name if hasattr(self, &#39;framer&#39;) else &#34;DefaultFramer&#34;,
+                    default_model=self.default_model
+                )
+            )
         )
 
         # Register the respond action using the agency&#39;s perform_task method
@@ -141,6 +139,16 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
 
         # Update the agency&#39;s action_registry
         self.agency.action_registry = self.action_registry
+
+    def set_framer(self, framer):
+        self.framer = framer
+        if hasattr(self.agency, &#39;set_framer&#39;):
+            self.agency.set_framer(framer)
+        else:
+            logger.warning(&#34;Agency does not have a set_framer method. This might cause issues.&#34;)
+
+    def get_framer(self):
+        return self.framer
 
     async def _execute_think_action(self, decision: Decision) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
@@ -219,7 +227,9 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         self.agency.set_roles(roles)
 
     async def process_perception(
-        self, perception: Union[Perception, Dict[str, Any]], goals: Optional[List[Goal]] = None
+        self,
+        perception: Union[Perception, Dict[str, Any]],
+        goals: Optional[List[Goal]] = None,
     ) -&gt; Decision:
         &#34;&#34;&#34;
         Process a perception and make a decision based on it.
@@ -309,19 +319,28 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         # Consider role and goal priorities when setting decision priority
         active_roles = [role for role in self.roles if role.status == RoleStatus.ACTIVE]
         active_goals = [goal for goal in self.goals if goal.status == GoalStatus.ACTIVE]
-        roles_priority = max([role.priority for role in active_roles], default=Priority.MEDIUM)
-        goals_priority = max([goal.priority for goal in active_goals], default=Priority.MEDIUM)
+        roles_priority = max(
+            [role.priority for role in active_roles], default=Priority.MEDIUM
+        )
+        goals_priority = max(
+            [goal.priority for goal in active_goals], default=Priority.MEDIUM
+        )
         decision_priority = Priority.from_value(decision_data.get(&#34;priority&#34;, &#34;MEDIUM&#34;))
-        final_priority = max(decision_priority, roles_priority, goals_priority)
+        priority_value = decision_data.get(&#34;priority&#34;, &#34;MEDIUM&#34;)
+        priority = Priority.from_string(priority_value) if isinstance(priority_value, str) else Priority(priority_value)
 
         return Decision(
             action=action,
             parameters=parameters,
             reasoning=reasoning,
             confidence=float(decision_data.get(&#34;confidence&#34;, 0.5)),
-            priority=final_priority,
-            related_roles=[role for role in active_roles if role.priority &gt;= final_priority],
-            related_goals=[goal for goal in active_goals if goal.priority &gt;= final_priority],
+            priority=priority,
+            related_roles=[
+                role for role in active_roles if role.priority &gt;= priority.value
+            ],
+            related_goals=[
+                goal for goal in active_goals if goal.priority &gt;= priority.value
+            ],
         )
 
     async def _get_decision_prompt(self, perception: Optional[Perception]) -&gt; str:
@@ -346,11 +365,13 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
 
         active_roles = [
             f&#34;{role.name} (Priority: {role.priority.name}, Status: {role.status.name})&#34;
-            for role in self.roles if role.status == RoleStatus.ACTIVE
+            for role in self.roles
+            if role.status == RoleStatus.ACTIVE
         ]
         active_goals = [
             f&#34;{goal.name} (Priority: {goal.priority.name}, Status: {goal.status.name})&#34;
-            for goal in self.goals if goal.status == GoalStatus.ACTIVE
+            for goal in self.goals
+            if goal.status == GoalStatus.ACTIVE
         ]
 
         prompt = f&#34;&#34;&#34;Given the following perception and context, decide on the most appropriate action to take.
@@ -703,6 +724,12 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
 <dd>The decision to execute.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.framer.brain.brain.Brain.get_framer"><code class="name flex">
+<span>def <span class="ident">get_framer</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.framer.brain.brain.Brain.make_decision"><code class="name flex">
 <span>async def <span class="ident">make_decision</span></span>(<span>self, perception: Optional[<a title="frame.src.framer.brain.perception.perception.Perception" href="perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
@@ -738,7 +765,7 @@ and priority.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.brain.Brain.process_perception"><code class="name flex">
-<span>async def <span class="ident">process_perception</span></span>(<span>self, perception: Union[<a title="frame.src.framer.brain.perception.perception.Perception" href="perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>, Dict[str, Any]], goals: Optional[List[<a title="frame.src.models.framer.agency.goals.Goal" href="../../models/framer/agency/goals.html#frame.src.models.framer.agency.goals.Goal">Goal</a>]] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+<span>async def <span class="ident">process_perception</span></span>(<span>self, perception: Union[<a title="frame.src.framer.brain.perception.perception.Perception" href="perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>, Dict[str, Any]], goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="../agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Process a perception and make a decision based on it.</p>
@@ -755,8 +782,14 @@ and priority.</dd>
 <dd>The decision made based on the perception.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.framer.brain.brain.Brain.set_framer"><code class="name flex">
+<span>def <span class="ident">set_framer</span></span>(<span>self, framer)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.framer.brain.brain.Brain.set_roles"><code class="name flex">
-<span>def <span class="ident">set_roles</span></span>(<span>self, roles: List[<a title="frame.src.models.framer.agency.roles.Role" href="../../models/framer/agency/roles.html#frame.src.models.framer.agency.roles.Role">Role</a>]) ‑> None</span>
+<span>def <span class="ident">set_roles</span></span>(<span>self, roles: List[<a title="frame.src.framer.agency.roles.Role" href="../agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the roles for the Agency.</p>
@@ -785,11 +818,13 @@ and priority.</dd>
 <ul>
 <li>
 <h4><code><a title="frame.src.framer.brain.brain.Brain" href="#frame.src.framer.brain.brain.Brain">Brain</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="frame.src.framer.brain.brain.Brain.execute_decision" href="#frame.src.framer.brain.brain.Brain.execute_decision">execute_decision</a></code></li>
+<li><code><a title="frame.src.framer.brain.brain.Brain.get_framer" href="#frame.src.framer.brain.brain.Brain.get_framer">get_framer</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.make_decision" href="#frame.src.framer.brain.brain.Brain.make_decision">make_decision</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.parse_json_response" href="#frame.src.framer.brain.brain.Brain.parse_json_response">parse_json_response</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.process_perception" href="#frame.src.framer.brain.brain.Brain.process_perception">process_perception</a></code></li>
+<li><code><a title="frame.src.framer.brain.brain.Brain.set_framer" href="#frame.src.framer.brain.brain.Brain.set_framer">set_framer</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.set_roles" href="#frame.src.framer.brain.brain.Brain.set_roles">set_roles</a></code></li>
 </ul>
 </li>

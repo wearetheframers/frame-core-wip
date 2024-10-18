@@ -103,7 +103,7 @@ validated to form a valid model.</p>
             &#34;description&#34;: self.description,
             &#34;permissions&#34;: self.permissions,
             &#34;priority&#34;: self.priority.value,
-            &#34;status&#34;: self.status.value
+            &#34;status&#34;: self.status.value,
         }</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -297,7 +297,7 @@ validated to form a valid model.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Roles(BaseModel):
-    roles: List[Role] = []</code></pre>
+    roles: List[Role] = Field(default_factory=list)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

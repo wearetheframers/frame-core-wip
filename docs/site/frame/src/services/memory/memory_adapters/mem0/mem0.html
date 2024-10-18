@@ -46,7 +46,7 @@ including adding, retrieving, and searching memories.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Mem0Adapter:
+<pre><code class="python">class Mem0Adapter(MemoryAdapterInterface):
     &#34;&#34;&#34;
     Adapter for basic memory operations.
 
@@ -57,38 +57,37 @@ including adding, retrieving, and searching memories.</p></div>
     def __init__(self):
         self.storage = {}
 
-    def add(
+    def store(
         self,
         memory: str,
         user_id: str = &#34;default&#34;,
         metadata: Optional[Dict[str, Any]] = None,
-    ):
+    ) -&gt; int:
         if user_id not in self.storage:
             self.storage[user_id] = []
+        memory_id = len(self.storage[user_id])
         self.storage[user_id].append({&#34;memory&#34;: memory, &#34;metadata&#34;: metadata or {}})
+        return memory_id
 
-    &#34;&#34;&#34;
-    Adapter for basic memory operations.
-
-    This class provides methods to interact with the memory storage,
-    including adding, retrieving, and searching memories.
-    &#34;&#34;&#34;
-
-    def __init__(self):
-        self.storage = {}
-
-    def add(
-        self,
-        memory: str,
-        user_id: str = &#34;default&#34;,
-        metadata: Optional[Dict[str, Any]] = None,
-    ):
-        if user_id not in self.storage:
-            self.storage[user_id] = []
-        self.storage[user_id].append({&#34;memory&#34;: memory, &#34;metadata&#34;: metadata or {}})
+    def retrieve(self, memory_id: int, user_id: str = &#34;default&#34;) -&gt; Optional[Any]:
+        user_memories = self.storage.get(user_id, [])
+        if 0 &lt;= memory_id &lt; len(user_memories):
+            return user_memories[memory_id]
+        return None
 
     def get_all(self, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
         return self.storage.get(user_id, [])
+
+    def add(
+        self,
+        memory: str,
+        user_id: str = &#34;default&#34;,
+        metadata: Optional[Dict[str, Any]] = None,
+    ):
+        self.store(memory, user_id, metadata)
+
+    def get_all(self, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
+        return self.retrieve(user_id)
 
     def search(self, query: str, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
         return [
@@ -106,6 +105,11 @@ including adding, retrieving, and searching memories.</p></div>
             return [self.storage[user_id][memory_id][&#34;memory&#34;]]
         return []</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface" href="../../../../framer/brain/memory/memory_adapter_interface.html#frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface">MemoryAdapterInterface</a></li>
+<li>abc.ABC</li>
+</ul>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.add"><code class="name flex">
@@ -126,8 +130,20 @@ including adding, retrieving, and searching memories.</p></div>
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.retrieve"><code class="name flex">
+<span>def <span class="ident">retrieve</span></span>(<span>self, memory_id: int, user_id: str = 'default') ‑> Optional[Any]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.search"><code class="name flex">
 <span>def <span class="ident">search</span></span>(<span>self, query: str, user_id: str = 'default') ‑> List[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.store"><code class="name flex">
+<span>def <span class="ident">store</span></span>(<span>self, memory: str, user_id: str = 'default', metadata: Optional[Dict[str, Any]] = None) ‑> int</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -157,11 +173,13 @@ including adding, retrieving, and searching memories.</p></div>
 <ul>
 <li>
 <h4><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter">Mem0Adapter</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.add" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.add">add</a></code></li>
 <li><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.get_all" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.get_all">get_all</a></code></li>
 <li><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.history" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.history">history</a></code></li>
+<li><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.retrieve" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.retrieve">retrieve</a></code></li>
 <li><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.search" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.search">search</a></code></li>
+<li><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.store" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.store">store</a></code></li>
 <li><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.update" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.update">update</a></code></li>
 </ul>
 </li>
