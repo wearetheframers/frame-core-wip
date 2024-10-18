@@ -19,7 +19,7 @@ class CreateNewAgentAction(Action):
             Framer: The newly created Framer instance.
         """
         new_config = FramerConfig(
-            name=config.get("name", "New Framer"), model=config.get("model")
+            **config
         )
         new_framer = await execution_context.create_framer(new_config)
         return new_framer

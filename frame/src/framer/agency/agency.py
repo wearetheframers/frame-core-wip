@@ -96,14 +96,19 @@ class Agency:
             for role in roles:
                 self.roles.add_role(role)
 
-    def set_goals(self, goals: Optional[List[Goal]] = None) -> None:
+    def set_goals(self, goals: Optional[Union[List[Goal], Goals]] = None) -> None:
         """
         Set the goals for the Agency.
 
         Args:
-            goals (Optional[List[GoalModel]]): List of Goal objects.
+            goals (Optional[Union[List[Goal], Goals]]): List of Goal objects or a Goals instance.
         """
-        self.goals.goal_list = goals if goals is not None else []
+        if isinstance(goals, list):
+            self.goals = Goals(goals)
+        elif isinstance(goals, Goals):
+            self.goals = goals
+        else:
+            self.goals = Goals([])
 
     def add_goal(self, goal: Goal) -> None:
         """
