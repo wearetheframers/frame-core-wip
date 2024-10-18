@@ -47,9 +47,13 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </summary>
 <pre><code class="python">class CreateNewAgentAction(BaseAction):
     def __init__(self):
-        super().__init__(&#34;create_new_agent&#34;, &#34;Create a new agent with the required properties&#34;)
+        super().__init__(
+            &#34;create_new_agent&#34;, &#34;Create a new agent with the required properties&#34;
+        )
 
-    async def execute(self, execution_context: ExecutionContext, config: Dict[str, Any]) -&gt; Any:
+    async def execute(
+        self, execution_context: ExecutionContext, config: Dict[str, Any]
+    ) -&gt; Any:
         &#34;&#34;&#34;
         Create a new agent with the required properties.
 
@@ -60,9 +64,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
         Returns:
             Framer: The newly created Framer instance.
         &#34;&#34;&#34;
-        new_config = FramerConfig(
-            **config
-        )
+        new_config = FramerConfig(**config)
         new_framer = await execution_context.create_framer(new_config)
         return new_framer</code></pre>
 </details>

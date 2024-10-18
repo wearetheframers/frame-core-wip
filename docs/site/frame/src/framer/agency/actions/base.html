@@ -52,7 +52,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
     Actions can create Tasks, which can enforce output types.
     &#34;&#34;&#34;
 
-    def __init__(self, name: str, description: str, priority: Priority = Priority.MEDIUM):
+    def __init__(
+        self, name: str, description: str, priority: Priority = Priority.MEDIUM
+    ):
         self.name = name
         self.description = description
         self.priority = priority
@@ -70,7 +72,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
         &#34;&#34;&#34;
         raise NotImplementedError(&#34;Subclasses must implement this method&#34;)
 
-    def create_task(self, description: str, expected_output_type: Optional[type] = None, **kwargs) -&gt; Task:
+    def create_task(
+        self, description: str, expected_output_type: Optional[type] = None, **kwargs
+    ) -&gt; Task:
         &#34;&#34;&#34;
         Create a new Task with the given description and expected output type.
 
@@ -82,7 +86,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
         Returns:
             Task: A new Task instance.
         &#34;&#34;&#34;
-        return Task(description=description, expected_output_type=expected_output_type, **kwargs)
+        return Task(
+            description=description, expected_output_type=expected_output_type, **kwargs
+        )
 
     def __str__(self):
         return f&#34;BaseAction(name={self.name}, priority={self.priority})&#34;</code></pre>

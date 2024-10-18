@@ -58,21 +58,28 @@ validated to form a valid model.</p>
 <pre><code class="python">class Perception(BaseModel):
     &#34;&#34;&#34;
     Represents a perception in the Frame system.
-    
+
     Perceptions in Frame can be any type of information or stimulus, not limited to human senses.
     This includes traditional inputs like text, images, or sounds, but also extends to more abstract
     or non-human sensory data such as magnetic fields, vibrations, internal states like hunger,
     or any other data that can be analyzed by the language model.
-    
+
     The &#34;prompt&#34; action in a Framer is essentially processing a perception of hearing for text input
     and responding to it.
     &#34;&#34;&#34;
-    
-    type: str = Field(..., description=&#34;The type of perception (e.g., &#39;visual&#39;, &#39;auditory&#39;, &#39;text&#39;, &#39;magnetic&#39;, &#39;internal_state&#39;, etc.)&#34;)
-    data: Dict[str, Any] = Field(
-        ..., description=&#34;The data associated with the perception. Can contain any type of information.&#34;
+
+    type: str = Field(
+        ...,
+        description=&#34;The type of perception (e.g., &#39;visual&#39;, &#39;auditory&#39;, &#39;text&#39;, &#39;magnetic&#39;, &#39;internal_state&#39;, etc.)&#34;,
     )
-    source: Optional[str] = Field(None, description=&#34;The source of the perception (e.g., &#39;camera&#39;, &#39;microphone&#39;, &#39;text_input&#39;, &#39;magnetometer&#39;, &#39;internal_sensor&#39;, etc.)&#34;)
+    data: Dict[str, Any] = Field(
+        ...,
+        description=&#34;The data associated with the perception. Can contain any type of information.&#34;,
+    )
+    source: Optional[str] = Field(
+        None,
+        description=&#34;The source of the perception (e.g., &#39;camera&#39;, &#39;microphone&#39;, &#39;text_input&#39;, &#39;magnetometer&#39;, &#39;internal_sensor&#39;, etc.)&#34;,
+    )
     timestamp: datetime = Field(
         default_factory=datetime.utcnow,
         description=&#34;The timestamp of when the perception was created&#34;,
@@ -142,7 +149,7 @@ validated to form a valid model.</p>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.models.framer.brain.mind.perception.perception.Perception.from_dict"><code class="name flex">
-<span>def <span class="ident">from_dict</span></span>(<span>perception_dict: Union[str, Dict[str, Any]]) ‑> <a title="frame.src.models.framer.brain.mind.perception.perception.Perception" href="#frame.src.models.framer.brain.mind.perception.perception.Perception">Perception</a></span>
+<span>def <span class="ident">from_dict</span></span>(<span>perception_dict: Union[Dict[str, Any], str]) ‑> <a title="frame.src.models.framer.brain.mind.perception.perception.Perception" href="#frame.src.models.framer.brain.mind.perception.perception.Perception">Perception</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>

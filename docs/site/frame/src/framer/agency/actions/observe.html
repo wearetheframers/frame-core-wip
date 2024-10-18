@@ -47,9 +47,18 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </summary>
 <pre><code class="python">class ObserveAction(BaseAction):
     def __init__(self):
-        super().__init__(&#34;observe&#34;, &#34;Process an observation and generate insights or actions&#34;, Priority.MEDIUM)
+        super().__init__(
+            &#34;observe&#34;,
+            &#34;Process an observation and generate insights or actions&#34;,
+            Priority.MEDIUM,
+        )
 
-    async def execute(self, execution_context: ExecutionContext, observation: Optional[str] = None, insights: Optional[Dict[str, Any]] = None) -&gt; str:
+    async def execute(
+        self,
+        execution_context: ExecutionContext,
+        observation: Optional[str] = None,
+        insights: Optional[Dict[str, Any]] = None,
+    ) -&gt; str:
         &#34;&#34;&#34;
         Process an observation and generate insights or actions.
 

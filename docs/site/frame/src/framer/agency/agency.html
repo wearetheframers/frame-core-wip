@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.agency.Agency"><code class="flex name class">
 <span>class <span class="ident">Agency</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, context: Optional[Dict[str, Any]] = None, execution_context: Optional[ForwardRef('ExecutionContext')] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, context: Optional[Dict[str, Any]] = None, execution_context: Optional[<a title="frame.src.services.execution_context.ExecutionContext" href="../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Agency class represents the decision-making and task management component of a Framer.</p>
@@ -104,7 +104,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         self,
         llm_service: LLMService,
         context: Optional[Dict[str, Any]] = None,
-        execution_context: Optional[&#34;ExecutionContext&#34;] = None,
+        execution_context: Optional[ExecutionContext] = None,
         roles: Optional[List[Role]] = None,
         goals: Optional[List[Goal]] = None,
     ):
@@ -130,8 +130,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, &#34;default_model&#34;, DEFAULT_MODEL)
-        self.action_registry = ActionRegistry()
-        self.action_registry.execution_context = self.execution_context
+        self.action_registry = ActionRegistry(execution_context=self.execution_context)
 
     def set_roles(self, roles: Optional[List[Role]] = None) -&gt; None:
         self.roles = roles if roles is not None else []
@@ -163,10 +162,9 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             Task: The created Task object.
         &#34;&#34;&#34;
         if isinstance(priority, str):
-            priority = Priority.from_string(priority)
+            priority = Priority.get(priority)
         elif not isinstance(priority, Priority):
             raise ValueError(&#34;Priority must be a string or Priority enum&#34;)
-
         return Task(description=description, priority=priority, workflow_id=workflow_id)
 
     def add_task(self, task: Task, workflow_id: str = &#34;default&#34;) -&gt; None:
@@ -296,6 +294,27 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             self.completion_calls[task.workflow_id] = {}
         if task.id not in self.completion_calls[task.workflow_id]:
             self.completion_calls[task.workflow_id][task.id] = 0
+
+        # Perform the task
+        prompt = f&#34;Execute the following task: {task.description}&#34;
+        response = await self.llm_service.get_completion(
+            prompt,
+            model=self.default_model,
+            max_tokens=200,
+            temperature=0.7,
+        )
+
+        # Update task status and result
+        task.update_status(TaskStatus.COMPLETED)
+        task.set_result(response)
+
+        # Log task completion
+        end_time = time.time()
+        duration = end_time - start_time
+        logger.debug(f&#34;Task &#39;{task.description}&#39; completed in {duration:.2f} seconds.&#34;)
+        logger.debug(f&#34;Task result: {response}&#34;)
+
+        return {&#34;output&#34;: response}
 
     async def generate_roles(self) -&gt; List[Role]:
         &#34;&#34;&#34;
@@ -478,6 +497,47 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 
         return response
 
+    async def execute_decision(self, decision: Decision) -&gt; Any:
+        &#34;&#34;&#34;
+        Execute the decision made by the brain.
+
+        Args:
+            decision (Decision): The decision to execute.
+
+        Returns:
+            Any: The result of executing the decision.
+        &#34;&#34;&#34;
+        logger.debug(f&#34;Executing decision: {decision.action}&#34;)
+        logger.debug(f&#34;Decision parameters: {decision.parameters}&#34;)
+
+        try:
+            if decision.action == &#34;think&#34;:
+                result = await self._execute_think_action(decision)
+            else:
+                if decision.action not in self.action_registry.actions:
+                    raise ValueError(f&#34;Action &#39;{decision.action}&#39; not found in registry.&#34;)
+
+                if decision.action == &#34;respond&#34;:
+                    result = await self.perform_task(
+                        {
+                            &#34;description&#34;: decision.parameters.get(&#34;content&#34;, &#34;&#34;),
+                            &#34;workflow_id&#34;: &#34;default&#34;,
+                        }
+                    )
+                else:
+                    result = await self.action_registry.execute_action(decision.action, decision.parameters)
+
+            logger.info(f&#34;Executed action: {decision.action}&#34;)
+            logger.debug(f&#34;Action result: {result}&#34;)
+            logger.debug(f&#34;Decision reasoning: {decision.reasoning}&#34;)
+
+        except Exception as e:
+            logger.error(f&#34;Error executing decision: {e}&#34;)
+            logger.exception(&#34;Detailed traceback:&#34;)
+            result = {&#34;error&#34;: str(e)}
+
+        return result
+
     def update_role_status(self, role_id: str, new_status: RoleStatus) -&gt; None:
         for role in self.roles:
             if role.id == role_id:
@@ -574,6 +634,22 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.agency.Agency.execute_decision"><code class="name flex">
+<span>async def <span class="ident">execute_decision</span></span>(<span>self, decision: <a title="frame.src.framer.brain.decision.decision.Decision" href="../brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute the decision made by the brain.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>decision</code></strong> :&ensp;<code>Decision</code></dt>
+<dd>The decision to execute.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Any</code></dt>
+<dd>The result of executing the decision.</dd>
+</dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.execute_task"><code class="name flex">
 <span>async def <span class="ident">execute_task</span></span>(<span>self, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>) ‑> str</span>
@@ -769,6 +845,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <li><code><a title="frame.src.framer.agency.agency.Agency.create_task" href="#frame.src.framer.agency.agency.Agency.create_task">create_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.create_workflow" href="#frame.src.framer.agency.agency.Agency.create_workflow">create_workflow</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.evaluate_roles_and_goals" href="#frame.src.framer.agency.agency.Agency.evaluate_roles_and_goals">evaluate_roles_and_goals</a></code></li>
+<li><code><a title="frame.src.framer.agency.agency.Agency.execute_decision" href="#frame.src.framer.agency.agency.Agency.execute_decision">execute_decision</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.execute_task" href="#frame.src.framer.agency.agency.Agency.execute_task">execute_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.fail_task" href="#frame.src.framer.agency.agency.Agency.fail_task">fail_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.generate_goals" href="#frame.src.framer.agency.agency.Agency.generate_goals">generate_goals</a></code></li>

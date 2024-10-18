@@ -47,9 +47,15 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </summary>
 <pre><code class="python">class ResearchAction(BaseAction):
     def __init__(self):
-        super().__init__(&#34;research&#34;, &#34;Perform research on a given topic and summarize findings&#34;, Priority.HIGH)
+        super().__init__(
+            &#34;research&#34;,
+            &#34;Perform research on a given topic and summarize findings&#34;,
+            Priority.HIGH,
+        )
 
-    async def execute(self, execution_context: ExecutionContext, research_topic: str) -&gt; Dict[str, Any]:
+    async def execute(
+        self, execution_context: ExecutionContext, research_topic: str
+    ) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Perform research on a given topic and summarize findings.
 
@@ -63,7 +69,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
         print(f&#34;Performing research on topic: {research_topic}&#34;)
 
         if execution_context.llm_service is None:
-            return {&#34;error&#34;: f&#34;Unable to perform research on &#39;{research_topic}&#39; due to missing LLM service.&#34;}
+            return {
+                &#34;error&#34;: f&#34;Unable to perform research on &#39;{research_topic}&#39; due to missing LLM service.&#34;
+            }
 
         # Use the LLM service from the execution context
         result = await execution_context.llm_service.get_completion(
@@ -80,7 +88,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
         return {
             &#34;topic&#34;: research_topic,
             &#34;findings&#34;: result,
-            &#34;summary&#34;: f&#34;Research findings for topic &#39;{research_topic}&#39;:\n{result}&#34;
+            &#34;summary&#34;: f&#34;Research findings for topic &#39;{research_topic}&#39;:\n{result}&#34;,
         }</code></pre>
 </details>
 <h3>Ancestors</h3>

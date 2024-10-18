@@ -47,9 +47,15 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </summary>
 <pre><code class="python">class ThinkAction(BaseAction):
     def __init__(self):
-        super().__init__(&#34;think&#34;, &#34;Ponder and reflect on the current situation&#34;, Priority.HIGH)
+        super().__init__(
+            &#34;think&#34;, &#34;Ponder and reflect on the current situation&#34;, Priority.HIGH
+        )
 
-    async def execute(self, execution_context: ExecutionContext, thought: str = &#34;Processing information...&#34;) -&gt; Dict[str, Any]:
+    async def execute(
+        self,
+        execution_context: ExecutionContext,
+        thought: str = &#34;Processing information...&#34;,
+    ) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Ponder and reflect on the current situation, potentially creating new tasks or generating a new prompt.
         This action is only necessary if a new prompt should be generated with new pretext and context for better results.

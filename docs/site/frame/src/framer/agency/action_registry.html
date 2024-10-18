@@ -61,11 +61,11 @@ hljs.highlightAll();
             ObserveAction(),
             RespondAction(),
             ThinkAction(),
-            ResearchAction()
+            ResearchAction(),
         ]
         for action in default_actions:
             self.register_action(action)
-        
+
         for action, info in VALID_ACTIONS.items():
             if action not in [a.name for a in default_actions]:
                 self.register_action(
@@ -80,7 +80,11 @@ hljs.highlightAll();
         self._register_default_actions()
 
     def register_action(
-        self, action: Union[str, BaseAction, Callable], action_func: Optional[Callable] = None, description: str = &#34;&#34;, priority: int = 5
+        self,
+        action: Union[str, BaseAction, Callable],
+        action_func: Optional[Callable] = None,
+        description: str = &#34;&#34;,
+        priority: int = 5,
     ):
         if isinstance(action, BaseAction):
             name = action.name
@@ -93,13 +97,17 @@ hljs.highlightAll();
         else:
             name = action
             if action_func is None:
-                raise ValueError(&#34;action_func must be provided when registering a string action name&#34;)
+                raise ValueError(
+                    &#34;action_func must be provided when registering a string action name&#34;
+                )
 
         if not (1 &lt;= priority &lt;= 10):
             raise ValueError(&#34;Priority must be between 1 and 10&#34;)
         if not asyncio.iscoroutinefunction(action_func):
+
             async def wrapper(*args, **kwargs):
                 return action_func(*args, **kwargs)
+
             action_func = wrapper
         self.actions[name] = {
             &#34;action_func&#34;: action_func,

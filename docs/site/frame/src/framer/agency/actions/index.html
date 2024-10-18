@@ -83,7 +83,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
     Actions can create Tasks, which can enforce output types.
     &#34;&#34;&#34;
 
-    def __init__(self, name: str, description: str, priority: Priority = Priority.MEDIUM):
+    def __init__(
+        self, name: str, description: str, priority: Priority = Priority.MEDIUM
+    ):
         self.name = name
         self.description = description
         self.priority = priority
@@ -101,7 +103,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
         &#34;&#34;&#34;
         raise NotImplementedError(&#34;Subclasses must implement this method&#34;)
 
-    def create_task(self, description: str, expected_output_type: Optional[type] = None, **kwargs) -&gt; Task:
+    def create_task(
+        self, description: str, expected_output_type: Optional[type] = None, **kwargs
+    ) -&gt; Task:
         &#34;&#34;&#34;
         Create a new Task with the given description and expected output type.
 
@@ -113,7 +117,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
         Returns:
             Task: A new Task instance.
         &#34;&#34;&#34;
-        return Task(description=description, expected_output_type=expected_output_type, **kwargs)
+        return Task(
+            description=description, expected_output_type=expected_output_type, **kwargs
+        )
 
     def __str__(self):
         return f&#34;BaseAction(name={self.name}, priority={self.priority})&#34;</code></pre>
@@ -181,9 +187,13 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </summary>
 <pre><code class="python">class CreateNewAgentAction(BaseAction):
     def __init__(self):
-        super().__init__(&#34;create_new_agent&#34;, &#34;Create a new agent with the required properties&#34;)
+        super().__init__(
+            &#34;create_new_agent&#34;, &#34;Create a new agent with the required properties&#34;
+        )
 
-    async def execute(self, execution_context: ExecutionContext, config: Dict[str, Any]) -&gt; Any:
+    async def execute(
+        self, execution_context: ExecutionContext, config: Dict[str, Any]
+    ) -&gt; Any:
         &#34;&#34;&#34;
         Create a new agent with the required properties.
 
@@ -194,9 +204,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
         Returns:
             Framer: The newly created Framer instance.
         &#34;&#34;&#34;
-        new_config = FramerConfig(
-            **config
-        )
+        new_config = FramerConfig(**config)
         new_framer = await execution_context.create_framer(new_config)
         return new_framer</code></pre>
 </details>
@@ -246,9 +254,13 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </summary>
 <pre><code class="python">class GenerateRolesAndGoalsAction(BaseAction):
     def __init__(self):
-        super().__init__(&#34;generate_roles_and_goals&#34;, &#34;Generate roles and goals for the Framer&#34;)
+        super().__init__(
+            &#34;generate_roles_and_goals&#34;, &#34;Generate roles and goals for the Framer&#34;
+        )
 
-    async def execute(self, execution_context: ExecutionContext) -&gt; Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    async def execute(
+        self, execution_context: ExecutionContext
+    ) -&gt; Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         &#34;&#34;&#34;
         Generate roles and goals for the Framer.
 
@@ -305,9 +317,18 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </summary>
 <pre><code class="python">class ObserveAction(BaseAction):
     def __init__(self):
-        super().__init__(&#34;observe&#34;, &#34;Process an observation and generate insights or actions&#34;, Priority.MEDIUM)
+        super().__init__(
+            &#34;observe&#34;,
+            &#34;Process an observation and generate insights or actions&#34;,
+            Priority.MEDIUM,
+        )
 
-    async def execute(self, execution_context: ExecutionContext, observation: Optional[str] = None, insights: Optional[Dict[str, Any]] = None) -&gt; str:
+    async def execute(
+        self,
+        execution_context: ExecutionContext,
+        observation: Optional[str] = None,
+        insights: Optional[Dict[str, Any]] = None,
+    ) -&gt; str:
         &#34;&#34;&#34;
         Process an observation and generate insights or actions.
 
@@ -377,9 +398,15 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </summary>
 <pre><code class="python">class ResearchAction(BaseAction):
     def __init__(self):
-        super().__init__(&#34;research&#34;, &#34;Perform research on a given topic and summarize findings&#34;, Priority.HIGH)
+        super().__init__(
+            &#34;research&#34;,
+            &#34;Perform research on a given topic and summarize findings&#34;,
+            Priority.HIGH,
+        )
 
-    async def execute(self, execution_context: ExecutionContext, research_topic: str) -&gt; Dict[str, Any]:
+    async def execute(
+        self, execution_context: ExecutionContext, research_topic: str
+    ) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Perform research on a given topic and summarize findings.
 
@@ -393,7 +420,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
         print(f&#34;Performing research on topic: {research_topic}&#34;)
 
         if execution_context.llm_service is None:
-            return {&#34;error&#34;: f&#34;Unable to perform research on &#39;{research_topic}&#39; due to missing LLM service.&#34;}
+            return {
+                &#34;error&#34;: f&#34;Unable to perform research on &#39;{research_topic}&#39; due to missing LLM service.&#34;
+            }
 
         # Use the LLM service from the execution context
         result = await execution_context.llm_service.get_completion(
@@ -410,7 +439,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
         return {
             &#34;topic&#34;: research_topic,
             &#34;findings&#34;: result,
-            &#34;summary&#34;: f&#34;Research findings for topic &#39;{research_topic}&#39;:\n{result}&#34;
+            &#34;summary&#34;: f&#34;Research findings for topic &#39;{research_topic}&#39;:\n{result}&#34;,
         }</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -461,7 +490,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
     def __init__(self):
         super().__init__(&#34;respond&#34;, &#34;Generate a response based on the current context&#34;)
 
-    async def execute(self, execution_context: ExecutionContext, **kwargs) -&gt; Dict[str, Any]:
+    async def execute(
+        self, execution_context: ExecutionContext, **kwargs
+    ) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Generate a response based on the current context, emphasizing the most recent perception.
 
@@ -567,9 +598,15 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </summary>
 <pre><code class="python">class ThinkAction(BaseAction):
     def __init__(self):
-        super().__init__(&#34;think&#34;, &#34;Ponder and reflect on the current situation&#34;, Priority.HIGH)
+        super().__init__(
+            &#34;think&#34;, &#34;Ponder and reflect on the current situation&#34;, Priority.HIGH
+        )
 
-    async def execute(self, execution_context: ExecutionContext, thought: str = &#34;Processing information...&#34;) -&gt; Dict[str, Any]:
+    async def execute(
+        self,
+        execution_context: ExecutionContext,
+        thought: str = &#34;Processing information...&#34;,
+    ) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Ponder and reflect on the current situation, potentially creating new tasks or generating a new prompt.
         This action is only necessary if a new prompt should be generated with new pretext and context for better results.

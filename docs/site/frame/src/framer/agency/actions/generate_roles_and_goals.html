@@ -47,9 +47,13 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </summary>
 <pre><code class="python">class GenerateRolesAndGoalsAction(BaseAction):
     def __init__(self):
-        super().__init__(&#34;generate_roles_and_goals&#34;, &#34;Generate roles and goals for the Framer&#34;)
+        super().__init__(
+            &#34;generate_roles_and_goals&#34;, &#34;Generate roles and goals for the Framer&#34;
+        )
 
-    async def execute(self, execution_context: ExecutionContext) -&gt; Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    async def execute(
+        self, execution_context: ExecutionContext
+    ) -&gt; Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         &#34;&#34;&#34;
         Generate roles and goals for the Framer.
 
