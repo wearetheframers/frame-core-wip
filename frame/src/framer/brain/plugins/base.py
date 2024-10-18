@@ -60,3 +60,26 @@ class PluginBase(ABC):
             Any: The result of the action execution.
         """
         pass
+
+# This file serves as a reference for plugin developers.
+# Actual plugins should be implemented in separate files,
+# inheriting from the PluginBase class.
+
+class ExamplePlugin(PluginBase):
+    async def on_load(self):
+        self.logger.info("Example plugin loaded")
+        # Example of using get_api_key method
+        try:
+            api_key = self.get_api_key("EXAMPLE_API_KEY")
+            self.logger.info(f"API key retrieved: {api_key[:5]}...")
+        except ValueError as e:
+            self.logger.warning(f"API key not found: {e}")
+
+    async def on_unload(self):
+        self.logger.info("Example plugin unloaded")
+
+    async def on_decision_made(self, decision):
+        self.logger.info(f"Decision made: {decision}")
+
+# Note: This is just an example. Don't instantiate plugins here.
+# Plugins should be instantiated and registered by the Framer.

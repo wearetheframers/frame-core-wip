@@ -15,7 +15,7 @@ from frame.src.utils.config_parser import (
     parse_markdown_config,
     export_config_to_markdown,
 )
-from frame.src.plugins.search_extract_summarize_plugin import SearchExtractSummarizePlugin
+from frame.src.plugins.search_extract_summarize_plugin.search_extract_summarize_plugin import SearchExtractSummarizePlugin
 from frame.src.utils.llm_utils import (
     get_completion,
     choose_best_model_for_tokens,
@@ -74,7 +74,7 @@ class Framer:
 
         # Initialize the SearchExtractSummarizePlugin if available
         try:
-            from frame.src.plugins.search_extract_summarize_plugin import SearchExtractSummarizePlugin
+            from frame.src.plugins.search_extract_summarize_plugin.search_extract_summarize_plugin import SearchExtractSummarizePlugin
             self.search_extract_summarize_plugin = SearchExtractSummarizePlugin(self)
             self.plugins["search_extract_summarize"] = self.search_extract_summarize_plugin
         except ImportError:
