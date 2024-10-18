@@ -70,8 +70,14 @@ class Decision(DecisionModel):
             "priority": self.priority,
             "expected_results": self.expected_results,
             "task_status": self.task_status.value,
-            "related_roles": [role.to_dict() if hasattr(role, 'to_dict') else str(role) for role in self.related_roles],
-            "related_goals": [goal.dict() if hasattr(goal, 'dict') else str(goal) for goal in self.related_goals],
+            "related_roles": [
+                role.to_dict() if hasattr(role, "to_dict") else str(role)
+                for role in self.related_roles
+            ],
+            "related_goals": [
+                goal.dict() if hasattr(goal, "dict") else str(goal)
+                for goal in self.related_goals
+            ],
         }
 
     @classmethod
@@ -197,4 +203,6 @@ class Decision(DecisionModel):
         Args:
             goal_name (str): The name of the goal to remove from the related goals.
         """
-        self.related_goals = [goal for goal in self.related_goals if goal.name != goal_name]
+        self.related_goals = [
+            goal for goal in self.related_goals if goal.name != goal_name
+        ]

@@ -70,7 +70,9 @@ class Frame:
             huggingface_api_key=huggingface_api_key,
             default_model=self._default_model,
         )
-        self.plugins_dir = plugins_dir or os.path.join(os.path.dirname(__file__), 'src', 'plugins')
+        self.plugins_dir = plugins_dir or os.path.join(
+            os.path.dirname(__file__), "src", "plugins"
+        )
         self.plugins = load_plugins(self.plugins_dir)
 
     def set_plugins_dir(self, plugins_dir: str):

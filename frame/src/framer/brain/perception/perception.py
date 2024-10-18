@@ -1,4 +1,6 @@
-from frame.src.models.framer.brain.mind.perception.perception import Perception as PerceptionModel
+from frame.src.models.framer.brain.mind.perception.perception import (
+    Perception as PerceptionModel,
+)
 from typing import Any, Dict, Optional, Union
 from datetime import datetime
 

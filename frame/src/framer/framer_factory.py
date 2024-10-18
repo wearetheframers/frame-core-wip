@@ -70,11 +70,11 @@ class FramerFactory:
         # Generate roles and goals. The Framer must be acting to respond to perceptions.
         if roles is None or goals is None:
             roles, goals = await agency.generate_roles_and_goals()
-        
+
         # Ensure goals have a default status of ACTIVE
         for goal in goals:
-            if isinstance(goal, dict) and 'status' not in goal:
-                goal['status'] = GoalStatus.ACTIVE.value
+            if isinstance(goal, dict) and "status" not in goal:
+                goal["status"] = GoalStatus.ACTIVE.value
             elif isinstance(goal, Goal) and goal.status is None:
                 goal.status = GoalStatus.ACTIVE
 

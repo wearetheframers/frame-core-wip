@@ -2,6 +2,7 @@ from typing import List
 from frame.src.models.framer.agency.roles import RoleStatus, Role
 from frame.src.models.framer.agency.priority import Priority
 
+
 class Roles:
     """
     Manages a collection of roles for a Framer.
@@ -65,7 +66,7 @@ class Roles:
             if role.id == role_id:
                 self.roles[i] = updated_role
                 break
-    
+
     def update_role_status(self, role_id: str, status: RoleStatus):
         """
         Update the status of a specific role.

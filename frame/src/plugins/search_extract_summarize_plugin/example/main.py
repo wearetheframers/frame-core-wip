@@ -2,7 +2,10 @@ import asyncio
 import sys
 from frame import Frame
 from frame.src.framer.config import FramerConfig
-from frame.src.plugins.search_extract_summarize_plugin import SearchExtractSummarizePlugin
+from frame.src.plugins.search_extract_summarize_plugin import (
+    SearchExtractSummarizePlugin,
+)
+
 
 async def main():
     # Initialize Frame
@@ -20,12 +23,13 @@ async def main():
     if len(sys.argv) < 2:
         print("Please provide a search query as a command line argument.")
         sys.exit(1)
-    
+
     query = " ".join(sys.argv[1:])
 
     # Use the plugin
     result = await framer.use_plugin("search_extract_summarize", query)
     print(result)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

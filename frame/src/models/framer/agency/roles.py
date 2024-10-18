@@ -3,10 +3,12 @@ from typing import List, Dict, Any
 from enum import Enum
 from .priority import Priority
 
+
 class RoleStatus(Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     ABANDONED = "abandoned"
+
 
 class Role(BaseModel):
     id: str
@@ -23,8 +25,9 @@ class Role(BaseModel):
             "description": self.description,
             "permissions": self.permissions,
             "priority": self.priority.value,
-            "status": self.status.value
+            "status": self.status.value,
         }
+
 
 class Roles(BaseModel):
     roles: List[Role] = []

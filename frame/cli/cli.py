@@ -459,9 +459,13 @@ async def run_async(
                         f"Executed Task '{task.description}' Result: {task_result}"
                     )
             if isinstance(decision, dict):
-                logger.info(f"Decision reasoning: {decision.get('reasoning', 'No reasoning provided')}")
+                logger.info(
+                    f"Decision reasoning: {decision.get('reasoning', 'No reasoning provided')}"
+                )
             else:
-                logger.info(f"Decision reasoning: {getattr(decision, 'reasoning', 'No reasoning provided')}")
+                logger.info(
+                    f"Decision reasoning: {getattr(decision, 'reasoning', 'No reasoning provided')}"
+                )
             _roles = framer.agency.get_roles()
             _goals = framer.agency.get_goals()
             for role in _roles:

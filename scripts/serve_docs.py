@@ -12,7 +12,9 @@ from watchdog.events import FileSystemEventHandler
 from roam_links_converter import convert_roam_links
 
 # Set up more detailed logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 def parse_arguments():

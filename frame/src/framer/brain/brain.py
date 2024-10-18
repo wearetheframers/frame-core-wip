@@ -180,7 +180,9 @@ class Brain:
         self.agency.set_roles(roles)
 
     async def process_perception(
-        self, perception: Union[Perception, Dict[str, Any]], goals: Optional[List[Goal]] = None
+        self,
+        perception: Union[Perception, Dict[str, Any]],
+        goals: Optional[List[Goal]] = None,
     ) -> Decision:
         """
         Process a perception and make a decision based on it.
@@ -270,8 +272,12 @@ class Brain:
         # Consider role and goal priorities when setting decision priority
         active_roles = [role for role in self.roles if role.status == RoleStatus.ACTIVE]
         active_goals = [goal for goal in self.goals if goal.status == GoalStatus.ACTIVE]
-        roles_priority = max([role.priority for role in active_roles], default=Priority.MEDIUM)
-        goals_priority = max([goal.priority for goal in active_goals], default=Priority.MEDIUM)
+        roles_priority = max(
+            [role.priority for role in active_roles], default=Priority.MEDIUM
+        )
+        goals_priority = max(
+            [goal.priority for goal in active_goals], default=Priority.MEDIUM
+        )
         decision_priority = Priority.from_value(decision_data.get("priority", "MEDIUM"))
         final_priority = max(decision_priority, roles_priority, goals_priority)
 
@@ -281,8 +287,12 @@ class Brain:
             reasoning=reasoning,
             confidence=float(decision_data.get("confidence", 0.5)),
             priority=final_priority,
-            related_roles=[role for role in active_roles if role.priority >= final_priority],
-            related_goals=[goal for goal in active_goals if goal.priority >= final_priority],
+            related_roles=[
+                role for role in active_roles if role.priority >= final_priority
+            ],
+            related_goals=[
+                goal for goal in active_goals if goal.priority >= final_priority
+            ],
         )
 
     async def _get_decision_prompt(self, perception: Optional[Perception]) -> str:
@@ -307,11 +317,13 @@ class Brain:
 
         active_roles = [
             f"{role.name} (Priority: {role.priority.name}, Status: {role.status.name})"
-            for role in self.roles if role.status == RoleStatus.ACTIVE
+            for role in self.roles
+            if role.status == RoleStatus.ACTIVE
         ]
         active_goals = [
             f"{goal.name} (Priority: {goal.priority.name}, Status: {goal.status.name})"
-            for goal in self.goals if goal.status == GoalStatus.ACTIVE
+            for goal in self.goals
+            if goal.status == GoalStatus.ACTIVE
         ]
 
         prompt = f"""Given the following perception and context, decide on the most appropriate action to take.

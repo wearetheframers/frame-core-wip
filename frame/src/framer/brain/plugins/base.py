@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
+
 class PluginBase(ABC):
     """
     Base class for all Frame plugins.
@@ -61,9 +62,11 @@ class PluginBase(ABC):
         """
         pass
 
+
 # This file serves as a reference for plugin developers.
 # Actual plugins should be implemented in separate files,
 # inheriting from the PluginBase class.
+
 
 class ExamplePlugin(PluginBase):
     async def on_load(self):
@@ -80,6 +83,7 @@ class ExamplePlugin(PluginBase):
 
     async def on_decision_made(self, decision):
         self.logger.info(f"Decision made: {decision}")
+
 
 # Note: This is just an example. Don't instantiate plugins here.
 # Plugins should be instantiated and registered by the Framer.

@@ -15,7 +15,9 @@ from frame.src.utils.config_parser import (
     parse_markdown_config,
     export_config_to_markdown,
 )
-from frame.src.plugins.search_extract_summarize_plugin.search_extract_summarize_plugin import SearchExtractSummarizePlugin
+from frame.src.plugins.search_extract_summarize_plugin.search_extract_summarize_plugin import (
+    SearchExtractSummarizePlugin,
+)
 from frame.src.utils.llm_utils import (
     get_completion,
     choose_best_model_for_tokens,
@@ -74,11 +76,18 @@ class Framer:
 
         # Initialize the SearchExtractSummarizePlugin if available
         try:
-            from frame.src.plugins.search_extract_summarize_plugin.search_extract_summarize_plugin import SearchExtractSummarizePlugin
+            from frame.src.plugins.search_extract_summarize_plugin.search_extract_summarize_plugin import (
+                SearchExtractSummarizePlugin,
+            )
+
             self.search_extract_summarize_plugin = SearchExtractSummarizePlugin(self)
-            self.plugins["search_extract_summarize"] = self.search_extract_summarize_plugin
+            self.plugins["search_extract_summarize"] = (
+                self.search_extract_summarize_plugin
+            )
         except ImportError:
-            self.logger.warning("SearchExtractSummarizePlugin is not available. To use it, install the required dependencies.")
+            self.logger.warning(
+                "SearchExtractSummarizePlugin is not available. To use it, install the required dependencies."
+            )
         """
         Initialize a Framer instance.
 
@@ -185,8 +194,8 @@ class Framer:
             _, self.goals = await self.agency.generate_roles_and_goals()
 
         # Sort roles and goals by priority
-        self.roles.sort(key=lambda x: x.get('priority', 5), reverse=True)
-        self.goals.sort(key=lambda x: x.get('priority', 5), reverse=True)
+        self.roles.sort(key=lambda x: x.get("priority", 5), reverse=True)
+        self.goals.sort(key=lambda x: x.get("priority", 5), reverse=True)
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
@@ -320,12 +329,14 @@ class Framer:
             perception = Perception.from_dict(perception)
         current_goals = self.agency.get_goals()
         decision = await self.brain.process_perception(perception, current_goals)
-        
+
         # Consider goal status in decision-making
-        active_goals = [goal for goal in current_goals if goal.status == GoalStatus.ACTIVE]
+        active_goals = [
+            goal for goal in current_goals if goal.status == GoalStatus.ACTIVE
+        ]
         if active_goals:
             decision.reasoning += f" (Aligned with {len(active_goals)} active goals)"
-        
+
         if hasattr(self, "can_execute") and self.can_execute:
             await self.brain.execute_decision(decision)
         logger.debug(f"Processed perception: {perception}, Decision: {decision}")
@@ -379,7 +390,11 @@ class Framer:
             if hasattr(plugin, "on_decision_made"):
                 plugin.on_decision_made(decision)
 
-    async def generate_tasks_from_perception(self, perception: Union[Perception, Dict[str, Any]], max_len: Optional[int] = None) -> List[Task]:
+    async def generate_tasks_from_perception(
+        self,
+        perception: Union[Perception, Dict[str, Any]],
+        max_len: Optional[int] = None,
+    ) -> List[Task]:
         """
         Generate tasks based on the given perception.
 
@@ -391,15 +406,15 @@ class Framer:
             List[Task]: A list of generated tasks.
         """
         tasks = []
-        
+
         # Convert dictionary to Perception object if necessary
         if isinstance(perception, dict):
             perception = Perception.from_dict(perception)
-        
+
         # Example: Create a task to process the perception
         task = Task(
             description=f"Process perception of type: {perception.type}",
-            workflow_id="perception_processing"
+            workflow_id="perception_processing",
         )
         tasks.append(task)
 

@@ -8,8 +8,14 @@ from frame.src.services import ExecutionContext
 from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.framer.agency.roles import Role, Roles, RoleStatus
 from frame.src.framer.agency.goals import Goal, Goals, GoalStatus
-from frame.src.models.framer.agency.roles import Role as RoleModel, RoleStatus as RoleStatusModel
-from frame.src.models.framer.agency.goals import Goal as GoalModel, GoalStatus as GoalStatusModel
+from frame.src.models.framer.agency.roles import (
+    Role as RoleModel,
+    RoleStatus as RoleStatusModel,
+)
+from frame.src.models.framer.agency.goals import (
+    Goal as GoalModel,
+    GoalStatus as GoalStatusModel,
+)
 import json
 import logging
 import time
@@ -306,11 +312,19 @@ class Agency:
                 logger.warning(
                     "Received empty response while generating role. Using default role."
                 )
-                return [Role(id="default", name="Task Assistant", description="Assist with the given task or query.", priority=5, status=RoleStatus.ACTIVE)]
-            
+                return [
+                    Role(
+                        id="default",
+                        name="Task Assistant",
+                        description="Assist with the given task or query.",
+                        priority=5,
+                        status=RoleStatus.ACTIVE,
+                    )
+                ]
+
             if isinstance(role_data, dict):
                 role_data = [role_data]
-            
+
             roles = []
             for r in role_data:
                 r["priority"] = max(1, min(10, int(r.get("priority", 5))))
@@ -320,7 +334,15 @@ class Agency:
         except Exception as e:
             logger.error(f"Error generating role: {str(e)}", exc_info=True)
             logger.error(f"Prompt used for role generation: {prompt}")
-            return [Role(id="default", name="Task Assistant", description="Assist with the given task or query.", priority=5, status=RoleStatus.ACTIVE)]
+            return [
+                Role(
+                    id="default",
+                    name="Task Assistant",
+                    description="Assist with the given task or query.",
+                    priority=5,
+                    status=RoleStatus.ACTIVE,
+                )
+            ]
 
     async def generate_goals(self) -> List[Goal]:
         """
@@ -352,11 +374,18 @@ class Agency:
                 logger.warning(
                     "Received empty response while generating goal. Using default goal."
                 )
-                return [Goal(name="Default Goal", description="Assist users based on the given input.", priority=5, status=GoalStatus.ACTIVE)]
-            
+                return [
+                    Goal(
+                        name="Default Goal",
+                        description="Assist users based on the given input.",
+                        priority=5,
+                        status=GoalStatus.ACTIVE,
+                    )
+                ]
+
             if isinstance(goal_data, dict):
                 goal_data = [goal_data]
-            
+
             goals = []
             for g in goal_data:
                 g["priority"] = max(1, min(10, int(g.get("priority", 5))))
@@ -366,7 +395,14 @@ class Agency:
         except Exception as e:
             logger.error(f"Error generating goal: {e}", exc_info=True)
             logger.error(f"Prompt used for goal generation: {prompt}")
-            return [Goal(name="Default Goal", description="Assist users to the best of my abilities", priority=5, status=GoalStatus.ACTIVE)]
+            return [
+                Goal(
+                    name="Default Goal",
+                    description="Assist users to the best of my abilities",
+                    priority=5,
+                    status=GoalStatus.ACTIVE,
+                )
+            ]
 
     async def generate_roles_and_goals(self) -> Tuple[List[Role], List[Goal]]:
         """
@@ -454,10 +490,12 @@ class Agency:
             Should this role's status be updated? If yes, what should be the new status?
             Respond with a JSON object containing 'update_status' (boolean) and 'new_status' (string) fields.
             """
-            response = await self.llm_service.get_completion(prompt, model=self.default_model)
+            response = await self.llm_service.get_completion(
+                prompt, model=self.default_model
+            )
             evaluation = json.loads(response)
-            if evaluation['update_status']:
-                self.update_role_status(role.id, RoleStatus[evaluation['new_status']])
+            if evaluation["update_status"]:
+                self.update_role_status(role.id, RoleStatus[evaluation["new_status"]])
 
         # Evaluate goals
         for goal in self.goals.goal_list:
@@ -469,7 +507,9 @@ class Agency:
             Should this goal's status be updated? If yes, what should be the new status?
             Respond with a JSON object containing 'update_status' (boolean) and 'new_status' (string) fields.
             """
-            response = await self.llm_service.get_completion(prompt, model=self.default_model)
+            response = await self.llm_service.get_completion(
+                prompt, model=self.default_model
+            )
             evaluation = json.loads(response)
-            if evaluation['update_status']:
-                self.update_goal_status(goal.name, GoalStatus[evaluation['new_status']])
+            if evaluation["update_status"]:
+                self.update_goal_status(goal.name, GoalStatus[evaluation["new_status"]])

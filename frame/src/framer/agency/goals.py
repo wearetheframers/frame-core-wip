@@ -2,6 +2,7 @@ from typing import List
 from frame.src.models.framer.agency.goals import Goal, GoalStatus
 from frame.src.models.framer.agency.priority import Priority
 
+
 class Goals:
     """
     Manages a list of goals for a Framer.
