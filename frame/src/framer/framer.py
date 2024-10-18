@@ -97,14 +97,14 @@ class Framer:
                     plugin_class = getattr(plugin_module, plugin_name)
                     self.plugins[plugin_name] = plugin_class(self)
                 except ImportError:
-                    self.logger.warning(f"{plugin_name} is not available. To use it, install the required dependencies.")
+                    logger.warning(f"{plugin_name} is not available. To use it, install the required dependencies.")
 
         # Initialize Mem0Adapter if API key is provided and permission is granted
         if config.mem0_api_key and "withMemory" in self.permissions:
             self.mem0_adapter = Mem0Adapter(api_key=config.mem0_api_key)
         else:
             self.mem0_adapter = None
-            self.logger.warning("Mem0 API key not provided or permission not granted. Mem0Adapter will not be available.")
+            logger.warning("Mem0 API key not provided or permission not granted. Mem0Adapter will not be available.")
         """
         Initialize a Framer instance.
 

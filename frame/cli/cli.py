@@ -6,7 +6,10 @@ import asyncio
 import atexit
 
 import json
+from frame import Frame
+
 from frame.src.framer.config import FramerConfig
+from frame.src.utils.log_manager import get_logger
 from frame.src.framer.framer_factory import FramerFactory
 from frame.src.framer.agency import Agency
 from frame.src.services.context.local_context_service import LocalContext
@@ -105,11 +108,8 @@ def execute_framer(frame, data, sync, stream):
     Returns:
         Any: Result of the Framer execution.
     """
-    import json
-    from frame.src.framer.config import FramerConfig
 
     logger.debug("execute_framer function started")
-
     name = data.get("name", "Default Framer")
     description = data.get("description")
     model = data.get("model", DEFAULT_MODEL).lower()
@@ -131,7 +131,6 @@ def execute_framer(frame, data, sync, stream):
         raise click.UsageError(
             "Either 'prompt' or 'perception' must be provided in the JSON input."
         )
-
     config = FramerConfig(
         name=name,
         description=description,
@@ -202,7 +201,6 @@ def tui():
 @click.pass_context
 def run_framer(ctx, prompt, name, model, debug, sync, stream):
     """Run a Framer with the given configuration."""
-    from frame.frame import Frame
 
     if debug:
         logger.setLevel(logging.DEBUG)
@@ -245,6 +243,7 @@ def run_framer(ctx, prompt, name, model, debug, sync, stream):
 
 def execute_framer(frame, data, sync, stream):
     """Execute the Framer based on the provided configuration."""
+    logger = get_logger(__name__)
     name = data.get("name", "Default Framer")
     description = data.get("description")
     model = data.get("model", "gpt-3.5-turbo").lower()

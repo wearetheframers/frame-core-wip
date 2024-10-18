@@ -8,8 +8,7 @@ from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.framer.agency.roles import Role, Roles, RoleStatus
 from frame.src.framer.agency.goals import Goal, Goals, GoalStatus
 
-if TYPE_CHECKING:
-    from frame.src.services.execution_context import ExecutionContext
+from frame.src.services.execution_context import ExecutionContext
 from frame.src.models.framer.agency.roles import (
     Role as RoleModel,
     RoleStatus as RoleStatusModel,

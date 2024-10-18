@@ -1,8 +1,9 @@
 from typing import Optional, List, Dict, Any, Union
-from frame.src.constants.models import DEFAULT_MODEL
-from pydantic import BaseModel
+from frame.src.constants import DEFAULT_MODEL
+from pydantic import BaseModel, Field
 import logging
-from frame.src.constants.api_keys import HUGGINGFACE_API_KEY
+from frame.src.constants import HUGGINGFACE_API_KEY, MEM0_API_KEY
+from frame.src.utils.log_manager import setup_logging, get_logger
 
 
 class FramerConfig(BaseModel):
@@ -10,6 +11,8 @@ class FramerConfig(BaseModel):
     model: Optional[str] = None
     soul_seed: Optional[Union[str, Dict[str, Any]]] = "You are a helpful AI assistant."
     use_local_model: bool = False
+    permissions: Optional[List[str]] = Field(default_factory=list)
+    mem0_api_key: Optional[str] = MEM0_API_KEY
     """
     Configuration class for Framer instances.
 
@@ -53,6 +56,7 @@ class FramerConfig(BaseModel):
         if self.default_model:
             self.default_model = self.default_model.lower()
         if self.use_local_model and not HUGGINGFACE_API_KEY.strip():
-            logging.error(
+            logger = get_logger(__name__)
+            logger.error(
                 "Error: Hugging Face API key is not set, but the Framer is set to use local models. Some features may not work."
             )

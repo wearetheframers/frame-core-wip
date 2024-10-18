@@ -1,7 +1,8 @@
 import asyncio
 import logging
 import json
-from typing import Dict, Any, Callable, Optional, TYPE_CHECKING
+from typing import Dict, Any, Callable, Optional, TYPE_CHECKING, Union
+from frame.src.framer.agency.actions.base_action import Action
 
 if TYPE_CHECKING:
     from frame.src.services import ExecutionContext
@@ -22,15 +23,15 @@ from frame.src.framer.agency.actions import (
 
 
 class ActionRegistry:
-    def __init__(self, execution_context_service: 'ExecutionContext'):
+    def __init__(self, execution_context: 'ExecutionContext'):
         self.actions: Dict[str, Dict[str, Any]] = {}
-        self.execution_context_service = execution_context_service
+        self.execution_context = execution_context
         self._register_default_actions()
 
-    def set_execution_context_service(
-        self, execution_context_service: 'ExecutionContext'
+    def set_execution_context(
+        self, execution_context: 'ExecutionContext'
     ):
-        self.execution_context_service = execution_context_service
+        self.execution_context = execution_context
 
     def _register_default_actions(self):
         default_actions = [
@@ -48,7 +49,7 @@ class ActionRegistry:
             if action not in [a.name for a in default_actions]:
                 self.register_action(
                     action,
-                    info["func"],
+                    action_func=info["func"],
                     description=info["description"],
                     priority=info["priority"],
                 )
@@ -58,15 +59,23 @@ class ActionRegistry:
         self._register_default_actions()
 
     def register_action(
-        self, name: str, action_func: Callable, description: str = "", priority: int = 5
+        self, action: Union[str, Action], action_func: Optional[Callable] = None, description: str = "", priority: int = 5
     ):
+        if isinstance(action, Action):
+            name = action.name
+            action_func = action.execute
+            description = action.description
+            priority = action.priority.value
+        else:
+            name = action
+            if action_func is None:
+                raise ValueError("action_func must be provided when registering a string action name")
+
         if not (1 <= priority <= 10):
             raise ValueError("Priority must be between 1 and 10")
         if not asyncio.iscoroutinefunction(action_func):
-
             async def wrapper(*args, **kwargs):
                 return action_func(*args, **kwargs)
-
             action_func = wrapper
         self.actions[name] = {
             "action_func": action_func,
