@@ -58,7 +58,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Mem0SearchExtractSummarizePlugin(PluginBase):
+<pre><code class="python">class Mem0SearchExtractSummarizePlugin(BasePlugin):
     def __init__(self, framer):
         super().__init__(framer)
         self.logger = logging.getLogger(__name__)
@@ -144,7 +144,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="frame.src.framer.brain.plugins.base.PluginBase" href="../../framer/brain/plugins/base.html#frame.src.framer.brain.plugins.base.PluginBase">PluginBase</a></li>
+<li><a title="frame.src.framer.brain.plugins.base.BasePlugin" href="../../framer/brain/plugins/base.html#frame.src.framer.brain.plugins.base.BasePlugin">BasePlugin</a></li>
 <li>abc.ABC</li>
 </ul>
 <h3>Methods</h3>
@@ -164,11 +164,11 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="frame.src.framer.brain.plugins.base.PluginBase" href="../../framer/brain/plugins/base.html#frame.src.framer.brain.plugins.base.PluginBase">PluginBase</a></b></code>:
+<li><code><b><a title="frame.src.framer.brain.plugins.base.BasePlugin" href="../../framer/brain/plugins/base.html#frame.src.framer.brain.plugins.base.BasePlugin">BasePlugin</a></b></code>:
 <ul class="hlist">
-<li><code><a title="frame.src.framer.brain.plugins.base.PluginBase.execute" href="../../framer/brain/plugins/base.html#frame.src.framer.brain.plugins.base.PluginBase.execute">execute</a></code></li>
-<li><code><a title="frame.src.framer.brain.plugins.base.PluginBase.on_load" href="../../framer/brain/plugins/base.html#frame.src.framer.brain.plugins.base.PluginBase.on_load">on_load</a></code></li>
-<li><code><a title="frame.src.framer.brain.plugins.base.PluginBase.register_action" href="../../framer/brain/plugins/base.html#frame.src.framer.brain.plugins.base.PluginBase.register_action">register_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.execute" href="../../framer/brain/plugins/base.html#frame.src.framer.brain.plugins.base.BasePlugin.execute">execute</a></code></li>
+<li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.on_load" href="../../framer/brain/plugins/base.html#frame.src.framer.brain.plugins.base.BasePlugin.on_load">on_load</a></code></li>
+<li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.register_action" href="../../framer/brain/plugins/base.html#frame.src.framer.brain.plugins.base.BasePlugin.register_action">register_action</a></code></li>
 </ul>
 </li>
 </ul>

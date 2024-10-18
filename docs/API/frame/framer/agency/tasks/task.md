@@ -44,6 +44,18 @@ print(f"Task Status: {task.status}")
 
 ## Priority
 
-The `priority` attribute of a Task uses the same priority system as roles and goals (LOW, MEDIUM, HIGH, CRITICAL). This allows for consistent prioritization across different components of the Framer. The priority of a task influences its execution order and importance within workflows. The default priority is MEDIUM if not specified.
+The `priority` attribute of a Task uses the same Priority component as roles and goals (LOW, MEDIUM, HIGH, CRITICAL). This allows for consistent prioritization across different components of the Framer. The priority of a task influences its execution order and importance within workflows. The default priority is MEDIUM if not specified.
 
 Tasks with higher priorities are generally executed before those with lower priorities, allowing the Framer to focus on the most important or urgent tasks first. This priority system enables dynamic and context-aware task management, where the Framer can adjust its focus based on the current priorities of active tasks, roles, and goals.
+
+::: frame.src.framer.agency.priority.Priority
+    options:
+      show_root_heading: false
+      show_source: false
+
+The Priority component is an enumeration used by tasks, roles, and goals to represent their importance:
+
+- `LOW`: The lowest priority level.
+- `MEDIUM`: The default priority level.
+- `HIGH`: A high priority level.
+- `CRITICAL`: The highest priority level, used for urgent or crucial items.

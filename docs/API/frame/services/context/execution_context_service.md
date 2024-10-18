@@ -1,6 +1,6 @@
 # ExecutionContextService
 
-::: frame.src.services.context.execution_context_service.ExecutionContextService
+::: frame.src.services.context.ExecutionContext
     options:
       show_root_heading: false
       show_source: false
@@ -21,7 +21,7 @@ The ExecutionContextService is a crucial component in the Frame framework that p
 To use the ExecutionContextService:
 
 ```python
-from frame.src.services.context.execution_context_service import ExecutionContextService
+from frame.src.services.context.execution_context import ExecutionContext
 from frame.src.services.llm.main import LLMService
 from frame.src.framer.soul.soul import Soul
 

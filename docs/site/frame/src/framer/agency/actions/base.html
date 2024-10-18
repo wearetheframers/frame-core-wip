@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
-<title>frame.src.framer.agency.actions.research API documentation</title>
+<title>frame.src.framer.agency.actions.base API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -22,7 +22,7 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>frame.src.framer.agency.actions.research</code></h1>
+<h1 class="title">Module <code>frame.src.framer.agency.actions.base</code></h1>
 </header>
 <section id="section-intro">
 </section>
@@ -35,8 +35,9 @@ hljs.highlightAll();
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="frame.src.framer.agency.actions.research.ResearchAction"><code class="flex name class">
-<span>class <span class="ident">ResearchAction</span></span>
+<dt id="frame.src.framer.agency.actions.base.BaseAction"><code class="flex name class">
+<span>class <span class="ident">BaseAction</span></span>
+<span>(</span><span>name: str, description: str, priority: <a title="frame.src.framer.agency.priority.Priority" href="../priority.html#frame.src.framer.agency.priority.Priority">Priority</a> = 5)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Base class for all actions in the Frame framework.
@@ -45,77 +46,97 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ResearchAction(BaseAction):
-    def __init__(self):
-        super().__init__(&#34;research&#34;, &#34;Perform research on a given topic and summarize findings&#34;, Priority.HIGH)
+<pre><code class="python">class BaseAction:
+    &#34;&#34;&#34;
+    Base class for all actions in the Frame framework.
+    Actions can create Tasks, which can enforce output types.
+    &#34;&#34;&#34;
 
-    async def execute(self, execution_context: ExecutionContext, research_topic: str) -&gt; Dict[str, Any]:
+    def __init__(self, name: str, description: str, priority: Priority = Priority.MEDIUM):
+        self.name = name
+        self.description = description
+        self.priority = priority
+
+    async def execute(self, execution_context: ExecutionContext, **kwargs: Any) -&gt; Any:
         &#34;&#34;&#34;
-        Perform research on a given topic and summarize findings.
+        Execute the action.
 
         Args:
             execution_context (ExecutionContext): The execution context containing necessary services.
-            research_topic (str): The research topic.
+            **kwargs: Additional keyword arguments that might be passed to the action.
 
         Returns:
-            Dict[str, Any]: A dictionary containing the research findings and any additional information.
+            Any: The result of the action execution, which could be a Task or any other type.
         &#34;&#34;&#34;
-        print(f&#34;Performing research on topic: {research_topic}&#34;)
+        raise NotImplementedError(&#34;Subclasses must implement this method&#34;)
 
-        if execution_context.llm_service is None:
-            return {&#34;error&#34;: f&#34;Unable to perform research on &#39;{research_topic}&#39; due to missing LLM service.&#34;}
+    def create_task(self, description: str, expected_output_type: Optional[type] = None, **kwargs) -&gt; Task:
+        &#34;&#34;&#34;
+        Create a new Task with the given description and expected output type.
 
-        # Use the LLM service from the execution context
-        result = await execution_context.llm_service.get_completion(
-            f&#34;Provide a summary of the latest developments and top libraries for {research_topic}&#34;,
-            model=execution_context.llm_service.default_model,
-        )
+        Args:
+            description (str): The description of the task.
+            expected_output_type (Optional[type]): The expected output type of the task.
+            **kwargs: Additional keyword arguments for Task creation.
 
-        # If memory service is available, store the research results
-        if execution_context.memory_service:
-            await execution_context.memory_service.add_memory(
-                f&#34;Research on {research_topic}&#34;, result
-            )
+        Returns:
+            Task: A new Task instance.
+        &#34;&#34;&#34;
+        return Task(description=description, expected_output_type=expected_output_type, **kwargs)
 
-        return {
-            &#34;topic&#34;: research_topic,
-            &#34;findings&#34;: result,
-            &#34;summary&#34;: f&#34;Research findings for topic &#39;{research_topic}&#39;:\n{result}&#34;
-        }</code></pre>
+    def __str__(self):
+        return f&#34;BaseAction(name={self.name}, priority={self.priority})&#34;</code></pre>
 </details>
-<h3>Ancestors</h3>
+<h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></li>
+<li><a title="frame.src.framer.agency.actions.create_new_agent.CreateNewAgentAction" href="create_new_agent.html#frame.src.framer.agency.actions.create_new_agent.CreateNewAgentAction">CreateNewAgentAction</a></li>
+<li><a title="frame.src.framer.agency.actions.generate_roles_and_goals.GenerateRolesAndGoalsAction" href="generate_roles_and_goals.html#frame.src.framer.agency.actions.generate_roles_and_goals.GenerateRolesAndGoalsAction">GenerateRolesAndGoalsAction</a></li>
+<li><a title="frame.src.framer.agency.actions.observe.ObserveAction" href="observe.html#frame.src.framer.agency.actions.observe.ObserveAction">ObserveAction</a></li>
+<li><a title="frame.src.framer.agency.actions.research.ResearchAction" href="research.html#frame.src.framer.agency.actions.research.ResearchAction">ResearchAction</a></li>
+<li><a title="frame.src.framer.agency.actions.respond.RespondAction" href="respond.html#frame.src.framer.agency.actions.respond.RespondAction">RespondAction</a></li>
+<li><a title="frame.src.framer.agency.actions.think.ThinkAction" href="think.html#frame.src.framer.agency.actions.think.ThinkAction">ThinkAction</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="frame.src.framer.agency.actions.research.ResearchAction.execute"><code class="name flex">
-<span>async def <span class="ident">execute</span></span>(<span>self, execution_context: <a title="frame.src.services.execution_context.ExecutionContext" href="../../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>, research_topic: str) ‑> Dict[str, Any]</span>
+<dt id="frame.src.framer.agency.actions.base.BaseAction.create_task"><code class="name flex">
+<span>def <span class="ident">create_task</span></span>(<span>self, description: str, expected_output_type: Optional[type] = None, **kwargs) ‑> <a title="frame.src.framer.agency.tasks.task.Task" href="../tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Perform research on a given topic and summarize findings.</p>
+<div class="desc"><p>Create a new Task with the given description and expected output type.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code></dt>
+<dd>The description of the task.</dd>
+<dt><strong><code>expected_output_type</code></strong> :&ensp;<code>Optional[type]</code></dt>
+<dd>The expected output type of the task.</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Additional keyword arguments for Task creation.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Task</code></dt>
+<dd>A new Task instance.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.actions.base.BaseAction.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, execution_context: <a title="frame.src.services.execution_context.ExecutionContext" href="../../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>, **kwargs: Any) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute the action.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
 <dd>The execution context containing necessary services.</dd>
-<dt><strong><code>research_topic</code></strong> :&ensp;<code>str</code></dt>
-<dd>The research topic.</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Additional keyword arguments that might be passed to the action.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Dict[str, Any]</code></dt>
-<dd>A dictionary containing the research findings and any additional information.</dd>
+<dt><code>Any</code></dt>
+<dd>The result of the action execution, which could be a Task or any other type.</dd>
 </dl></div>
 </dd>
 </dl>
-<h3>Inherited members</h3>
-<ul class="hlist">
-<li><code><b><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></b></code>:
-<ul class="hlist">
-<li><code><a title="frame.src.framer.agency.actions.base.BaseAction.create_task" href="base.html#frame.src.framer.agency.actions.base.BaseAction.create_task">create_task</a></code></li>
-</ul>
-</li>
-</ul>
 </dd>
 </dl>
 </section>
@@ -133,9 +154,10 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="frame.src.framer.agency.actions.research.ResearchAction" href="#frame.src.framer.agency.actions.research.ResearchAction">ResearchAction</a></code></h4>
+<h4><code><a title="frame.src.framer.agency.actions.base.BaseAction" href="#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></code></h4>
 <ul class="">
-<li><code><a title="frame.src.framer.agency.actions.research.ResearchAction.execute" href="#frame.src.framer.agency.actions.research.ResearchAction.execute">execute</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.base.BaseAction.create_task" href="#frame.src.framer.agency.actions.base.BaseAction.create_task">create_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.base.BaseAction.execute" href="#frame.src.framer.agency.actions.base.BaseAction.execute">execute</a></code></li>
 </ul>
 </li>
 </ul>

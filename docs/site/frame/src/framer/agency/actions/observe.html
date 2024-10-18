@@ -45,7 +45,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ObserveAction(Action):
+<pre><code class="python">class ObserveAction(BaseAction):
     def __init__(self):
         super().__init__(&#34;observe&#34;, &#34;Process an observation and generate insights or actions&#34;, Priority.MEDIUM)
 
@@ -73,7 +73,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+<li><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -100,9 +100,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<li><code><b><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></b></code>:
 <ul class="hlist">
-<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.base.BaseAction.create_task" href="base.html#frame.src.framer.agency.actions.base.BaseAction.create_task">create_task</a></code></li>
 </ul>
 </li>
 </ul>

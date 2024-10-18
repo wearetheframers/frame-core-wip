@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.brain.Brain"><code class="flex name class">
 <span>class <span class="ident">Brain</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, roles: List[Dict[str, Any]], goals: List[Dict[str, Any]], default_model: str = 'gpt-3.5-turbo', recent_memories_limit: int = 5, soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, roles: List[Dict[str, Any]], goals: List[Dict[str, Any]], default_model: str = 'gpt-3.5-turbo', recent_memories_limit: int = 5, soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None, execution_context: Optional[<a title="frame.src.services.execution_context.ExecutionContext" href="../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Brain class represents the decision-making component of the Framer.</p>
@@ -59,6 +59,8 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
 <dd>The number of recent memories to keep. Defaults to 5.</dd>
 <dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Soul]</code></dt>
 <dd>The Soul instance for the Brain.</dd>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
+<dd>The execution context for the Brain.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -81,6 +83,7 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         default_model: str = &#34;gpt-3.5-turbo&#34;,
         recent_memories_limit: int = 5,
         soul: Optional[Soul] = None,
+        execution_context: Optional[ExecutionContext] = None,
     ):
         &#34;&#34;&#34;
         Initialize the Brain with the necessary components.
@@ -92,12 +95,21 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
             default_model (str): The default language model to use.
             recent_memories_limit (int): The number of recent memories to keep. Defaults to 5.
             soul (Optional[Soul]): The Soul instance for the Brain.
+            execution_context (Optional[ExecutionContext]): The execution context for the Brain.
         &#34;&#34;&#34;
         self.llm_service = llm_service
         self.default_model = default_model
         self.roles = roles
         self.goals = goals
         self.soul = soul
+        self.execution_context = execution_context or ExecutionContext(
+            llm_service=llm_service,
+            soul=soul,
+            config=FramerConfig(
+                name=&#34;DefaultFramer&#34;,
+                default_model=default_model
+            )
+        )
 
         self.mind = Mind(self, recent_memories_limit)
 
@@ -165,15 +177,14 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
                 - new_prompt (str): The new prompt if generate_new_prompt is True.
         &#34;&#34;&#34;
         # Gather context for thinking
-        soul_context = (
-            self.execution_context.soul.get_current_state()
-            if self.execution_context.soul
-            else {}
-        )
+        soul_context = {}
+        if self.execution_context and hasattr(self.execution_context, &#39;soul&#39;) and self.execution_context.soul:
+            soul_context = self.execution_context.soul.get_current_state()
+        
         roles_and_goals = {&#34;roles&#34;: self.roles, &#34;goals&#34;: self.goals}
         recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
         recent_perceptions = self.mind.get_recent_perceptions(5)
-        execution_state = self.execution_context.state
+        execution_state = self.execution_context.state if self.execution_context else {}
 
     def parse_json_response(self, response: str) -&gt; Any:
         &#34;&#34;&#34;
@@ -251,6 +262,17 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
 
         self.mind.perceptions.append(perception)
         decision = await self.make_decision(perception)
+        if decision is None:
+            logger.error(&#34;Failed to make a decision. Returning default decision.&#34;)
+            decision = Decision(
+                action=&#34;error&#34;,
+                parameters={},
+                reasoning=&#34;Failed to make a decision&#34;,
+                confidence=0.0,
+                priority=1,
+                related_roles=[],
+                related_goals=[]
+            )
         if hasattr(self, &#34;framer&#34;) and getattr(self.framer, &#34;can_execute&#34;, False):
             await self.execute_decision(decision)
         return decision
@@ -268,7 +290,15 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
                       and priority.
         &#34;&#34;&#34;
         if perception is None:
-            return Decision(action=&#34;no_action&#34;, reasoning=&#34;No perception provided&#34;)
+            return Decision(
+                action=&#34;no_action&#34;,
+                parameters={},
+                reasoning=&#34;No perception provided&#34;,
+                confidence=0.0,
+                priority=1,
+                related_roles=[],
+                related_goals=[]
+            )
 
         response = await self._get_decision_prompt(perception)
         decision_data = self.parse_json_response(response)
@@ -325,21 +355,20 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         goals_priority = max(
             [goal.priority for goal in active_goals], default=Priority.MEDIUM
         )
-        decision_priority = Priority.from_value(decision_data.get(&#34;priority&#34;, &#34;MEDIUM&#34;))
         priority_value = decision_data.get(&#34;priority&#34;, &#34;MEDIUM&#34;)
-        priority = Priority.from_string(priority_value) if isinstance(priority_value, str) else Priority(priority_value)
+        priority_int = Decision.convert_priority(priority_value)
 
-        return Decision(
+        decision = Decision(
             action=action,
             parameters=parameters,
             reasoning=reasoning,
             confidence=float(decision_data.get(&#34;confidence&#34;, 0.5)),
-            priority=priority,
+            priority=priority_int,
             related_roles=[
-                role for role in active_roles if role.priority &gt;= priority.value
+                role for role in active_roles if role.priority &gt;= priority_int
             ],
             related_goals=[
-                goal for goal in active_goals if goal.priority &gt;= priority.value
+                goal for goal in active_goals if goal.priority &gt;= priority_int
             ],
         )
 
@@ -403,7 +432,7 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
         - parameters: Any relevant parameters for the action (e.g., new roles, goals, tasks, research topic, or response content)
         - reasoning: Your reasoning for this decision, including how it aligns with current roles and goals
         - confidence: A float between 0 and 1 indicating your confidence in this decision
-        - priority: A string representing the priority level (e.g., &#34;MEDIUM&#34;, &#34;HIGH&#34;, etc.) based on the urgency and importance of the action
+        - priority: A string representing the priority level (e.g., &#34;LOW&#34;, &#34;MEDIUM&#34;, &#34;HIGH&#34;, &#34;CRITICAL&#34;) or an integer between 1 and 10 based on the urgency and importance of the action
         - related_roles: A list of role names that are most relevant to this decision
         - related_goals: A list of goal names that are most relevant to this decision
 

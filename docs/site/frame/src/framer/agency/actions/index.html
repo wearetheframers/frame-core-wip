@@ -29,7 +29,7 @@ hljs.highlightAll();
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="frame.src.framer.agency.actions.base_action" href="base_action.html">frame.src.framer.agency.actions.base_action</a></code></dt>
+<dt><code class="name"><a title="frame.src.framer.agency.actions.base" href="base.html">frame.src.framer.agency.actions.base</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -66,6 +66,109 @@ hljs.highlightAll();
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="frame.src.framer.agency.actions.BaseAction"><code class="flex name class">
+<span>class <span class="ident">BaseAction</span></span>
+<span>(</span><span>name: str, description: str, priority: <a title="frame.src.framer.agency.priority.Priority" href="../priority.html#frame.src.framer.agency.priority.Priority">Priority</a> = 5)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all actions in the Frame framework.
+Actions can create Tasks, which can enforce output types.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BaseAction:
+    &#34;&#34;&#34;
+    Base class for all actions in the Frame framework.
+    Actions can create Tasks, which can enforce output types.
+    &#34;&#34;&#34;
+
+    def __init__(self, name: str, description: str, priority: Priority = Priority.MEDIUM):
+        self.name = name
+        self.description = description
+        self.priority = priority
+
+    async def execute(self, execution_context: ExecutionContext, **kwargs: Any) -&gt; Any:
+        &#34;&#34;&#34;
+        Execute the action.
+
+        Args:
+            execution_context (ExecutionContext): The execution context containing necessary services.
+            **kwargs: Additional keyword arguments that might be passed to the action.
+
+        Returns:
+            Any: The result of the action execution, which could be a Task or any other type.
+        &#34;&#34;&#34;
+        raise NotImplementedError(&#34;Subclasses must implement this method&#34;)
+
+    def create_task(self, description: str, expected_output_type: Optional[type] = None, **kwargs) -&gt; Task:
+        &#34;&#34;&#34;
+        Create a new Task with the given description and expected output type.
+
+        Args:
+            description (str): The description of the task.
+            expected_output_type (Optional[type]): The expected output type of the task.
+            **kwargs: Additional keyword arguments for Task creation.
+
+        Returns:
+            Task: A new Task instance.
+        &#34;&#34;&#34;
+        return Task(description=description, expected_output_type=expected_output_type, **kwargs)
+
+    def __str__(self):
+        return f&#34;BaseAction(name={self.name}, priority={self.priority})&#34;</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.agency.actions.create_new_agent.CreateNewAgentAction" href="create_new_agent.html#frame.src.framer.agency.actions.create_new_agent.CreateNewAgentAction">CreateNewAgentAction</a></li>
+<li><a title="frame.src.framer.agency.actions.generate_roles_and_goals.GenerateRolesAndGoalsAction" href="generate_roles_and_goals.html#frame.src.framer.agency.actions.generate_roles_and_goals.GenerateRolesAndGoalsAction">GenerateRolesAndGoalsAction</a></li>
+<li><a title="frame.src.framer.agency.actions.observe.ObserveAction" href="observe.html#frame.src.framer.agency.actions.observe.ObserveAction">ObserveAction</a></li>
+<li><a title="frame.src.framer.agency.actions.research.ResearchAction" href="research.html#frame.src.framer.agency.actions.research.ResearchAction">ResearchAction</a></li>
+<li><a title="frame.src.framer.agency.actions.respond.RespondAction" href="respond.html#frame.src.framer.agency.actions.respond.RespondAction">RespondAction</a></li>
+<li><a title="frame.src.framer.agency.actions.think.ThinkAction" href="think.html#frame.src.framer.agency.actions.think.ThinkAction">ThinkAction</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.actions.BaseAction.create_task"><code class="name flex">
+<span>def <span class="ident">create_task</span></span>(<span>self, description: str, expected_output_type: Optional[type] = None, **kwargs) ‑> <a title="frame.src.framer.agency.tasks.task.Task" href="../tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new Task with the given description and expected output type.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code></dt>
+<dd>The description of the task.</dd>
+<dt><strong><code>expected_output_type</code></strong> :&ensp;<code>Optional[type]</code></dt>
+<dd>The expected output type of the task.</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Additional keyword arguments for Task creation.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Task</code></dt>
+<dd>A new Task instance.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.actions.BaseAction.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, execution_context: <a title="frame.src.services.execution_context.ExecutionContext" href="../../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>, **kwargs: Any) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute the action.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
+<dd>The execution context containing necessary services.</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Additional keyword arguments that might be passed to the action.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Any</code></dt>
+<dd>The result of the action execution, which could be a Task or any other type.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
 <dt id="frame.src.framer.agency.actions.CreateNewAgentAction"><code class="flex name class">
 <span>class <span class="ident">CreateNewAgentAction</span></span>
 </code></dt>
@@ -76,7 +179,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class CreateNewAgentAction(Action):
+<pre><code class="python">class CreateNewAgentAction(BaseAction):
     def __init__(self):
         super().__init__(&#34;create_new_agent&#34;, &#34;Create a new agent with the required properties&#34;)
 
@@ -99,7 +202,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+<li><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -124,9 +227,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<li><code><b><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></b></code>:
 <ul class="hlist">
-<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.base.BaseAction.create_task" href="base.html#frame.src.framer.agency.actions.base.BaseAction.create_task">create_task</a></code></li>
 </ul>
 </li>
 </ul>
@@ -141,7 +244,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class GenerateRolesAndGoalsAction(Action):
+<pre><code class="python">class GenerateRolesAndGoalsAction(BaseAction):
     def __init__(self):
         super().__init__(&#34;generate_roles_and_goals&#34;, &#34;Generate roles and goals for the Framer&#34;)
 
@@ -163,7 +266,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+<li><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -183,9 +286,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<li><code><b><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></b></code>:
 <ul class="hlist">
-<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.base.BaseAction.create_task" href="base.html#frame.src.framer.agency.actions.base.BaseAction.create_task">create_task</a></code></li>
 </ul>
 </li>
 </ul>
@@ -200,7 +303,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ObserveAction(Action):
+<pre><code class="python">class ObserveAction(BaseAction):
     def __init__(self):
         super().__init__(&#34;observe&#34;, &#34;Process an observation and generate insights or actions&#34;, Priority.MEDIUM)
 
@@ -228,7 +331,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+<li><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -255,9 +358,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<li><code><b><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></b></code>:
 <ul class="hlist">
-<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.base.BaseAction.create_task" href="base.html#frame.src.framer.agency.actions.base.BaseAction.create_task">create_task</a></code></li>
 </ul>
 </li>
 </ul>
@@ -272,7 +375,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ResearchAction(Action):
+<pre><code class="python">class ResearchAction(BaseAction):
     def __init__(self):
         super().__init__(&#34;research&#34;, &#34;Perform research on a given topic and summarize findings&#34;, Priority.HIGH)
 
@@ -312,7 +415,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+<li><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -337,9 +440,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<li><code><b><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></b></code>:
 <ul class="hlist">
-<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.base.BaseAction.create_task" href="base.html#frame.src.framer.agency.actions.base.BaseAction.create_task">create_task</a></code></li>
 </ul>
 </li>
 </ul>
@@ -354,7 +457,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class RespondAction(Action):
+<pre><code class="python">class RespondAction(BaseAction):
     def __init__(self):
         super().__init__(&#34;respond&#34;, &#34;Generate a response based on the current context&#34;)
 
@@ -420,7 +523,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+<li><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -445,9 +548,9 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<li><code><b><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></b></code>:
 <ul class="hlist">
-<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.base.BaseAction.create_task" href="base.html#frame.src.framer.agency.actions.base.BaseAction.create_task">create_task</a></code></li>
 </ul>
 </li>
 </ul>
@@ -462,7 +565,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ThinkAction(Action):
+<pre><code class="python">class ThinkAction(BaseAction):
     def __init__(self):
         super().__init__(&#34;think&#34;, &#34;Ponder and reflect on the current situation&#34;, Priority.HIGH)
 
@@ -489,7 +592,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></li>
+<li><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -515,9 +618,9 @@ This action is only necessary if a new prompt should be generated with new prete
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="frame.src.framer.agency.actions.base_action.Action" href="base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a></b></code>:
+<li><code><b><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></b></code>:
 <ul class="hlist">
-<li><code><a title="frame.src.framer.agency.actions.base_action.Action.create_task" href="base_action.html#frame.src.framer.agency.actions.base_action.Action.create_task">create_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.base.BaseAction.create_task" href="base.html#frame.src.framer.agency.actions.base.BaseAction.create_task">create_task</a></code></li>
 </ul>
 </li>
 </ul>
@@ -537,7 +640,7 @@ This action is only necessary if a new prompt should be generated with new prete
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="frame.src.framer.agency.actions.base_action" href="base_action.html">frame.src.framer.agency.actions.base_action</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.base" href="base.html">frame.src.framer.agency.actions.base</a></code></li>
 <li><code><a title="frame.src.framer.agency.actions.create_new_agent" href="create_new_agent.html">frame.src.framer.agency.actions.create_new_agent</a></code></li>
 <li><code><a title="frame.src.framer.agency.actions.generate_roles_and_goals" href="generate_roles_and_goals.html">frame.src.framer.agency.actions.generate_roles_and_goals</a></code></li>
 <li><code><a title="frame.src.framer.agency.actions.observe" href="observe.html">frame.src.framer.agency.actions.observe</a></code></li>
@@ -548,6 +651,13 @@ This action is only necessary if a new prompt should be generated with new prete
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="frame.src.framer.agency.actions.BaseAction" href="#frame.src.framer.agency.actions.BaseAction">BaseAction</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.actions.BaseAction.create_task" href="#frame.src.framer.agency.actions.BaseAction.create_task">create_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.actions.BaseAction.execute" href="#frame.src.framer.agency.actions.BaseAction.execute">execute</a></code></li>
+</ul>
+</li>
 <li>
 <h4><code><a title="frame.src.framer.agency.actions.CreateNewAgentAction" href="#frame.src.framer.agency.actions.CreateNewAgentAction">CreateNewAgentAction</a></code></h4>
 <ul class="">

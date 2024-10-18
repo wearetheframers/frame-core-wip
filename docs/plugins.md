@@ -34,15 +34,15 @@ framer = await frame.create_framer(config)
 
 This configuration gives the Framer access to the Memory service, EQ service, and the Search Extract Summarize plugin.
 
-## Plugin Base
+## Base Plugin
 
-All plugins in Frame should inherit from the `PluginBase` class. This base class provides a common interface and some utility methods for all plugins. Here's an overview of the `PluginBase` class:
+All plugins in Frame should inherit from the `BasePlugin` class. This base class provides a common interface and some utility methods for all plugins. Here's an overview of the `BasePlugin` class:
 
 ```python
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
-class PluginBase(ABC):
+class BasePlugin(ABC):
     def __init__(self, framer):
         self.framer = framer
 

@@ -80,9 +80,9 @@ hljs.highlightAll();
         self._register_default_actions()
 
     def register_action(
-        self, action: Union[str, Action, Callable], action_func: Optional[Callable] = None, description: str = &#34;&#34;, priority: int = 5
+        self, action: Union[str, BaseAction, Callable], action_func: Optional[Callable] = None, description: str = &#34;&#34;, priority: int = 5
     ):
-        if isinstance(action, Action):
+        if isinstance(action, BaseAction):
             name = action.name
             action_func = action.execute
             description = action.description
@@ -261,7 +261,7 @@ hljs.highlightAll();
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry.register_action"><code class="name flex">
-<span>def <span class="ident">register_action</span></span>(<span>self, action: Union[str, <a title="frame.src.framer.agency.actions.base_action.Action" href="actions/base_action.html#frame.src.framer.agency.actions.base_action.Action">Action</a>, Callable], action_func: Optional[Callable] = None, description: str = '', priority: int = 5)</span>
+<span>def <span class="ident">register_action</span></span>(<span>self, action: Union[str, <a title="frame.src.framer.agency.actions.base.BaseAction" href="actions/base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a>, Callable], action_func: Optional[Callable] = None, description: str = '', priority: int = 5)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>

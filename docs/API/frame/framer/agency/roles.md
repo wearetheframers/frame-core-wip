@@ -1,24 +1,13 @@
 # Roles
 
-::: frame.src.framer.agency.roles.Roles
+::: frame.src.framer.agency.roles.Role
     options:
       show_root_heading: false
       show_source: false
 
 ## Overview
 
-The `Roles` module is responsible for defining and managing the roles that a Framer can assume. Roles help guide the Framer's behavior and decision-making processes by providing context and constraints.
-
-### Attributes
-
-- `roles` (List[Role]): A list of Role objects representing the current roles.
-
-## Role
-
-::: frame.src.models.framer.agency.roles.Role
-    options:
-      show_root_heading: false
-      show_source: false
+The `Role` module is responsible for defining and managing the roles that a Framer can assume. Roles help guide the Framer's behavior and decision-making processes by providing context and constraints.
 
 ### Attributes
 
@@ -29,32 +18,15 @@ The `Roles` module is responsible for defining and managing the roles that a Fra
 - `priority` (Priority): The priority level of the role.
 - `status` (RoleStatus): The current status of the role (ACTIVE, INACTIVE, or SUSPENDED).
 
-## Methods
+## RoleStatus
 
-### `add_role`
+::: frame.src.framer.agency.roles.RoleStatus
+    options:
+      show_root_heading: false
+      show_source: false
 
-Adds a new role to the list of roles.
+An enumeration representing the possible statuses of a role:
 
-### `remove_role`
-
-Removes a role from the list by its identifier.
-
-### `evaluate_roles`
-
-Evaluates the current roles to determine their relevance and applicability.
-
-## Usage
-
-To add a new role:
-
-```python
-roles.add_role(
-    {"name": "Data Analyst", "description": "Analyze data and generate insights", "permissions": ["read", "write"]}
-)
-```
-
-To evaluate roles:
-
-```python
-applicable_roles = roles.evaluate_roles()
-```
+- `ACTIVE`: The role is currently active and being used.
+- `INACTIVE`: The role is not currently active but can be reactivated.
+- `SUSPENDED`: The role has been temporarily suspended and cannot be used.
