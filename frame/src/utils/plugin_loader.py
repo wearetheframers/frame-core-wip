@@ -4,10 +4,9 @@ import logging
 from typing import Dict, Any
 from dotenv import load_dotenv
 import json
-from frame.src.framer.brain.plugin_base import PluginBase
+from frame.src.framer.brain.plugins import PluginBase
 
 logger = logging.getLogger(__name__)
-
 
 def load_plugins(plugins_dir: str) -> Dict[str, Any]:
     """
@@ -29,7 +28,7 @@ def load_plugins(plugins_dir: str) -> Dict[str, Any]:
     plugins = {}
     for item in os.listdir(plugins_dir):
         plugin_dir = os.path.join(plugins_dir, item)
-        if os.path.isdir(plugin_dir) and not item.startswith("__"):
+        if os.path.isdir(plugin_dir) and not item.startswith('__'):
             try:
                 # Load plugin-specific configuration
                 config = load_plugin_config(plugin_dir)
@@ -40,9 +39,7 @@ def load_plugins(plugins_dir: str) -> Dict[str, Any]:
 
                 # Check if the plugin class inherits from PluginBase
                 if not issubclass(plugin_class, PluginBase):
-                    logger.warning(
-                        f"Plugin {item} does not inherit from PluginBase. Skipping."
-                    )
+                    logger.warning(f"Plugin {item} does not inherit from PluginBase. Skipping.")
                     continue
 
                 # Initialize the plugin with its configuration
@@ -51,7 +48,6 @@ def load_plugins(plugins_dir: str) -> Dict[str, Any]:
             except (ImportError, AttributeError) as e:
                 logger.warning(f"Failed to load plugin {item}: {str(e)}")
     return plugins
-
 
 def load_plugin_config(plugin_dir: str) -> Dict[str, Any]:
     """
@@ -69,9 +65,9 @@ def load_plugin_config(plugin_dir: str) -> Dict[str, Any]:
     config = {}
 
     # Try to load from config.json
-    config_file = os.path.join(plugin_dir, "config.json")
+    config_file = os.path.join(plugin_dir, 'config.json')
     if os.path.exists(config_file):
-        with open(config_file, "r") as f:
+        with open(config_file, 'r') as f:
             config = json.load(f)
 
     # Override with environment variables if they exist

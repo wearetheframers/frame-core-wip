@@ -11,6 +11,117 @@ Plugins in Frame are essentially new actions that can be added to the `ActionReg
 
 Frame will feature a plugin marketplace where premium plugins and community plugins can be developed, given away, or sold. This marketplace will foster a rich ecosystem of extensions and customizations, similar to mod communities in popular games.
 
+## Plugin Base
+
+All plugins in Frame should inherit from the `PluginBase` class. This base class provides a common interface and some utility methods for all plugins. Here's an overview of the `PluginBase` class:
+
+```python
+from abc import ABC, abstractmethod
+from typing import Any, Dict
+
+class PluginBase(ABC):
+    def __init__(self, framer):
+        self.framer = framer
+
+    @abstractmethod
+    async def on_load(self):
+        pass
+
+    def register_action(self, name: str, func: callable, description: str):
+        self.framer.brain.action_registry.register_action(name, func, description)
+
+    @abstractmethod
+    async def execute(self, action: str, params: Dict[str, Any]) -> Any:
+        pass
+```
+
+## Creating a New Plugin
+
+To create a new plugin, follow these steps:
+
+1. Create a new Python file in the `frame/src/plugins/` directory (e.g., `my_custom_plugin.py`).
+2. Define a new class that inherits from `PluginBase`.
+3. Implement the required methods: `on_load()` and `execute()`.
+4. Add any additional methods or attributes specific to your plugin.
+
+Here's an example of a simple custom plugin:
+
+```python
+from frame.src.framer.brain.plugin_base import PluginBase
+from typing import Any, Dict
+
+class MyCustomPlugin(PluginBase):
+    async def on_load(self):
+        self.register_action("custom_action", self.custom_action, "Perform a custom action")
+
+    async def execute(self, action: str, params: Dict[str, Any]) -> Any:
+        if action == "custom_action":
+            return await self.custom_action(params)
+        else:
+            raise ValueError(f"Unknown action: {action}")
+
+    async def custom_action(self, params: Dict[str, Any]) -> str:
+        return f"Custom action executed with params: {params}"
+```
+
+## Registering and Using a Plugin
+
+To use a plugin with a Framer instance:
+
+1. Import the plugin
+2. Initialize the plugin with the Framer instance
+3. Register the plugin with the Framer
+
+Here's an example:
+
+```python
+from frame import Frame
+from frame.src.framer.config import FramerConfig
+from frame.src.plugins.my_custom_plugin import MyCustomPlugin
+
+# Initialize Frame
+frame = Frame()
+
+# Create a Framer instance
+config = FramerConfig(name="CustomFramer", default_model="gpt-3.5-turbo")
+framer = await frame.create_framer(config)
+
+# Initialize and register the plugin
+custom_plugin = MyCustomPlugin(framer)
+framer.register_plugin("my_custom_plugin", custom_plugin)
+
+# Use the plugin
+result = await framer.use_plugin("my_custom_plugin", "custom_action", {"param1": "value1"})
+print(result)
+```
+
+## Plugin Loading
+
+Plugins are loaded automatically by the Frame system. The `load_plugins` function in `frame/src/utils/plugin_loader.py` is responsible for discovering and loading plugins. Here's an overview of how it works:
+
+1. The function scans the specified plugins directory (default is `frame/src/plugins/`).
+2. For each subdirectory, it attempts to import a module and find a plugin class.
+3. If a valid plugin class is found (inheriting from `PluginBase`), it's instantiated and added to the plugins dictionary.
+4. The function also loads plugin-specific configurations from environment variables or a `config.json` file in the plugin's directory.
+
+You can customize the plugins directory by setting the `plugins_dir` parameter when initializing the Frame instance:
+
+```python
+frame = Frame(plugins_dir="/path/to/custom/plugins")
+```
+
+## Best Practices
+
+When creating plugins, consider the following best practices:
+
+1. **Modularity**: Keep your plugin focused on a specific set of related functionalities.
+2. **Error Handling**: Implement proper error handling in your plugin methods.
+3. **Documentation**: Provide clear docstrings for your plugin class and methods.
+4. **Configuration**: Use the built-in configuration loading system for any plugin-specific settings.
+5. **Testing**: Write unit tests for your plugin to ensure its functionality.
+
+By following these guidelines, you can create powerful and flexible plugins to extend the capabilities of your Frame-based AI agents.
+
 ## Action Component
 
 **Action Model**: Represents an executable action within the framework.
@@ -24,212 +135,44 @@ These models help standardize the structure of actions and decisions throughout 
 
 ## Creating a New Action
 
-To create a new action, follow these steps:
+To create a new action within a plugin, follow these steps:
 
-1. Create a new Python file in the `frame/src/framer/agency/actions/` directory (e.g., `my_custom_action.py`).
-2. Define a function that implements the action logic.
-3. The function should accept any necessary parameters and return the result of the action.
+1. Define a method in your plugin class that implements the action logic.
+2. Register the action in the `on_load` method of your plugin.
 
-### Example 1: Weather Information Action
-
-Let's create an action that fetches weather information for a given location using an external API.
+Here's an example:
 
 ```python
-import requests
-from typing import Dict, Any
+class WeatherPlugin(PluginBase):
+    async def on_load(self):
+        self.register_action("get_weather", self.get_weather, "Fetch weather information for a location")
 
-def get_weather(location: str, api_key: str, **kwargs) -> Dict[str, Any]:
-    """
-    Fetch weather information for a given location.
-    
-    Args:
-        location (str): The city and country code, e.g., "London,UK"
-        api_key (str): The API key for the weather service
-        **kwargs: Additional keyword arguments
-    
-    Returns:
-        Dict[str, Any]: Weather information
-    """
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric"
-    response = requests.get(url)
-    response.raise_for_status()
-    return response.json()
-```
+    async def execute(self, action: str, params: Dict[str, Any]) -> Any:
+        if action == "get_weather":
+            return await self.get_weather(params.get("location"), params.get("api_key"))
+        else:
+            raise ValueError(f"Unknown action: {action}")
 
-### Example 2: Sentiment Analysis Action
-
-Now, let's create an action that performs sentiment analysis on a given text using a sentiment analysis library.
-
-```python
-from textblob import TextBlob
-from typing import Dict, Any
-
-def analyze_sentiment(text: str, **kwargs) -> Dict[str, Any]:
-    """
-    Perform sentiment analysis on a given text.
-    
-    Args:
-        text (str): The text to analyze
-    
-    Returns:
-        Dict[str, Any]: Sentiment analysis results
-    """
-    blob = TextBlob(text)
-    sentiment = blob.sentiment
-    return {
-        "polarity": sentiment.polarity,
-        "subjectivity": sentiment.subjectivity
-    }
+    async def get_weather(self, location: str, api_key: str) -> Dict[str, Any]:
+        # Implementation of weather fetching logic
+        pass
 ```
 
 ## Registering a New Action
 
-To register your new action with the ActionRegistry, follow these steps:
-
-1. Import your action function and the ActionRegistry.
-2. Use the `register_action` method to add your action to the registry.
-
-### Registering the Weather Information Action
-
-```python
-from frame.src.framer.agency.action_registry import ActionRegistry
-from frame.src.framer.agency.actions.weather_action import get_weather
-
-action_registry = ActionRegistry()
-action_registry.register_action(
-    "get_weather",
-    get_weather,
-    description="Fetch weather information for a location",
-    priority=5,
-    expected_output_format="A dictionary containing weather data",
-    expected_output_format_strict="Dict[str, Any]",
-    api_key="your_api_key_here"  # Binding the API key to the action
-)
-```
-
-### Registering the Sentiment Analysis Action
-
-```python
-from frame.src.framer.agency.action_registry import ActionRegistry
-from frame.src.framer.agency.actions.sentiment_analysis import analyze_sentiment
-
-action_registry = ActionRegistry()
-action_registry.register_action(
-    "analyze_sentiment",
-    analyze_sentiment,
-    description="Perform sentiment analysis on a given text",
-    priority=5,
-    expected_output_format="A dictionary with polarity and subjectivity",
-    expected_output_format_strict="Dict[str, Any]"
-)
-```
-
-The `register_action` method accepts the following parameters:
+Actions are automatically registered when you call `self.register_action()` in your plugin's `on_load()` method. The `register_action` method accepts the following parameters:
 
 - `name` (str): The name of the action (used to call it later).
 - `function` (callable): The action function itself.
 - `description` (str): A brief description of what the action does.
-- `priority` (int): A priority score from 1 (lowest) to 10 (highest).
-- `expected_output_format` (str): A verbal description of the expected output format.
-- `expected_output_format_strict` (str): An exact type of value to be created/generated.
-
-## Binding Variables to Action Callbacks
-
-When registering an action, you can bind additional variables to the action function using keyword arguments. These bound variables will be passed to the action function when it's called.
-
-Here's an example of binding variables:
-
-```python
-action_registry.register_action(
-    "my_custom_action",
-    my_custom_action,
-    description="Perform a custom action",
-    priority=5,
-    expected_output_format="A string describing the action result",
-    expected_output_format_strict="str",
-    bound_var1="value1",
-    bound_var2="value2"
-)
-```
-
-In this example, `bound_var1` and `bound_var2` will be passed as keyword arguments to `my_custom_action` when it's called.
 
 ## Using a Registered Action
 
-Once an action is registered, it can be used in two ways:
-
-1. As part of the Framer's decision-making process:
+Once a plugin is registered with a Framer, its actions can be used as follows:
 
 ```python
-decision = await framer.brain.make_decision(some_perception)
-if decision.action.name == "my_custom_action":
-    result = await framer.brain.execute_decision(decision)
-    print(f"Result of my custom action: {result}")
+result = await framer.use_plugin("weather_plugin", "get_weather", {"location": "London,UK", "api_key": "your_api_key"})
+print(f"Weather data: {result}")
 ```
 
-2. Called directly through the ActionRegistry:
-
-```python
-result = framer.brain.action_registry.perform_action("my_custom_action", "param1_value", 42, kwarg1="extra_value")
-print(f"Result of my custom action: {result}")
-```
-
-## Best Practices
-
-When creating new actions, consider the following best practices:
-
-1. **Documentation**: Provide clear docstrings for your action functions, including parameter descriptions and return value information.
-2. **Error Handling**: Implement proper error handling in your action functions to ensure robustness.
-3. **Type Hinting**: Use type hints to make your action's interface clear and to enable better IDE support.
-4. **Testability**: Design your actions to be easily testable, possibly by accepting dependencies as parameters.
-5. **Configurability**: Where appropriate, make your actions configurable to increase their flexibility and reusability.
-
-## Example: Weather Action
-
-Here's a complete example of creating and using a weather action:
-
-```python
-# In frame/src/framer/agency/actions/weather_action.py
-import requests
-from typing import Dict, Any
-
-def get_weather(location: str, api_key: str, **kwargs) -> Dict[str, Any]:
-    """
-    Fetch weather information for a given location.
-    
-    Args:
-        location (str): The city and country code, e.g., "London,UK"
-        api_key (str): The API key for the weather service
-        **kwargs: Additional keyword arguments
-    
-    Returns:
-        Dict[str, Any]: Weather information
-    """
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric"
-    response = requests.get(url)
-    response.raise_for_status()
-    return response.json()
-
-# In your main application file
-from frame.src.framer.agency.action_registry import ActionRegistry
-from frame.src.framer.agency.actions.weather_action import get_weather
-
-action_registry = ActionRegistry()
-action_registry.register_action(
-    "get_weather",
-    get_weather,
-    description="Fetch weather information for a location",
-    priority=5,
-    expected_output_format="A dictionary containing weather data",
-    expected_output_format_strict="Dict[str, Any]",
-    api_key="your_api_key_here"  # Binding the API key to the action
-)
-
-# Using the action
-weather_data = action_registry.perform_action("get_weather", "London,UK")
-print(f"Weather in London: {weather_data['main']['temp']}°C")
-```
-
-This example demonstrates how to create a new action, register it with bound variables (the API key), and use it within your application.
-
-By following these guidelines and examples, you can create powerful and flexible actions to extend the capabilities of your Frame-based AI agents.
+By following these guidelines and examples, you can create powerful and flexible plugins and actions to extend the capabilities of your Frame-based AI agents.

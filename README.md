@@ -84,6 +84,62 @@ print(f"Task result: {result}")
 await framer.close()
 ```
 
+## Permissions and Plugins
+
+Frame uses a permissions system to control which plugins and services a Framer has access to. These permissions are specified in the FramerConfig and are mapped to plugins.
+
+### Default Permissions
+
+There are three default permissions that correspond to core services:
+
+- `withMemory`: Enables access to the Memory service
+- `withEQ`: Enables access to the Emotional Intelligence (EQ) service
+- `withSharedContext`: Enables access to the Shared Context service
+
+### Custom Plugin Permissions
+
+For custom plugins, the permission name follows the format `with<PluginName>`. For example:
+
+- `withSearchExtractSummarizePlugin`: Enables access to the Search Extract Summarize plugin
+
+### Setting Permissions
+
+You can set permissions when creating a Framer:
+
+```python
+config = FramerConfig(
+    name="Example Framer",
+    default_model="gpt-4o-mini",
+    permissions=["withMemory", "withEQ", "withSearchExtractSummarizePlugin"]
+)
+framer = await frame.create_framer(config)
+```
+
+This configuration gives the Framer access to the Memory service, EQ service, and the Search Extract Summarize plugin.
+
+### Examples
+
+Here are some examples of creating Framers with different permissions:
+
+```python
+# Framer with memory and EQ capabilities
+framer_with_memory_and_eq = await frame.create_framer(
+    config=FramerConfig(name="MemoryEQFramer", permissions=["withMemory", "withEQ"])
+)
+
+# Framer with shared context and search capabilities
+framer_with_context_and_search = await frame.create_framer(
+    config=FramerConfig(name="ContextSearchFramer", permissions=["withSharedContext", "withSearchExtractSummarizePlugin"])
+)
+
+# Framer with all default services and a custom plugin
+framer_with_all = await frame.create_framer(
+    config=FramerConfig(name="AllCapabilitiesFramer", permissions=["withMemory", "withEQ", "withSharedContext", "withCustomPlugin"])
+)
+```
+
+Note that some plugins may require additional API keys or configurations. Refer to the specific plugin documentation for requirements.
+
 ## Architecture
 
 Frame is built on a modular architecture that allows for flexible and emergent AI agent behavior. The main components are:
