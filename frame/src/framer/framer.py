@@ -29,7 +29,7 @@ from frame.src.services import EQService
 from frame.src.utils.metrics import MetricsManager
 from frame.src.services import ExecutionContext
 from frame.src.models.framer.agency.goals import GoalStatus
-from frame.src.framer.brain.memory.memory_adapters.mem0.mem0_adapter import Mem0Adapter
+from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
 
 Observer = Callable[[Decision], None]
 
