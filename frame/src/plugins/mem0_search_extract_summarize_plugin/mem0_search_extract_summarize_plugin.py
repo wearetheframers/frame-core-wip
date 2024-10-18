@@ -1,40 +1,92 @@
-from typing import Any, Dict
-from frame.src.framer.agency.actions.base_action import Action
-from frame.src.services.execution_context import ExecutionContext
-from frame.src.models.framer.agency.priority import Priority
+import logging
+from typing import Any, Dict, List, Optional
 
-class Mem0SearchExtractSummarizePlugin:
-    def __init__(self):
-        self.name = "Mem0SearchExtractSummarizePlugin"
+from frame.src.framer.brain.plugins.base import PluginBase
+from frame.src.framer.agency.goals import Goal, GoalStatus
+from frame.src.framer.agency.roles import Role, RoleStatus
+from frame.src.framer.agency.priority import Priority
+from frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter import Mem0Adapter
 
-    class SearchAction(Action):
-        def __init__(self):
-            super().__init__("search", "Search for information in Mem0", Priority.MEDIUM)
+class Mem0SearchExtractSummarizePlugin(PluginBase):
+    def __init__(self, framer):
+        super().__init__(framer)
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        self.logger.addHandler(logging.StreamHandler())
+        self.mem0_adapter = Mem0Adapter(api_key=framer.config.mem0_api_key)
 
-        async def execute(self, execution_context: ExecutionContext, query: str) -> Dict[str, Any]:
-            # Implement the search logic here
-            # This is a placeholder implementation
-            return {"result": f"Search results for: {query}"}
+    async def on_load(self):
+        self.register_action(
+            "mem0_search_extract_summarize",
+            self.mem0_search_extract_summarize,
+            "Search Mem0 for a query, extract information, and summarize the results",
+        )
 
-    class ExtractAction(Action):
-        def __init__(self):
-            super().__init__("extract", "Extract relevant information from search results", Priority.MEDIUM)
+        # Add a new role for Mem0 searching and summarizing
+        mem0_researcher_role = Role(
+            name="Mem0 Researcher",
+            description="Specializes in Mem0 searching, information extraction, and summarization",
+            priority=Priority.HIGH,
+            status=RoleStatus.ACTIVE,
+        )
+        self.framer.agency.add_role(mem0_researcher_role)
 
-        async def execute(self, execution_context: ExecutionContext, search_results: Dict[str, Any]) -> Dict[str, Any]:
-            # Implement the extraction logic here
-            # This is a placeholder implementation
-            return {"extracted_info": f"Extracted information from: {search_results}"}
+        # Add a new goal for providing comprehensive answers using Mem0
+        comprehensive_answer_goal = Goal(
+            name="Provide Comprehensive Answers using Mem0",
+            description="Gather and synthesize information from Mem0 to provide comprehensive answers",
+            priority=Priority.HIGH,
+            status=GoalStatus.ACTIVE,
+        )
+        self.framer.agency.add_goal(comprehensive_answer_goal)
 
-    class SummarizeAction(Action):
-        def __init__(self):
-            super().__init__("summarize", "Summarize extracted information", Priority.MEDIUM)
+    async def mem0_search_extract_summarize(
+        self,
+        query: str,
+        user_id: Optional[str] = None,
+        agent_id: Optional[str] = None,
+        run_id: Optional[str] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        model_name: str = "gpt-4o-mini",
+    ) -> str:
+        self.logger.info(f"Searching Mem0 for query: {query}")
 
-        async def execute(self, execution_context: ExecutionContext, extracted_info: Dict[str, Any]) -> str:
-            # Implement the summarization logic here
-            # This is a placeholder implementation
-            return f"Summary of: {extracted_info}"
+        search_results = self.mem0_adapter.search(
+            query, user_id=user_id, agent_id=agent_id, run_id=run_id, filters=filters
+        )
+        self.logger.info(f"Found {len(search_results)} results in Mem0")
 
-    def register_actions(self, action_registry):
-        action_registry.register_action(self.SearchAction())
-        action_registry.register_action(self.ExtractAction())
-        action_registry.register_action(self.SummarizeAction())
+        if not search_results:
+            return "No relevant information found in Mem0."
+
+        context = "\n".join([result["content"] for result in search_results])
+        summary = await self.summarize(query, context, model_name)
+
+        references = "\n".join(
+            [f"[{i+1}] {result['id']}" for i, result in enumerate(search_results)]
+        )
+        return f"# Answer\n\n{summary}\n\n# References\n\n{references}"
+
+    async def summarize(self, query: str, context: str, model_name: str) -> str:
+        prompt = f"""
+        Given the following context and query, provide a comprehensive answer:
+
+        Context:
+        {context}
+
+        Query: {query}
+
+        Answer:
+        """
+
+        system_message = "You are a helpful assistant that provides accurate and comprehensive answers based on the given context from Mem0."
+
+        response = await self.framer.llm_service.get_completion(
+            prompt,
+            model=model_name,
+            system_message=system_message,
+            max_tokens=1000,
+            temperature=0.5,
+        )
+
+        return response.strip()

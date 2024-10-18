@@ -3,7 +3,7 @@ from frame.src.services.execution_context import ExecutionContext
 
 from typing import Any, Optional
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.models.framer.agency.priority import Priority
+from frame.src.framer.agency.priority import Priority
 from frame.src.framer.agency.tasks.task import Task
 
 class Action:

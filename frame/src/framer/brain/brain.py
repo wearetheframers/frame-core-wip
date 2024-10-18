@@ -16,12 +16,11 @@ from frame.src.utils.llm_utils import get_llm_provider, get_completion
 from frame.src.services.llm.main import LLMService
 from frame.src.services.llm.llm_adapters.lmql.lmql_adapter import LMQLConfig
 from frame.src.framer.soul.soul import Soul
-from frame.src.models.framer.agency.roles import Role, RoleStatus
-from frame.src.models.framer.agency.goals import Goal, GoalStatus
-from frame.src.models.framer.agency.priority import Priority
-
-if TYPE_CHECKING:
-    from frame.src.services import ExecutionContext
+from frame.src.framer.agency.roles import Role, RoleStatus
+from frame.src.framer.agency.goals import Goal, GoalStatus
+from frame.src.framer.agency.priority import Priority
+from frame.src.services.execution_context import ExecutionContext
+from frame.src.framer.config import FramerConfig
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +34,6 @@ class Brain:
     VALID_ACTIONS are derived from the ActionRegistry and default actions.
     """
 
-    # VALID_ACTIONS will be initialized in the __init__ method
     def __init__(
         self,
         llm_service: LLMService,
@@ -43,7 +41,6 @@ class Brain:
         goals: List[Dict[str, Any]],
         default_model: str = "gpt-3.5-turbo",
         recent_memories_limit: int = 5,
-        execution_context: Optional['ExecutionContext'] = None,
         soul: Optional[Soul] = None,
     ):
         """
@@ -55,7 +52,6 @@ class Brain:
             goals (List[Dict[str, Any]]): Initial goals for the Brain.
             default_model (str): The default language model to use.
             recent_memories_limit (int): The number of recent memories to keep. Defaults to 5.
-            execution_context (Optional[ExecutionContext]): The execution context for actions.
             soul (Optional[Soul]): The Soul instance for the Brain.
         """
         self.llm_service = llm_service
@@ -76,19 +72,22 @@ class Brain:
         }
         self.memory = Memory(memory_config)
 
-        # Initialize ExecutionContext if not provided
-        self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service, soul=self.soul, state={}
-        )
-
         # Initialize ActionRegistry
-        self.action_registry = ActionRegistry(self.execution_context)
+        self.action_registry = ActionRegistry()
 
         # Initialize Agency
         self.agency = Agency(
             llm_service=self.llm_service,
             context=None,
-            execution_context=self.execution_context,
+            execution_context=ExecutionContext(
+                llm_service=self.llm_service,
+                process_perception=self.process_perception,
+                execute_decision=self.execute_decision,
+                config=FramerConfig(
+                    name=self.framer.config.name if hasattr(self, 'framer') else "DefaultFramer",
+                    default_model=self.default_model
+                )
+            )
         )
 
         # Register the respond action using the agency's perform_task method
@@ -101,6 +100,16 @@ class Brain:
 
         # Update the agency's action_registry
         self.agency.action_registry = self.action_registry
+
+    def set_framer(self, framer):
+        self.framer = framer
+        if hasattr(self.agency, 'set_framer'):
+            self.agency.set_framer(framer)
+        else:
+            logger.warning("Agency does not have a set_framer method. This might cause issues.")
+
+    def get_framer(self):
+        return self.framer
 
     async def _execute_think_action(self, decision: Decision) -> Dict[str, Any]:
         """
@@ -278,19 +287,20 @@ class Brain:
             [goal.priority for goal in active_goals], default=Priority.MEDIUM
         )
         decision_priority = Priority.from_value(decision_data.get("priority", "MEDIUM"))
-        final_priority = max(decision_priority, roles_priority, goals_priority)
+        priority_value = decision_data.get("priority", "MEDIUM")
+        priority = Priority.from_string(priority_value) if isinstance(priority_value, str) else Priority(priority_value)
 
         return Decision(
             action=action,
             parameters=parameters,
             reasoning=reasoning,
             confidence=float(decision_data.get("confidence", 0.5)),
-            priority=final_priority,
+            priority=priority,
             related_roles=[
-                role for role in active_roles if role.priority >= final_priority
+                role for role in active_roles if role.priority >= priority.value
             ],
             related_goals=[
-                goal for goal in active_goals if goal.priority >= final_priority
+                goal for goal in active_goals if goal.priority >= priority.value
             ],
         )
 

@@ -2,7 +2,8 @@ from datetime import datetime
 from frame.src.utils.id_generator import generate_id
 import logging
 from typing import Any, Dict, Optional, List, Callable
-from frame.src.models.framer.agency.tasks.task import TaskModel, TaskStatus
+from enum import Enum
+from frame.src.models.framer.agency.tasks import TaskModel, TaskStatus
 
 logger = logging.getLogger(__name__)
 

@@ -2,9 +2,9 @@ import json
 from pydantic import Field
 from typing import Dict, Any, Optional, Union, List
 from frame.src.models.framer.brain.decision.decision import Decision as DecisionModel
-from frame.src.models.framer.agency.tasks.task import TaskStatus
-from frame.src.models.framer.agency.roles import Role
-from frame.src.models.framer.agency.goals import Goal
+from frame.src.models.framer.agency.tasks import TaskStatus
+from frame.src.framer.agency import Role
+from frame.src.framer.agency import Goal
 
 
 class Decision(DecisionModel):

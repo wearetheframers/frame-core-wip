@@ -9,8 +9,8 @@ from frame.src.framer.agency.roles import Roles, Role
 from frame.src.framer.agency.goals import Goals, Goal
 from frame.src.services.llm.main import LLMService
 from frame.src.framer.agency.tasks.task import Task
-from frame.src.framer.agency.tasks.workflow import Workflow
-from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
+from frame.src.framer.agency.workflow import Workflow
+from frame.src.framer.agency.workflow.workflow_manager import WorkflowManager
 from frame.src.framer.brain.brain import Brain
 from frame.src.services import ExecutionContext
 

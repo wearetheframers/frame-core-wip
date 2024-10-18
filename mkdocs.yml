@@ -25,8 +25,9 @@ nav:
                   - Default Actions: API/frame/framer/agency/default_actions.md
                   - Tasks:
                     - Task: API/frame/framer/agency/tasks/task.md
-                    - Workflow: API/frame/framer/agency/tasks/workflow/workflow.md
-                    - Workflow Manager: API/frame/framer/agency/tasks/workflow/workflow_manager.md
+                  - Workflow:
+                    - Workflow: API/frame/framer/agency/workflow/workflow.md
+                    - Workflow Manager: API/frame/framer/agency/workflow/workflow_manager.md
                 - Brain:
                     - Brain: API/frame/framer/brain/brain.md
                     - Decision: API/frame/framer/brain/decision/decision.md

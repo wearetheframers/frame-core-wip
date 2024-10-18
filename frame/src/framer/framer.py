@@ -9,9 +9,9 @@ from frame.src.framer.config import FramerConfig
 from frame.src.framer.agency import Agency
 from frame.src.framer.brain import Brain
 from frame.src.framer.soul import Soul
-from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
+from frame.src.framer.agency.workflow import WorkflowManager
 from frame.src.framer.agency.tasks.task import Task
-from frame.src.models.framer.agency.tasks.task import TaskStatus
+from frame.src.models.framer.agency.tasks import TaskStatus
 from frame.src.utils.config_parser import (
     parse_json_config,
     parse_markdown_config,
@@ -29,7 +29,7 @@ from frame.src.services import MemoryService
 from frame.src.services import EQService
 from frame.src.utils.metrics import MetricsManager
 from frame.src.services import ExecutionContext
-from frame.src.models.framer.agency.goals import GoalStatus
+from frame.src.framer.agency.goals import GoalStatus
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
 
 Observer = Callable[[Decision], None]
@@ -216,9 +216,6 @@ class Framer:
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
-
-        # Load the SearchExtractSummarizePlugin
-        await self.search_extract_summarize_plugin.on_load()
 
         self.act()  # Start acting after initialization
 

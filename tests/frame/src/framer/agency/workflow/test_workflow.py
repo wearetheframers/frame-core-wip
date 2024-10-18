@@ -1,5 +1,5 @@
 import pytest
-from frame.src.framer.agency.tasks.workflow.workflow import Workflow
+from frame.src.framer.agency.workflow.workflow import Workflow
 from frame.src.framer.agency.tasks.task import Task
 from frame.src.models.framer.agency.tasks.task import TaskStatus
 

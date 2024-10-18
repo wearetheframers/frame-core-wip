@@ -23,15 +23,13 @@ from frame.src.framer.agency.actions import (
 
 
 class ActionRegistry:
-    def __init__(self, execution_context: 'ExecutionContext'):
+    def __init__(self, execution_context=None):
         self.actions: Dict[str, Dict[str, Any]] = {}
         self.execution_context = execution_context
         self._register_default_actions()
 
-    def set_execution_context(
-        self, execution_context: 'ExecutionContext'
-    ):
-        self.execution_context = execution_context
+    def set_framer(self, framer):
+        self.framer = framer
 
     def _register_default_actions(self):
         default_actions = [
@@ -59,13 +57,16 @@ class ActionRegistry:
         self._register_default_actions()
 
     def register_action(
-        self, action: Union[str, Action], action_func: Optional[Callable] = None, description: str = "", priority: int = 5
+        self, action: Union[str, Action, Callable], action_func: Optional[Callable] = None, description: str = "", priority: int = 5
     ):
         if isinstance(action, Action):
             name = action.name
             action_func = action.execute
             description = action.description
             priority = action.priority.value
+        elif callable(action):
+            name = action.__name__
+            action_func = action
         else:
             name = action
             if action_func is None:

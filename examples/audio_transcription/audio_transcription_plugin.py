@@ -4,7 +4,7 @@ import numpy as np
 import whisper
 from frame.src.framer.agency.actions.base_action import Action
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.models.framer.agency.priority import Priority
+from frame.src.framer.agency.priority import Priority
 
 class AudioTranscriptionPlugin:
     def __init__(self):

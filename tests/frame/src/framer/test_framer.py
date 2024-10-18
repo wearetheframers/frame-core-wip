@@ -2,8 +2,8 @@ import pytest
 from frame.src.framer.framer import Framer
 from frame.src.framer.config import FramerConfig
 from frame.src.framer.brain.memory import Memory
-from frame.src.framer.agency.tasks.workflow import WorkflowManager
-from frame.src.framer.agency.tasks.workflow.workflow import Workflow
+from frame.src.framer.agency.workflow import WorkflowManager
+from frame.src.framer.agency.workflow.workflow import Workflow
 from frame.src.framer.brain.decision import Decision
 from frame.src.utils.log_manager import close_logging
 from frame.src.framer.agency.agency import Agency

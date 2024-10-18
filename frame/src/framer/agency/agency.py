@@ -1,22 +1,16 @@
 from typing import List, Dict, Any, Optional, Tuple, Union, TYPE_CHECKING
 from frame.src.constants.models import DEFAULT_MODEL
-from frame.src.models.framer.agency.priority import Priority
-from frame.src.framer.agency.tasks.task import Task, TaskStatus
-from frame.src.framer.agency.tasks.workflow import WorkflowManager, Workflow
+from frame.src.framer.agency.priority import Priority
+from frame.src.framer.agency.tasks import Task, TaskStatus
+from frame.src.framer.agency.workflow.workflow_manager import WorkflowManager
+from frame.src.framer.agency.workflow.workflow import Workflow
 from frame.src.services.llm.main import LLMService
 from frame.src.framer.agency.action_registry import ActionRegistry
-from frame.src.framer.agency.roles import Role, Roles, RoleStatus
-from frame.src.framer.agency.goals import Goal, Goals, GoalStatus
+from frame.src.framer.agency.roles import Role, RoleStatus
+from frame.src.framer.agency.goals import Goal, GoalStatus
 
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.models.framer.agency.roles import (
-    Role as RoleModel,
-    RoleStatus as RoleStatusModel,
-)
-from frame.src.models.framer.agency.goals import (
-    Goal as GoalModel,
-    GoalStatus as GoalStatusModel,
-)
+
 import json
 import logging
 import time
@@ -32,11 +26,17 @@ class Agency:
     This allows the Agency to perform additional tasks and manage new workflows.
     It manages roles, goals, tasks, and workflows for the Framer.
 
+    The Agency supports multiple active roles, goals, and tasks simultaneously. This means:
+    - Multiple roles can be active at once, allowing the Framer to fulfill various functions concurrently.
+    - Multiple goals can be pursued simultaneously, enabling the Framer to work towards various objectives.
+    - Multiple tasks can be in progress at the same time, allowing for concurrent action execution.
+
     Attributes:
         execution_context (ExecutionContext): The execution context containing necessary services.
-        roles (Roles): Roles assigned to the Agency.
-        goals (Goals): Goals for the Agency.
-        workflow_manager (WorkflowManager): Manages workflows and tasks.
+        roles (List[Role]): Roles assigned to the Agency. Multiple roles can be active simultaneously.
+        goals (List[Goal]): Goals for the Agency. Multiple goals can be active at the same time.
+        workflow_manager (WorkflowManager): Manages workflows and tasks, supporting concurrent task execution.
+        framer (Framer): The Framer instance associated with this Agency.
     """
 
     def __init__(
@@ -54,88 +54,35 @@ class Agency:
             llm_service (LLMService): The language model service.
             context (Optional[Dict[str, Any]]): Additional context for the Agency. Defaults to None.
             execution_context (Optional[ExecutionContext]): The execution context for the Agency. Defaults to None.
-            roles (Optional[List[RoleModel]]): Initial roles for the Agency. Defaults to None.
-            goals (Optional[List[GoalModel]]): Initial goals for the Agency. Defaults to None.
+            roles (Optional[List[Role]]): Initial roles for the Agency. Defaults to None.
+            goals (Optional[List[Goal]]): Initial goals for the Agency. Defaults to None.
         """
         self.llm_service = llm_service
         self.context = context or {}
-        self.execution_context = execution_context or ExecutionContext(
-            llm_service=llm_service
-        )
-        self.roles = Roles()
-        self.goals = Goals()
+        self.execution_context = execution_context
+        self.roles: List[Role] = []
+        self.goals: List[Goal] = []
         if roles:
-            for role in roles:
-                self.roles.add_role(role)
+            self.set_roles(roles)
         if goals:
-            for goal in goals:
-                self.goals.add_goal(goal)
+            self.set_goals(goals)
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, "default_model", DEFAULT_MODEL)
-        self.action_registry = ActionRegistry(self.execution_context)
-
-    def add_role(self, role: Role) -> None:
-        """
-        Add a new role to the Agency.
-
-        Args:
-            role (RoleModel): The role to be added.
-        """
-        self.roles.add_role(role)
+        self.action_registry = ActionRegistry()
+        self.action_registry.execution_context = self.execution_context
 
     def set_roles(self, roles: Optional[List[Role]] = None) -> None:
-        """
-        Set the roles for the Agency.
+        self.roles = roles if roles is not None else []
 
-        Args:
-            roles (Optional[List[RoleModel]]): List of Role objects.
-        """
-        self.roles.clear_roles()
-        if roles:
-            for role in roles:
-                self.roles.add_role(role)
-
-    def set_goals(self, goals: Optional[Union[List[Goal], Goals]] = None) -> None:
-        """
-        Set the goals for the Agency.
-
-        Args:
-            goals (Optional[Union[List[Goal], Goals]]): List of Goal objects or a Goals instance.
-        """
-        if isinstance(goals, list):
-            self.goals = Goals(goals)
-        elif isinstance(goals, Goals):
-            self.goals = goals
-        else:
-            self.goals = Goals([])
-
-    def add_goal(self, goal: Goal) -> None:
-        """
-        Add a new goal to the Agency.
-
-        Args:
-            goal (GoalModel): The goal to be added.
-        """
-        self.goals.add_goal(goal)
+    def set_goals(self, goals: Optional[List[Goal]] = None) -> None:
+        self.goals = goals if goals is not None else []
 
     def get_roles(self) -> List[Role]:
-        """
-        Get all roles of the Agency.
-
-        Returns:
-            List[RoleModel]: List of all roles.
-        """
-        return self.roles.get_roles()
+        return self.roles
 
     def get_goals(self) -> List[Goal]:
-        """
-        Get all goals of the Agency.
-
-        Returns:
-            List[GoalModel]: List of all goals.
-        """
-        return self.goals.goal_list
+        return [goal for goal in self.goals if goal.status == GoalStatus.ACTIVE]
 
     def create_task(
         self,
@@ -420,15 +367,19 @@ class Agency:
         3. If both exist, generate new goals and add them to existing ones.
 
         Returns:
-            Tuple[List[RoleModel], List[GoalModel]]: A tuple containing the final roles and goals.
+            Tuple[List[Role], List[Goal]]: A tuple containing the final roles and goals.
         """
-        roles = await self.generate_roles()
-        goals = await self.generate_goals()
+        new_roles = await self.generate_roles()
+        new_goals = await self.generate_goals()
         if self.roles is None:
-            self.roles = roles
+            roles = new_roles
+        else:
+            roles = self.roles + new_roles
         if self.goals is None:
-            self.goals = goals
-        return self.roles, self.goals
+            goals = new_goals
+        else:
+            goals = self.goals + new_goals
+        return roles, goals
 
     async def execute_task(self, task: Task) -> str:
         """
@@ -467,59 +418,26 @@ class Agency:
         return response
 
     def update_role_status(self, role_id: str, new_status: RoleStatus) -> None:
-        """
-        Update the status of a role.
-
-        Args:
-            role_id (str): The ID of the role to update.
-            new_status (RoleStatus): The new status to set for the role.
-        """
-        self.roles.update_role_status(role_id, new_status)
+        for role in self.roles:
+            if role.id == role_id:
+                role.status = new_status
+                break
 
     def update_goal_status(self, goal_name: str, new_status: GoalStatus) -> None:
-        """
-        Update the status of a goal.
-
-        Args:
-            goal_name (str): The name of the goal to update.
-            new_status (GoalStatusModel): The new status to set for the goal.
-        """
-        self.goals.set_goal_status(goal_name, new_status)
+        for goal in self.goals:
+            if goal.name == goal_name:
+                goal.status = new_status
+                break
 
     async def evaluate_roles_and_goals(self) -> None:
+        # Implement role and goal evaluation logic here
+        pass
+
+    def set_framer(self, framer):
         """
-        Evaluate and update the status of roles and goals based on the current context.
+        Set the Framer instance associated with this Agency.
+
+        Args:
+            framer (Framer): The Framer instance to associate with this Agency.
         """
-        # Evaluate roles
-        for role in self.roles.get_roles():
-            prompt = f"""
-            Evaluate the following role based on the current context:
-            Role: {role.to_dict()}
-            Current context: {self.context}
-
-            Should this role's status be updated? If yes, what should be the new status?
-            Respond with a JSON object containing 'update_status' (boolean) and 'new_status' (string) fields.
-            """
-            response = await self.llm_service.get_completion(
-                prompt, model=self.default_model
-            )
-            evaluation = json.loads(response)
-            if evaluation["update_status"]:
-                self.update_role_status(role.id, RoleStatus[evaluation["new_status"]])
-
-        # Evaluate goals
-        for goal in self.goals.goal_list:
-            prompt = f"""
-            Evaluate the following goal based on the current context:
-            Goal: {goal.dict()}
-            Current context: {self.context}
-
-            Should this goal's status be updated? If yes, what should be the new status?
-            Respond with a JSON object containing 'update_status' (boolean) and 'new_status' (string) fields.
-            """
-            response = await self.llm_service.get_completion(
-                prompt, model=self.default_model
-            )
-            evaluation = json.loads(response)
-            if evaluation["update_status"]:
-                self.update_goal_status(goal.name, GoalStatus[evaluation["new_status"]])
+        self.framer = framer

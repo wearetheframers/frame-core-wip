@@ -37,6 +37,9 @@ def __getattr__(name):
         "Mem0Adapter",
         "Decision",
         "EQService",
+        "MemoryService",
+        "Workflow",
+        "WorkflowManager",
     ):
         return getattr(__lazy_import("src"), name)
     elif name == "sync_frame":
@@ -67,7 +70,8 @@ from frame.src.framer.config import FramerConfig
 from frame.src.framer.agency import Agency
 from frame.src.framer.brain import Brain
 from frame.src.framer.soul import Soul
-from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
+from frame.src.framer.agency.workflow import WorkflowManager
+from frame.src.framer.agency.workflow.workflow import Workflow
 from frame.src.framer.agency.tasks.task import Task
 from frame.src.services import LLMService
 from frame.src.framer.brain.perception import Perception

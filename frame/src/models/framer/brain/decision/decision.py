@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional, List
-from frame.src.framer.agency.tasks import TaskStatusModel
+from frame.src.models.framer.agency.tasks import TaskStatus
 
 
 class Decision(BaseModel):
@@ -18,8 +18,8 @@ class Decision(BaseModel):
     priority: int = Field(
         default=1, ge=1, le=10, description="Priority of the decision"
     )
-    task_status: TaskStatusModel = Field(
-        default=TaskStatusModel.PENDING, description="Status of the associated task"
+    task_status: TaskStatus = Field(
+        default=TaskStatus.PENDING, description="Status of the associated task"
     )
     result: Optional[Dict[str, Any]] = Field(
         default=None, description="The result of executing the decision"

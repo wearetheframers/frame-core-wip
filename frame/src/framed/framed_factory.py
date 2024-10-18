@@ -1,16 +1,15 @@
 from typing import Optional, Dict, Any, List
 
 from frame.src.framed.config import FramedConfig
-from frame.src.services import LLMService
 from frame.src.framed.framed import Framed
 from frame.src.framer.agency import Agency
 from frame.src.framer.brain import Brain
 from frame.src.framer.soul import Soul
-from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
+from frame.src.framer.agency.workflow import WorkflowManager
 from frame.src.services import MemoryService
 from frame.src.services import EQService
 from frame.src.services import ExecutionContext
-
+from frame.src.services import LLMService
 
 class FramedFactory:
     """

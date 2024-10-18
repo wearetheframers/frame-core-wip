@@ -1,7 +1,7 @@
 from typing import Dict, Any
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.actions.base_action import Action
-from frame.src.models.framer.agency.priority import Priority
+from frame.src.framer.agency.priority import Priority
 
 class ThinkAction(Action):
     def __init__(self):

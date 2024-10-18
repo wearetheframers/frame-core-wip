@@ -7,12 +7,13 @@ from frame.src.services.llm.main import LLMService
 from frame.src.framer.agency.agency import Agency
 from frame.src.framer.brain.brain import Brain
 from frame.src.framer.soul.soul import Soul
-from frame.src.framer.agency.tasks.workflow.workflow_manager import WorkflowManager
+from frame.src.framer.agency.workflow import WorkflowManager
 from frame.src.services.context.execution_context_service import ExecutionContext
 from frame.src.services.memory.main import MemoryService
 from frame.src.services.eq.main import EQService
 from frame.src.constants.models import DEFAULT_MODEL
-from frame.src.models.framer.agency.goals import Goal, GoalStatus
+from frame.src.framer.agency.goals import Goal, GoalStatus
+from frame.src.framer.agency.roles import Role, RoleStatus
 
 
 class FramerFactory:
@@ -57,8 +58,8 @@ class FramerFactory:
         self,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
-        roles: Optional[List[Dict[str, Any]]] = None,
-        goals: Optional[List[Dict[str, Any]]] = None,
+        roles: Optional[List[Role]] = None,
+        goals: Optional[List[Goal]] = None,
     ) -> Framer:
         execution_context = ExecutionContext(llm_service=self.llm_service)
         agency = Agency(
@@ -70,13 +71,33 @@ class FramerFactory:
         # Generate roles and goals. The Framer must be acting to respond to perceptions.
         if roles is None or goals is None:
             roles, goals = await agency.generate_roles_and_goals()
+        elif isinstance(roles, list) and len(roles) == 0:
+            roles = []
+            goals = []
+        elif isinstance(goals, list) and len(goals) == 0:
+            roles, goals = await agency.generate_roles_and_goals()
+            goals = []
+        elif isinstance(roles, list) and len(roles) == 0 and goals:
+            roles, new_goals = await agency.generate_roles_and_goals()
+            goals.extend(new_goals)
 
         # Ensure goals have a default status of ACTIVE
         for goal in goals:
-            if isinstance(goal, dict) and "status" not in goal:
-                goal["status"] = GoalStatus.ACTIVE.value
-            elif isinstance(goal, Goal) and goal.status is None:
+            if isinstance(goal, dict):
+                if "status" not in goal:
+                    goal["status"] = GoalStatus.ACTIVE.value
+            else:
                 goal.status = GoalStatus.ACTIVE
+        for role in roles:
+            if isinstance(role, dict):
+                if "status" not in role:
+                    role["status"] = RoleStatus.ACTIVE.value
+            else:
+                role.status = RoleStatus.ACTIVE
+
+        # Sort roles and goals by priority
+        roles.sort(key=lambda x: x.priority.value if hasattr(x, 'priority') else 5, reverse=True)
+        goals.sort(key=lambda x: x.priority.value if hasattr(x, 'priority') else 5, reverse=True)
 
         execution_context = ExecutionContext(llm_service=self.llm_service)
         brain = Brain(
@@ -89,16 +110,11 @@ class FramerFactory:
                 if self.config.default_model
                 else DEFAULT_MODEL
             ),
-            execution_context=execution_context,
         )
-
-        soul = Soul(seed=self.config.soul_seed)
         # Initialize the Soul component with the provided or default seed
-        workflow_manager = WorkflowManager()
+        soul = Soul(seed=self.config.soul_seed)
         # Initialize the WorkflowManager component
-
-        from frame.src.framer.framer import Framer  # Import Framer within the function
-
+        workflow_manager = WorkflowManager()
         framer = Framer(
             # Create the Framer instance with all initialized components
             config=self.config,
@@ -111,8 +127,12 @@ class FramerFactory:
             eq_service=eq_service,
         )
 
-        framer.agency.set_roles(roles)
         framer.agency.set_goals(goals)
+        framer.agency.set_roles(roles)
+
+        # Set the Framer instance in Brain and ActionRegistry
+        framer.brain.set_framer(framer)
+        framer.brain.action_registry.set_framer(framer)
 
         return framer
 
