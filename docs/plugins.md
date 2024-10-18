@@ -9,6 +9,10 @@ Frame provides a powerful and flexible plugin system that allows you to extend t
 
 Plugins in Frame are essentially new actions that can be added to the `ActionRegistry`. These actions can be used by Framers to perform specific tasks or integrate with external services. By creating plugins, you can extend the capabilities of your AI agents to handle domain-specific tasks or interact with custom APIs.
 
+Framers use plugins to enhance their ability to process various types of perceptions (such as text, images, or sounds) and perform a wide range of actions. When a plugin action is well-described, the Framer can make reasonable decisions to take that action based on the current context, its internal thinking process, and the action's priority compared to other possible actions.
+
+The plugin system works in conjunction with the Framer's permission system, which determines which plugins a Framer has access to. This allows for fine-grained control over a Framer's capabilities and ensures that Framers only use actions they are explicitly allowed to perform.
+
 Frame will feature a plugin marketplace where premium plugins and community plugins can be developed, given away, or sold. This marketplace will foster a rich ecosystem of extensions and customizations, similar to mod communities in popular games.
 
 ## Plugin Base

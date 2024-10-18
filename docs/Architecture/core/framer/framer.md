@@ -7,7 +7,7 @@ weight: 20
 
 ## Overview
 
-The Framer class represents an individual AI agent within the Frame cognitive agent framework. It serves as the core component, enabling the creation and management of intelligent agents with capabilities for task management, decision-making, and interaction with language models. Framers are designed to exhibit emergent behaviors and can be customized for various applications.
+The Framer class represents an individual AI agent within the Frame cognitive agent framework. It serves as the core component, enabling the creation and management of intelligent agents with capabilities for perception processing, task management, decision-making, and interaction with language models. Framers are designed to exhibit emergent behaviors and can be customized for various applications.
 
 ### Attributes
 
@@ -17,6 +17,16 @@ The Framer class represents an individual AI agent within the Frame cognitive ag
 - `memory_service` (Optional[MemoryService]): Service for managing memory. Default is None.
 - `soul_seed` (Optional[Dict[str, Any]]): Initial seed for the Framer's soul. Default is None.
 - `_streamed_response` (dict): A dictionary with keys `status` and `result` that accumulates streamed content when `get_completion` is called with streaming enabled. Resets with each new call.
+- `plugins` (Dict[str, Any]): A dictionary of loaded plugins that extend the Framer's capabilities.
+- `permissions` (List[str]): A list of permissions that determine which plugins and services the Framer can access.
+
+### Key Features
+
+- **Perception Processing**: Framers can sense and process various types of incoming data (perceptions) such as text, images, and sounds, provided the appropriate plugins and inputs are available.
+- **Decision Making**: Based on incoming perceptions, roles, goals, available plugins, and permissions, Framers make decisions on what actions to take.
+- **Action Execution**: Framers can perform actions based on their decisions, including creating tasks and workflows.
+- **Plugin Integration**: Framers can use plugins to extend their behavior with new actions. When a plugin action is well-described, the Framer can make reasonable moves to take that action based on context, internal thinking, and the action's priority compared to other possible actions.
+- **Permission-Based Execution**: Framers consider their permissions when deciding which actions to take, ensuring they only use plugins and services they have access to.
 
 ## Related Components
 

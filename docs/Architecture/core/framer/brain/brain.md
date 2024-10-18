@@ -11,11 +11,15 @@ The Brain component handles decision-making processes for the Framer, communicat
 
 ## Key Features
 
-- Decision-making based on goals and context.
+- Perception processing: The Brain can process various types of incoming data (perceptions) such as text, images, and sounds, provided the appropriate plugins and inputs are available.
+- Decision-making based on perceptions, goals, roles, context, and available actions.
 - Interaction with language models through ExecutionContext.
 - Memory storage and retrieval using ExecutionContext.
 - Multi-modal perception processing.
 - Execution of actions using ActionRegistry and ExecutionContext.
+- Task and workflow creation based on decisions and context.
+- Plugin integration: The Brain can use available plugins to extend its capabilities and perform a wider range of actions.
+- Permission-based action execution: The Brain considers the Framer's permissions when deciding which actions to take.
 
 ## ExecutionContext
 

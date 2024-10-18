@@ -6,6 +6,15 @@ The `ActionRegistry` class in the Frame framework manages and executes actions w
 
 The `ActionRegistry` class is responsible for managing actions that can be performed by Framers. It inherits from the `ConfigurableMixin`, allowing it to be configured with various options.
 
+Actions in the Frame framework are central to how Framers process perceptions and make decisions. When a Framer receives a perception (which can be any type of incoming data like text, images, or sounds), it uses its available actions to decide how to respond. The decision-making process takes into account:
+
+1. The type and content of the perception
+2. The Framer's current roles and goals
+3. The priority of each available action
+4. The Framer's permissions (which determine which plugins and actions it can use)
+
+When an action is well-described and registered in the ActionRegistry, the Framer can make informed decisions about when and how to use that action based on the current context and its internal reasoning process. The priority of an action plays a crucial role in this decision-making, as higher priority actions are more likely to be chosen when multiple actions are applicable.
+
 ### Adding New Actions
 
 To add a new action, follow these steps:
