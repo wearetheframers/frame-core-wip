@@ -25,6 +25,7 @@ the **[[framed]]**: A collection of Framer objects working together to achieve c
 - Integration with popular AI APIs (OpenAI GPT, Mistral, etc.) as well as local model support
 - Streaming text generation support 
 - Flexible behavior and decision-making mechanics that can be based off of emotions and memories
+- Comprehensive priority system for roles, goals, and tasks, enabling dynamic and context-aware behavior
 - Monitoring and metrics; built-in LLM API usage / costs tracking
 
 ## Technologies Used

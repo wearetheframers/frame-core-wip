@@ -18,7 +18,8 @@ Frame consists of three main components: `Frame`, `Framed`, and `Framer`.
   - Permissions: Determine which plugins and services a Framer has access to, controlling its capabilities.
   - Roles: Framer roles are represented by the `Role` class, which includes attributes such as id, name, description, permissions, priority, and status. Multiple roles can be active simultaneously. Roles can have different statuses (ACTIVE, INACTIVE, SUSPENDED) to reflect their current state. The priority of roles influences decision-making, with higher priority roles having more impact.
   - Goals: Goals are represented by the `Goal` class, which includes attributes such as name, description, priority, and status. Multiple goals can be active at the same time, guiding the Framer's decision-making process. Goals can have different statuses (ACTIVE, COMPLETED, ABANDONED) to reflect their current state. The priority of goals affects the Framer's focus, with higher priority goals being given more attention in decision-making.
-  - Priority System: Both roles and goals use a priority system (LOW, MEDIUM, HIGH, CRITICAL) to determine their importance in the Framer's decision-making process. This allows for dynamic and context-aware behavior, where the Framer can adjust its actions based on the current priorities of its active roles and goals.
+  - Tasks: Tasks are represented by the `Task` class and also use the priority system. The priority of a task influences its execution order and importance within workflows.
+  - Priority System: Roles, goals, and tasks use a priority system (LOW, MEDIUM, HIGH, CRITICAL) to determine their importance in the Framer's decision-making process. This allows for dynamic and context-aware behavior, where the Framer can adjust its actions based on the current priorities of its active roles, goals, and tasks.
 - **Framed**: A collection of Framer objects working together to achieve complex tasks.
 
 ## Table of Contents

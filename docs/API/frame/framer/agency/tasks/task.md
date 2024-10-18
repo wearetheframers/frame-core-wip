@@ -44,4 +44,6 @@ print(f"Task Status: {task.status}")
 
 ## Priority
 
-The `priority` attribute of a Task is an integer ranging from 1 to 10, with 10 being the highest priority. This allows for fine-grained control over task execution order and importance. The default priority is 5 if not specified.
+The `priority` attribute of a Task uses the same priority system as roles and goals (LOW, MEDIUM, HIGH, CRITICAL). This allows for consistent prioritization across different components of the Framer. The priority of a task influences its execution order and importance within workflows. The default priority is MEDIUM if not specified.
+
+Tasks with higher priorities are generally executed before those with lower priorities, allowing the Framer to focus on the most important or urgent tasks first. This priority system enables dynamic and context-aware task management, where the Framer can adjust its focus based on the current priorities of active tasks, roles, and goals.
