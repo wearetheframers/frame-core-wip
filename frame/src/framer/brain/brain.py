@@ -321,8 +321,8 @@ class Brain:
         goals_priority = max(
             [goal.priority for goal in active_goals], default=Priority.MEDIUM
         )
-        priority_value = decision_data.get("priority", "MEDIUM")
-        priority_int = Decision.convert_priority(priority_value)
+        priority_value = decision_data.get("priority", Priority.MEDIUM)
+        priority_int = Priority.from_value(priority_value).value
 
         decision = Decision(
             action=action,

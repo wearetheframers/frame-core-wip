@@ -16,7 +16,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
         self.logger.addHandler(logging.StreamHandler())
-        self.mem0_adapter = Mem0Adapter(api_key=framer.config.mem0_api_key)
+        self.mem0_adapter = Mem0Adapter()
 
     async def on_load(self):
         self.register_action(

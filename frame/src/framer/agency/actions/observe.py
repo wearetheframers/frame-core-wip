@@ -17,6 +17,8 @@ class ObserveAction(BaseAction):
         execution_context: ExecutionContext,
         observation: Optional[str] = None,
         insights: Optional[Dict[str, Any]] = None,
+        actions: Optional[Dict[str, Any]] = None,
+        next_steps: Optional[Dict[str, Any]] = None,
     ) -> str:
         """
         Process an observation and generate insights or actions.

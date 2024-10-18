@@ -1,3 +1,4 @@
+import os
 from typing import Dict, Any, List, Optional
 from frame.src.framer.brain.memory.memory_adapter_interface import (
     MemoryAdapterInterface,
@@ -10,7 +11,9 @@ class Mem0Adapter(MemoryAdapterInterface):
     It provides methods to store, retrieve, and manage memory data.
     """
 
-    def __init__(self):
+    def __init__(self, api_key: Optional[str] = None):
+        if api_key is None:
+            api_key = os.getenv("MEM0_API_KEY")
         self.memories = {}
 
     def store(

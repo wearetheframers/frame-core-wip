@@ -45,3 +45,7 @@ class Priority(IntEnum):
             raise ValueError(
                 "Priority must be an integer, string, or Priority instance"
             )
+
+    @classmethod
+    def get(cls, value: Union[int, str, "Priority"]) -> "Priority":
+        return cls.from_value(value)

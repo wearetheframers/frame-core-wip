@@ -26,6 +26,7 @@ from frame.src.framer.brain.perception import Perception
 from frame.src.framer.brain.decision import Decision
 from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import DSPyAdapter
 from frame.src.services import MemoryService
+from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
 from frame.src.services import EQService
 from frame.src.utils.metrics import MetricsManager
 from frame.src.services import ExecutionContext
@@ -67,6 +68,7 @@ class Framer:
         brain: Brain,
         soul: Soul,
         workflow_manager: WorkflowManager,
+        memory_adapter: Optional[MemoryAdapterInterface] = None,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
         roles: List[Dict[str, Any]] = [],
@@ -78,8 +80,8 @@ class Framer:
         self.permissions = config.permissions
 
         # Initialize services and plugins based on permissions
-        if "withMemory" in self.permissions:
-            self.memory_service = memory_service or MemoryService()
+        if "withMemory" in self.permissions and memory_adapter:
+            self.memory_service = memory_service or MemoryService(adapter=memory_adapter)
 
         if "withEQ" in self.permissions:
             self.eq_service = eq_service or EQService()
@@ -310,6 +312,27 @@ class Framer:
 
         export_config_to_markdown(self.config, file_path)
 
+    async def use_plugin_action(self, plugin_name: str, action_name: str, parameters: Dict[str, Any]) -> Any:
+        """
+        Execute a plugin action directly.
+
+        Args:
+            plugin_name (str): The name of the plugin.
+            action_name (str): The name of the action to execute.
+            parameters (Dict[str, Any]): Parameters for the action.
+
+        Returns:
+            Any: The result of the action execution.
+        """
+        plugin = self.plugins.get(plugin_name)
+        if not plugin:
+            raise ValueError(f"Plugin {plugin_name} not found.")
+        
+        action = getattr(plugin, action_name, None)
+        if not action:
+            raise ValueError(f"Action {action_name} not found in plugin {plugin_name}.")
+        
+        return await action(**parameters)
     async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """
         Perform a task asynchronously.

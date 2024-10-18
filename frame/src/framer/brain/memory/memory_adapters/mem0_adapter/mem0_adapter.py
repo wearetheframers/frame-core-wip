@@ -2,7 +2,8 @@ from typing import Any, Dict, List, Optional
 from frame.src.framer.brain.memory.memory_adapter_interface import (
     MemoryAdapterInterface,
 )
-from mem0 import Memory
+import os
+from mem0 import MemoryClient
 from frame.src.constants.api_keys import MEM0_SERVER_HOST
 
 
@@ -12,11 +13,47 @@ class Mem0Adapter(MemoryAdapterInterface):
     It provides methods to store, retrieve, and manage memory data.
     """
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: Optional[str] = None):
+        if api_key is None:
+            api_key = os.getenv("MEM0_API_KEY")
         if MEM0_SERVER_HOST:
-            self.client = Memory(api_key=api_key, server_url=MEM0_SERVER_HOST)
+            self.client = MemoryClient(api_key=api_key, server_url=MEM0_SERVER_HOST)
         else:
-            self.client = Memory(api_key=api_key)
+            self.client = MemoryClient(api_key=api_key)
+
+    def store(
+        self,
+        memory: str,
+        user_id: str = "default",
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> int:
+        """
+        Store a new memory entry in the Mem0 system.
+
+        Args:
+            memory (str): The memory content to store.
+            user_id (str, optional): The user ID associated with the memory. Defaults to "default".
+            metadata (Optional[Dict[str, Any]], optional): Metadata for the memory. Defaults to None.
+
+        Returns:
+            int: The ID of the stored memory.
+        """
+        response = self.add(memory, user_id, metadata)
+        return response.get("id", -1)
+
+    def retrieve(self, memory_id: int, user_id: str = "default") -> Optional[Any]:
+        """
+        Retrieve a specific memory entry from the Mem0 system.
+
+        Args:
+            memory_id (int): The ID of the memory to retrieve.
+            user_id (str, optional): The user ID associated with the memory. Defaults to "default".
+
+        Returns:
+            Optional[Any]: The retrieved memory content, or None if not found.
+        """
+        memory = self.get_memory(str(memory_id))
+        return memory.get("content") if memory else None
 
     def add(
         self,
