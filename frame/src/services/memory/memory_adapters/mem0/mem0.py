@@ -14,7 +14,7 @@ class Mem0Adapter:
     def __init__(self):
         self.storage = {}
 
-    def add(
+    def store(
         self,
         memory: str,
         user_id: str = "default",
@@ -24,8 +24,19 @@ class Mem0Adapter:
             self.storage[user_id] = []
         self.storage[user_id].append({"memory": memory, "metadata": metadata or {}})
 
-    def get_all(self, user_id: str = "default") -> List[Dict[str, Any]]:
+    def retrieve(self, user_id: str = "default") -> List[Dict[str, Any]]:
         return self.storage.get(user_id, [])
+
+    def add(
+        self,
+        memory: str,
+        user_id: str = "default",
+        metadata: Optional[Dict[str, Any]] = None,
+    ):
+        self.store(memory, user_id, metadata)
+
+    def get_all(self, user_id: str = "default") -> List[Dict[str, Any]]:
+        return self.retrieve(user_id)
 
     def search(self, query: str, user_id: str = "default") -> List[Dict[str, Any]]:
         return [

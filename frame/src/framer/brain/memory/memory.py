@@ -22,7 +22,7 @@ class Memory:
         self.core = {}
         self.short_term = []
         self.mem0 = Mem0Adapter()
-        self.user_id = "default"  # You might want to make this configurable
+        self.user_id = config.get("user_id", "default")
 
     def get_core_memory(self, key: str) -> Any:
         """
@@ -38,13 +38,10 @@ class Memory:
         if core_memory is not None:
             return core_memory
 
-        mem0_data = self.mem0.get_all(user_id="default")
-        if isinstance(mem0_data, dict):
-            return mem0_data.get(key)
-        elif isinstance(mem0_data, list):
-            for item in mem0_data:
-                if isinstance(item, dict) and item.get("key") == key:
-                    return item.get("value")
+        mem0_data = self.mem0.retrieve(user_id=self.user_id)
+        for item in mem0_data:
+            if isinstance(item, dict) and item.get("key") == key:
+                return item.get("value")
         return None
 
     def set_core_memory(self, key: str, value: Any) -> Any:
@@ -59,7 +56,8 @@ class Memory:
             Any: The stored value.
         """
         self.core[key] = value
-        return self.core.get(key)
+        self.mem0.store(f"{key}: {value}", user_id=self.user_id, metadata={"key": key})
+        return value
 
     def retrieve_memory(self, key: str) -> Any:
         """
@@ -76,10 +74,10 @@ class Memory:
     def add_long_term_memory(
         self,
         memory: str,
-        user_id: str = "default",
+        user_id: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ):
-        self.mem0.add(memory, user_id=user_id, metadata=metadata)
+        self.mem0.store(memory, user_id=user_id or self.user_id, metadata=metadata)
 
     def add_short_term_memory(self, memory: Dict[str, Any]):
         self.short_term.append(memory)
@@ -89,7 +87,7 @@ class Memory:
     def get_all_memories(self) -> Dict[str, Any]:
         return {
             "core": self.core,
-            "long_term": self.mem0.get_all(),
+            "long_term": self.mem0.retrieve(user_id=self.user_id),
             "short_term": self.short_term,
         }
 
