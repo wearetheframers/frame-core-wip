@@ -122,6 +122,23 @@ When loading plugins, Frame checks for conflicting action names across all plugi
 
 This behavior ensures that the system remains stable while still allowing for a wide range of plugins to be loaded. Developers should be aware of this behavior and design their plugins accordingly, using unique action names when possible.
 
+#### Best Practices for Plugin Developers
+
+To avoid conflicts and ensure your plugin's actions are loaded successfully:
+
+1. Use unique and descriptive names for your actions.
+2. Prefix action names with your plugin name (e.g., `weather_get_forecast` instead of just `get_forecast`).
+3. Document all action names provided by your plugin clearly in its documentation.
+4. If your plugin is designed to override or replace actions from another plugin, clearly state this in the documentation and consider providing a way to disable the conflicting actions.
+
+When loading plugins, Frame checks for conflicting action names across all plugins. If a conflict is detected:
+
+1. A warning message is logged for each conflicting action.
+2. Only the first occurrence of an action name is kept and made available for use.
+3. Subsequent actions with the same name are skipped.
+
+This behavior ensures that the system remains stable while still allowing for a wide range of plugins to be loaded. Developers should be aware of this behavior and design their plugins accordingly, using unique action names when possible.
+
 ## Best Practices
 
 When creating plugins, consider the following best practices:
