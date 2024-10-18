@@ -419,7 +419,11 @@ class Agency:
         """
         roles = await self.generate_roles()
         goals = await self.generate_goals()
-        return roles, goals
+        if self.roles is None:
+            self.roles = roles
+        if self.goals is None:
+            self.goals = goals
+        return self.roles, self.goals
 
     async def execute_task(self, task: Task) -> str:
         """
