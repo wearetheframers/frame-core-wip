@@ -6,6 +6,8 @@ It supports both global and multi-user memory contexts, as well as different typ
 
 This is achieved using the MemoryService and Mem0Adapter, which abstract away the underlying storage solution and provide a flexible interface for memory operations. The architecture allows for easy swapping of memory components, offering alternatives like RAG with the same interface but different underlying drivers.
 
+The `memory` service functions like a plugin but does not require explicit permissions to be accessed. It is always available to Framers, providing essential memory management capabilities.
+
 ## Memory Types
 
 1. **Core Memory**: Essential, unchanging information about the Framer.

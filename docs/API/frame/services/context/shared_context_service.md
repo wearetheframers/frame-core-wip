@@ -14,6 +14,8 @@ shared_context_service.set_shared_goals("framer_id_1", ["goal1", "goal2"])
 
 ## Related Components
 
+The `shared_context` service functions like a plugin but does not require explicit permissions to be accessed. It is always available to Framers, enabling them to manage shared roles and goals effectively.
+
 - **Context Service**: Provides the base functionality for managing roles and goals.
 - **Framer**: Uses the Shared Context Service to collaborate with other Framers.
 

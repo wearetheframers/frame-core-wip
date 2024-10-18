@@ -19,6 +19,12 @@ The `Framer` class represents an AI agent with cognitive capabilities. It integr
 
 ## Key Components
 
+Framers include several default plugins and services that are automatically available. These include:
+
+- **Services**: `memory`, `eq`, and `shared_context` are special plugins called services. They function like plugins but do not require explicit permissions to be accessed. They are always available to Framers, enhancing their capabilities by providing essential functionalities without the need for additional permissions.
+
+- **Default Plugin**: The `Mem0SearchExtractSummarizePlugin` is included as a default plugin. It provides a mechanism to look into memories, retrieve relevant information, and share insights, functioning as a Retrieval-Augmented Generation (RAG) mechanism. By default, all Framers inherit this action, enabling them to search, extract, and summarize information effectively.
+
 ### Agency
 
 Manages roles, goals, and tasks for the Framer. 

@@ -22,7 +22,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         self.register_action(
             "mem0_search_extract_summarize",
             self.mem0_search_extract_summarize,
-            "Search Mem0 for a query, extract information, and summarize the results",
+            "Search Mem0 for a query, extract information, and summarize the results. This action involves looking into the Framer's memories to retrieve relevant information and provide a comprehensive answer or share insights based on stored memories.",
         )
 
         # Add a new role for Mem0 searching and summarizing

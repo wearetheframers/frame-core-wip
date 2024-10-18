@@ -4,7 +4,7 @@ from frame.src.framer.agency.actions import BaseAction
 
 class RespondAction(BaseAction):
     def __init__(self):
-        super().__init__("respond", "Generate a response based on the current context")
+        super().__init__("respond", "Generate a default response based on the current context if no memory retrieval is needed.")
 
     async def execute(
         self, execution_context: ExecutionContext, **kwargs

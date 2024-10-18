@@ -17,9 +17,13 @@ Frame features a plugin marketplace where premium plugins and community plugins 
 
 ## Default Plugins and Services
 
-Frame includes several default plugins known as services, such as `memory`, `eq`, and `shared_context`. These services operate much like plugins but do not require explicit permissions to be accessed. They are automatically available to Framers when included in the configuration. However, you still need to pass them into a Framer to have access to them.
+Frame includes several default plugins and services that are automatically available to Framers. These include:
 
-These services enhance the Framer's capabilities by providing essential functionalities without the need for additional permissions, making them integral to the Framer's operation.
+- **Services**: `memory`, `eq`, and `shared_context` are special plugins called services. They function like plugins but do not require explicit permissions to be accessed. They are always available to Framers, enhancing their capabilities by providing essential functionalities without the need for additional permissions.
+
+- **Default Plugin**: The `Mem0SearchExtractSummarizePlugin` is included as a default plugin. It provides a mechanism to look into memories, retrieve relevant information, and share insights, functioning as a Retrieval-Augmented Generation (RAG) mechanism. By default, all Framers inherit this action, enabling them to search, extract, and summarize information effectively.
+
+To add a plugin as a default, simply include its permission in the FramerConfig. This ensures that the plugin is automatically available to all Framers without needing to specify it each time.
 
 ## Plugin Permissions
 
