@@ -108,7 +108,7 @@ class Mem0Adapter(MemoryAdapterInterface):
         """
         return self.memories.get(user_id, [])
 
-    def search(self, query: str, user_id: str = "default") -> List[Dict[str, Any]]:
+    def search(self, query: str, user_id: str = "default", limit: int = 10) -> List[Dict[str, Any]]:
         """
         Search for memory entries containing the query string for a specific user.
 
@@ -123,7 +123,7 @@ class Mem0Adapter(MemoryAdapterInterface):
             mem
             for mem in self.memories.get(user_id, [])
             if query.lower() in str(mem["memory"]).lower()
-        ]
+        ][:limit]
 
     def history(self, memory_id: int, user_id: str = "default") -> List[str]:
         """
