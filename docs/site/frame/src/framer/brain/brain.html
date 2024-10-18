@@ -272,16 +272,25 @@ VALID_ACTIONS are derived from the ActionRegistry and default actions.</p>
 
         # Check if the action is valid
         if action not in valid_actions:
-            invalid_action = action
-            action = &#34;respond&#34;
-            logger.warning(
-                f&#34;Invalid action &#39;{invalid_action}&#39; generated. &#34;
-                f&#34;Valid actions are: {&#39;, &#39;.join(valid_actions)}&#34;
-            )
-            decision_data[&#34;action&#34;] = action
-            decision_data[&#34;reasoning&#34;] = (
-                f&#34;Invalid action &#39;{invalid_action}&#39; was generated. Defaulted to &#39;{action}&#39;.&#34;
-            )
+            # If the action is not valid, check if it&#39;s related to web search or summarization
+            if any(keyword in action for keyword in [&#34;search&#34;, &#34;summarize&#34;, &#34;extract&#34;]):
+                action = &#34;search_extract_summarize&#34;
+                decision_data[&#34;action&#34;] = action
+                decision_data[&#34;reasoning&#34;] = (
+                    f&#34;Action &#39;{action}&#39; was generated based on the perception. &#34;
+                    f&#34;Using the search_extract_summarize plugin to process this request.&#34;
+                )
+            else:
+                invalid_action = action
+                action = &#34;respond&#34;
+                logger.warning(
+                    f&#34;Invalid action &#39;{invalid_action}&#39; generated. &#34;
+                    f&#34;Valid actions are: {&#39;, &#39;.join(valid_actions)}&#34;
+                )
+                decision_data[&#34;action&#34;] = action
+                decision_data[&#34;reasoning&#34;] = (
+                    f&#34;Invalid action &#39;{invalid_action}&#39; was generated. Defaulted to &#39;{action}&#39;.&#34;
+                )
 
         logger.info(f&#34;Action &#39;{action}&#39; generated: {decision_data}&#34;)
 

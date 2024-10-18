@@ -12,7 +12,9 @@ Frame is the main interface for creating and managing Framer instances in the Fr
 ## Key Features
 
 - Creation and management of Framer and Framed instances
-- Extensible architecture with plugin engine
+- Extensible architecture with a powerful plugin engine
+- Support for a plugin marketplace, allowing for premium and community plugins
+- Flexible plugin system inspired by game mods, enabling unlimited expansions and customizations
 
 ### Attributes
 

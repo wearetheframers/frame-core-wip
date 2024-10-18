@@ -3,11 +3,13 @@ title: Plugins and Actions
 weight: 50
 ---
 
-Frame provides a powerful plugin system that allows you to extend the functionality of Framers by adding new actions. This document explains how to create, register, and use plugins and actions in the Frame framework.
+Frame provides a powerful and flexible plugin system that allows you to extend the functionality of Framers by adding new actions. This system is designed to be as expansive and customizable as mods in games, allowing for unlimited plugins and expansions to be developed. This document explains how to create, register, and use plugins and actions in the Frame framework.
 
 ## Introduction
 
 Plugins in Frame are essentially new actions that can be added to the `ActionRegistry`. These actions can be used by Framers to perform specific tasks or integrate with external services. By creating plugins, you can extend the capabilities of your AI agents to handle domain-specific tasks or interact with custom APIs.
+
+Frame will feature a plugin marketplace where premium plugins and community plugins can be developed, given away, or sold. This marketplace will foster a rich ecosystem of extensions and customizations, similar to mod communities in popular games.
 
 ## Action Component
 

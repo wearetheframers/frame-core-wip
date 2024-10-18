@@ -71,30 +71,6 @@ processing perceptions, making decisions, and executing tasks.</p>
 <dd>Determines if decisions are executed automatically. Default is True.</dd>
 <dt><strong><code>acting</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Indicates if the Framer is actively processing perceptions. Default is False.</dd>
-</dl>
-<p>Initialize a Framer instance.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>config</code></strong> :&ensp;<code>FramerConfig</code></dt>
-<dd>Configuration settings for the Framer.</dd>
-<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
-<dd>The language model service to be used by the Framer.</dd>
-<dt><strong><code>agency</code></strong> :&ensp;<code>Agency</code></dt>
-<dd>Manages roles, goals, tasks, and workflows for the Framer.</dd>
-<dt><strong><code>brain</code></strong> :&ensp;<code>Brain</code></dt>
-<dd>Handles decision-making processes, integrating perceptions, memories, and thoughts.</dd>
-<dt><strong><code>soul</code></strong> :&ensp;<code>Soul</code></dt>
-<dd>Represents the core essence and personality of a Framer.</dd>
-<dt><strong><code>workflow_manager</code></strong> :&ensp;<code>WorkflowManager</code></dt>
-<dd>Manages workflows and tasks.</dd>
-<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
-<dd>Service for managing memory. Default is None.</dd>
-<dt><strong><code>eq_service</code></strong> :&ensp;<code>Optional[EQService]</code></dt>
-<dd>Service for managing emotional intelligence. Default is None.</dd>
-<dt><strong><code>roles</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
-<dd>List of roles for the Framer. Default is None.</dd>
-<dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
-<dd>List of goals for the Framer. Default is None.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -135,6 +111,15 @@ processing perceptions, making decisions, and executing tasks.</p>
         roles: List[Dict[str, Any]] = [],
         goals: List[Dict[str, Any]] = [],
     ):
+        # Existing initialization code...
+
+        # Initialize the SearchExtractSummarizePlugin if available
+        try:
+            from frame.src.plugins.search_extract_summarize_plugin import SearchExtractSummarizePlugin
+            self.search_extract_summarize_plugin = SearchExtractSummarizePlugin(self)
+            self.plugins[&#34;search_extract_summarize&#34;] = self.search_extract_summarize_plugin
+        except ImportError:
+            self.logger.warning(&#34;SearchExtractSummarizePlugin is not available. To use it, install the required dependencies.&#34;)
         &#34;&#34;&#34;
         Initialize a Framer instance.
 
@@ -246,6 +231,10 @@ processing perceptions, making decisions, and executing tasks.</p>
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
+
+        # Load the SearchExtractSummarizePlugin
+        await self.search_extract_summarize_plugin.on_load()
+
         self.act()  # Start acting after initialization
 
     async def export_to_file(self, file_path: str, llm) -&gt; None:

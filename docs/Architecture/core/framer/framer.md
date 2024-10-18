@@ -61,6 +61,18 @@ memory_entry = framer.brain.memory.get("important_concept")
 framer.brain.memory.store("new_information", "This is a new piece of information")
 ```
 
+### Plugin System
+
+Framers support a robust plugin system, allowing for extensive customization and expansion of capabilities. This system is designed to be as flexible and powerful as mods in games, enabling developers to create a wide range of extensions and enhancements.
+
+```python
+# Example of using a plugin
+from frame.plugins import CustomPlugin
+
+framer.add_plugin(CustomPlugin())
+result = framer.use_plugin("custom_plugin", some_data)
+```
+
 ### Emotional Intelligence
 
 The Soul component of a Framer can be configured to simulate emotional states and responses. This feature is still in development and will allow for more nuanced and human-like interactions.

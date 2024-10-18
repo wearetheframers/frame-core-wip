@@ -1,6 +1,6 @@
 # Goals
 
-::: frame.src.framer.agency.goals.Goals
+::: frame.src.framer.agency.Goals
     options:
       show_root_heading: false
       show_source: false

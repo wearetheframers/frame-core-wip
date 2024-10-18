@@ -70,6 +70,11 @@ decision = await framer.prompt("What is the current status of our efficiency goa
 
 # Perform a task
 result = await framer.perform_task(task)
+
+# Use a plugin
+plugin_result = framer.use_plugin("custom_plugin", plugin_data)
 ```
 
 The Framer's decision-making process takes into account the status of each goal (ACTIVE, COMPLETED, ABANDONED) and the currently active roles, prioritizing actions that align with active goals and roles, and adapting its behavior as goals are completed or abandoned.
+
+The plugin system allows for extensive customization and expansion of the Framer's capabilities, similar to how mods work in games. This enables developers to create a wide range of extensions and enhancements, potentially available through a plugin marketplace.

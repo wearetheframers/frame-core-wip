@@ -95,7 +95,7 @@ validated to form a valid model.</p>
     )
     source: Optional[str] = Field(None, description=&#34;The source of the perception&#34;)
     timestamp: datetime = Field(
-        default_factory=datetime.now,
+        default_factory=datetime.utcnow,
         description=&#34;The timestamp of when the perception was created&#34;,
     )
 

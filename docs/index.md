@@ -116,3 +116,11 @@ Join our community to get help, share ideas, and collaborate:
 Stay updated on our future plans and upcoming features by checking our [[roadmap]].
 
 We hope you find Frame useful for your AI agent development needs. Happy coding!
+
+## Plugin Marketplace
+
+Frame will feature a robust plugin marketplace where developers can create, share, and potentially sell their custom plugins. This marketplace will include both premium and community-developed plugins, fostering a rich ecosystem of extensions and customizations.
+
+The plugin system in Frame is designed to be as flexible and powerful as mods in games. It includes conflict resolvers and allows for essentially unlimited plugins and expansions to be developed. This approach enables developers to create a wide range of enhancements and specialized functionalities, tailoring Frame to diverse use cases and requirements.
+
+For more information on creating and using plugins, see our [[plugins]] documentation.

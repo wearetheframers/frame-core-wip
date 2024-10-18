@@ -15,6 +15,7 @@ The Frame component serves as the main interface for creating and managing Frame
 - Creating individual Framers with specific roles and goals.
 - Managing LLM services and model interactions. Note: DSPy does not support streaming mode.
 - Creating Framed groups for multi-agent coordination.
+- Supporting a plugin system for extending functionality, including a marketplace for premium and community plugins.
 
 ## Related Components
 
