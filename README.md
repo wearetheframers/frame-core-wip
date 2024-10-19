@@ -236,7 +236,9 @@ async def main():
 asyncio.run(main())
 ```
 
-This example demonstrates how to create a plugin that fetches weather information for a specific location if given, register it with a Framer, and execute its actions, all in natural conversation.
+The Framer intelligently chooses the best decision / action to take based on the perception (in this case a user message), conversational history, assigned roles, assigned goals, soul state, and the priority levels and descriptions of the other actions.
+
+A plugin can also remove actions from the action registry whenever a plugin is loaded (though this could result in unexpected behavior for other plugins). This can help ensure more safe and restricted behavior, or enforce specific types of behavioral flows for the Framer. An example of this is in `examples/autonomous_vehicle/`.
 
 ## Enterprise / Commerical Support
 
