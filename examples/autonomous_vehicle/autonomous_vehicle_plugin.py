@@ -46,7 +46,7 @@ class StopVehicleAction(BaseAction):
         self.vehicle_plugin = vehicle_plugin
 
     async def execute(self, execution_context: ExecutionContext, **kwargs) -> str:
-        result = self.vehicle_plugin.stop_vehicle()
+        result = await self.vehicle_plugin.stop_vehicle()
         print(f"{execution_context.config.name}: {result}")
         await asyncio.sleep(0.1)
         return result
@@ -62,7 +62,7 @@ class SlowDownVehicleAction(BaseAction):
         self.vehicle_plugin = vehicle_plugin
 
     async def execute(self, execution_context: ExecutionContext, **kwargs) -> str:
-        result = self.vehicle_plugin.slow_down_vehicle()
+        result = await self.vehicle_plugin.slow_down_vehicle()
         print(f"{execution_context.config.name}: {result}")
         await asyncio.sleep(0.1)
         return result
@@ -78,7 +78,7 @@ class ChangeLaneAction(BaseAction):
         self.vehicle_plugin = vehicle_plugin
 
     async def execute(self, execution_context: ExecutionContext, **kwargs) -> str:
-        result = self.vehicle_plugin.change_lane()
+        result = await self.vehicle_plugin.change_lane()
         print(f"{execution_context.config.name}: {result}")
         await asyncio.sleep(0.1)
         return result

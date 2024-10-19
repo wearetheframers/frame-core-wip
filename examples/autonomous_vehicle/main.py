@@ -14,6 +14,11 @@ from frame.src.framer.agency.priority import Priority
 from frame.src.framer.brain.decision import Decision
 from frame.src.framer.agency.action_registry import ActionRegistry
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger.addHandler(handler)
 
 class ProcessPerceptionAction(BaseAction):
     """
@@ -31,9 +36,9 @@ class ProcessPerceptionAction(BaseAction):
         )
 
     async def execute(self, execution_context: ExecutionContext, perception: Dict[str, Any]) -> str:
-        print(f"\nProcessing perception: {perception}")
+        logger.info(f"\nProcessing perception: {perception}")
         decision = await execution_context.process_perception(perception)
-        print(f"Decision made: {decision}")
+        logger.info(f"Decision made: {decision}")
 
         if isinstance(decision, Decision):
             await execution_context.execute_decision(decision)
@@ -43,11 +48,6 @@ class ProcessPerceptionAction(BaseAction):
 
 
 async def main():
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-    logger.addHandler(handler)
     frame = Frame()
     config = FramerConfig(name="AutonomousVehicleFramer")
     framer = await frame.framer_factory.create_framer(config, plugins=frame.plugins)
@@ -108,11 +108,16 @@ async def main():
 
     for perception in perceptions:
         logger.info(f"Processing perception: {perception}")
+        # The sense method allows the Framer to choose any type of action from its behavior,
+        # though it intelligently chooses the most relevant / urgent action to take
+        # decision = await framer.sense(perception)
+        # You could instead enforce a specific action like so
         decision = await framer.sense(perception)
+        # The process_perception action we've defined results in a new action or decision based on the perception
         logger.info(f"Decision made: {decision}")
         if decision:
             result = await framer.brain.agency.execute_action(decision.action, decision.parameters)
-            print(result)
+            logger.info(f"Decision result: {result}")
         else:
             logger.warning("No decision was made.")
         await asyncio.sleep(1)
