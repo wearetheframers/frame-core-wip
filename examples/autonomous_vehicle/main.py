@@ -52,9 +52,11 @@ async def main():
     config = FramerConfig(name="AutonomousVehicleFramer")
     framer = await frame.framer_factory.create_framer(config, plugins=frame.plugins)
 
-
     # This completely replaces the ActionRegistry and the default actions in the original Framer
+    # (By default Framers come with an ActionRegistry created so there's no need to pass one)
     action_registry = ActionRegistry()
+    action_registry.actions = {}
+    action_registry.valid_actions = []
 
     # We must set our newly created Action Registry to our Framer's execution_context
     action_registry.execution_context = framer.brain.agency.execution_context
