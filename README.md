@@ -278,10 +278,6 @@ async def main():
     weather_plugin = WeatherPlugin(framer)
     framer.plugins["weather_plugin"] = weather_plugin
 
-    # Register the plugin
-    weather_plugin = WeatherPlugin(framer)
-    framer.plugins["weather_plugin"] = weather_plugin
-
     # Use the plugin with a prompt
     response = await framer.prompt("How's the weather today in NY?")
     print(f"Response using prompt: {response}")
