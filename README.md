@@ -50,23 +50,23 @@ Frame
     │   └── Core Traits
     ├── Context
     ├── Observers
-    └── ActionRegistry
+    └── Action Registry
 Framed
 └── Multiple Framers
-LLM Adapters
-├── DSPy Adapter
-├── HuggingFace Adapter
-└── LMQL Adapter
 Services
-├── LLMService
-│   ├── DSPy Adapter
-│   ├── HuggingFace Adapter
-│   └── LMQL Adapter
-├── MemoryService
+├── LLM Service
+│   └── LLM Adapters
+│       └── DSPy Adapter
+│       └── HuggingFace Adapter
+│       └── LMQL Adapter
+├── Memory Service
 │   └── Memory Adapters
-│       └── Mem0Adapter
-├── EQService
-└── ContextService
+│       └── Mem0 Adapter
+├── EQ Service
+└── Context Service
+│   └── Execution Context
+│   └── Local Context
+│   └── Shared Context
 ```
 
 ## Agent Flow
