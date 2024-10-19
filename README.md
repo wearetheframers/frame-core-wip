@@ -111,6 +111,25 @@ docker build -t frame .
 
 Here's a simple example to get started with Frame:
 
+```python
+from frame import Frame, FramerConfig
+
+# Initialize Frame
+frame = Frame()
+
+# Create a Framer instance
+config = FramerConfig(name="Example Framer", default_model="gpt-4o-mini")
+framer = await frame.create_framer(config)
+
+# Define a task
+task = {"name": "Engage", "description": "Engage in a deep conversation"}
+result = await framer.perform_task(task)
+print(f"Task result: {result}")
+
+# Clean up
+await framer.close()
+```
+
 ## Chatbot Interaction Example
 
 This example demonstrates how to interact with Frame like a chatbot using both the `prompt` method and the `sense` method with a perception of hearing. Both methods achieve the same result.
