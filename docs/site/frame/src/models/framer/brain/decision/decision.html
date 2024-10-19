@@ -100,8 +100,8 @@ validated to form a valid model.</p>
     confidence: float = Field(
         default=0.7, ge=0, le=1, description=&#34;Confidence level of the decision&#34;
     )
-    priority: Union[int, str] = Field(
-        default=1, description=&#34;Priority of the decision&#34;
+    priority: Union[Priority, int] = Field(
+        default=Priority.MEDIUM, description=&#34;Priority of the decision&#34;
     )
     task_status: TaskStatus = Field(
         default=TaskStatus.PENDING, description=&#34;Status of the associated task&#34;
@@ -167,7 +167,7 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.brain.decision.decision.Decision.priority"><code class="name">var <span class="ident">priority</span> : Union[str, int]</code></dt>
+<dt id="frame.src.models.framer.brain.decision.decision.Decision.priority"><code class="name">var <span class="ident">priority</span> : Union[<a title="frame.src.framer.agency.priority.Priority" href="../../../../framer/agency/priority.html#frame.src.framer.agency.priority.Priority">Priority</a>, int]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>

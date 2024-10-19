@@ -320,7 +320,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
         super().__init__(
             &#34;observe&#34;,
             &#34;Process an observation and generate insights or actions&#34;,
-            Priority.MEDIUM,
+            1,
         )
 
     async def execute(
@@ -404,7 +404,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
         super().__init__(
             &#34;research&#34;,
             &#34;Perform research on a given topic and summarize findings&#34;,
-            Priority.HIGH,
+            5,
         )
 
     async def execute(
@@ -491,7 +491,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </summary>
 <pre><code class="python">class RespondAction(BaseAction):
     def __init__(self):
-        super().__init__(&#34;respond&#34;, &#34;Generate a response based on the current context&#34;)
+        super().__init__(&#34;respond&#34;, &#34;Generate a default response based on the current context if NO memory retrieval is needed. If any type of personal information or questions about some previously saved or stored or recorded information is referenced, then likely this respond action is not appropriate and we need to use the memory response.&#34;, 2)
 
     async def execute(
         self, execution_context: ExecutionContext, **kwargs
@@ -602,7 +602,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <pre><code class="python">class ThinkAction(BaseAction):
     def __init__(self):
         super().__init__(
-            &#34;think&#34;, &#34;Ponder and reflect on the current situation&#34;, Priority.HIGH
+            &#34;think&#34;, &#34;Ponder and reflect on the current situation and current state of self.&#34;, 1
         )
 
     async def execute(

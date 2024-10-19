@@ -48,7 +48,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <pre><code class="python">class ThinkAction(BaseAction):
     def __init__(self):
         super().__init__(
-            &#34;think&#34;, &#34;Ponder and reflect on the current situation&#34;, Priority.HIGH
+            &#34;think&#34;, &#34;Ponder and reflect on the current situation and current state of self.&#34;, 1
         )
 
     async def execute(

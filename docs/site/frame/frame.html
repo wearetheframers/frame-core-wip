@@ -141,7 +141,8 @@ model to be used for completions and loads plugins.</p>
         self.plugins_dir = plugins_dir or os.path.join(
             os.path.dirname(__file__), &#34;src&#34;, &#34;plugins&#34;
         )
-        self.plugins = load_plugins(self.plugins_dir)
+        self.plugins = {}
+        self.is_loading_plugins = False
 
     def set_plugins_dir(self, plugins_dir: str):
         &#34;&#34;&#34;
@@ -153,7 +154,13 @@ model to be used for completions and loads plugins.</p>
         self.plugins_dir = plugins_dir
         self.plugins = load_plugins(self.plugins_dir)
 
-    async def create_framer(self, config: FramerConfig, **kwargs: Any) -&gt; &#34;Framer&#34;:
+    def create_framer(self, config: FramerConfig, **kwargs: Any) -&gt; Framer:
+        &#34;&#34;&#34;
+        Load plugins from the specified plugins directory.
+        &#34;&#34;&#34;
+        self.is_loading_plugins = True
+        self.plugins = load_plugins(self.plugins_dir)
+        self.is_loading_plugins = False
         &#34;&#34;&#34;
         Create a new Framer instance.
 
@@ -170,7 +177,7 @@ model to be used for completions and loads plugins.</p>
             Framer: A new Framer instance, fully configured and ready to use.
         &#34;&#34;&#34;
         framer_builder = FramerBuilder(config, self.llm_service)
-        return await framer_builder.build()
+        return framer_builder.build()
 
     def load_framer_from_file(self, file_path: str) -&gt; Framer:
         return Framer.load_from_file(file_path, self.llm_service)
@@ -311,26 +318,10 @@ the current language model service.</p>
 </dl></div>
 </dd>
 <dt id="frame.frame.Frame.create_framer"><code class="name flex">
-<span>async def <span class="ident">create_framer</span></span>(<span>self, config: <a title="frame.src.framer.config.FramerConfig" href="src/framer/config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, **kwargs: Any) ‑> <a title="frame.src.framer.framer.Framer" href="src/framer/framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+<span>def <span class="ident">create_framer</span></span>(<span>self, config: <a title="frame.src.framer.config.FramerConfig" href="src/framer/config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, **kwargs: Any) ‑> <a title="frame.src.framer.framer.Framer" href="src/framer/framer.html#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a new Framer instance.</p>
-<p>This method uses the FramerBuilder to construct a new Framer based on
-the provided configuration. It encapsulates the complexity of Framer
-creation and ensures that each Framer is properly initialized with
-the current language model service.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>config</code></strong> :&ensp;<code>FramerConfig</code></dt>
-<dd>Configuration for the new Framer.</dd>
-<dt><strong><code>**kwargs</code></strong></dt>
-<dd>Additional keyword arguments to pass to the FramerBuilder.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Framer</code></dt>
-<dd>A new Framer instance, fully configured and ready to use.</dd>
-</dl></div>
+<div class="desc"><p>Load plugins from the specified plugins directory.</p></div>
 </dd>
 <dt id="frame.frame.Frame.get_completion"><code class="name flex">
 <span>async def <span class="ident">get_completion</span></span>(<span>self, prompt: str, **kwargs)</span>

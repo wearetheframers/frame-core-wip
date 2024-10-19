@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
-<title>frame.src.framer.agency.actions.research API documentation</title>
+<title>frame.examples.framer_memory_interaction API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -22,7 +22,7 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>frame.src.framer.agency.actions.research</code></h1>
+<h1 class="title">Module <code>frame.examples.framer_memory_interaction</code></h1>
 </header>
 <section id="section-intro">
 </section>
@@ -31,101 +31,17 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="frame.examples.framer_memory_interaction.main"><code class="name flex">
+<span>async def <span class="ident">main</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 </section>
 <section>
-<h2 class="section-title" id="header-classes">Classes</h2>
-<dl>
-<dt id="frame.src.framer.agency.actions.research.ResearchAction"><code class="flex name class">
-<span>class <span class="ident">ResearchAction</span></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Base class for all actions in the Frame framework.
-Actions can create Tasks, which can enforce output types.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ResearchAction(BaseAction):
-    def __init__(self):
-        super().__init__(
-            &#34;research&#34;,
-            &#34;Perform research on a given topic and summarize findings&#34;,
-            5,
-        )
-
-    async def execute(
-        self, execution_context: ExecutionContext, research_topic: str
-    ) -&gt; Dict[str, Any]:
-        &#34;&#34;&#34;
-        Perform research on a given topic and summarize findings.
-
-        Args:
-            execution_context (ExecutionContext): The execution context containing necessary services.
-            research_topic (str): The research topic.
-
-        Returns:
-            Dict[str, Any]: A dictionary containing the research findings and any additional information.
-        &#34;&#34;&#34;
-        print(f&#34;Performing research on topic: {research_topic}&#34;)
-
-        if execution_context.llm_service is None:
-            return {
-                &#34;error&#34;: f&#34;Unable to perform research on &#39;{research_topic}&#39; due to missing LLM service.&#34;
-            }
-
-        # Use the LLM service from the execution context
-        result = await execution_context.llm_service.get_completion(
-            f&#34;Provide a summary of the latest developments and top libraries for {research_topic}&#34;,
-            model=execution_context.llm_service.default_model,
-        )
-
-        # If memory service is available, store the research results
-        if execution_context.memory_service:
-            await execution_context.memory_service.add_memory(
-                f&#34;Research on {research_topic}&#34;, result
-            )
-
-        return {
-            &#34;topic&#34;: research_topic,
-            &#34;findings&#34;: result,
-            &#34;summary&#34;: f&#34;Research findings for topic &#39;{research_topic}&#39;:\n{result}&#34;,
-        }</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="frame.src.framer.agency.actions.research.ResearchAction.execute"><code class="name flex">
-<span>async def <span class="ident">execute</span></span>(<span>self, execution_context: <a title="frame.src.services.execution_context.ExecutionContext" href="../../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>, research_topic: str) ‑> Dict[str, Any]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Perform research on a given topic and summarize findings.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
-<dd>The execution context containing necessary services.</dd>
-<dt><strong><code>research_topic</code></strong> :&ensp;<code>str</code></dt>
-<dd>The research topic.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Dict[str, Any]</code></dt>
-<dd>A dictionary containing the research findings and any additional information.</dd>
-</dl></div>
-</dd>
-</dl>
-<h3>Inherited members</h3>
-<ul class="hlist">
-<li><code><b><a title="frame.src.framer.agency.actions.base.BaseAction" href="base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a></b></code>:
-<ul class="hlist">
-<li><code><a title="frame.src.framer.agency.actions.base.BaseAction.create_task" href="base.html#frame.src.framer.agency.actions.base.BaseAction.create_task">create_task</a></code></li>
-</ul>
-</li>
-</ul>
-</dd>
-</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -135,17 +51,12 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="frame.src.framer.agency.actions" href="index.html">frame.src.framer.agency.actions</a></code></li>
+<li><code><a title="frame.examples" href="index.html">frame.examples</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="frame.src.framer.agency.actions.research.ResearchAction" href="#frame.src.framer.agency.actions.research.ResearchAction">ResearchAction</a></code></h4>
+<li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="frame.src.framer.agency.actions.research.ResearchAction.execute" href="#frame.src.framer.agency.actions.research.ResearchAction.execute">execute</a></code></li>
-</ul>
-</li>
+<li><code><a title="frame.examples.framer_memory_interaction.main" href="#frame.examples.framer_memory_interaction.main">main</a></code></li>
 </ul>
 </li>
 </ul>

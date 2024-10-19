@@ -60,7 +60,7 @@ hljs.highlightAll();
     @classmethod
     def from_string(cls, value: Union[str, int]) -&gt; &#34;Priority&#34;:
         if isinstance(value, int):
-            return cls(value)
+            return cls(min(max(value, 1), 10))
         string_to_priority = {
             &#34;lowest&#34;: cls.LOWEST,
             &#34;very low&#34;: cls.VERY_LOW,

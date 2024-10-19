@@ -78,6 +78,20 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         &#34;&#34;&#34;
         self.framer = framer
 
+    def remove_action(self, name: str):
+        &#34;&#34;&#34;
+        Remove an action from the action registry by its name.
+
+        Args:
+            name (str): The name of the action to remove.
+        &#34;&#34;&#34;
+        if name in self.framer.brain.action_registry.actions:
+            # del self.framer.brain.action_registry.actions[name]
+            self.framer.brain.action_registry.remove_action(name)
+            print(f&#34;Action &#39;{name}&#39; removed from registry.&#34;)
+        else:
+            print(f&#34;Action &#39;{name}&#39; not found in registry.&#34;)
+
     @abstractmethod
     async def on_load(self):
         &#34;&#34;&#34;
@@ -88,7 +102,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         &#34;&#34;&#34;
         pass
 
-    def register_action(self, name: str, func: callable, description: str):
+    def add_action(self, name: str, func: callable, description: str, priority: Priority = Priority.MEDIUM):
         &#34;&#34;&#34;
         Register an action with the Framer&#39;s action registry.
 
@@ -99,7 +113,9 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
             func (callable): The function to be called when the action is performed.
             description (str): A brief description of what the action does.
         &#34;&#34;&#34;
-        self.framer.brain.action_registry.register_action(name, func, description)
+        print(&#34;Registering action: &#34;, name)
+        self.framer.brain.action_registry.add_action(name, func, description, priority)
+        print(&#34;Registered to Framer action registry: &#34;, self.framer.brain.action_registry.actions)
 
     @abstractmethod
     async def execute(self, action: str, params: Dict[str, Any]) -&gt; Any:
@@ -129,6 +145,22 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 </ul>
 <h3>Methods</h3>
 <dl>
+<dt id="frame.src.framer.brain.plugins.base.BasePlugin.add_action"><code class="name flex">
+<span>def <span class="ident">add_action</span></span>(<span>self, name: str, func: <built-in function callable>, description: str, priority: <a title="frame.src.framer.agency.priority.Priority" href="../../agency/priority.html#frame.src.framer.agency.priority.Priority">Priority</a> = 5)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Register an action with the Framer's action registry.</p>
+<p>This method allows the plugin to add new actions that can be performed by the Framer.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the action.</dd>
+<dt><strong><code>func</code></strong> :&ensp;<code>callable</code></dt>
+<dd>The function to be called when the action is performed.</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code></dt>
+<dd>A brief description of what the action does.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.framer.brain.plugins.base.BasePlugin.execute"><code class="name flex">
 <span>async def <span class="ident">execute</span></span>(<span>self, action: str, params: Dict[str, Any]) ‑> Any</span>
 </code></dt>
@@ -157,20 +189,15 @@ plugin-specific actions.</p>
 <p>This method should be implemented by all plugin subclasses to perform
 any necessary initialization or setup when the plugin is loaded.</p></div>
 </dd>
-<dt id="frame.src.framer.brain.plugins.base.BasePlugin.register_action"><code class="name flex">
-<span>def <span class="ident">register_action</span></span>(<span>self, name: str, func: <built-in function callable>, description: str)</span>
+<dt id="frame.src.framer.brain.plugins.base.BasePlugin.remove_action"><code class="name flex">
+<span>def <span class="ident">remove_action</span></span>(<span>self, name: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Register an action with the Framer's action registry.</p>
-<p>This method allows the plugin to add new actions that can be performed by the Framer.</p>
+<div class="desc"><p>Remove an action from the action registry by its name.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>The name of the action.</dd>
-<dt><strong><code>func</code></strong> :&ensp;<code>callable</code></dt>
-<dd>The function to be called when the action is performed.</dd>
-<dt><strong><code>description</code></strong> :&ensp;<code>str</code></dt>
-<dd>A brief description of what the action does.</dd>
+<dd>The name of the action to remove.</dd>
 </dl></div>
 </dd>
 </dl>
@@ -238,9 +265,10 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 <ul class="hlist">
 <li><code><b><a title="frame.src.framer.brain.plugins.base.BasePlugin" href="#frame.src.framer.brain.plugins.base.BasePlugin">BasePlugin</a></b></code>:
 <ul class="hlist">
+<li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.add_action" href="#frame.src.framer.brain.plugins.base.BasePlugin.add_action">add_action</a></code></li>
 <li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.execute" href="#frame.src.framer.brain.plugins.base.BasePlugin.execute">execute</a></code></li>
 <li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.on_load" href="#frame.src.framer.brain.plugins.base.BasePlugin.on_load">on_load</a></code></li>
-<li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.register_action" href="#frame.src.framer.brain.plugins.base.BasePlugin.register_action">register_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.remove_action" href="#frame.src.framer.brain.plugins.base.BasePlugin.remove_action">remove_action</a></code></li>
 </ul>
 </li>
 </ul>
@@ -263,9 +291,10 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 <li>
 <h4><code><a title="frame.src.framer.brain.plugins.base.BasePlugin" href="#frame.src.framer.brain.plugins.base.BasePlugin">BasePlugin</a></code></h4>
 <ul class="">
+<li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.add_action" href="#frame.src.framer.brain.plugins.base.BasePlugin.add_action">add_action</a></code></li>
 <li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.execute" href="#frame.src.framer.brain.plugins.base.BasePlugin.execute">execute</a></code></li>
 <li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.on_load" href="#frame.src.framer.brain.plugins.base.BasePlugin.on_load">on_load</a></code></li>
-<li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.register_action" href="#frame.src.framer.brain.plugins.base.BasePlugin.register_action">register_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.plugins.base.BasePlugin.remove_action" href="#frame.src.framer.brain.plugins.base.BasePlugin.remove_action">remove_action</a></code></li>
 </ul>
 </li>
 <li>

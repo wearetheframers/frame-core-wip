@@ -94,18 +94,20 @@ validated to form a valid model.</p>
     priority: Priority = Field(default=Priority.MEDIUM)
     status: TaskStatus = TaskStatus.PENDING
     workflow_id: Optional[str] = None
-    expected_results: List[Any] = Field(default_factory=list)</code></pre>
+    expected_results: List[Any] = Field(default_factory=list)
+    updated_at: Optional[str] = None
+    created_at: Optional[str] = None</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.main.BaseModel</li>
 </ul>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="frame.src.framer.agency.tasks.task.Task" href="../../../../framer/agency/tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a></li>
-</ul>
 <h3>Class variables</h3>
 <dl>
+<dt id="frame.src.models.framer.agency.tasks.tasks.TaskModel.created_at"><code class="name">var <span class="ident">created_at</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.models.framer.agency.tasks.tasks.TaskModel.description"><code class="name">var <span class="ident">description</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
@@ -135,6 +137,10 @@ validated to form a valid model.</p>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.models.framer.agency.tasks.tasks.TaskModel.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.models.framer.agency.tasks.tasks.TaskStatus" href="#frame.src.models.framer.agency.tasks.tasks.TaskStatus">TaskStatus</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.models.framer.agency.tasks.tasks.TaskModel.updated_at"><code class="name">var <span class="ident">updated_at</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -336,6 +342,7 @@ validated to form a valid model.</p>
 <li>
 <h4><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel">TaskModel</a></code></h4>
 <ul class="">
+<li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.created_at" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.created_at">created_at</a></code></li>
 <li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.description" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.description">description</a></code></li>
 <li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.expected_results" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.expected_results">expected_results</a></code></li>
 <li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.id" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.id">id</a></code></li>
@@ -344,6 +351,7 @@ validated to form a valid model.</p>
 <li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.model_fields" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.model_fields">model_fields</a></code></li>
 <li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.priority" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.priority">priority</a></code></li>
 <li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.status" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.status">status</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.updated_at" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.updated_at">updated_at</a></code></li>
 <li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.workflow_id" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.workflow_id">workflow_id</a></code></li>
 </ul>
 </li>

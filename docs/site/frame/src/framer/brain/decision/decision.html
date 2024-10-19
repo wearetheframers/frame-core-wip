@@ -135,8 +135,13 @@ validated to form a valid model.</p>
             Decision: An instance of the Decision class.
         &#34;&#34;&#34;
         if isinstance(json_data, dict):
-            return cls(**json_data)
-        decision_dict = json.loads(json_data)
+            decision_dict = json_data
+        else:
+            decision_dict = json.loads(json_data)
+
+        # Convert priority from string or integer to Priority enum
+        decision_dict[&#34;priority&#34;] = Priority.from_value(decision_dict.get(&#34;priority&#34;, Priority.MEDIUM))
+
         return cls(**decision_dict)
 
     def to_dict(self) -&gt; Dict[str, Any]:

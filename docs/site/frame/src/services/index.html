@@ -758,10 +758,25 @@ It serves as a base class for more specialized local contexts.</p>
     def __init__(self, adapter):
         self.adapter = adapter
 
-    def add_memory(
+    def store(
         self, memory: str, user_id: str = &#34;default&#34;, metadata: Dict[str, Any] = None
     ):
-        self.adapter.add(memory, user_id, metadata)
+        self.adapter.store(memory, user_id, metadata)
+
+    def retrieve_memory(self, memory_id: int, user_id: str = &#34;default&#34;) -&gt; Optional[Any]:
+        return self.adapter.retrieve(memory_id, user_id)
+
+    def update_memory(self, memory_id: int, data: str, user_id: str = &#34;default&#34;):
+        self.adapter.update(memory_id, data, user_id)
+
+    def delete_memory(self, memory_id: int, user_id: str = &#34;default&#34;):
+        self.adapter.delete(memory_id, user_id)
+
+    def get_all_memories(self, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
+        return self.adapter.get_all(user_id)
+
+    def search_memories(self, query: str, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
+        return self.adapter.search(query, user_id)
 
     def get_all_memories(self, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
         return self.adapter.get_all(user_id)
@@ -779,8 +794,8 @@ It serves as a base class for more specialized local contexts.</p>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="frame.src.services.MemoryService.add_memory"><code class="name flex">
-<span>def <span class="ident">add_memory</span></span>(<span>self, memory: str, user_id: str = 'default', metadata: Dict[str, Any] = None)</span>
+<dt id="frame.src.services.MemoryService.delete_memory"><code class="name flex">
+<span>def <span class="ident">delete_memory</span></span>(<span>self, memory_id: int, user_id: str = 'default')</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -797,8 +812,20 @@ It serves as a base class for more specialized local contexts.</p>
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.services.MemoryService.retrieve_memory"><code class="name flex">
+<span>def <span class="ident">retrieve_memory</span></span>(<span>self, memory_id: int, user_id: str = 'default') ‑> Optional[Any]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.services.MemoryService.search_memories"><code class="name flex">
 <span>def <span class="ident">search_memories</span></span>(<span>self, query: str, user_id: str = 'default') ‑> List[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.MemoryService.store"><code class="name flex">
+<span>def <span class="ident">store</span></span>(<span>self, memory: str, user_id: str = 'default', metadata: Dict[str, Any] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -912,11 +939,13 @@ It serves as a base class for more specialized local contexts.</p>
 </li>
 <li>
 <h4><code><a title="frame.src.services.MemoryService" href="#frame.src.services.MemoryService">MemoryService</a></code></h4>
-<ul class="">
-<li><code><a title="frame.src.services.MemoryService.add_memory" href="#frame.src.services.MemoryService.add_memory">add_memory</a></code></li>
+<ul class="two-column">
+<li><code><a title="frame.src.services.MemoryService.delete_memory" href="#frame.src.services.MemoryService.delete_memory">delete_memory</a></code></li>
 <li><code><a title="frame.src.services.MemoryService.get_all_memories" href="#frame.src.services.MemoryService.get_all_memories">get_all_memories</a></code></li>
 <li><code><a title="frame.src.services.MemoryService.get_memory_history" href="#frame.src.services.MemoryService.get_memory_history">get_memory_history</a></code></li>
+<li><code><a title="frame.src.services.MemoryService.retrieve_memory" href="#frame.src.services.MemoryService.retrieve_memory">retrieve_memory</a></code></li>
 <li><code><a title="frame.src.services.MemoryService.search_memories" href="#frame.src.services.MemoryService.search_memories">search_memories</a></code></li>
+<li><code><a title="frame.src.services.MemoryService.store" href="#frame.src.services.MemoryService.store">store</a></code></li>
 <li><code><a title="frame.src.services.MemoryService.update_memory" href="#frame.src.services.MemoryService.update_memory">update_memory</a></code></li>
 </ul>
 </li>

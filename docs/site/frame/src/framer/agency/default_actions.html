@@ -34,23 +34,15 @@ hljs.highlightAll();
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="frame.src.framer.agency.default_actions.extend_valid_actions"><code class="name flex">
-<span>def <span class="ident">extend_valid_actions</span></span>(<span>new_actions: Dict[str, Dict[str, Any]]) ‑> None</span>
+<span>def <span class="ident">extend_valid_actions</span></span>(<span>new_actions: List[str]) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extend the VALID_ACTIONS dictionary with new actions.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>new_actions</code></strong> :&ensp;<code>Dict[str, Dict[str, Any]]</code></dt>
-<dd>A dictionary of new actions to add.</dd>
-</dl>
-<p>Each action should have the following structure:
-{
-"action_name": {
-"func": Callable,
-"description": str,
-"priority": int
-}
-}</p></div>
+<dt><strong><code>new_actions</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>A list of new actions to add.</dd>
+</dl></div>
 </dd>
 </dl>
 </section>

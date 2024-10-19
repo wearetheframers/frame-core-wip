@@ -135,6 +135,19 @@ validated to form a valid model.</p>
     goals: Optional[List[Dict[str, Any]]] = None
     recent_memories_limit: Optional[int] = 5
 
+    def get(self, key: str, default: Any = None) -&gt; Any:
+        &#34;&#34;&#34;
+        Retrieve the value of a configuration attribute safely.
+
+        Args:
+            key (str): The attribute name to retrieve.
+            default (Any): The default value to return if the attribute is not found.
+
+        Returns:
+            Any: The value of the attribute if it exists, otherwise the default value.
+        &#34;&#34;&#34;
+        return getattr(self, key, default)
+
     def __init__(self, **data):
         super().__init__(**data)
         if self.default_model:
@@ -277,6 +290,27 @@ It uses the FramerConfigModel to validate and set default values for the configu
 <div class="desc"></div>
 </dd>
 </dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.config.FramerConfig.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>self, key: str, default: Any = None) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve the value of a configuration attribute safely.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>key</code></strong> :&ensp;<code>str</code></dt>
+<dd>The attribute name to retrieve.</dd>
+<dt><strong><code>default</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The default value to return if the attribute is not found.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Any</code></dt>
+<dd>The value of the attribute if it exists, otherwise the default value.</dd>
+</dl></div>
+</dd>
+</dl>
 </dd>
 </dl>
 </section>
@@ -299,6 +333,7 @@ It uses the FramerConfigModel to validate and set default values for the configu
 <li><code><a title="frame.src.framer.config.FramerConfig.default_model" href="#frame.src.framer.config.FramerConfig.default_model">default_model</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.description" href="#frame.src.framer.config.FramerConfig.description">description</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.gender" href="#frame.src.framer.config.FramerConfig.gender">gender</a></code></li>
+<li><code><a title="frame.src.framer.config.FramerConfig.get" href="#frame.src.framer.config.FramerConfig.get">get</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.goals" href="#frame.src.framer.config.FramerConfig.goals">goals</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.is_multi_modal" href="#frame.src.framer.config.FramerConfig.is_multi_modal">is_multi_modal</a></code></li>
 <li><code><a title="frame.src.framer.config.FramerConfig.llm_frequency_penalty" href="#frame.src.framer.config.FramerConfig.llm_frequency_penalty">llm_frequency_penalty</a></code></li>

@@ -175,6 +175,9 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             task (Task): The task to add.
             workflow_id (str, optional): The ID of the workflow to add the task to. Defaults to &#34;default&#34;.
         &#34;&#34;&#34;
+        # Ensure the workflow exists before adding a task
+        if not self.workflow_manager.get_workflow(workflow_id):
+            self.workflow_manager.create_workflow(workflow_id)
         self.workflow_manager.add_task(workflow_id, task)
 
     def get_next_task(self, workflow_id: str = &#34;default&#34;) -&gt; Optional[Task]:
@@ -296,7 +299,29 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
             self.completion_calls[task.workflow_id][task.id] = 0
 
         # Perform the task
-        prompt = f&#34;Execute the following task: {task.description}&#34;
+        priority_explanation = &#34;&#34;&#34;
+        Priority levels are defined as follows:
+        1 - LOWEST
+        2 - VERY LOW
+        3 - LOW
+        4 - MEDIUM LOW
+        5 - MEDIUM
+        6 - MEDIUM HIGH
+        7 - HIGH
+        8 - VERY HIGH
+        9 - HIGHEST
+        10 - CRITICAL
+
+        When making decisions, prioritize tasks with higher priority levels, but introduce some variability to avoid always selecting the same task. Consider the context and relevance of each task to determine the best course of action.
+        &#34;&#34;&#34;
+
+        prompt = f&#34;&#34;&#34;
+        Execute the following task: {task.description}
+
+        {priority_explanation}
+
+        Consider the context and relevance of each task, and introduce some variability in your decision-making process.
+        &#34;&#34;&#34;
         response = await self.llm_service.get_completion(
             prompt,
             model=self.default_model,
@@ -511,23 +536,27 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         &#34;&#34;&#34;
         logger.debug(f&#34;Executing decision: {decision.action}&#34;)
         logger.debug(f&#34;Decision parameters: {decision.parameters}&#34;)
-
+        result = None
         try:
-            if decision.action == &#34;think&#34;:
-                result = await self._execute_think_action(decision)
+            # Pass priorities to the LLM to help prioritize tasks based on relevance
+            for action_name, action_info in self.action_registry.get_all_actions().items():
+                if action_name == decision.action:
+                    if action_name == &#34;think&#34;:
+                        result = await self._execute_think_action(decision)
+                    elif action_name == &#34;respond&#34;:
+                        result = await self.perform_task(
+                            {
+                                &#34;description&#34;: decision.parameters.get(&#34;content&#34;, &#34;&#34;),
+                                &#34;workflow_id&#34;: &#34;default&#34;,
+                            }
+                        )
+                    else:
+                        print(f&#34;Executing action: {action_name}&#34;)
+                        print(&#34;Action info: &#34;, action_info)
+                        result = await self.action_registry.execute_action(action_name, decision.parameters)
+                    break
             else:
-                if decision.action not in self.action_registry.actions:
-                    raise ValueError(f&#34;Action &#39;{decision.action}&#39; not found in registry.&#34;)
-
-                if decision.action == &#34;respond&#34;:
-                    result = await self.perform_task(
-                        {
-                            &#34;description&#34;: decision.parameters.get(&#34;content&#34;, &#34;&#34;),
-                            &#34;workflow_id&#34;: &#34;default&#34;,
-                        }
-                    )
-                else:
-                    result = await self.action_registry.execute_action(decision.action, decision.parameters)
+                raise ValueError(f&#34;Action &#39;{decision.action}&#39; not found in registry.&#34;)
 
             logger.info(f&#34;Executed action: {decision.action}&#34;)
             logger.debug(f&#34;Action result: {result}&#34;)

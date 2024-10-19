@@ -63,6 +63,19 @@ class BasePlugin(ABC):
     def register_action(self, name: str, func: callable, description: str):
         self.framer.brain.action_registry.register_action(name, func, description)
 
+    def remove_action(self, name: str):
+        """
+        Remove an action from the action registry by its name.
+
+        Args:
+            name (str): The name of the action to remove.
+        """
+        if name in self.framer.brain.action_registry.actions:
+            del self.framer.brain.action_registry.actions[name]
+            self.framer.logger.info(f"Action '{name}' removed from registry.")
+        else:
+            self.framer.logger.warning(f"Action '{name}' not found in registry.")
+
     @abstractmethod
     async def execute(self, action: str, params: Dict[str, Any]) -> Any:
         pass

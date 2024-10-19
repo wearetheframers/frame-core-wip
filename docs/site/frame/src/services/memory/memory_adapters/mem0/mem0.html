@@ -90,6 +90,8 @@ including adding, retrieving, and searching memories.</p></div>
         return self.retrieve(user_id)
 
     def search(self, query: str, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
+        if not query:
+            raise ValueError(&#34;Query cannot be null or empty.&#34;)
         return [
             mem
             for mem in self.storage.get(user_id, [])

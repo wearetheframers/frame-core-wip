@@ -47,7 +47,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </summary>
 <pre><code class="python">class RespondAction(BaseAction):
     def __init__(self):
-        super().__init__(&#34;respond&#34;, &#34;Generate a response based on the current context&#34;)
+        super().__init__(&#34;respond&#34;, &#34;Generate a default response based on the current context if NO memory retrieval is needed. If any type of personal information or questions about some previously saved or stored or recorded information is referenced, then likely this respond action is not appropriate and we need to use the memory response.&#34;, 2)
 
     async def execute(
         self, execution_context: ExecutionContext, **kwargs

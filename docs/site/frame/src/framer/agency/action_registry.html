@@ -49,6 +49,7 @@ hljs.highlightAll();
     def __init__(self, execution_context=None):
         self.actions: Dict[str, Dict[str, Any]] = {}
         self.execution_context = execution_context
+        self.valid_actions = []
         self._register_default_actions()
 
     def set_framer(self, framer):
@@ -64,81 +65,41 @@ hljs.highlightAll();
             ResearchAction(),
         ]
         for action in default_actions:
-            self.register_action(action)
-
-        for action, info in VALID_ACTIONS.items():
-            if action not in [a.name for a in default_actions]:
-                self.register_action(
-                    action,
-                    action_func=info[&#34;func&#34;],
-                    description=info[&#34;description&#34;],
-                    priority=info[&#34;priority&#34;],
-                )
+            self.add_action(
+                action.name,
+                description=action.description,
+                action_func=getattr(action, &#39;func&#39;, None),
+                priority=action.priority,
+            )
 
     def extend_actions(self, new_actions: Dict[str, Dict[str, Any]]):
         extend_valid_actions(new_actions)
         self._register_default_actions()
 
-    def register_action(
-        self,
-        action: Union[str, BaseAction, Callable],
-        action_func: Optional[Callable] = None,
-        description: str = &#34;&#34;,
-        priority: int = 5,
-    ):
-        if isinstance(action, BaseAction):
-            name = action.name
-            action_func = action.execute
-            description = action.description
-            priority = action.priority.value
-        elif callable(action):
-            name = action.__name__
-            action_func = action
-        else:
-            name = action
-            if action_func is None:
-                raise ValueError(
-                    &#34;action_func must be provided when registering a string action name&#34;
-                )
-
-        if not (1 &lt;= priority &lt;= 10):
-            raise ValueError(&#34;Priority must be between 1 and 10&#34;)
-        if not asyncio.iscoroutinefunction(action_func):
-
-            async def wrapper(*args, **kwargs):
-                return action_func(*args, **kwargs)
-
-            action_func = wrapper
-        self.actions[name] = {
-            &#34;action_func&#34;: action_func,
-            &#34;description&#34;: description,
-            &#34;priority&#34;: priority,
-        }
-
     def add_action(
-        self, name: str, action_func: Callable, description: str = &#34;&#34;, priority: int = 5
+        self, name: str, description: str = &#34;&#34;, action_func: Optional[Callable] = None, priority: int = 5
     ):
         &#34;&#34;&#34;
         Add a new action to the registry.
 
         Args:
             name (str): The name of the action.
-            action_func (Callable): The function to execute for this action.
+            action_func (Callable, optional): The function to execute for this action. Defaults to None.
             description (str, optional): A description of the action. Defaults to &#34;&#34;.
             priority (int, optional): The priority of the action. Defaults to 5.
         &#34;&#34;&#34;
-        if not (1 &lt;= priority &lt;= 10):
+        if priority is not None and not (1 &lt;= priority &lt;= 10):
             raise ValueError(&#34;Priority must be between 1 and 10&#34;)
+        if action_func is None:
+            # set action func to a dummy function
+            action_func = lambda *args, **kwargs: None
         self.actions[name] = {
             &#34;action_func&#34;: action_func,
             &#34;description&#34;: description,
             &#34;priority&#34;: priority,
         }
-        VALID_ACTIONS[name] = {
-            &#34;func&#34;: action_func,
-            &#34;description&#34;: description,
-            &#34;priority&#34;: priority,
-        }
+        if name not in self.valid_actions:
+            self.valid_actions.append(name)
 
     def remove_action(self, name: str):
         &#34;&#34;&#34;
@@ -149,8 +110,8 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         if name in self.actions:
             del self.actions[name]
-            if name in VALID_ACTIONS:
-                del VALID_ACTIONS[name]
+            if name in self.valid_actions:
+                del self.valid_actions[name]
         else:
             raise ValueError(f&#34;Action &#39;{name}&#39; not found.&#34;)
         return self.actions.get(name, {})
@@ -168,7 +129,10 @@ hljs.highlightAll();
         return self.actions.get(name)
 
     def get_all_actions(self) -&gt; Dict[str, Dict[str, Any]]:
-        return self.actions
+        &#34;&#34;&#34;
+        Return all actions in the registry that are also in self.valid_actions.
+        &#34;&#34;&#34;
+        return {k: v for k, v in self.actions.items() if k in self.valid_actions}
 
     async def perform_action(
         self,
@@ -205,14 +169,21 @@ hljs.highlightAll();
         &#34;&#34;&#34;Execute an action by its name.&#34;&#34;&#34;
         action = self.get_action(action_name)
         if action:
-            return await action[&#34;action_func&#34;](self.execution_context, **parameters)
+            # Filter parameters to match the expected arguments of the action function
+            action_func = action[&#34;action_func&#34;]
+            expected_params = action_func.__code__.co_varnames[:action_func.__code__.co_argcount]
+            filtered_params = {k: v for k, v in parameters.items() if k in expected_params}
+            # Ensure &#39;query&#39; is included in the parameters
+            if &#39;query&#39; not in filtered_params and &#39;text&#39; in parameters:
+                filtered_params[&#39;query&#39;] = parameters[&#39;text&#39;]
+            return await action_func(self.execution_context, **filtered_params)
         else:
             raise ValueError(f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry.add_action"><code class="name flex">
-<span>def <span class="ident">add_action</span></span>(<span>self, name: str, action_func: Callable, description: str = '', priority: int = 5)</span>
+<span>def <span class="ident">add_action</span></span>(<span>self, name: str, description: str = '', action_func: Optional[Callable] = None, priority: int = 5)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a new action to the registry.</p>
@@ -220,8 +191,8 @@ hljs.highlightAll();
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
 <dd>The name of the action.</dd>
-<dt><strong><code>action_func</code></strong> :&ensp;<code>Callable</code></dt>
-<dd>The function to execute for this action.</dd>
+<dt><strong><code>action_func</code></strong> :&ensp;<code>Callable</code>, optional</dt>
+<dd>The function to execute for this action. Defaults to None.</dd>
 <dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
 <dd>A description of the action. Defaults to "".</dd>
 <dt><strong><code>priority</code></strong> :&ensp;<code>int</code>, optional</dt>
@@ -260,16 +231,10 @@ hljs.highlightAll();
 <span>def <span class="ident">get_all_actions</span></span>(<span>self) ‑> Dict[str, Dict[str, Any]]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return all actions in the registry that are also in self.valid_actions.</p></div>
 </dd>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry.perform_action"><code class="name flex">
 <span>async def <span class="ident">perform_action</span></span>(<span>self, name: str, *args, callback: Optional[Callable] = None, callback_args: Optional[tuple] = (), **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.action_registry.ActionRegistry.register_action"><code class="name flex">
-<span>def <span class="ident">register_action</span></span>(<span>self, action: Union[str, <a title="frame.src.framer.agency.actions.base.BaseAction" href="actions/base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a>, Callable], action_func: Optional[Callable] = None, description: str = '', priority: int = 5)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -317,7 +282,6 @@ hljs.highlightAll();
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.get_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.get_action">get_action</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.get_all_actions" href="#frame.src.framer.agency.action_registry.ActionRegistry.get_all_actions">get_all_actions</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.perform_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.perform_action">perform_action</a></code></li>
-<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.register_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.register_action">register_action</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.remove_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.remove_action">remove_action</a></code></li>
 <li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.set_framer" href="#frame.src.framer.agency.action_registry.ActionRegistry.set_framer">set_framer</a></code></li>
 </ul>
