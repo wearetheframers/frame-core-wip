@@ -169,7 +169,7 @@ Both methods allow you to interact with Frame as if it were a chatbot, providing
 
 ### Memory Retrieval Example
 
-This example demonstrates how Frame can retrieve information from memory and distinguish between responses that require memory and those that do not.
+This example demonstrates how Frame can retrieve information from memory and distinguish between responses that require memory and those that do not. Framer will automatically choose between responding from RAG-like memory augmentation versus a regular response without memory automatically, provided the `with_memory` and `with_mem0_search_extract_summarize_plugin` plugins are provided to a Framer (which are included by default in Frame's package). The Framer takes *no* additional API calls to an LLM service to distinguish between which response type it should pick.
 
 ```python
 import asyncio
@@ -193,9 +193,9 @@ async def main():
 
     # Queries
     queries = [
-        "What is my favorite color?",
-        "When is my next appointment?",
-        "What is the capital of France?"
+        "What is my favorite color?", # Framer considers this question for memory retrieval
+        "When is my next appointment?", # Framer considers this question for memory retrieval
+        "What is the capital of France?" # Framer considers this question as general knowledge it knows
     ]
 
     for query in queries:
