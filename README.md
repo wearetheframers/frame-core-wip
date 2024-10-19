@@ -184,8 +184,20 @@ class WeatherPlugin(BasePlugin):
         return response.strip()
 
     async def get_weather(self, location: str) -> str:
-        # Simulate fetching weather data
-        return f"Weather for {location}: Sunny, 25°C"
+        # Example of fetching weather data from a real API
+        import requests
+
+        api_key = "your_api_key_here"
+        base_url = "http://api.weatherapi.com/v1/current.json"
+        response = requests.get(base_url, params={"key": api_key, "q": location})
+        data = response.json()
+
+        if "error" in data:
+            return f"Error fetching weather data: {data['error']['message']}"
+        
+        weather = data["current"]["condition"]["text"]
+        temperature = data["current"]["temp_c"]
+        return f"Weather for {location}: {weather}, {temperature}°C"
 ```
 
 2. **Register the Plugin**: Import and register the plugin with a Framer instance.
