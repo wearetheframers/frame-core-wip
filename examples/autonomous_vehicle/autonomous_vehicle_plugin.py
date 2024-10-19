@@ -1,4 +1,7 @@
 import asyncio
+from frame.src.framer.agency.actions import BaseAction
+from frame.src.services.execution_context import ExecutionContext
+from frame.src.framer.agency.priority import Priority
 
 
 class AutonomousVehiclePlugin:
@@ -8,19 +11,62 @@ class AutonomousVehiclePlugin:
         self.speed = 0
         self.lane = 1
 
-    async def stop_vehicle(self, execution_context):
+    def stop_vehicle(self):
         self.speed = 0
-        print(f"{execution_context.config.name}: Vehicle stopped")
-        await asyncio.sleep(0.1)
+        return "Vehicle stopped"
 
-    async def slow_down_vehicle(self, execution_context):
+    def slow_down_vehicle(self):
         self.speed = max(0, self.speed - 10)
-        print(
-            f"{execution_context.config.name}: Vehicle slowing down. Current speed: {self.speed}"
-        )
-        await asyncio.sleep(0.1)
+        return f"Vehicle slowing down. Current speed: {self.speed}"
 
-    async def change_lane(self, execution_context):
+    def change_lane(self):
         self.lane = 3 - self.lane  # Toggle between lane 1 and 2
-        print(f"{execution_context.config.name}: Vehicle changing to lane {self.lane}")
+        return f"Vehicle changing to lane {self.lane}"
+
+
+class StopVehicleAction(BaseAction):
+    def __init__(self, vehicle_plugin: AutonomousVehiclePlugin):
+        super().__init__(
+            "stop_vehicle",
+            "Stop the autonomous vehicle",
+            Priority.HIGH,
+        )
+        self.vehicle_plugin = vehicle_plugin
+
+    async def execute(self, execution_context: ExecutionContext, **kwargs) -> str:
+        result = self.vehicle_plugin.stop_vehicle()
+        print(f"{execution_context.config.name}: {result}")
         await asyncio.sleep(0.1)
+        return result
+
+
+class SlowDownVehicleAction(BaseAction):
+    def __init__(self, vehicle_plugin: AutonomousVehiclePlugin):
+        super().__init__(
+            "slow_down_vehicle",
+            "Slow down the autonomous vehicle",
+            Priority.MEDIUM,
+        )
+        self.vehicle_plugin = vehicle_plugin
+
+    async def execute(self, execution_context: ExecutionContext, **kwargs) -> str:
+        result = self.vehicle_plugin.slow_down_vehicle()
+        print(f"{execution_context.config.name}: {result}")
+        await asyncio.sleep(0.1)
+        return result
+
+
+class ChangeLaneAction(BaseAction):
+    def __init__(self, vehicle_plugin: AutonomousVehiclePlugin):
+        super().__init__(
+            "change_lane",
+            "Change the lane of the autonomous vehicle",
+            Priority.LOW,
+        )
+        self.vehicle_plugin = vehicle_plugin
+
+    async def execute(self, execution_context: ExecutionContext, **kwargs) -> str:
+        result = self.vehicle_plugin.change_lane()
+        print(f"{execution_context.config.name}: {result}")
+        await asyncio.sleep(0.1)
+        return result
