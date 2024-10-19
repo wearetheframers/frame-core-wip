@@ -27,8 +27,6 @@
 - Monitoring and metrics; built-in LLM API usage / costs tracking
 - Synchronous wrapper provided around async functions
 
-
-
 ### Component Hierarchy and Interactions
 
 ```
@@ -45,6 +43,7 @@ Frame
     │   │   └── Thoughts
     │   ├── Decision
     │   └── Memory
+    │   └── Plugins
     ├── Soul
     │   ├── Emotional State
     │   └── Core Traits

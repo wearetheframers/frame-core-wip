@@ -102,6 +102,7 @@ Frame
     │   │   └── Thoughts
     │   ├── Decision
     │   └── Memory
+    │   └── Plugins
     ├── Soul
     │   ├── Emotional State
     │   └── Core Traits
