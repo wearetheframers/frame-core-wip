@@ -54,8 +54,13 @@ class Decision(DecisionModel):
             Decision: An instance of the Decision class.
         """
         if isinstance(json_data, dict):
-            return cls(**json_data)
-        decision_dict = json.loads(json_data)
+            decision_dict = json_data
+        else:
+            decision_dict = json.loads(json_data)
+
+        # Convert priority from string or integer to Priority enum
+        decision_dict["priority"] = Priority.from_value(decision_dict.get("priority", Priority.MEDIUM))
+
         return cls(**decision_dict)
 
     def to_dict(self) -> Dict[str, Any]:

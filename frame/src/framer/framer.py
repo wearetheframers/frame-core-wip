@@ -1,8 +1,10 @@
+import asyncio
 import logging
 import time
 import json
 import importlib
-from typing import List, Dict, Any, Optional, Callable, Union, Tuple
+from typing import List, Dict, Any, Optional, Callable, Union, Tuple, Deque
+from collections import deque
 from frame.src.services.llm.main import LLMService
 from frame.src.services.context.shared_context_service import SharedContext
 from frame.src.framer.config import FramerConfig
@@ -39,6 +41,7 @@ logger = logging.getLogger("frame.framer")
 
 
 class Framer:
+    perceptions_queue: Deque[Union[Perception, Dict[str, Any]]] = deque()
     """
     The Framer class represents an AI agent with cognitive capabilities. It integrates various components
     such as agency, brain, soul, and workflow management to create a comprehensive AI entity capable of
@@ -73,7 +76,10 @@ class Framer:
         eq_service: Optional[EQService] = None,
         roles: List[Dict[str, Any]] = [],
         goals: List[Dict[str, Any]] = [],
+        plugins: Optional[Dict[str, Any]] = None,
+        plugin_loading_progress: Optional[Callable[[int], None]] = None,
     ):
+        self.plugin_loading_progress = plugin_loading_progress
         # Existing initialization code...
 
         self.config = config
@@ -93,37 +99,16 @@ class Framer:
         if "with_shared_context" in self.permissions:
             self.shared_context_service = SharedContext()
 
-        # Initialize custom plugins
-        self.plugins = {}
-        for permission in self.permissions:
-            if permission.startswith("with") and permission not in [
-                "with_memory",
-                "with_eq",
-                "with_shared_context",
-            ]:
-                plugin_name = permission[5:]  # Remove 'with_' prefix
-                try:
-                    plugin_module = importlib.import_module(
-                        f"frame.src.plugins.{plugin_name}.{plugin_name}"
-                    )
-                    # Construct the plugin class name by converting the plugin name to CamelCase
-                    plugin_class_name = ''.join(word.capitalize() for word in plugin_name.split('_'))
-                    plugin_class = getattr(plugin_module, plugin_class_name)
-                    self.plugins[plugin_name] = plugin_class(self)
-                except (ImportError, AttributeError) as e:
-                    logger.warning(f"{plugin_name} is not available. Error: {str(e)}")
-                    logger.warning(
-                        f"{plugin_name} is not available. To use it, install the required dependencies."
-                    )
-        logger.info(f"Loaded plugins: {list(self.plugins.keys())}")
-        # Initialize Mem0Adapter if API key is provided and permission is granted
-        if config.mem0_api_key and "with_memory" in self.permissions:
-            self.mem0_adapter = Mem0Adapter(api_key=config.mem0_api_key)
-        else:
-            self.mem0_adapter = None
-            logger.warning(
-                "Mem0 API key not provided or permission not granted. Mem0Adapter will not be available."
-            )
+        self.config = config
+        self.llm_service = llm_service
+        self.agency = agency
+        self.brain = brain
+        self.soul = soul
+        self.workflow_manager = workflow_manager
+        self.memory_service = memory_service
+        self.eq_service = eq_service
+        self.plugins = plugins or {}
+        self.plugin_loading_complete = False
         self._streamed_response = {"status": "pending", "result": ""}
         self.config = config
         self.llm_service = llm_service
@@ -141,59 +126,11 @@ class Framer:
         # Initialize roles and goals
         self.roles: List[Dict[str, Any]] = roles if roles is not None else []
         self.goals: List[Dict[str, Any]] = goals if goals is not None else []
-        self.act()
+    
+   
 
-    @classmethod
-    async def create(
-        cls,
-        config: FramerConfig,
-        llm_service: LLMService,
-        soul_seed: Optional[Union[str, Dict[str, Any]]] = None,
-        memory_service: Optional[MemoryService] = None,
-        eq_service: Optional[EQService] = None,
-    ) -> "Framer":
-        agency = Agency(llm_service=llm_service, context={}, execution_context=None)
-
-        # Generate roles and goals if they are None
-        roles = config.roles
-        goals = config.goals
-
-        soul = Soul(seed=config.soul_seed)
-        brain = Brain(
-            llm_service=llm_service,
-            default_model="gpt-4o",
-            roles=roles,
-            goals=goals,
-            soul=soul,
-        )
-        workflow_manager = WorkflowManager()
-
-        framer = cls(
-            config=config,
-            llm_service=llm_service,
-            agency=agency,
-            brain=brain,
-            soul=soul,
-            workflow_manager=workflow_manager,
-            memory_service=memory_service,
-            eq_service=eq_service,
-            roles=roles,
-            goals=goals,
-        )
-
-        await framer.initialize(
-            llm_service=llm_service,
-            memory_service=memory_service,
-            eq_service=eq_service,
-        )
-        # Notify observers about the Framer being opened
-        for observer in framer.observers:
-            if hasattr(observer, "on_framer_opened"):
-                observer.on_framer_opened(framer)
-
-        return framer
-
-    def act(self):
+            
+    async def act(self):
         """
         Enable the Framer to process perceptions and make decisions.
 
@@ -202,16 +139,32 @@ class Framer:
         initialization to ensure the Framer starts acting immediately.
         """
         self.acting = True
+        await self.process_queued_perceptions()
 
-    async def initialize(self):
-        """Initialize the Framer with roles and goals."""
+    async def process_queued_perceptions(self):
+        """
+        Process all queued perceptions once the Framer is ready.
+        """
+        if self.is_ready():
+            while self.perceptions_queue:
+                perception = self.perceptions_queue.popleft()
+                await self.sense(perception)
 
-        if not self.roles and not self.goals:
-            self.roles, self.goals = await self.agency.generate_roles_and_goals()
-        elif not self.roles:
-            self.roles, _ = await self.agency.generate_roles_and_goals()
-        elif not self.goals:
-            _, self.goals = await self.agency.generate_roles_and_goals()
+            if not self.roles and not self.goals:
+                self.roles, self.goals = await self.agency.generate_roles_and_goals()
+            elif not self.roles:
+                self.roles, _ = await self.agency.generate_roles_and_goals()
+            elif not self.goals:
+                _, self.goals = await self.agency.generate_roles_and_goals()
+
+            # Sort roles and goals by priority
+            self.roles.sort(key=lambda x: x.get("priority", 5), reverse=True)
+            self.goals.sort(key=lambda x: x.get("priority", 5), reverse=True)
+
+            self.agency.set_roles(self.roles)
+            self.agency.set_goals(self.goals)
+        else:
+            logger.warning("Framer is not ready. Queuing perception.")
 
         # Sort roles and goals by priority
         self.roles.sort(key=lambda x: x.get("priority", 5), reverse=True)
@@ -219,8 +172,6 @@ class Framer:
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
-
-        self.act()  # Start acting after initialization
 
     async def export_to_file(self, file_path: str, llm) -> None:
         """
@@ -350,7 +301,16 @@ class Framer:
         result = await self.perform_task(task_obj.to_dict())
         return result if result is not None else {"output": "No result returned"}
 
-    async def sense(self, perception: Union[Perception, Dict[str, Any]]) -> Decision:
+    def is_ready(self) -> bool:
+        """
+        Check if the Framer is ready to process perceptions and make decisions.
+
+        Returns:
+            bool: True if the Framer is ready, False otherwise.
+        """
+        return self.plugin_loading_complete and self.acting
+
+    async def sense(self, perception: Union[Perception, Dict[str, Any]]) -> Optional[Decision]:
         """
         Process a perception and make a decision.
 
@@ -360,11 +320,23 @@ class Framer:
         Returns:
             Decision: The decision made based on the perception.
         """
-        if not self.acting:
-            logger.warning("Framer is not acting. Cannot process perceptions.")
-            return Decision(
-                action="error", parameters={}, reasoning="Framer is halted."
-            )
+        if not self.is_ready():
+            logger.warning("Framer is not ready. Queuing perception.")
+            self.perceptions_queue.append(perception)
+            return None  # Return None to indicate the perception was queued
+        """
+        Process a perception and make a decision.
+
+        Args:
+            perception (Union[Perception, Dict[str, Any]]): The perception to process, can be a Perception object or a dictionary.
+
+        Returns:
+            Decision: The decision made based on the perception.
+        """
+        if not self.plugin_loading_complete or not self.acting:
+            logger.warning("Framer is not ready. Queuing perception.")
+            self.perceptions_queue.append(perception)
+            return None  # Return None to indicate the perception was queued
         # Convert perception to Perception object if it is a dictionary
         if isinstance(perception, dict):
             perception = Perception.from_dict(perception)
@@ -382,7 +354,7 @@ class Framer:
             await self.brain.execute_decision(decision)
         logger.debug(f"Processed perception: {perception}, Decision: {decision}")
         self.notify_observers(decision)
-        return decision  # Return the Decision object directly
+        return decision  
 
     async def prompt(self, text: str) -> Decision:
         """

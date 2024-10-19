@@ -14,6 +14,7 @@ from frame.src.services.eq.main import EQService
 from frame.src.constants.models import DEFAULT_MODEL
 from frame.src.framer.agency.goals import Goal, GoalStatus
 from frame.src.framer.agency.roles import Role, RoleStatus
+from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
 
 
 class FramerFactory:
@@ -69,7 +70,54 @@ class FramerFactory:
         )
         # Initialize the Agency component with default permissions
         self.config.permissions = self.config.permissions or ["with_memory", "with_mem0_search_extract_summarize_plugin", "with_shared_context"]
-        # Generate roles and goals. The Framer must be acting to respond to perceptions.
+        roles, goals = await self._generate_roles_and_goals(agency, roles, goals)
+        brain = Brain(
+            # Initialize the Brain component with roles, goals, and default model
+            llm_service=self.llm_service,
+            roles=roles,
+            goals=goals,
+            default_model=(
+                self.config.default_model
+                if self.config.default_model
+                else DEFAULT_MODEL
+            ),
+        )
+        # Initialize the Soul component with the provided or default seed
+        soul = Soul(seed=self.config.soul_seed)
+        # Initialize the WorkflowManager component
+        workflow_manager = WorkflowManager()
+        # Set the memory service if provided, otherwise create a new one
+        memory_service = memory_service or MemoryService(adapter=Mem0Adapter())
+
+        framer = Framer(
+            config=self.config,
+            llm_service=self.llm_service,
+            agency=agency,
+            brain=brain,
+            soul=soul,
+            workflow_manager=workflow_manager,
+            memory_service=memory_service,
+            eq_service=eq_service,
+        )
+
+        framer.agency.set_goals(goals)
+        framer.agency.set_roles(roles)
+
+        # Set the Framer instance in Brain and ActionRegistry
+        framer.brain.set_framer(framer)
+        framer.brain.action_registry.set_framer(framer)
+
+        # Notify observers about the Framer being opened
+        for observer in framer.observers:
+            if hasattr(observer, "on_framer_opened"):
+                observer.on_framer_opened(framer)
+
+        framer.plugin_loading_complete = True
+        await framer.act()  # Start acting after plugins are loaded
+
+        return framer
+
+    async def _generate_roles_and_goals(self, agency, roles, goals):
         if roles is None or goals is None:
             roles, goals = await agency.generate_roles_and_goals()
         elif isinstance(roles, list) and len(roles) == 0:
@@ -100,55 +148,7 @@ class FramerFactory:
         roles.sort(key=lambda x: x.priority.value if hasattr(x, 'priority') else 5, reverse=True)
         goals.sort(key=lambda x: x.priority.value if hasattr(x, 'priority') else 5, reverse=True)
 
-        execution_context = ExecutionContext(llm_service=self.llm_service)
-        brain = Brain(
-            # Initialize the Brain component with roles, goals, and default model
-            llm_service=self.llm_service,
-            roles=roles,
-            goals=goals,
-            default_model=(
-                self.config.default_model
-                if self.config.default_model
-                else DEFAULT_MODEL
-            ),
-        )
-        # Initialize the Soul component with the provided or default seed
-        soul = Soul(seed=self.config.soul_seed)
-        # Initialize the WorkflowManager component
-        workflow_manager = WorkflowManager()
-        framer = Framer(
-            # Create the Framer instance with all initialized components
-            config=self.config,
-            llm_service=self.llm_service,
-            agency=agency,
-            brain=brain,
-            soul=soul,
-            workflow_manager=workflow_manager,
-            memory_service=memory_service,
-            eq_service=eq_service,
-        )
-
-        framer.agency.set_goals(goals)
-        framer.agency.set_roles(roles)
-
-        # Set the Framer instance in Brain and ActionRegistry
-        framer.brain.set_framer(framer)
-        framer.brain.action_registry.set_framer(framer)
-
-        return framer
-
-    def get_plugin(self, plugin_name: str) -> Any:
-        """
-        Retrieve a plugin by name.
-
-        Args:
-            plugin_name (str): The name of the plugin to retrieve.
-
-        Returns:
-            Any: The plugin object if found, otherwise None.
-        """
-        return self.plugins.get(plugin_name)
-
+        return roles, goals
 
 class FramerBuilder:
     """

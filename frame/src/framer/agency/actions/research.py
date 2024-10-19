@@ -9,7 +9,7 @@ class ResearchAction(BaseAction):
         super().__init__(
             "research",
             "Perform research on a given topic and summarize findings",
-            Priority.HIGH,
+            5,
         )
 
     async def execute(

@@ -476,10 +476,10 @@ class Agency:
         """
         logger.debug(f"Executing decision: {decision.action}")
         logger.debug(f"Decision parameters: {decision.parameters}")
-
+        result = None
         try:
             # Pass priorities to the LLM to help prioritize tasks based on relevance
-            for action_name, action_info in self.action_registry.actions.items():
+            for action_name, action_info in self.action_registry.get_all_actions().items():
                 if action_name == decision.action:
                     if action_name == "think":
                         result = await self._execute_think_action(decision)
@@ -491,6 +491,8 @@ class Agency:
                             }
                         )
                     else:
+                        print(f"Executing action: {action_name}")
+                        print("Action info: ", action_info)
                         result = await self.action_registry.execute_action(action_name, decision.parameters)
                     break
             else:

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
+from frame.src.framer.agency.priority import Priority
 
 
 class BasePlugin(ABC):
@@ -22,6 +23,20 @@ class BasePlugin(ABC):
         """
         self.framer = framer
 
+    def remove_action(self, name: str):
+        """
+        Remove an action from the action registry by its name.
+
+        Args:
+            name (str): The name of the action to remove.
+        """
+        if name in self.framer.brain.action_registry.actions:
+            # del self.framer.brain.action_registry.actions[name]
+            self.framer.brain.action_registry.remove_action(name)
+            print(f"Action '{name}' removed from registry.")
+        else:
+            print(f"Action '{name}' not found in registry.")
+
     @abstractmethod
     async def on_load(self):
         """
@@ -32,7 +47,7 @@ class BasePlugin(ABC):
         """
         pass
 
-    def register_action(self, name: str, func: callable, description: str):
+    def add_action(self, name: str, func: callable, description: str, priority: Priority = Priority.MEDIUM):
         """
         Register an action with the Framer's action registry.
 
@@ -43,7 +58,9 @@ class BasePlugin(ABC):
             func (callable): The function to be called when the action is performed.
             description (str): A brief description of what the action does.
         """
-        self.framer.brain.action_registry.register_action(name, func, description)
+        print("Registering action: ", name)
+        self.framer.brain.action_registry.add_action(name, func, description, priority)
+        print("Registered to Framer action registry: ", self.framer.brain.action_registry.actions)
 
     @abstractmethod
     async def execute(self, action: str, params: Dict[str, Any]) -> Any:

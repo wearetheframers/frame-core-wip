@@ -52,6 +52,8 @@ class Mem0Adapter(MemoryAdapterInterface):
         return self.retrieve(user_id)
 
     def search(self, query: str, user_id: str = "default") -> List[Dict[str, Any]]:
+        if not query:
+            raise ValueError("Query cannot be null or empty.")
         return [
             mem
             for mem in self.storage.get(user_id, [])

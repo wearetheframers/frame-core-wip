@@ -119,11 +119,12 @@ class Mem0Adapter(MemoryAdapterInterface):
         Returns:
             List[Dict[str, Any]]: A list of memory entries that match the search query.
         """
-        return [
+        results = [
             mem
             for mem in self.memories.get(user_id, [])
             if query.lower() in str(mem["memory"]).lower()
-        ][:limit]
+        ]
+        return results[:limit]
 
     def history(self, memory_id: int, user_id: str = "default") -> List[str]:
         """

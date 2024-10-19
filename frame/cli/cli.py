@@ -411,12 +411,13 @@ async def run_async(
 
     try:
         logger.debug(f"Framer agency before generate_roles_and_goals: {framer.agency}")
-        roles, goals = await framer.agency.generate_roles_and_goals()
-        framer.agency.set_roles(roles)
-        framer.agency.set_goals(goals)
-        logger.debug(f"Framer agency after generate_roles_and_goals: {framer.agency}")
-        logger.info(f"Generated roles: {roles}")
-        logger.info(f"Generated goals: {goals}")
+        # Framer now initializes goals
+        # roles, goals = await framer.agency.generate_roles_and_goals()
+        # framer.agency.set_roles(roles)
+        # framer.agency.set_goals(goals)
+        # logger.debug(f"Framer agency after generate_roles_and_goals: {framer.agency}")
+        # logger.info(f"Generated roles: {framer.agency.roles}")
+        # logger.info(f"Generated goals: {framer.agency.goals}")
 
         if prompt:
             decision = await framer.prompt(prompt)

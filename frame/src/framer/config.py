@@ -53,6 +53,19 @@ class FramerConfig(BaseModel):
     goals: Optional[List[Dict[str, Any]]] = None
     recent_memories_limit: Optional[int] = 5
 
+    def get(self, key: str, default: Any = None) -> Any:
+        """
+        Retrieve the value of a configuration attribute safely.
+
+        Args:
+            key (str): The attribute name to retrieve.
+            default (Any): The default value to return if the attribute is not found.
+
+        Returns:
+            Any: The value of the attribute if it exists, otherwise the default value.
+        """
+        return getattr(self, key, default)
+
     def __init__(self, **data):
         super().__init__(**data)
         if self.default_model:

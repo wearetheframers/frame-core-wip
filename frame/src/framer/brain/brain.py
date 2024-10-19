@@ -23,9 +23,16 @@ from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.config import FramerConfig
 
 logger = logging.getLogger(__name__)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s')
+for handler in logger.handlers:
+    handler.setFormatter(formatter)
 
+
+import logging
 
 class Brain:
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
     """
     The Brain class represents the decision-making component of the Framer.
 
@@ -102,10 +109,10 @@ class Brain:
         )
 
         # Register the respond action using the agency's perform_task method
-        self.action_registry.register_action(
+        self.action_registry.add_action(
             "respond",
-            self.agency.perform_task,
             description="Generate a response based on the current context",
+            action_func=self.agency.perform_task,
             priority=5,
         )
 
@@ -162,11 +169,22 @@ class Brain:
         Returns:
             Any: The parsed JSON data or an error dictionary.
         """
+        result = None
+        result = None
+        result = None
         try:
             # Remove trailing commas from the response
             response = re.sub(r",\s*}", "}", response)
             response = re.sub(r",\s*]", "]", response)
-            return json.loads(response)
+            decision_data = json.loads(response)
+            # Ensure priority is a Priority enum
+            priority_value = decision_data.get("priority", Priority.MEDIUM)
+            try:
+                decision_data["priority"] = Priority.get(priority_value).value
+            except (KeyError, ValueError) as e:
+                logger.error(f"Invalid priority: {priority_value}. Error: {e}")
+                decision_data["priority"] = Priority.MEDIUM.value
+            return decision_data
         except json.JSONDecodeError as e:
             logger.error(f"JSON parsing error: {e}")
             logger.error(f"Raw response: {response}")
@@ -227,6 +245,16 @@ class Brain:
             perception = Perception.from_dict(perception)
 
         self.mind.perceptions.append(perception)
+        # Log available actions
+        available_actions = self.action_registry.get_all_actions().keys()
+        self.logger.debug(f"Available actions: {available_actions}")
+
+        # Check if 'mem0_search_extract_memories' is a valid action
+        if 'mem0_search_extract_memories' in available_actions:
+            self.logger.debug("'mem0_search_extract_memories' is a valid action.")
+        else:
+            self.logger.debug("'mem0_search_extract_memories' is NOT a valid action.")
+
         decision = await self.make_decision(perception)
         if decision is None:
             logger.error("Failed to make a decision. Returning default decision.")
@@ -273,7 +301,7 @@ class Brain:
 
         action = decision_data.get("action", "respond").lower()
         valid_actions = [
-            action.lower() for action in self.action_registry.actions.keys()
+            action.lower() for action in self.action_registry.get_all_actions().keys()
         ]
 
         # Check if the action is valid
@@ -301,7 +329,9 @@ class Brain:
         logger.info(f"Action '{action}' generated: {decision_data}")
 
         parameters = decision_data.get("parameters", {})
-        if "topic" in parameters:
+        if action == "mem0_search_extract_summarize" and "query" not in parameters:
+            parameters["query"] = perception.data.get("text", "")
+        elif "topic" in parameters:
             parameters["research_topic"] = parameters.pop("topic")
         if not isinstance(parameters, dict):
             parameters = {"value": parameters}
@@ -321,8 +351,24 @@ class Brain:
         goals_priority = max(
             [goal.priority for goal in active_goals], default=Priority.MEDIUM
         )
+        priority_value = None
+        priority_int = None
+        # Ensure priority is a Priority enum
         priority_value = decision_data.get("priority", Priority.MEDIUM)
-        priority_int = Priority.from_value(priority_value).value
+        try:
+            if isinstance(priority_value, str):
+                priority_enum = Priority[priority_value.upper()]
+            elif isinstance(priority_value, int):
+                priority_enum = Priority(priority_value)
+            elif isinstance(priority_value, Priority):
+                priority_enum = priority_value
+            else:
+                raise ValueError(f"Unexpected priority type: {type(priority_value)}")
+        except (KeyError, ValueError) as e:
+            logger.error(f"Invalid priority: {priority_value}. Error: {e}")
+            priority_enum = Priority.MEDIUM
+
+        priority_int = priority_enum.value
 
         decision = Decision(
             action=action,
@@ -350,15 +396,13 @@ class Brain:
         Returns:
             str: The generated decision prompt.
         """
-        valid_actions = [
-            action.lower() for action in self.action_registry.actions.keys()
-        ]
-        action_descriptions = "\n".join(
-            [
-                f"- {name.lower()}: {info['description']}"
-                for name, info in self.action_registry.actions.items()
-            ]
-        )
+        valid_actions = self.action_registry.valid_actions
+        # action_descriptions = "\n".join(
+        #     [
+        #         f"- {name.lower()}: {info['description']}"
+        #         for name, info in self.action_registry.actions.items()
+        #     ]
+        # )
 
         active_roles = [
             f"{role.name} (Priority: {role.priority.name}, Status: {role.status.name})"
@@ -380,19 +424,28 @@ class Brain:
         Current active goals:
         {json.dumps(active_goals, indent=2)}
 
-        Consider the following possible actions:
-        {action_descriptions}
-
         Valid actions are:
-        {json.dumps({action.lower(): self.action_registry.actions[action]['description'] for action in self.action_registry.actions}, indent=2)}
-
+        {json.dumps({action: f"{self.action_registry.actions[action]['description']} (Priority: {self.action_registry.actions[action]['priority']})" for action in self.action_registry.actions}, indent=2)}
+        
         For each perception, carefully evaluate:
         - The type and content of the perception
         - The urgency and importance of the information
         - The current active goals and roles of the system, considering their priorities and statuses
         - Whether immediate action, further research, or no action is most appropriate
 
-        Priority levels:
+        Examples of personal/memory questions:
+        - "What is my favorite hobby?"
+        - "When is my next meeting?"
+        - "What did I mention about my travel plans?"
+
+        Examples of general knowledge questions:
+        - "What is the largest ocean on Earth?"
+        - "How many planets are in the solar system?"
+        - "What is the freezing point of water in Fahrenheit?"
+
+        General knowledge questions will have the regular action `respond`. Personal/memory questions will require memory retrieval and should use the `respond with memory retrieval` action.
+
+        Priority levels and their meanings:
         {json.dumps({p.name: p.value for p in Priority}, indent=2)}
 
         Respond with a JSON object containing the following fields:
@@ -407,8 +460,6 @@ class Brain:
         Ensure your decision is well-reasoned, aligns with the current active goals and roles (considering their priorities), and uses only the valid actions provided.
         Use the provided priority levels when assigning priority to your decision, taking into account the priorities of related roles and goals.
         """
-
-        valid_actions = list(self.action_registry.actions.keys())
         response = await self.llm_service.get_completion(
             prompt,
             model=self.default_model,
@@ -438,29 +489,29 @@ class Brain:
         """
         logger.debug(f"Executing decision: {decision.action}")
         logger.debug(f"Decision parameters: {decision.parameters}")
-
+        result = None
         try:
-            if decision.action == "think":
-                result = await self._execute_think_action(decision)
-            else:
-                if decision.action not in self.action_registry.actions:
-                    raise ValueError(
-                        f"Action '{decision.action}' not found in registry."
-                    )
+            if decision.action not in self.action_registry.get_all_actions():
+                logger.error("Action not found in registry.")
+                raise ValueError(
+                    f"Action '{decision.action}' not found in registry."
+                )
 
-                # For 'respond' action, ensure 'content' is passed correctly
-                if decision.action == "respond":
-                    # For 'respond' action, we'll use the agency's perform_task method directly
-                    result = await self.agency.perform_task(
-                        {
-                            "description": decision.parameters.get("content", ""),
-                            "workflow_id": "default",
-                        }
-                    )
-                else:
-                    result = await self.action_registry.execute_action(
-                        decision.action, decision.parameters
-                    )
+            # For 'respond' action, ensure 'content' is passed correctly
+            if decision.action == "respond with memory retrieval" and "query" not in decision.parameters:
+                decision.parameters["query"] = decision.parameters.get("text", "")
+            elif decision.action == "respond":
+                # For 'respond' action, we'll use the agency's perform_task method directly
+                result = await self.agency.perform_task(
+                    {
+                        "description": decision.parameters.get("content", ""),
+                        "workflow_id": "default",
+                    }
+                )
+            else:
+                result = await self.action_registry.execute_action(
+                    decision.action, decision.parameters
+                )
 
             logger.info(f"Executed action: {decision.action}")
             logger.debug(f"Action result: {result}")
@@ -561,149 +612,3 @@ class Brain:
         )
         return response.strip()
 
-    async def _get_decision_prompt(self, perception: Optional[Perception]) -> str:
-        """
-        Generate a decision prompt based on the current perception and context.
-
-        Args:
-            perception (Optional[Perception]): The current perception.
-
-        Returns:
-            str: The generated decision prompt.
-        """
-        valid_actions = [
-            action.lower() for action in self.action_registry.actions.keys()
-        ]
-        action_descriptions = "\n".join(
-            [
-                f"- {name.lower()}: {info['description']}"
-                for name, info in self.action_registry.actions.items()
-            ]
-        )
-
-        prompt = f"""Given the following perception, decide on the most appropriate action to take.
-        Perception: {perception}
-        Current roles: {self.roles}
-        Current goals: {self.goals}
-
-        Consider the following possible actions:
-        {action_descriptions}
-
-        Valid actions are:
-        {json.dumps({action.lower(): self.action_registry.actions[action]['description'] for action in self.action_registry.actions}, indent=2)}
-
-        For each perception, carefully evaluate:
-        - The type and content of the perception
-        - The urgency and importance of the information
-        - The current goals and roles of the system
-        - Whether immediate action, further research, or no action is most appropriate
-
-        Priority levels:
-        {json.dumps({p.name: p.value for p in Priority}, indent=2)}
-
-        Respond with a JSON object containing the following fields:
-        - action: The action to take (must be EXACTLY one of the valid action names listed above)
-        - parameters: Any relevant parameters for the action (e.g., new roles, goals, tasks, research topic, or response content)
-        - reasoning: Your reasoning for this decision
-        - confidence: A float between 0 and 1 indicating your confidence in this decision
-        - priority: A string representing the priority level (e.g., "MEDIUM", "HIGH", etc.)
-
-        Ensure your decision is well-reasoned, aligns with the current goals and roles, and uses only the valid actions provided.
-        Use the provided priority levels when assigning priority to your decision.
-        """
-
-        valid_actions = list(self.action_registry.actions.keys())
-        response = await self.llm_service.get_completion(
-            prompt,
-            model=self.default_model,
-            additional_context={"valid_actions": valid_actions},
-            expected_output=f"""
-            {{
-                "action": str where str in {valid_actions},
-                "parameters": dict,
-                "reasoning": str,
-                "confidence": float where 0 <= float <= 1,
-                "priority": int where 1 <= int <= 10
-            }}
-            """,
-        )
-        logger.debug(f"Raw LLM response: {response}")
-
-        if response is None:
-            logger.error("Received None response from LLM service.")
-            return json.dumps(
-                {
-                    "action": "think",
-                    "parameters": {
-                        "thought": "Error: Received no response from language model."
-                    },
-                    "reasoning": "Failed to generate a valid decision due to no response",
-                    "confidence": 0.0,
-                    "priority": 1,
-                }
-            )
-
-        # Check if ```json is in the response and remove it if present
-        if (
-            isinstance(response, str)
-            and response.startswith("```json")
-            and response.endswith("```")
-        ):
-            cleaned_response = "\n".join(response.split("\n")[1:-1])
-            try:
-                return cleaned_response
-            except json.JSONDecodeError:
-                pass
-
-        # Parse the response
-        try:
-            decision_data = (
-                json.loads(response) if isinstance(response, str) else response
-            )
-
-            # Ensure 'respond' is used instead of 'generate_response'
-            if decision_data.get("action") == "generate_response":
-                decision_data["action"] = "respond"
-            if (
-                "parameters" in decision_data
-                and "response_content" in decision_data["parameters"]
-            ):
-                decision_data["parameters"]["content"] = decision_data[
-                    "parameters"
-                ].pop("response_content")
-
-            # Double-check that the action is valid
-            if decision_data["action"] not in self.action_registry.actions:
-                logger.warning(
-                    f"Invalid action: {decision_data['action']}. Defaulting to 'error'."
-                )
-                decision_data["action"] = "error"
-                decision_data["reasoning"] = (
-                    f"Invalid action '{decision_data['action']}' was generated. "
-                    f"Defaulted to 'error'."
-                )
-
-            # Ensure the decision_data is properly formatted
-            decision_data = {
-                "action": decision_data.get("action", "respond"),
-                "parameters": decision_data.get("parameters", {}),
-                "reasoning": decision_data.get("reasoning", "No reasoning provided."),
-                "confidence": float(decision_data.get("confidence", 0.5)),
-                "priority": int(decision_data.get("priority", 5)),
-            }
-
-            return json.dumps(decision_data)
-        except Exception as e:
-            logger.error(f"Error parsing decision: {e}")
-            logger.error(f"Raw response that caused the error: {response}")
-            return json.dumps(
-                {
-                    "action": "think",
-                    "parameters": {
-                        "thought": f"Error: {str(e)}. Unable to process the request."
-                    },
-                    "reasoning": "Failed to generate a valid decision",
-                    "confidence": 0.0,
-                    "priority": 1,
-                }
-            )

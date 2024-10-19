@@ -1,10 +1,11 @@
 from typing import Dict, Any
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.actions import BaseAction
+from frame.src.framer.agency.priority import Priority
 
 class RespondAction(BaseAction):
     def __init__(self):
-        super().__init__("respond", "Generate a default response based on the current context if no memory retrieval is needed.")
+        super().__init__("respond", "Generate a default response based on the current context if NO memory retrieval is needed. If any type of personal information or questions about some previously saved or stored or recorded information is referenced, then likely this respond action is not appropriate and we need to use the memory response.", 2)
 
     async def execute(
         self, execution_context: ExecutionContext, **kwargs

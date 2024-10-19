@@ -3,6 +3,20 @@ from typing import Union
 from typing import Union
 
 
+"""
+Priority levels and their meanings:
+1. LOWEST: Minimal urgency, can be deferred indefinitely.
+2. VERY_LOW: Very low urgency, can be deferred for a long time.
+3. LOW: Low urgency, can be deferred.
+4. MEDIUM_LOW: Slightly below average urgency.
+5. MEDIUM: Average urgency, requires attention.
+6. MEDIUM_HIGH: Above average urgency, should be addressed soon.
+7. HIGH: High urgency, requires prompt attention.
+8. VERY_HIGH: Very high urgency, requires immediate attention.
+9. HIGHEST: Extremely high urgency, requires immediate action.
+10. CRITICAL: Maximum urgency, critical action needed immediately.
+"""
+
 class Priority(IntEnum):
     LOWEST = 1
     VERY_LOW = 2
@@ -18,7 +32,7 @@ class Priority(IntEnum):
     @classmethod
     def from_string(cls, value: Union[str, int]) -> "Priority":
         if isinstance(value, int):
-            return cls(value)
+            return cls(min(max(value, 1), 10))
         string_to_priority = {
             "lowest": cls.LOWEST,
             "very low": cls.VERY_LOW,

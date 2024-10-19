@@ -9,7 +9,7 @@ class ObserveAction(BaseAction):
         super().__init__(
             "observe",
             "Process an observation and generate insights or actions",
-            Priority.MEDIUM,
+            1,
         )
 
     async def execute(

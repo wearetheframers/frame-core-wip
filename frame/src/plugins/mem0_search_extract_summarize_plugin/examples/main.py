@@ -30,9 +30,23 @@ async def main():
 
     query = " ".join(sys.argv[1:])
 
-    # Use the plugin
-    result = await framer.use_plugin_action("mem0_search_extract_summarize_plugin", "mem0_search_extract_summarize", {"query": query})
-    print(result)
+    # Combine memory-based and non-memory-based queries
+    queries = [
+        {"type": "memory", "text": query},
+        {"type": "non-memory", "text": "What is the capital of France?"},
+        {"type": "non-memory", "text": "Explain the theory of relativity."},
+        {"type": "non-memory", "text": "How does a computer work?"},
+    ]
+
+    # Shuffle the queries to mix them up
+    import random
+    random.shuffle(queries)
+
+    for query in queries:
+        print(f"Query: {query['text']}")
+        perception = {"type": "hearing", "data": {"text": query['text']}}
+        decision = await framer.sense(perception)
+        print(f"Response: {decision.reasoning}\n")
 
 
 if __name__ == "__main__":
