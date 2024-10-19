@@ -21,15 +21,13 @@ Frame is an advanced AI agent framework that enables the creation and management
 
 - Multi-modal cognitive agents framework
 - Supports dynamic, emergent behaviors
-- Extensible architecture with plugin engine
+- Extensible architecture with plugin engine inspired by game mods
 - Integration with popular AI APIs (OpenAI GPT, Mistral, etc.)
 - Streaming text generation support
 - Flexible behavior and decision-making mechanics
+- Emotional intelligence and state (optional)
 - Monitoring and metrics; built-in LLM API usage / costs tracking
-
-## Plugins and Extensions
-
-Frame supports a powerful plugin system that allows you to extend the functionality of Framers by adding new actions. Inspired by game mods, this system offers unlimited potential for extensions, with automatic conflict resolution and a community marketplace for plugins. This fosters a rich ecosystem of extensions and customizations.
+- Synchronous wrapper provided around async functions
 
 ## Installation
 
@@ -64,9 +62,7 @@ print(f"Task result: {result}")
 await framer.close()
 ```
 
-## Advanced Examples
-
-### Chatbot Interaction Example
+## Chatbot Interaction Example
 
 This example demonstrates how to interact with Frame like a chatbot using both the `prompt` method and the `sense` method with a perception of hearing. Both methods achieve the same result.
 
@@ -97,8 +93,6 @@ async def main():
 
 asyncio.run(main())
 ```
-
-### Explanation
 
 - **Prompt Method**: Directly sends a text prompt to the Framer and receives a response.
 - **Sense Method**: Sends a perception of hearing to the Framer, which processes it and makes a decision to respond.
@@ -147,6 +141,90 @@ async def main():
 
 asyncio.run(main())
 ```
+
+- **Memory Retrieval**: The Framer retrieves personal information like favorite color and appointment details from memory.
+- **General Knowledge**: For questions like the capital of France, the Framer uses general knowledge without memory retrieval.
+- **Decision Making**: The Framer decides whether to use memory based on the query context.
+
+## Plugin System
+
+Frame features a powerful and flexible plugin system inspired by game mods, allowing developers to extend the functionality of Framers. This system supports a community marketplace where plugins can be shared, sold, or given away, fostering a rich ecosystem of extensions and customizations.
+
+### Key Features
+
+- **Easy and Flexible API**: Develop plugins using a straightforward API. Plugins can be Python packages imported into Framer or stored in a local directory for Frame to ingest.
+- **Community Marketplace**: Share and discover plugins in a community-driven marketplace, similar to mod communities in popular games.
+
+### Example: Weather Forecast Plugin
+
+Here's an example of how to develop, import, and run a plugin that provides weather forecasts:
+
+1. **Create the Plugin**: Define a new plugin class in a Python file, e.g., `weather_plugin.py`.
+
+```python
+from frame.src.framer.brain.plugins.base import BasePlugin
+from typing import Any, Dict
+
+class WeatherPlugin(BasePlugin):
+    async def on_load(self):
+        self.add_action("get_weather", self.get_weather, "Fetch weather information for a location")
+
+    async def execute(self, action: str, params: Dict[str, Any]) -> Any:
+        if action == "get_weather":
+            # Use the parse_location function to extract the location from natural language
+            location = await self.parse_location(params.get("prompt"))
+            return await self.get_weather(location)
+        else:
+            raise ValueError(f"Unknown action: {action}")
+
+    async def parse_location(self, prompt: str) -> str:
+        # Use Frame's get_completion method with LMQL prompt templating to parse location
+        formatted_prompt = format_lmql_prompt(prompt, expected_output="location")
+        response = await self.framer.get_completion(formatted_prompt)
+        return response.strip()
+
+    async def get_weather(self, location: str) -> str:
+        # Simulate fetching weather data
+        return f"Weather for {location}: Sunny, 25°C"
+```
+
+2. **Register the Plugin**: Import and register the plugin with a Framer instance.
+
+```python
+from frame import Frame, FramerConfig
+from weather_plugin import WeatherPlugin
+
+async def main():
+    frame = Frame()
+    config = FramerConfig(name="WeatherFramer", default_model="gpt-4o-mini")
+    framer = await frame.create_framer(config)
+
+    # Register the plugin
+    weather_plugin = WeatherPlugin(framer)
+    framer.plugins["weather_plugin"] = weather_plugin
+
+    # Register the plugin
+    weather_plugin = WeatherPlugin(framer)
+    framer.plugins["weather_plugin"] = weather_plugin
+
+    # Use the plugin with a prompt
+    response = await framer.prompt("How's the weather today in NY?")
+    print(f"Response using prompt: {response}")
+
+    # Use the plugin with a sense method
+    perception = {"type": "thought", "data": {"text": "I want to know what the weather is like in New York today since I am going there later."}}
+    # Framer's decision making should prompt it to fetch the weather for the location
+    decision = await framer.sense(perception)
+    if decision:
+        response = await framer.agency.execute_decision(decision)
+        print(f"Response using sense: {response}")
+
+    await framer.close()
+
+asyncio.run(main())
+```
+
+This example demonstrates how to create a plugin that fetches weather information for a specific location if given, register it with a Framer, and execute its actions, all in natural conversation.
 
 ## Enterprise / Commerical Support
 
