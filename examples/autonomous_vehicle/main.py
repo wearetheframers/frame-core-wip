@@ -58,7 +58,7 @@ async def main():
 
     # We must set our newly created Action Registry to our Framer's execution_context
     action_registry.execution_context = framer.brain.agency.execution_context
-    vehicle_plugin = AutonomousVehiclePlugin()
+    vehicle_plugin = AutonomousVehiclePlugin(framer)
     stop_vehicle_action = StopVehicleAction(vehicle_plugin)
     slow_down_vehicle_action = SlowDownVehicleAction(vehicle_plugin)
     change_lane_action = ChangeLaneAction(vehicle_plugin)

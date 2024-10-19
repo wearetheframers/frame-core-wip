@@ -1,25 +1,37 @@
 import asyncio
-from frame.src.framer.agency.actions import BaseAction
+from frame.src.framer.brain.plugins.base import BasePlugin
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.priority import Priority
+from typing import Dict, Any
+from frame.src.framer.agency.actions import BaseAction
 
 
-class AutonomousVehiclePlugin:
+class AutonomousVehiclePlugin(BasePlugin):
 
-    def __init__(self):
-        # Initialize any necessary state or resources
-        self.speed = 0
-        self.lane = 1
+    async def on_load(self):
+        self.add_action("stop_vehicle", self.stop_vehicle, "Stop the autonomous vehicle")
+        self.add_action("slow_down_vehicle", self.slow_down_vehicle, "Slow down the autonomous vehicle")
+        self.add_action("change_lane", self.change_lane, "Change the lane of the autonomous vehicle")
 
-    def stop_vehicle(self):
+    async def execute(self, action: str, params: Dict[str, Any]) -> str:
+        if action == "stop_vehicle":
+            return await self.stop_vehicle()
+        elif action == "slow_down_vehicle":
+            return await self.slow_down_vehicle()
+        elif action == "change_lane":
+            return await self.change_lane()
+        else:
+            raise ValueError(f"Unknown action: {action}")
+
+    async def stop_vehicle(self) -> str:
         self.speed = 0
         return "Vehicle stopped"
 
-    def slow_down_vehicle(self):
+    async def slow_down_vehicle(self) -> str:
         self.speed = max(0, self.speed - 10)
         return f"Vehicle slowing down. Current speed: {self.speed}"
 
-    def change_lane(self):
+    async def change_lane(self) -> str:
         self.lane = 3 - self.lane  # Toggle between lane 1 and 2
         return f"Vehicle changing to lane {self.lane}"
 
