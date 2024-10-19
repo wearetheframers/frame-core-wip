@@ -9,8 +9,6 @@
 
 ## Overview
 
-Frame is an advanced AI agent framework that enables the creation and management of cognitive agents with emergent behaviors. It is designed to be flexible, extensible, and capable of handling complex tasks and interactions.
-
 ### Key Components
 
 - **Frame**: The main interface for creating and managing Framer instances.
