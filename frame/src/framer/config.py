@@ -13,7 +13,13 @@ class FramerConfig(BaseModel):
     use_local_model: bool = False
     # Default permissions include services like memory, eq, and shared_context.
     # These services do not require explicit permissions to be accessed.
-    permissions: Optional[List[str]] = Field(default_factory=lambda: ["with_memory", "with_mem0_search_extract_summarize_plugin", "with_shared_context"])
+    permissions: Optional[List[str]] = Field(
+        default_factory=lambda: [
+            "with_memory",
+            "with_mem0_search_extract_summarize_plugin",
+            "with_shared_context",
+        ]
+    )
     mem0_api_key: Optional[str] = MEM0_API_KEY
     """
     Configuration class for Framer instances.

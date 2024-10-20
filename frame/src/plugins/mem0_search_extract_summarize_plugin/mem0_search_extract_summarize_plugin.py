@@ -32,7 +32,11 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
         handler = logging.StreamHandler()
-        handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s'))
+        handler.setFormatter(
+            logging.Formatter(
+                "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s"
+            )
+        )
         self.logger.addHandler(handler)
         self.mem0_adapter = Mem0Adapter()
 
@@ -45,22 +49,30 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
             framer.agency.action_registry.add_action(
                 "respond with memory retrieval",
                 description="This action is ideal for responding to personal questions that involve historical or memory-based "
-                            "information about the user or the Framer. It leverages the Framer's memory to retrieve relevant data "
-                            "or previously saved texts, providing comprehensive answers or insights based on stored memories. "
-                            "When questions reference or relate to past conversations, this action is preferred. It generally "
-                            "takes precedence over `think` and `observe` actions, especially for questions. If uncertain whether "
-                            "a question can be answered with or without memory, default to this action.",
+                "information about the user or the Framer. It leverages the Framer's memory to retrieve relevant data "
+                "or previously saved texts, providing comprehensive answers or insights based on stored memories. "
+                "When questions reference or relate to past conversations, this action is preferred. It generally "
+                "takes precedence over `think` and `observe` actions, especially for questions. If uncertain whether "
+                "a question can be answered with or without memory, default to this action.",
                 action_func=self.mem0_search_extract_summarize,
                 priority=8,
             )
-            self.logger.info("Mem0SearchExtractSummarizePlugin registered 'response with memory retrieval' action.")
+            self.logger.info(
+                "Mem0SearchExtractSummarizePlugin registered 'response with memory retrieval' action."
+            )
             # Remove respond action
             if "respond" in framer.agency.action_registry.get_all_actions():
+                self.logger.info("Removing 'respond' action from registry.")
                 framer.agency.action_registry.remove_action("respond")
+                exit()
             else:
-                self.logger.warning("Action 'respond' not found in registry. Skipping removal.")
+                self.logger.warning(
+                    "Action 'respond' not found in registry. Skipping removal."
+                )
         else:
-            self.logger.warning("Mem0 API key not found or is empty. Action 'response with memory retrieval' will not be registered.")
+            self.logger.warning(
+                "Mem0 API key not found or is empty. Action 'response with memory retrieval' will not be registered."
+            )
 
         # # Add a new role for Mem0 searching and summarizing
         # mem0_researcher_role = Role(
@@ -84,9 +96,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         """
         Return a dictionary of actions provided by this plugin.
         """
-        return {
-            "respond with memory retrieval": self.mem0_search_extract_summarize
-        }
+        return {"respond with memory retrieval": self.mem0_search_extract_summarize}
 
     async def execute(self, action_name: str, parameters: Dict[str, Any]) -> Any:
         """
@@ -103,8 +113,10 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
             return await self.mem0_search_extract_summarize(**parameters)
         else:
             raise ValueError(f"Action {action_name} not found in plugin.")
-        
-    def filter_search_results(self, search_results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+
+    def filter_search_results(
+        self, search_results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """
         Filter search results by memory text to remove duplicate results.
 
@@ -117,7 +129,12 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         memory_texts = set()
         filtered_results = []
         for result in search_results:
-            if isinstance(result, dict) and "content" in result and isinstance(result["content"], dict) and "memory" in result["content"]:
+            if (
+                isinstance(result, dict)
+                and "content" in result
+                and isinstance(result["content"], dict)
+                and "memory" in result["content"]
+            ):
                 memory_text = result["content"]["memory"]
                 if memory_text not in memory_texts:
                     memory_texts.add(memory_text)
@@ -153,12 +170,21 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
 
         if not search_results:
             return "No relevant information found in Mem0."
-        
+
         # Filter search results by memory text (remove same text results)
         search_results = self.filter_search_results(search_results)
         self.logger.debug(f"Filtered search results: {search_results}")
 
-        context = "\n".join([result["content"]["memory"] for result in search_results if isinstance(result, dict) and "content" in result and isinstance(result["content"], dict) and "memory" in result["content"]])
+        context = "\n".join(
+            [
+                result["content"]["memory"]
+                for result in search_results
+                if isinstance(result, dict)
+                and "content" in result
+                and isinstance(result["content"], dict)
+                and "memory" in result["content"]
+            ]
+        )
         if not context:
             return "No relevant information found in Mem0."
 
@@ -180,7 +206,6 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
 
         Answer:
         """
-
 
         response = await self.framer.llm_service.get_completion(
             prompt,

@@ -2,11 +2,18 @@ import asyncio
 import os
 import sys
 import os
+
 # Import Frame from upper dir
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")))
+sys.path.append(
+    os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")
+    )
+)
 from frame import Frame
 from frame.src.framer.config import FramerConfig
-from frame.src.framer.brain.memory.memory_adapters.mem0_adapter.concrete_mem0_adapter import ConcreteMem0Adapter
+from frame.src.framer.brain.memory.memory_adapters.mem0_adapter.concrete_mem0_adapter import (
+    ConcreteMem0Adapter,
+)
 
 
 async def main():
@@ -17,7 +24,11 @@ async def main():
     config = FramerConfig(
         name="Research Assistant",
         default_model="gpt-3.5-turbo",
-        permissions=["with_memory", "with_mem0_search_extract_summarize_plugin", "with_shared_context"]
+        permissions=[
+            "with_memory",
+            "with_mem0_search_extract_summarize_plugin",
+            "with_shared_context",
+        ],
     )
     api_key = os.getenv("MEM0_API_KEY", "your_api_key_here")
     mem0_adapter = ConcreteMem0Adapter(api_key=api_key)
@@ -40,11 +51,12 @@ async def main():
 
     # Shuffle the queries to mix them up
     import random
+
     random.shuffle(queries)
 
     for query in queries:
         print(f"Query: {query['text']}")
-        perception = {"type": "hearing", "data": {"text": query['text']}}
+        perception = {"type": "hearing", "data": {"text": query["text"]}}
         decision = await framer.sense(perception)
         print(f"Response: {decision.reasoning}\n")
 

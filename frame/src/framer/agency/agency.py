@@ -8,6 +8,7 @@ from frame.src.services.llm import LLMService
 from frame.src.framer.agency.action_registry import ActionRegistry
 from frame.src.framer.agency.roles import Role, RoleStatus
 from frame.src.framer.agency.goals import Goal, GoalStatus
+
 # Remove this import
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.brain.decision import Decision
@@ -463,11 +464,11 @@ class Agency:
         logger.debug(f"Cost incurred: ${cost_incurred:.4f}")
 
         return response
-    
+
     async def execute_action(self, action_name: str, parameters: dict):
         """Execute an action by its name using the action registry."""
         return await self.action_registry.execute_action(action_name, parameters)
-    
+
     async def execute_decision(self, decision: Decision) -> Any:
         """
         Execute the decision made by the brain.
@@ -483,7 +484,10 @@ class Agency:
         result = None
         try:
             # Pass priorities to the LLM to help prioritize tasks based on relevance
-            for action_name, action_info in self.action_registry.get_all_actions().items():
+            for (
+                action_name,
+                action_info,
+            ) in self.action_registry.get_all_actions().items():
                 if action_name == decision.action:
                     if action_name == "think":
                         result = await self._execute_think_action(decision)
@@ -497,7 +501,9 @@ class Agency:
                     else:
                         print(f"Executing action: {action_name}")
                         print("Action info: ", action_info)
-                        result = await self.action_registry.execute_action(action_name, decision.parameters)
+                        result = await self.action_registry.execute_action(
+                            action_name, decision.parameters
+                        )
                     break
             else:
                 raise ValueError(f"Action '{decision.action}' not found in registry.")

@@ -118,7 +118,9 @@ def execute_framer(frame, data, sync, stream):
     soul_seed = data.get("soul_seed", "default_soul_seed")
     max_len = data.get("max_len", 512)
 
-    logger.info(f"Framer configuration: name={name}, description={description}, model={model}")
+    logger.info(
+        f"Framer configuration: name={name}, description={description}, model={model}"
+    )
     logger.info(f"Soul seed: {soul_seed}")
     logger.info(f"Prompt: {prompt}")
     logger.info(f"Perception: {perception}")
@@ -440,7 +442,8 @@ async def run_async(
                 print(decision)
                 total_workflows = len(framer.workflow_manager.workflows)
                 total_tasks = sum(
-                    len(workflow.tasks) for workflow in framer.workflow_manager.workflows
+                    len(workflow.tasks)
+                    for workflow in framer.workflow_manager.workflows
                 )
                 # logger.info(f"Total Workflows created: {total_workflows}")
                 # logger.info(f"Total Tasks created: {total_tasks}")
@@ -448,7 +451,7 @@ async def run_async(
                     # logger.info(f"Workflow has {len(workflow.tasks)} tasks.")
                     for task in workflow.tasks:
                         # logger.info(
-                            # f"Task Name: {task.description}, Task Priority: {task.priority}"
+                        # f"Task Name: {task.description}, Task Priority: {task.priority}"
                         # )
                         # Execute each task and log the result
                         task_result = await framer.agency.execute_task(task)

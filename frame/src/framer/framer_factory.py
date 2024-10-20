@@ -33,7 +33,12 @@ class FramerFactory:
     enabling developers to create a wide range of extensions and enhancements.
     """
 
-    def __init__(self, config: FramerConfig, llm_service: LLMService, plugins: Optional[Dict[str, Any]] = []):
+    def __init__(
+        self,
+        config: FramerConfig,
+        llm_service: LLMService,
+        plugins: Optional[Dict[str, Any]] = [],
+    ):
         """
         Initialize the FramerBuilder with configuration and LLM service.
 
@@ -73,7 +78,11 @@ class FramerFactory:
             context=None,
         )
         # Initialize the Agency component with default permissions
-        self.config.permissions = self.config.permissions or ["with_memory", "with_mem0_search_extract_summarize_plugin", "with_shared_context"]
+        self.config.permissions = self.config.permissions or [
+            "with_memory",
+            "with_mem0_search_extract_summarize_plugin",
+            "with_shared_context",
+        ]
         roles, goals = await self._generate_roles_and_goals(agency, roles, goals)
         brain = Brain(
             # Initialize the Brain component with roles, goals, and default model
@@ -102,7 +111,7 @@ class FramerFactory:
             workflow_manager=workflow_manager,
             memory_service=memory_service,
             eq_service=eq_service,
-            plugins=plugins
+            plugins=plugins,
         )
 
         framer.agency.set_goals(goals)
@@ -156,10 +165,17 @@ class FramerFactory:
                 role.status = RoleStatus.ACTIVE
 
         # Sort roles and goals by priority
-        roles.sort(key=lambda x: x.priority.value if hasattr(x, 'priority') else 5, reverse=True)
-        goals.sort(key=lambda x: x.priority.value if hasattr(x, 'priority') else 5, reverse=True)
+        roles.sort(
+            key=lambda x: x.priority.value if hasattr(x, "priority") else 5,
+            reverse=True,
+        )
+        goals.sort(
+            key=lambda x: x.priority.value if hasattr(x, "priority") else 5,
+            reverse=True,
+        )
 
         return roles, goals
+
 
 class FramerBuilder:
     """

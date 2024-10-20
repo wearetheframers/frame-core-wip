@@ -1,11 +1,11 @@
 import sys
 import os
 import asyncio
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame import Frame, FramerConfig
 from audio_transcription_plugin import AudioTranscriptionPlugin
-
 
 
 async def main():

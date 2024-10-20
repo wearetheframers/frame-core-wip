@@ -125,11 +125,18 @@ class Mem0Adapter(MemoryAdapterInterface):
             kwargs["filters"] = filters
         results = self.client.search(query, **kwargs)
         if isinstance(results, list):
-            return [{"id": i, "content": result} for i, result in enumerate(results[:limit])]
+            return [
+                {"id": i, "content": result} for i, result in enumerate(results[:limit])
+            ]
         elif isinstance(results, dict) and "results" in results:
-            return [{"id": i, "content": result} for i, result in enumerate(results["results"][:limit])]
+            return [
+                {"id": i, "content": result}
+                for i, result in enumerate(results["results"][:limit])
+            ]
         else:
-            raise TypeError("Expected results to be a list or a dictionary with a 'results' key")
+            raise TypeError(
+                "Expected results to be a list or a dictionary with a 'results' key"
+            )
 
     def get_all(
         self,

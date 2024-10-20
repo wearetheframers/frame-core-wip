@@ -46,7 +46,7 @@ class ActionRegistry:
                 self.add_action(
                     action.name,
                     description=action.description,
-                    action_func=getattr(action, 'func', None),
+                    action_func=getattr(action, "func", None),
                     priority=action.priority,
                 )
 
@@ -55,7 +55,11 @@ class ActionRegistry:
         self._register_default_actions()
 
     def add_action(
-        self, action_or_name: Union[BaseAction, str], description: str = "", action_func: Optional[Callable] = None, priority: int = 5
+        self,
+        action_or_name: Union[BaseAction, str],
+        description: str = "",
+        action_func: Optional[Callable] = None,
+        priority: int = 5,
     ):
         """
         Add a new action to the registry.
@@ -69,7 +73,7 @@ class ActionRegistry:
         if isinstance(action_or_name, BaseAction):
             name = action_or_name.name
             description = action_or_name.description
-            action_func = getattr(action_or_name, 'execute', None)
+            action_func = getattr(action_or_name, "execute", None)
             priority = action_or_name.priority
         else:
             name = action_or_name
@@ -80,6 +84,7 @@ class ActionRegistry:
             # set action func to a dummy async function
             async def action_func(*args, **kwargs):
                 return None
+
         self.actions[name] = {
             "action_func": action_func,
             "description": description,
@@ -158,7 +163,9 @@ class ActionRegistry:
 
     async def execute_action(self, action_name: str, parameters: dict):
         """Execute an action by its name."""
-        logger.info(f"Available actions before executing '{action_name}': {list(self.actions.keys())}")
+        logger.info(
+            f"Available actions before executing '{action_name}': {list(self.actions.keys())}"
+        )
         print("Action name: ", action_name)
         if action_name == "no_action":
             logger.info("No action to execute. Skipping.")
@@ -167,10 +174,14 @@ class ActionRegistry:
         action = self.get_action(action_name)
         if action:
             action_func = action["action_func"]
-            expected_params = action_func.__code__.co_varnames[:action_func.__code__.co_argcount]
-            filtered_params = {k: v for k, v in parameters.items() if k in expected_params}
-            if 'query' in filtered_params and 'query' in parameters:
-                del filtered_params['query']
+            expected_params = action_func.__code__.co_varnames[
+                : action_func.__code__.co_argcount
+            ]
+            filtered_params = {
+                k: v for k, v in parameters.items() if k in expected_params
+            }
+            if "query" in filtered_params and "query" in parameters:
+                del filtered_params["query"]
             print("Filtered params: ", filtered_params)
             print("Expected params: ", expected_params)
             return await action_func(self.execution_context, **filtered_params)

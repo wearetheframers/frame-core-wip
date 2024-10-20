@@ -7,7 +7,12 @@ from typing import Dict, Any
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame import Frame, FramerConfig
-from autonomous_vehicle_plugin import StopVehicleAction, SlowDownVehicleAction, ChangeLaneAction, AutonomousVehiclePlugin
+from autonomous_vehicle_plugin import (
+    StopVehicleAction,
+    SlowDownVehicleAction,
+    ChangeLaneAction,
+    AutonomousVehiclePlugin,
+)
 from frame.src.framer.agency.actions import BaseAction
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.priority import Priority
@@ -17,8 +22,11 @@ from frame.src.framer.agency.action_registry import ActionRegistry
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+handler.setFormatter(
+    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+)
 logger.addHandler(handler)
+
 
 class ProcessPerceptionAction(BaseAction):
     """
@@ -35,7 +43,9 @@ class ProcessPerceptionAction(BaseAction):
             Priority.HIGH,
         )
 
-    async def execute(self, execution_context: ExecutionContext, perception: Dict[str, Any]) -> str:
+    async def execute(
+        self, execution_context: ExecutionContext, perception: Dict[str, Any]
+    ) -> str:
         logger.info(f"\nProcessing perception: {perception}")
         decision = await execution_context.process_perception(perception)
         logger.info(f"Decision made: {decision}")
@@ -116,7 +126,9 @@ async def main():
         # The process_perception action we've defined results in a new action or decision based on the perception
         logger.info(f"Decision made: {decision}")
         if decision:
-            result = await framer.brain.agency.execute_action(decision.action, decision.parameters)
+            result = await framer.brain.agency.execute_action(
+                decision.action, decision.parameters
+            )
             logger.info(f"Decision result: {result}")
         else:
             logger.warning("No decision was made.")

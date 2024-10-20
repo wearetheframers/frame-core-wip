@@ -17,6 +17,7 @@ Priority levels and their meanings:
 10. CRITICAL: Maximum urgency, critical action needed immediately.
 """
 
+
 class Priority(IntEnum):
     LOWEST = 1
     VERY_LOW = 2

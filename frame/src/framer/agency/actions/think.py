@@ -7,7 +7,9 @@ from frame.src.framer.agency.priority import Priority
 class ThinkAction(BaseAction):
     def __init__(self):
         super().__init__(
-            "think", "Ponder and reflect on the current situation and current state of self.", 1
+            "think",
+            "Ponder and reflect on the current situation and current state of self.",
+            1,
         )
 
     async def execute(

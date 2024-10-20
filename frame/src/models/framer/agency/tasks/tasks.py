@@ -23,5 +23,6 @@ class TaskModel(BaseModel):
     updated_at: Optional[str] = None
     created_at: Optional[str] = None
 
+
 class TasksModel(BaseModel):
     tasks: list[TaskModel] = []

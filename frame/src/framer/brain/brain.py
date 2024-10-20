@@ -23,12 +23,15 @@ from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.config import FramerConfig
 
 logger = logging.getLogger(__name__)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s')
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s"
+)
 for handler in logger.handlers:
     handler.setFormatter(formatter)
 
 
 import logging
+
 
 class Brain:
     logger = logging.getLogger(__name__)
@@ -247,7 +250,7 @@ class Brain:
         self.logger.info(f"Available actions: {available_actions}")
 
         # Check if 'mem0_search_extract_memories' is a valid action
-        if 'mem0_search_extract_memories' in available_actions:
+        if "mem0_search_extract_memories" in available_actions:
             self.logger.info("'mem0_search_extract_memories' is a valid action.")
         else:
             self.logger.info("'mem0_search_extract_memories' is NOT a valid action.")
@@ -299,7 +302,8 @@ class Brain:
 
         action = decision_data.get("action", "respond").lower()
         valid_actions = [
-            str(action).lower() for action in self.agency.action_registry.get_all_actions().keys()
+            str(action).lower()
+            for action in self.agency.action_registry.get_all_actions().keys()
         ]
 
         # Check if the action is valid
@@ -483,24 +487,30 @@ class Brain:
 
         return response
 
-    async def execute_decision(self, decision: Decision, perception: Optional[Perception] = None):
+    async def execute_decision(
+        self, decision: Decision, perception: Optional[Perception] = None
+    ):
         """
         Execute the decision made by the brain.
 
         Args:
             decision (Decision): The decision to execute.
         """
-        logger.info(f"Executing decision: {decision.action} with params {decision.parameters}")
+        logger.info(
+            f"Executing decision: {decision.action} with params {decision.parameters}"
+        )
         result = None
         try:
             if decision.action not in self.agency.action_registry.get_all_actions():
                 logger.error("Action not found in registry.")
-                raise ValueError(
-                    f"Action '{decision.action}' not found in registry."
-                )
+                logger.error(f"Action '{decision.action}' not found in registry.")
+                return None
 
             # For 'respond' action, ensure 'content' is passed correctly
-            if decision.action == "respond with memory retrieval" and "query" not in decision.parameters:
+            if (
+                decision.action == "respond with memory retrieval"
+                and "query" not in decision.parameters
+            ):
                 decision.parameters["query"] = decision.parameters.get("text", "")
             elif decision.action == "respond":
                 # For 'respond' action, we'll use the agency's perform_task method directly
@@ -512,14 +522,19 @@ class Brain:
                 )
             else:
                 # Ensure 'perception' is included in parameters if needed
-                if decision.action == "process_perception" and "perception" not in decision.parameters:
+                if (
+                    decision.action == "process_perception"
+                    and "perception" not in decision.parameters
+                ):
                     decision.parameters["perception"] = perception.data
 
                 result = await self.agency.action_registry.execute_action(
                     decision.action, decision.parameters
                 )
 
-            logger.info(f"Action result: {result} with reasoning: {decision.reasoning}.")
+            logger.info(
+                f"Action result: {result} with reasoning: {decision.reasoning}."
+            )
 
         except Exception as e:
             logger.error(f"Error executing decision: {e}")
@@ -613,4 +628,3 @@ class Brain:
             prompt, model=self.default_model
         )
         return response.strip()
-

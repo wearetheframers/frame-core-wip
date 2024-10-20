@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from enum import Enum
 from frame.src.models.framer.agency.tasks import TaskModel, TaskStatus
 
+
 class TaskModel(BaseModel):
     id: str
     description: str
@@ -23,6 +24,7 @@ class TaskModel(BaseModel):
     result: Optional[Any] = None
     updated_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
+
 
 logger = logging.getLogger(__name__)
 

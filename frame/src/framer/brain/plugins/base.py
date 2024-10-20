@@ -47,7 +47,13 @@ class BasePlugin(ABC):
         """
         pass
 
-    def add_action(self, name: str, func: callable, description: str, priority: Priority = Priority.MEDIUM):
+    def add_action(
+        self,
+        name: str,
+        func: callable,
+        description: str,
+        priority: Priority = Priority.MEDIUM,
+    ):
         """
         Register an action with the Framer's action registry.
 
@@ -60,7 +66,9 @@ class BasePlugin(ABC):
         """
         print("Registering action: ", name)
         if name not in self.framer.brain.action_registry.actions:
-            self.framer.brain.action_registry.add_action(name, func, description, priority)
+            self.framer.brain.action_registry.add_action(
+                name, func, description, priority
+            )
             print(f"Action '{name}' registered to Framer action registry.")
         else:
             print(f"Action '{name}' already exists in Framer action registry.")

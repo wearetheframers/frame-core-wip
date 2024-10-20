@@ -95,7 +95,9 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
             self.logger.info(&#34;Mem0SearchExtractSummarizePlugin registered &#39;response with memory retrieval&#39; action.&#34;)
             # Remove respond action
             if &#34;respond&#34; in framer.agency.action_registry.get_all_actions():
+                self.logger.info(&#34;Removing &#39;respond&#39; action from registry.&#34;)
                 framer.agency.action_registry.remove_action(&#34;respond&#34;)
+                exit()
             else:
                 self.logger.warning(&#34;Action &#39;respond&#39; not found in registry. Skipping removal.&#34;)
         else:

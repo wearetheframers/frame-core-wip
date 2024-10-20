@@ -527,9 +527,8 @@ hljs.highlightAll();
         try:
             if decision.action not in self.agency.action_registry.get_all_actions():
                 logger.error(&#34;Action not found in registry.&#34;)
-                raise ValueError(
-                    f&#34;Action &#39;{decision.action}&#39; not found in registry.&#34;
-                )
+                logger.error(f&#34;Action &#39;{decision.action}&#39; not found in registry.&#34;)
+                return None
 
             # For &#39;respond&#39; action, ensure &#39;content&#39; is passed correctly
             if decision.action == &#34;respond with memory retrieval&#34; and &#34;query&#34; not in decision.parameters:

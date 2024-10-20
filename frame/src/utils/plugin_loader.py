@@ -46,7 +46,9 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
                 logger.debug(f"Module imported successfully for plugin: {item}")
 
                 # Construct the plugin class name by converting the directory name to CamelCase
-                plugin_class_name = ''.join(word.capitalize() for word in item.split('_'))
+                plugin_class_name = "".join(
+                    word.capitalize() for word in item.split("_")
+                )
                 logger.debug(f"Looking for class {plugin_class_name} in module {item}")
                 plugin_class = getattr(module, plugin_class_name)
 

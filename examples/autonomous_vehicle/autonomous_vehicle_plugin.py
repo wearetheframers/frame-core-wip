@@ -9,9 +9,17 @@ from frame.src.framer.agency.actions import BaseAction
 class AutonomousVehiclePlugin(BasePlugin):
 
     async def on_load(self):
-        self.add_action("stop_vehicle", self.stop_vehicle, "Stop the autonomous vehicle")
-        self.add_action("slow_down_vehicle", self.slow_down_vehicle, "Slow down the autonomous vehicle")
-        self.add_action("change_lane", self.change_lane, "Change the lane of the autonomous vehicle")
+        self.add_action(
+            "stop_vehicle", self.stop_vehicle, "Stop the autonomous vehicle"
+        )
+        self.add_action(
+            "slow_down_vehicle",
+            self.slow_down_vehicle,
+            "Slow down the autonomous vehicle",
+        )
+        self.add_action(
+            "change_lane", self.change_lane, "Change the lane of the autonomous vehicle"
+        )
 
     async def execute(self, action: str, params: Dict[str, Any]) -> str:
         if action == "stop_vehicle":

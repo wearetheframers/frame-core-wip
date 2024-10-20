@@ -10,7 +10,6 @@ from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 
 
-
 class StreamingResponseAction(BaseAction):
     def __init__(self):
         super().__init__(

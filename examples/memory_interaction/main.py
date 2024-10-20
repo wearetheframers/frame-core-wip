@@ -1,5 +1,6 @@
 import asyncio
 import os, sys
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame import Frame
@@ -10,7 +11,9 @@ import logging
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
 from frame.src.services.memory.main import MemoryService
 
-from frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin import Mem0SearchExtractSummarizePlugin
+from frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin import (
+    Mem0SearchExtractSummarizePlugin,
+)
 
 # Load configuration
 # Load it from the file that this script (the main.py) is in
@@ -22,9 +25,10 @@ with open(config_path, "r") as f:
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
+
 
 async def main():
     # Initialize Frame
@@ -34,16 +38,22 @@ async def main():
     config = FramerConfig(
         name="Memory Framer",
         default_model="gpt-3.5-turbo",
-        permissions=["with_memory", "with_mem0_search_extract_summarize_plugin", "with_shared_context"]
+        permissions=[
+            "with_memory",
+            "with_mem0_search_extract_summarize_plugin",
+            "with_shared_context",
+        ],
     )
     mem0_adapter = Mem0Adapter(api_key=config.get("MEM0_API_KEY"))
     memory_service = MemoryService(adapter=mem0_adapter)
     print("Memory service created: ", memory_service)
     print("Plugins: ", frame.plugins)
     print("Permissions: ", config.permissions)
-    framer = await frame.framer_factory.create_framer(memory_service=memory_service, plugins=frame.plugins)
+    framer = await frame.framer_factory.create_framer(
+        memory_service=memory_service, plugins=frame.plugins
+    )
     mem0_plugin = Mem0SearchExtractSummarizePlugin(framer)
-    
+
     # framer.brain.agency.action_registry.add_action(
     #     "respond with memory retrieval",
     #     description="This action is ideal for responding to personal questions that involve historical or memory-based "
@@ -75,7 +85,7 @@ async def main():
         "What did I say about my vacation plans?",
         "What is the capital of France?",
         "How many continents are there?",
-        "What is the boiling point of water in Celsius?"
+        "What is the boiling point of water in Celsius?",
     ]
 
     random.shuffle(queries)
@@ -94,6 +104,7 @@ async def main():
             print(f"Response: {result}\n")
         else:
             logger.warning("Decision is None, perception was queued.")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -28,7 +28,9 @@ from frame.src.framer.brain.perception import Perception
 from frame.src.framer.brain.decision import Decision
 from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import DSPyAdapter
 from frame.src.services import MemoryService
-from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
+from frame.src.framer.brain.memory.memory_adapter_interface import (
+    MemoryAdapterInterface,
+)
 from frame.src.services import EQService
 from frame.src.utils.metrics import MetricsManager
 from frame.src.services import ExecutionContext
@@ -83,7 +85,11 @@ class Framer:
         # Existing initialization code...
 
         self.config = config
-        self.permissions = config.permissions or ["with_memory", "with_mem0_search_extract_summarize_plugin", "with_shared_context"]
+        self.permissions = config.permissions or [
+            "with_memory",
+            "with_mem0_search_extract_summarize_plugin",
+            "with_shared_context",
+        ]
 
         # Initialize services and plugins based on permissions
         # Services like memory, eq, and shared_context are special plugins called services.
@@ -93,9 +99,11 @@ class Framer:
         # Enforce permission for 'with-mem0-search-extract-summarize-plugin' if 'with-memory' is used
         if "with-memory" in self.permissions:
             self.permissions.append("with-mem0-search-extract-summarize-plugin")
-        
+
         if "with-memory" in self.permissions and memory_adapter:
-            self.memory_service = memory_service or MemoryService(adapter=memory_adapter)
+            self.memory_service = memory_service or MemoryService(
+                adapter=memory_adapter
+            )
 
         if "with_eq" in self.permissions:
             self.eq_service = eq_service or EQService()
@@ -136,7 +144,7 @@ class Framer:
         Enable the Framer to start acting and processing perceptions.
         """
         self.acting = True
-            
+
     async def load_plugins(self):
         """
         Load all plugins by calling their on_load method.
@@ -150,7 +158,7 @@ class Framer:
                         action_name,
                         action_func=action_func,
                         description=f"Action from {plugin_name} plugin",
-                        priority=5  # Default priority, adjust as needed
+                        priority=5,  # Default priority, adjust as needed
                     )
         self.plugin_loading_complete = True
         self.act()
@@ -163,7 +171,9 @@ class Framer:
         if self.is_ready():
             logger.info("Processing queued perceptions...")
             while self.perceptions_queue:
-                logger.info(f"Processing perception from queue: {self.perceptions_queue[0]}")
+                logger.info(
+                    f"Processing perception from queue: {self.perceptions_queue[0]}"
+                )
                 perception = self.perceptions_queue.popleft()
                 await self.sense(perception)
 
@@ -272,7 +282,9 @@ class Framer:
 
         export_config_to_markdown(self.config, file_path)
 
-    async def use_plugin_action(self, plugin_name: str, action_name: str, parameters: Dict[str, Any]) -> Any:
+    async def use_plugin_action(
+        self, plugin_name: str, action_name: str, parameters: Dict[str, Any]
+    ) -> Any:
         """
         Execute a plugin action directly.
 
@@ -289,13 +301,13 @@ class Framer:
         if not plugin:
             logger.warning(f"Plugin {plugin_name} not found. Skipping action.")
             return {"error": f"Plugin {plugin_name} not found."}
-        
+
         action = getattr(plugin, action_name, None)
         if not action:
             raise ValueError(f"Action {action_name} not found in plugin {plugin_name}.")
-        
+
         return await action(**parameters)
-    
+
     async def perform_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """
         Perform a task asynchronously.
@@ -328,7 +340,9 @@ class Framer:
         """
         return self.plugin_loading_complete and self.acting
 
-    async def sense(self, perception: Union[Perception, Dict[str, Any]]) -> Optional[Decision]:
+    async def sense(
+        self, perception: Union[Perception, Dict[str, Any]]
+    ) -> Optional[Decision]:
         """
         Process a perception and make a decision.
 
@@ -372,7 +386,7 @@ class Framer:
             await self.brain.execute_decision(decision)
         logger.debug(f"Processed perception: {perception}, Decision: {decision}")
         self.notify_observers(decision)
-        return decision  
+        return decision
 
     async def prompt(self, text: str) -> Decision:
         """

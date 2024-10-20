@@ -76,7 +76,9 @@ class Frame:
         self.plugins = {}
         self.is_loading_plugins = True
         self.plugins, _ = load_plugins(self.plugins_dir)
-        self.framer_factory = FramerFactory(FramerConfig(name="DefaultFramer"), self.llm_service, plugins=self.plugins)
+        self.framer_factory = FramerFactory(
+            FramerConfig(name="DefaultFramer"), self.llm_service, plugins=self.plugins
+        )
         self.is_loading_plugins = False
 
     def set_plugins_dir(self, plugins_dir: str):
