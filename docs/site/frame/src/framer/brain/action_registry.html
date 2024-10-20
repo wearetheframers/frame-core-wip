@@ -228,7 +228,7 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         return self.actions.get(name)
 
-    async def execute_action(self, action_name: str, parameters: dict):
+    async def execute_action(self, action_name: str, *args, **kwargs):
         &#34;&#34;&#34;Execute an action by its name.&#34;&#34;&#34;
         logger.info(
             f&#34;Available actions before executing &#39;{action_name}&#39;: {list(self.actions.keys())}&#34;
@@ -246,17 +246,8 @@ hljs.highlightAll();
             return await self._handle_error(error_message)
 
         action_func = action[&#34;action_func&#34;]
-        expected_params = action_func.__code__.co_varnames[
-            : action_func.__code__.co_argcount
-        ]
-        filtered_params = {k: v for k, v in parameters.items() if k in expected_params}
-        logger.info(f&#34;Filtered params: {filtered_params}&#34;)
-
-        if &#34;query&#34; in filtered_params:
-            filtered_params[&#34;query&#34;] = parameters.get(&#34;query&#34;, &#34;&#34;)
-
         try:
-            result = await action_func(self.execution_context, **filtered_params)
+            result = await action_func(*args, **kwargs)
             if result is None:
                 return {
                     &#34;error&#34;: &#34;Action returned None&#34;,
@@ -326,7 +317,7 @@ hljs.highlightAll();
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.action_registry.ActionRegistry.execute_action"><code class="name flex">
-<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, parameters: dict)</span>
+<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, *args, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Execute an action by its name.</p></div>

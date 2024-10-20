@@ -263,7 +263,54 @@ model to be used for completions and loads plugins.</p>
             A dictionary containing the call count and cost for each model,
             as well as the total calls and total cost.
         &#34;&#34;&#34;
-        return self.llm_service.get_metrics()</code></pre>
+        return self.llm_service.get_metrics()
+
+    def shut_down(self, save_state: bool = False, reset: bool = True):
+        &#34;&#34;&#34;
+        Shut down the Frame instance, managing all Framers and workflows.
+
+        This method handles the graceful shutdown of all Framers and their associated
+        workflows. It can optionally save the current state and reset the Frame.
+
+        Args:
+            save_state (bool): If True, save the current state of all Framers and workflows.
+                               Defaults to False.
+            reset (bool): If True, reset all Framers and workflows after shutdown.
+                          Defaults to True.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        # Implement logic to pause or stop all workflows
+        # if hasattr(self, &#39;framers&#39;):
+        #     for framer in self.framers:
+        #         if hasattr(framer, &#39;workflow_manager&#39;):
+        #             framer.workflow_manager.pause_all_workflows()
+
+        # Implement logic to save state if requested
+        if save_state:
+            # Save state of all Framers and workflows
+            pass
+
+        # Implement logic to remove all Framers
+        # if hasattr(self, &#39;framers&#39;):
+        #     self.framers.clear()
+
+        # Implement logic to reset everything if requested
+        if reset:
+            # Reset all Frame components
+            pass
+
+        # Implement any necessary cleanup for plugins
+        for plugin in self.plugins.values():
+            if hasattr(plugin, &#39;on_shutdown&#39;):
+                plugin.on_shutdown()
+
+        # Implement any final cleanup or resource release
+        # if hasattr(self, &#39;llm_service&#39;) and hasattr(self.llm_service, &#39;close&#39;):
+        #     self.llm_service.close()
+
+        logger.info(&#34;Frame has been shut down.&#34;)</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
@@ -405,6 +452,25 @@ the entire Frame ecosystem.</p>
 <dd>The directory path where plugins are located.</dd>
 </dl></div>
 </dd>
+<dt id="frame.frame.Frame.shut_down"><code class="name flex">
+<span>def <span class="ident">shut_down</span></span>(<span>self, save_state: bool = False, reset: bool = True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Shut down the Frame instance, managing all Framers and workflows.</p>
+<p>This method handles the graceful shutdown of all Framers and their associated
+workflows. It can optionally save the current state and reset the Frame.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>save_state</code></strong> :&ensp;<code>bool</code></dt>
+<dd>If True, save the current state of all Framers and workflows.
+Defaults to False.</dd>
+<dt><strong><code>reset</code></strong> :&ensp;<code>bool</code></dt>
+<dd>If True, reset all Framers and workflows after shutdown.
+Defaults to True.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>None</p></div>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -434,6 +500,7 @@ the entire Frame ecosystem.</p>
 <li><code><a title="frame.frame.Frame.reset_metrics" href="#frame.frame.Frame.reset_metrics">reset_metrics</a></code></li>
 <li><code><a title="frame.frame.Frame.set_default_model" href="#frame.frame.Frame.set_default_model">set_default_model</a></code></li>
 <li><code><a title="frame.frame.Frame.set_plugins_dir" href="#frame.frame.Frame.set_plugins_dir">set_plugins_dir</a></code></li>
+<li><code><a title="frame.frame.Frame.shut_down" href="#frame.frame.Frame.shut_down">shut_down</a></code></li>
 </ul>
 </li>
 </ul>

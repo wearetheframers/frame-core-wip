@@ -64,7 +64,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.Framer"><code class="flex name class">
 <span>class <span class="ident">Framer</span></span>
-<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.workflow.workflow_manager.WorkflowManager" href="agency/workflow/workflow_manager.html#frame.src.framer.agency.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, brain: Optional[<a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>] = None, memory_adapter: Optional[<a title="frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface" href="brain/memory/memory_adapter_interface.html#frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface">MemoryAdapterInterface</a>] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], plugins: Optional[Dict[str, Any]] = None, plugin_loading_progress: Optional[Callable[[int], None]] = None)</span>
+<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.workflow.workflow_manager.WorkflowManager" href="agency/workflow/workflow_manager.html#frame.src.framer.agency.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, brain: Optional[<a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>] = None, memory_adapter: Optional[<a title="frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface" href="brain/memory/memory_adapter_interface.html#frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface">MemoryAdapterInterface</a>] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], plugins: Optional[Dict[str, Any]] = None, plugin_loading_progress: Optional[Callable[[int], None]] = None, execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -125,6 +125,7 @@ hljs.highlightAll();
         goals: List[Dict[str, Any]] = [],
         plugins: Optional[Dict[str, Any]] = None,
         plugin_loading_progress: Optional[Callable[[int], None]] = None,
+        execution_context: Optional[ExecutionContext] = None,
     ):
         self.plugin_loading_progress = plugin_loading_progress
         self.config = config
@@ -135,7 +136,7 @@ hljs.highlightAll();
         ]
         self.llm_service = llm_service
 
-        self.execution_context = ExecutionContext(llm_service=self.llm_service)
+        self.execution_context = execution_context or ExecutionContext(llm_service=self.llm_service)
         self.plugin_loading_progress = plugin_loading_progress
 
         # Initialize services and plugins based on permissions
@@ -1287,6 +1288,8 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
 
         # The Mind is now initialized within the Brain constructor
         mind = brain.mind
+        execution_context = ExecutionContext(llm_service=self.llm_service)
+        execution_context.agency = agency
         framer = Framer(
             config=self.config,
             llm_service=self.llm_service,
@@ -1297,6 +1300,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
             memory_service=memory_service,
             eq_service=eq_service,
             plugins=plugins,
+            execution_context=execution_context,
         )
 
         framer.agency.set_goals(goals)

@@ -120,7 +120,8 @@ allowing them to share resources and functionality without tight coupling.</p>
 <p>Key features:
 - Centralized service access: Provides access to core services like LLM, memory, and EQ.
 - State management: Maintains and updates the current state of the execution.
-- Goal tracking: Manages the current goals of the Framer.</p></div>
+- Goal tracking: Manages the current goals of the Framer.
+- Action registry: Stores and manages available actions.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -138,6 +139,7 @@ allowing them to share resources and functionality without tight coupling.</p>
     - Centralized service access: Provides access to core services like LLM, memory, and EQ.
     - State management: Maintains and updates the current state of the execution.
     - Goal tracking: Manages the current goals of the Framer.
+    - Action registry: Stores and manages available actions.
     &#34;&#34;&#34;
 
     def __init__(
@@ -155,6 +157,7 @@ allowing them to share resources and functionality without tight coupling.</p>
         self.state = state or {}
         self.goals: List[Any] = []
         self.roles: List[Any] = []
+        self.action_registry = None
 
     def set_state(self, key: str, value: Any) -&gt; None:
         self.state[key] = value
