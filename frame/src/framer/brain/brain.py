@@ -28,8 +28,8 @@ from .memory.memory import Memory
 
 logger = logging.getLogger(__name__)
 
-class Brain:
 
+class Brain:
     """
     The Brain class represents the central decision-making and cognitive processing component of the Framer.
 
@@ -67,7 +67,7 @@ class Brain:
     def __init__(
         self,
         llm_service: LLMService,
-        execution_context: Optional['ExecutionContext'] = None,
+        execution_context: Optional["ExecutionContext"] = None,
         memory_service: Optional[MemoryService] = None,
         roles: List[Dict[str, Any]] = [],
         goals: List[Dict[str, Any]] = [],
@@ -89,14 +89,16 @@ class Brain:
         self.logger = logging.getLogger(__name__)
         self.logger.info("Initializing Brain")
         self.llm_service = llm_service
-        self.execution_context = execution_context or ExecutionContext(llm_service=self.llm_service)
+        self.execution_context = execution_context or ExecutionContext(
+            llm_service=self.llm_service
+        )
         self.default_model = default_model
         self.roles = roles
         self.goals = goals
         self.soul = soul
         self.memory_service = memory_service
         self.logger.info(f"Memory service received: {self.memory_service}")
-        
+
         if self.memory_service:
             self.logger.info("Creating Memory object")
             self.memory = Memory(self.memory_service)
@@ -104,15 +106,17 @@ class Brain:
         else:
             self.logger.warning("No memory service provided, Memory object not created")
             self.memory = None
-        
+
         self.mind = Mind(self)
         # Initialize ActionRegistry
         self.action_registry = ActionRegistry(execution_context=self.execution_context)
 
-        self.logger.info(f"Brain initialized with memory service: {self.memory_service}")
+        self.logger.info(
+            f"Brain initialized with memory service: {self.memory_service}"
+        )
         self.logger.info(f"Brain memory object: {self.memory}")
 
-    def set_memory_service(self, memory_service: Optional['MemoryService']):
+    def set_memory_service(self, memory_service: Optional["MemoryService"]):
         """
         Set the memory service for the Brain.
 
@@ -125,7 +129,9 @@ class Brain:
             logger.info(f"Set memory service: {self.memory_service}")
         else:
             self.memory = None
-            logger.warning("Memory service is not set. Memory operations will not be available.")
+            logger.warning(
+                "Memory service is not set. Memory operations will not be available."
+            )
 
     def set_framer(self, framer):
         self.framer = framer
@@ -233,9 +239,9 @@ class Brain:
 
     async def process_perception(
         self,
-        perception: Union['Perception', Dict[str, Any]],
+        perception: Union["Perception", Dict[str, Any]],
         goals: Optional[List[Goal]] = None,
-    ) -> 'Decision':
+    ) -> "Decision":
         """
         Process a perception and make a decision based on it.
 
@@ -295,7 +301,7 @@ class Brain:
             )
 
         response = await self._get_decision_prompt(perception)
-        
+
         if response is None or (isinstance(response, str) and not response.strip()):
             logger.error("Received empty or None response from LLM service")
             return Decision(
@@ -316,7 +322,7 @@ class Brain:
             logger.error(f"Error in decision making: {decision_data['error']}")
             return Decision(
                 action="error",
-                parameters={"error": decision_data['error']},
+                parameters={"error": decision_data["error"]},
                 reasoning="Error occurred during decision making",
                 confidence=0.0,
                 priority=1,
@@ -333,7 +339,10 @@ class Brain:
         # Check if the action is valid
         if action not in valid_actions:
             # If the action is not valid, check if it's related to web search or summarization
-            if any(keyword in action for keyword in ["search", "summarize", "extract", "memory"]):
+            if any(
+                keyword in action
+                for keyword in ["search", "summarize", "extract", "memory"]
+            ):
                 action = "respond with memory retrieval"
                 decision_data["action"] = action
                 decision_data["reasoning"] = (
@@ -373,7 +382,11 @@ class Brain:
 
         # Consider role and goal priorities when setting decision priority
         active_roles = [role for role in self.roles if role.status == RoleStatus.ACTIVE]
-        active_goals = [goal for goal in self.execution_context.get_goals() if goal.status == GoalStatus.ACTIVE]
+        active_goals = [
+            goal
+            for goal in self.execution_context.get_goals()
+            if goal.status == GoalStatus.ACTIVE
+        ]
         roles_priority = max(
             [role.priority for role in active_roles], default=Priority.MEDIUM
         )
@@ -414,7 +427,7 @@ class Brain:
         )
         logger.info(f"Final decision object: {decision}")
         logger.info(f"Decision made: {decision}")
-        if hasattr(decision, 'reasoning'):
+        if hasattr(decision, "reasoning"):
             decision.reasoning += f" (Aligned with {len(active_goals)} active goals)"
         else:
             logger.error("Decision object does not have a 'reasoning' attribute.")
@@ -520,7 +533,10 @@ class Brain:
             return response
         except Exception as e:
             logger.error(f"Error in _get_decision_prompt: {str(e)}")
-            return {"error": str(e), "fallback_response": "An error occurred while processing your request."}
+            return {
+                "error": str(e),
+                "fallback_response": "An error occurred while processing your request.",
+            }
 
     async def execute_decision(
         self, decision: Decision, perception: Optional[Perception] = None
@@ -542,8 +558,13 @@ class Brain:
                 return None
 
             if decision.action == "respond with memory retrieval":
-                if "query" not in decision.parameters or not decision.parameters["query"]:
-                    decision.parameters["query"] = perception.data.get("text", "") if perception else ""
+                if (
+                    "query" not in decision.parameters
+                    or not decision.parameters["query"]
+                ):
+                    decision.parameters["query"] = (
+                        perception.data.get("text", "") if perception else ""
+                    )
                 # Ensure the query is passed to the action
                 result = await self.action_registry.execute_action(
                     decision.action, decision.parameters
@@ -558,14 +579,21 @@ class Brain:
                     }
                 )
             else:
-                if decision.action == "process_perception" and "perception" not in decision.parameters:
-                    decision.parameters["perception"] = perception.data if perception else None
+                if (
+                    decision.action == "process_perception"
+                    and "perception" not in decision.parameters
+                ):
+                    decision.parameters["perception"] = (
+                        perception.data if perception else None
+                    )
 
             result = await self.action_registry.execute_action(
                 decision.action, decision.parameters
             )
 
-            logger.info(f"Action result: {result} with reasoning: {decision.reasoning}.")
+            logger.info(
+                f"Action result: {result} with reasoning: {decision.reasoning}."
+            )
 
         except Exception as e:
             logger.error(f"Error executing decision: {e}")
@@ -616,7 +644,10 @@ class Brain:
                             )
                         except Exception as e:
                             logger.error(f"Error executing action '{action_name}': {e}")
-                            result = {"error": str(e), "fallback_response": "An error occurred while processing your request. Please try again."}
+                            result = {
+                                "error": str(e),
+                                "fallback_response": "An error occurred while processing your request. Please try again.",
+                            }
                     break
             else:
                 raise ValueError(f"Action '{decision.action}' not found in registry.")
@@ -631,7 +662,6 @@ class Brain:
             result = {"error": str(e)}
 
         return result
-
 
     async def _execute_think_action(self, decision: Decision):
         """

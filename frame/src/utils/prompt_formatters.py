@@ -2,6 +2,7 @@ from frame.src.services.llm.llm_adapters.lmql.lmql_interface import LMQLInterfac
 
 lmql_interface = LMQLInterface(model_name="gpt-3.5-turbo")
 
+
 def format_lmql_prompt(prompt: str, expected_output: str = None) -> str:
     """
     Format a prompt for LMQL using the LMQL interface.

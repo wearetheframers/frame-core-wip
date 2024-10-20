@@ -52,18 +52,18 @@ async def main():
             "with_mem0_search_extract_summarize_plugin",
             "with_shared_context",
         ],
-        mem0_api_key=os.environ.get("MEM0_API_KEY")
+        mem0_api_key=os.environ.get("MEM0_API_KEY"),
     )
     logger.info(f"Plugins: {frame.plugins}")
     logger.info(f"Permissions: {config.permissions}")
-    
+
     framer = await frame.framer_factory.create_framer(plugins=frame.plugins)
     framer.brain.set_memory_service(MemoryService(adapter=memory_adapter))
     logger.info(f"Framer created: {framer}")
     logger.info(f"Framer brain: {framer.brain}")
     logger.info(f"Framer brain memory service: {framer.brain.memory_service}")
     logger.info(f"Framer brain memory: {framer.brain.memory}")
-    
+
     mem0_plugin = Mem0SearchExtractSummarizePlugin(framer)
     logger.info(f"Mem0SearchExtractSummarizePlugin created: {mem0_plugin}")
 
@@ -71,15 +71,21 @@ async def main():
     while not framer.is_ready():
         logger.warning("Framer is not ready. Retrying...")
         await asyncio.sleep(1)
-    
+
     logger.info("Adding memories...")
     if framer.brain and framer.brain.memory:
         framer.brain.memory.store("My favorite color is blue.", user_id="user1")
-        framer.brain.memory.store("I have a dentist appointment on October 20th.", user_id="user1")
-        framer.brain.memory.store("I plan to visit Hawaii for my vacation.", user_id="user1")
+        framer.brain.memory.store(
+            "I have a dentist appointment on October 20th.", user_id="user1"
+        )
+        framer.brain.memory.store(
+            "I plan to visit Hawaii for my vacation.", user_id="user1"
+        )
         logger.info("All memories added.")
     else:
-        logger.error("Brain or Memory object is not initialized. Unable to store memories.")
+        logger.error(
+            "Brain or Memory object is not initialized. Unable to store memories."
+        )
     # Query the Framer for personal details
     queries = [
         "What is my favorite color?",
@@ -104,11 +110,11 @@ async def main():
 
             # Print the result of the decision
             if isinstance(result, dict):
-                if 'output' in result:
+                if "output" in result:
                     print(f"Response: {result['output']}\n")
-                elif 'error' in result:
+                elif "error" in result:
                     print(f"Error: {result['error']}\n")
-                elif 'response' in result:
+                elif "response" in result:
                     print(f"Response: {result['response']}\n")
                 else:
                     print(f"Unexpected result format: {result}\n")

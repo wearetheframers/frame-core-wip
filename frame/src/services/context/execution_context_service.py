@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from frame.src.services.eq.eq_service import EQService
     from frame.src.framer.soul.soul import Soul
 
+
 class ExecutionContext:
     """
     ExecutionContext provides a centralized container for various services, state, and functions
@@ -24,10 +25,10 @@ class ExecutionContext:
 
     def __init__(
         self,
-        llm_service: 'LLMService',
-        memory_service: Optional['MemoryService'] = None,
-        eq_service: Optional['EQService'] = None,
-        soul: Optional['Soul'] = None,
+        llm_service: "LLMService",
+        memory_service: Optional["MemoryService"] = None,
+        eq_service: Optional["EQService"] = None,
+        soul: Optional["Soul"] = None,
         state: Dict[str, Any] = None,
     ):
         self.llm_service = llm_service

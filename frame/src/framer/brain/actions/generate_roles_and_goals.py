@@ -6,8 +6,7 @@ from frame.src.services.execution_context import ExecutionContext
 class GenerateRolesAndGoalsAction(BaseAction):
     def __init__(self):
         super().__init__(
-            "generate_roles_and_goals", "Generate roles and goals for the Framer",
-            2
+            "generate_roles_and_goals", "Generate roles and goals for the Framer", 2
         )
 
     async def execute(

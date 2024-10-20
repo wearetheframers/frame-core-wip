@@ -15,7 +15,9 @@ class MemoryService:
     ) -> Optional[Any]:
         return self.adapter.retrieve(memory_id, user_id)
 
-    def update_memory(self, memory_id: int, data: str, user_id: str = "default") -> bool:
+    def update_memory(
+        self, memory_id: int, data: str, user_id: str = "default"
+    ) -> bool:
         return self.adapter.update(memory_id, data, user_id)
 
     def delete_memory(self, memory_id: int, user_id: str = "default") -> bool:

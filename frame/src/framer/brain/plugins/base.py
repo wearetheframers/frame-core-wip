@@ -24,7 +24,7 @@ class BasePlugin(ABC):
         """
         self.framer = framer
         self.logger = logging.getLogger(self.__class__.__name__)
-        if hasattr(framer, 'execution_context'):
+        if hasattr(framer, "execution_context"):
             self.execution_context = framer.execution_context
         else:
             self.execution_context = None

@@ -3,11 +3,14 @@ from typing import Optional, Callable, Dict, Any, List
 from lmql.runtime.program_state import ProgramState
 from lmql import decorators
 
+
 class LMQLInterface:
     def __init__(self, model_name: str):
         self.model = lmql.model(model_name)
 
-    def format_prompt_with_constraints(self, prompt: str, constraints: list, distribution: bool = False) -> str:
+    def format_prompt_with_constraints(
+        self, prompt: str, constraints: list, distribution: bool = False
+    ) -> str:
         """
         Format a prompt with LMQL constraints and optionally include a distribution clause.
 
@@ -38,7 +41,11 @@ class LMQLInterface:
             response = response.replace(pattern, "")
         return response.strip()
 
-    def set_decoder(self, decoder: Optional[str] = None, decoder_params: Optional[Dict[str, Any]] = None):
+    def set_decoder(
+        self,
+        decoder: Optional[str] = None,
+        decoder_params: Optional[Dict[str, Any]] = None,
+    ):
         """
         Set the decoding algorithm and its parameters.
 
@@ -49,7 +56,9 @@ class LMQLInterface:
         self.decoder = decoder
         self.decoder_params = decoder_params
 
-    def apply_decorators(self, value: str, decorators: List[Callable], context: Any) -> str:
+    def apply_decorators(
+        self, value: str, decorators: List[Callable], context: Any
+    ) -> str:
         """
         Apply a list of decorators to a value.
 
@@ -65,7 +74,15 @@ class LMQLInterface:
             value = decorator(value, context)
         return value
 
-    async def generate(self, prompt: str, max_tokens: int = 100, constraints: list = None, distribution: bool = False, control_flow: Optional[Callable] = None, decorators: Optional[List[Callable]] = None) -> str:
+    async def generate(
+        self,
+        prompt: str,
+        max_tokens: int = 100,
+        constraints: list = None,
+        distribution: bool = False,
+        control_flow: Optional[Callable] = None,
+        decorators: Optional[List[Callable]] = None,
+    ) -> str:
         """
         Generate a response using LMQL with constraints and optionally obtain a distribution.
         Supports dynamic prompt construction with control flow.
@@ -85,13 +102,17 @@ class LMQLInterface:
         context = ProgramState(prompt)  # Pass the prompt to ProgramState
         if decorators:
             prompt = self.apply_decorators(prompt, decorators, context)
-            prompt = self.format_prompt_with_constraints(prompt, constraints, distribution)
+            prompt = self.format_prompt_with_constraints(
+                prompt, constraints, distribution
+            )
         if distribution:
             return await self.model.score(prompt, max_tokens=max_tokens)
         else:
             # Apply LMQL constraints during generation
             lmql_constraints = self._apply_lmql_constraints(constraints)
-            return await self.model.generate(prompt, max_tokens=max_tokens, constraints=lmql_constraints)
+            return await self.model.generate(
+                prompt, max_tokens=max_tokens, constraints=lmql_constraints
+            )
 
     def _apply_lmql_constraints(self, constraints: list) -> list:
         """

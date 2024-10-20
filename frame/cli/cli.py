@@ -103,6 +103,7 @@ async def wait_for_streaming(framer):
         print(new_text, end="", flush=True)
     return framer._streamed_response["result"]
 
+
 async def execute_framer(frame, data, sync, stream):
     """
     Execute the Framer based on the provided configuration.
@@ -220,9 +221,9 @@ async def run_framer(ctx, prompt, name, model, debug, sync, stream):
         logger.warning("Hugging Face API key is not set. Some features may not work.")
 
     framer = await execute_framer(frame, data, sync, stream)
-    
+
     # Process the perception and execute the decision
-    perception = {"type": "hearing", "data": {"text": data['prompt']}}
+    perception = {"type": "hearing", "data": {"text": data["prompt"]}}
     decision = await framer.sense(perception)
     if decision:
         result = await framer.agency.execute_decision(decision)

@@ -86,8 +86,8 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         soul_state = execution_context.soul.get_current_state() if execution_context and execution_context.soul else &#34;No soul state available.&#34;
         recent_thoughts = execution_context.mind.get_all_thoughts()[-5:] if execution_context and execution_context.mind else []
-        active_roles = [role.name for role in execution_context.roles if role.status == RoleStatus.ACTIVE] if execution_context else []
-        active_goals = [goal.name for goal in execution_context.goals if goal.status == GoalStatus.ACTIVE] if execution_context else []
+        active_roles = [role.name for role in execution_context.roles if role.status == &#39;ACTIVE&#39;] if execution_context else []
+        active_goals = [goal.name for goal in execution_context.goals if goal.status == &#39;ACTIVE&#39;] if execution_context else []
 
         response = (
             f&#34;I&#39;m sorry, an error occurred: {error_message}. &#34;

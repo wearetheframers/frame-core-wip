@@ -27,7 +27,9 @@ from frame.src.utils.config_parser import (
     export_config_to_markdown,
 )
 
-from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
+from frame.src.framer.brain.memory.memory_adapter_interface import (
+    MemoryAdapterInterface,
+)
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
 
 Observer = Callable[[Decision], None]
@@ -141,7 +143,7 @@ class Framer:
             roles=self.roles,
             goals=self.goals,
             default_model=config.default_model,
-            soul=soul
+            soul=soul,
         )
         logger.info(f"Brain created with memory service: {self.brain.memory_service}")
 
@@ -159,22 +161,22 @@ class Framer:
     async def _generate_initial_roles_and_goals(self):
         if not self.roles or not self.goals:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
-            
+
         # Ensure uniqueness
         self.roles = list({role.name: role for role in self.roles}.values())
         self.goals = list({goal.name: goal for goal in self.goals}.values())
-        
+
         logger.info(f"Generated initial roles: {[role.name for role in self.roles]}")
         logger.info(f"Generated initial goals: {[goal.name for goal in self.goals]}")
-        
-        if hasattr(self.brain, 'set_roles'):
+
+        if hasattr(self.brain, "set_roles"):
             self.brain.set_roles(self.roles)
-        if hasattr(self.brain, 'set_goals'):
+        if hasattr(self.brain, "set_goals"):
             self.brain.set_goals(self.goals)
-        
-        if hasattr(self.execution_context, 'set_roles'):
+
+        if hasattr(self.execution_context, "set_roles"):
             self.execution_context.set_roles(self.roles)
-        if hasattr(self.execution_context, 'set_goals'):
+        if hasattr(self.execution_context, "set_goals"):
             self.execution_context.set_goals(self.goals)
 
     def act(self):
@@ -417,7 +419,9 @@ class Framer:
                 goal for goal in current_goals if goal.status == GoalStatus.ACTIVE
             ]
             if active_goals:
-                decision.reasoning += f" (Aligned with {len(active_goals)} active goals)"
+                decision.reasoning += (
+                    f" (Aligned with {len(active_goals)} active goals)"
+                )
 
             if hasattr(self, "can_execute") and self.can_execute:
                 await self.brain.execute_decision(decision)

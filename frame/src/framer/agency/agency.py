@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+
 class Agency:
     """
     The Agency class manages task execution, decision-making, and role/goal coordination for a Framer.
@@ -308,7 +309,9 @@ class Agency:
             )
             logger.debug(f"Role generation response: {response}")
             if response is None:
-                logger.warning("Received None response while generating role. Using default role.")
+                logger.warning(
+                    "Received None response while generating role. Using default role."
+                )
                 return [
                     Role(
                         id="default",
@@ -348,7 +351,9 @@ class Agency:
                     existing_role_names.add(r["name"])
                     logger.info(f"Generated unique role: {r['name']}")
                 else:
-                    logger.warning(f"Duplicate role name generated: {r['name']}. Skipping.")
+                    logger.warning(
+                        f"Duplicate role name generated: {r['name']}. Skipping."
+                    )
             return roles
         except Exception as e:
             logger.error(f"Error generating role: {str(e)}", exc_info=True)
@@ -389,7 +394,9 @@ class Agency:
             )
             logger.debug(f"Goal generation response: {response}")
             if response is None:
-                logger.warning("Received None response while generating goal. Using default goal.")
+                logger.warning(
+                    "Received None response while generating goal. Using default goal."
+                )
                 return [
                     Goal(
                         name="Default Goal",
@@ -425,7 +432,9 @@ class Agency:
                     existing_goal_names.add(g["name"])
                     logger.info(f"Generated unique goal: {g['name']}")
                 else:
-                    logger.warning(f"Duplicate goal name generated: {g['name']}. Skipping.")
+                    logger.warning(
+                        f"Duplicate goal name generated: {g['name']}. Skipping."
+                    )
             return goals
         except Exception as e:
             logger.error(f"Error generating goal: {e}", exc_info=True)

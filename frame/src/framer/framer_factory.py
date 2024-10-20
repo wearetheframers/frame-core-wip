@@ -115,7 +115,7 @@ class FramerFactory:
             ),
             soul=soul,
         )
-        
+
         # The Mind is now initialized within the Brain constructor
         mind = brain.mind
         framer = Framer(

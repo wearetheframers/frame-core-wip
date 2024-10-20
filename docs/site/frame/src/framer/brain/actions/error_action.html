@@ -57,8 +57,8 @@ Actions can create Tasks, which can enforce output types.</p></div>
         error_message = kwargs.get(&#34;error&#34;, &#34;An unknown error occurred.&#34;)
         soul_state = execution_context.soul.get_current_state() if execution_context and execution_context.soul else &#34;No soul state available.&#34;
         recent_thoughts = execution_context.get_recent_thoughts()[-5:] if execution_context and hasattr(execution_context, &#39;get_recent_thoughts&#39;) else []
-        active_roles = [role.name for role in execution_context.roles if role.status == RoleStatus.ACTIVE] if execution_context and hasattr(execution_context, &#39;roles&#39;) else []
-        active_goals = [goal.name for goal in execution_context.goals if goal.status == GoalStatus.ACTIVE] if execution_context and hasattr(execution_context, &#39;goals&#39;) else []
+        active_roles = [role.name for role in execution_context.roles if role.status == &#39;ACTIVE&#39;] if execution_context and hasattr(execution_context, &#39;roles&#39;) else []
+        active_goals = [goal.name for goal in execution_context.goals if goal.status == &#39;ACTIVE&#39;] if execution_context and hasattr(execution_context, &#39;goals&#39;) else []
 
         response = (
             f&#34;I apologize, an error occurred: {error_message}. &#34;

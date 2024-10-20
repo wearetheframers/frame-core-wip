@@ -109,7 +109,7 @@ hljs.highlightAll();
 </dd>
 <dt id="frame.src.services.ExecutionContext"><code class="flex name class">
 <span>class <span class="ident">ExecutionContext</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.eq_service.EQService" href="eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>] = None, soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../framer/soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None, state: Dict[str, Any] = None)</span>
+<span>(</span><span>llm_service: "'<a title="frame.src.services.LLMService" href="#frame.src.services.LLMService">LLMService</a>'", memory_service: "Optional['<a title="frame.src.services.MemoryService" href="#frame.src.services.MemoryService">MemoryService</a>']" = None, eq_service: "Optional['<a title="frame.src.services.EQService" href="#frame.src.services.EQService">EQService</a>']" = None, soul: "Optional['Soul']" = None, state: Dict[str, Any] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ExecutionContext provides a centralized container for various services, state, and functions
@@ -142,10 +142,10 @@ allowing them to share resources and functionality without tight coupling.</p>
 
     def __init__(
         self,
-        llm_service: LLMService,
-        memory_service: Optional[MemoryService] = None,
-        eq_service: Optional[EQService] = None,
-        soul: Optional[Soul] = None,
+        llm_service: &#39;LLMService&#39;,
+        memory_service: Optional[&#39;MemoryService&#39;] = None,
+        eq_service: Optional[&#39;EQService&#39;] = None,
+        soul: Optional[&#39;Soul&#39;] = None,
         state: Dict[str, Any] = None,
     ):
         self.llm_service = llm_service
@@ -153,8 +153,8 @@ allowing them to share resources and functionality without tight coupling.</p>
         self.eq_service = eq_service
         self.soul = soul
         self.state = state or {}
-        self.goals = []
-        self.roles = []
+        self.goals: List[Any] = []
+        self.roles: List[Any] = []
 
     def set_state(self, key: str, value: Any) -&gt; None:
         self.state[key] = value
@@ -267,7 +267,7 @@ allowing them to share resources and functionality without tight coupling.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.services.ExecutionContext.get_eq_service"><code class="name flex">
-<span>def <span class="ident">get_eq_service</span></span>(<span>self) ‑> Optional[<a title="frame.src.services.eq.eq_service.EQService" href="eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>]</span>
+<span>def <span class="ident">get_eq_service</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -290,13 +290,13 @@ allowing them to share resources and functionality without tight coupling.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.services.ExecutionContext.get_llm_service"><code class="name flex">
-<span>def <span class="ident">get_llm_service</span></span>(<span>self) ‑> <a title="frame.src.services.llm.main.LLMService" href="llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a></span>
+<span>def <span class="ident">get_llm_service</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.services.ExecutionContext.get_memory_service"><code class="name flex">
-<span>def <span class="ident">get_memory_service</span></span>(<span>self) ‑> Optional[<a title="frame.src.services.memory.main.MemoryService" href="memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>]</span>
+<span>def <span class="ident">get_memory_service</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -313,7 +313,7 @@ allowing them to share resources and functionality without tight coupling.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.services.ExecutionContext.get_soul"><code class="name flex">
-<span>def <span class="ident">get_soul</span></span>(<span>self) ‑> Optional[<a title="frame.src.framer.soul.soul.Soul" href="../framer/soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>]</span>
+<span>def <span class="ident">get_soul</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>

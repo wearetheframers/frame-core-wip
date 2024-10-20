@@ -40,7 +40,44 @@ hljs.highlightAll();
 <span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[ForwardRef('ExecutionContext')] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], default_model: str = 'gpt-3.5-turbo', soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Initialize the Brain with the necessary components.</p>
+<div class="desc"><p>The Brain class represents the central decision-making and cognitive processing component of the Framer.</p>
+<p>It is responsible for processing perceptions, making decisions, and executing actions based on those decisions.
+The Brain integrates various cognitive functions, including perception processing, decision-making,
+memory management, and action execution.</p>
+<p>Key features:
+- Perception processing: Analyzes and interprets incoming perceptions.
+- Decision-making: Generates decisions based on current context, roles, goals, and perceptions.
+- Action execution: Executes decided actions using the action registry.
+- Memory integration: Utilizes the memory service for storing and retrieving information.
+- LLM integration: Uses language models for generating responses and making decisions.
+- Role and goal management: Considers active roles and goals in the decision-making process.</p>
+<p>The Brain uses a set of valid actions, derived from the ActionRegistry and default actions,
+to determine which actions can be executed. This ensures that all actions are within the
+defined capabilities of the Framer.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>The language model service for text generation and processing.</dd>
+<dt><strong><code>default_model</code></strong> :&ensp;<code>str</code></dt>
+<dd>The default language model to use.</dd>
+<dt><strong><code>roles</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>List of roles for the Brain.</dd>
+<dt><strong><code>goals</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>List of goals for the Brain.</dd>
+<dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Soul]</code></dt>
+<dd>The Soul instance associated with this Brain.</dd>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
+<dd>The execution context for the Brain.</dd>
+<dt><strong><code>mind</code></strong> :&ensp;<code>Mind</code></dt>
+<dd>The Mind instance for cognitive processing.</dd>
+<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
+<dd>The memory service for storing and retrieving information.</dd>
+<dt><strong><code>action_registry</code></strong> :&ensp;<code>ActionRegistry</code></dt>
+<dd>Registry of available actions.</dd>
+</dl>
+<p>The Brain class serves as the cognitive core of the Framer, coordinating various components
+to enable intelligent decision-making and action execution.</p>
+<p>Initialize the Brain with the necessary components.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
@@ -62,7 +99,6 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Brain:
-    logger = logging.getLogger(__name__)
 
     &#34;&#34;&#34;
     The Brain class represents the central decision-making and cognitive processing component of the Framer.
@@ -120,6 +156,7 @@ hljs.highlightAll();
             default_model (str): The default language model to use.
             soul (Optional[Soul]): The Soul instance for the Brain.
         &#34;&#34;&#34;
+        self.logger = logging.getLogger(__name__)
         self.logger.info(&#34;Initializing Brain&#34;)
         self.llm_service = llm_service
         self.execution_context = execution_context or ExecutionContext(llm_service=self.llm_service)
@@ -752,49 +789,6 @@ hljs.highlightAll();
         )
         return response.strip()</code></pre>
 </details>
-<h3>Class variables</h3>
-<dl>
-<dt id="frame.src.framer.brain.brain.Brain.logger"><code class="name">var <span class="ident">logger</span></code></dt>
-<dd>
-<div class="desc"><p>The Brain class represents the central decision-making and cognitive processing component of the Framer.</p>
-<p>It is responsible for processing perceptions, making decisions, and executing actions based on those decisions.
-The Brain integrates various cognitive functions, including perception processing, decision-making,
-memory management, and action execution.</p>
-<p>Key features:
-- Perception processing: Analyzes and interprets incoming perceptions.
-- Decision-making: Generates decisions based on current context, roles, goals, and perceptions.
-- Action execution: Executes decided actions using the action registry.
-- Memory integration: Utilizes the memory service for storing and retrieving information.
-- LLM integration: Uses language models for generating responses and making decisions.
-- Role and goal management: Considers active roles and goals in the decision-making process.</p>
-<p>The Brain uses a set of valid actions, derived from the ActionRegistry and default actions,
-to determine which actions can be executed. This ensures that all actions are within the
-defined capabilities of the Framer.</p>
-<h2 id="attributes">Attributes</h2>
-<dl>
-<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
-<dd>The language model service for text generation and processing.</dd>
-<dt><strong><code>default_model</code></strong> :&ensp;<code>str</code></dt>
-<dd>The default language model to use.</dd>
-<dt><strong><code>roles</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
-<dd>List of roles for the Brain.</dd>
-<dt><strong><code>goals</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
-<dd>List of goals for the Brain.</dd>
-<dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Soul]</code></dt>
-<dd>The Soul instance associated with this Brain.</dd>
-<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
-<dd>The execution context for the Brain.</dd>
-<dt><strong><code>mind</code></strong> :&ensp;<code>Mind</code></dt>
-<dd>The Mind instance for cognitive processing.</dd>
-<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
-<dd>The memory service for storing and retrieving information.</dd>
-<dt><strong><code>action_registry</code></strong> :&ensp;<code>ActionRegistry</code></dt>
-<dd>Registry of available actions.</dd>
-</dl>
-<p>The Brain class serves as the cognitive core of the Framer, coordinating various components
-to enable intelligent decision-making and action execution.</p></div>
-</dd>
-</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.brain.Brain.execute_action"><code class="name flex">
@@ -924,7 +918,6 @@ and priority.</dd>
 <li><code><a title="frame.src.framer.brain.brain.Brain.execute_action" href="#frame.src.framer.brain.brain.Brain.execute_action">execute_action</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.execute_decision" href="#frame.src.framer.brain.brain.Brain.execute_decision">execute_decision</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.get_framer" href="#frame.src.framer.brain.brain.Brain.get_framer">get_framer</a></code></li>
-<li><code><a title="frame.src.framer.brain.brain.Brain.logger" href="#frame.src.framer.brain.brain.Brain.logger">logger</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.make_decision" href="#frame.src.framer.brain.brain.Brain.make_decision">make_decision</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.parse_json_response" href="#frame.src.framer.brain.brain.Brain.parse_json_response">parse_json_response</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.process_perception" href="#frame.src.framer.brain.brain.Brain.process_perception">process_perception</a></code></li>

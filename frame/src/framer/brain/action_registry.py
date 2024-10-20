@@ -67,10 +67,26 @@ class ActionRegistry:
         Returns:
             str: A response apologizing for the error and attempting to continue the conversation.
         """
-        soul_state = execution_context.soul.get_current_state() if execution_context and execution_context.soul else "No soul state available."
-        recent_thoughts = execution_context.mind.get_all_thoughts()[-5:] if execution_context and execution_context.mind else []
-        active_roles = [role.name for role in execution_context.roles if role.status == 'ACTIVE'] if execution_context else []
-        active_goals = [goal.name for goal in execution_context.goals if goal.status == 'ACTIVE'] if execution_context else []
+        soul_state = (
+            execution_context.soul.get_current_state()
+            if execution_context and execution_context.soul
+            else "No soul state available."
+        )
+        recent_thoughts = (
+            execution_context.mind.get_all_thoughts()[-5:]
+            if execution_context and execution_context.mind
+            else []
+        )
+        active_roles = (
+            [role.name for role in execution_context.roles if role.status == "ACTIVE"]
+            if execution_context
+            else []
+        )
+        active_goals = (
+            [goal.name for goal in execution_context.goals if goal.status == "ACTIVE"]
+            if execution_context
+            else []
+        )
 
         response = (
             f"I'm sorry, an error occurred: {error_message}. "
@@ -197,9 +213,11 @@ class ActionRegistry:
 
     async def execute_action(self, action_name: str, parameters: dict):
         """Execute an action by its name."""
-        logger.info(f"Available actions before executing '{action_name}': {list(self.actions.keys())}")
+        logger.info(
+            f"Available actions before executing '{action_name}': {list(self.actions.keys())}"
+        )
         logger.info(f"Action name: {action_name}")
-        
+
         if action_name == "no_action":
             logger.info("No action to execute. Skipping.")
             return None
@@ -211,17 +229,22 @@ class ActionRegistry:
             return await self._handle_error(error_message)
 
         action_func = action["action_func"]
-        expected_params = action_func.__code__.co_varnames[:action_func.__code__.co_argcount]
+        expected_params = action_func.__code__.co_varnames[
+            : action_func.__code__.co_argcount
+        ]
         filtered_params = {k: v for k, v in parameters.items() if k in expected_params}
         logger.info(f"Filtered params: {filtered_params}")
 
-        if 'query' in filtered_params:
-            filtered_params['query'] = parameters.get('query', '')
+        if "query" in filtered_params:
+            filtered_params["query"] = parameters.get("query", "")
 
         try:
             result = await action_func(self.execution_context, **filtered_params)
             if result is None:
-                return {"error": "Action returned None", "fallback_response": "The action didn't produce a response. Please try again."}
+                return {
+                    "error": "Action returned None",
+                    "fallback_response": "The action didn't produce a response. Please try again.",
+                }
             elif isinstance(result, dict):
                 return result
             elif isinstance(result, str):
@@ -239,6 +262,11 @@ class ActionRegistry:
     async def _handle_error(self, error_message: str):
         error_action = self.get_action("error")
         if error_action:
-            return await error_action["action_func"](self.execution_context, error=error_message)
+            return await error_action["action_func"](
+                self.execution_context, error=error_message
+            )
         else:
-            return {"error": error_message, "fallback_response": "An error occurred while processing your request. Please try again."}
+            return {
+                "error": error_message,
+                "fallback_response": "An error occurred while processing your request. Please try again.",
+            }

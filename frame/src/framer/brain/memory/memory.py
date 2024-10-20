@@ -4,6 +4,7 @@ from frame.src.services.memory.main import MemoryService
 
 logger = logging.getLogger(__name__)
 
+
 class Memory:
     """
     The Memory class manages memory storage and retrieval for Framers.
@@ -19,7 +20,12 @@ class Memory:
         self.memory_service = memory_service
         self.user_id = "default"
 
-    def store(self, memory: str, user_id: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
+    def store(
+        self,
+        memory: str,
+        user_id: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ):
         """
         Store a memory using the memory service.
 
@@ -33,7 +39,9 @@ class Memory:
         else:
             logger.warning("Memory service is not initialized. Unable to store memory.")
 
-    def retrieve(self, query: str, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    def retrieve(
+        self, query: str, user_id: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """
         Retrieve memories based on a query.
 

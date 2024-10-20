@@ -145,7 +145,9 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
                 self.logger.error("Execution context is not properly initialized.")
                 return Decision(
                     action="error",
-                    parameters={"error": "Execution context is not properly initialized."},
+                    parameters={
+                        "error": "Execution context is not properly initialized."
+                    },
                     reasoning="Execution context is not properly initialized.",
                     confidence=0.0,
                     priority=1,
@@ -156,10 +158,24 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
             if not isinstance(query, str):
                 query = str(query)
 
-            soul_state = execution_context.soul.get_current_state() if execution_context.soul else "No soul state available."
-            recent_thoughts = execution_context.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
-            active_roles = [role.name for role in execution_context.roles if role.status == RoleStatus.ACTIVE]
-            active_goals = [goal.name for goal in execution_context.goals if goal.status == GoalStatus.ACTIVE]
+            soul_state = (
+                execution_context.soul.get_current_state()
+                if execution_context.soul
+                else "No soul state available."
+            )
+            recent_thoughts = execution_context.mind.get_all_thoughts()[
+                -5:
+            ]  # Get last 5 thoughts
+            active_roles = [
+                role.name
+                for role in execution_context.roles
+                if role.status == RoleStatus.ACTIVE
+            ]
+            active_goals = [
+                goal.name
+                for goal in execution_context.goals
+                if goal.status == GoalStatus.ACTIVE
+            ]
 
             # Formulate a comprehensive response
             response = (
@@ -172,7 +188,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
                 f"- Active Goals: {active_goals}\n"
             )
             return response
-        
+
         # Ensure the query is a string
         if not isinstance(query, str):
             query = str(query)
@@ -182,7 +198,9 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         if not any([user_id, agent_id, run_id]):
             user_id = "default"
 
-        self.logger.info(f"Searching with user_id: {user_id}, agent_id: {agent_id}, run_id: {run_id}")
+        self.logger.info(
+            f"Searching with user_id: {user_id}, agent_id: {agent_id}, run_id: {run_id}"
+        )
         search_results = self.mem0_adapter.search(
             query, user_id=user_id, agent_id=agent_id, run_id=run_id, filters=filters
         )
@@ -192,7 +210,9 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         if not search_results:
             return Decision(
                 action="respond",
-                parameters={"response": "I don't have any specific information about that in my memory. Is there anything else I can help you with?"},
+                parameters={
+                    "response": "I don't have any specific information about that in my memory. Is there anything else I can help you with?"
+                },
                 reasoning="No relevant information found in memory.",
                 confidence=0.5,
                 priority=1,

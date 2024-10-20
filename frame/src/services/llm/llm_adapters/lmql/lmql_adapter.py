@@ -92,7 +92,9 @@ class LMQLAdapter(LLMAdapterInterface):
             capacity=60, fill_rate=1
         )  # 60 requests per minute
 
-    def format_prompt(self, prompt: str, additional_context: Optional[Dict[str, Any]] = None) -> str:
+    def format_prompt(
+        self, prompt: str, additional_context: Optional[Dict[str, Any]] = None
+    ) -> str:
         """
         Format the prompt for LMQL.
 
@@ -158,9 +160,7 @@ class LMQLAdapter(LLMAdapterInterface):
             LMQLConfig: The configuration object for the LMQL model.
         """
         return LMQLConfig(
-            model=self.default_model,
-            max_tokens=max_tokens,
-            temperature=temperature
+            model=self.default_model, max_tokens=max_tokens, temperature=temperature
         )
 
     @tenacity.retry(

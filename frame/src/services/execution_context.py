@@ -54,7 +54,7 @@ class ExecutionContext:
         process_perception: Optional[Callable] = None,
         execute_decision: Optional[Callable] = None,
         config: Optional[FramerConfig] = None,
-        agency: Optional['Agency'] = None
+        agency: Optional["Agency"] = None,
     ):
         self.llm_service = llm_service
         self.memory_service = memory_service

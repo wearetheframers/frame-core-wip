@@ -7,6 +7,7 @@ from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 def clean_response(response: str) -> str:
     """
     Clean the response by removing unwanted text patterns.
@@ -36,6 +37,7 @@ def log_method_call(func):
 
     return wrapper
 
+
 from frame.src.constants import OPENAI_API_KEY
 from .llm_adapters import DSPyAdapter, HuggingFaceAdapter, LMQLAdapter
 from frame.src.constants.api_keys import (
@@ -43,9 +45,14 @@ from frame.src.constants.api_keys import (
     MISTRAL_API_KEY,
     HUGGINGFACE_API_KEY,
 )
-from frame.src.services.llm.llm_adapters.lmql.lmql_adapter import LMQLConfig, lmql_adapter
+from frame.src.services.llm.llm_adapters.lmql.lmql_adapter import (
+    LMQLConfig,
+    lmql_adapter,
+)
 from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import DSPyConfig
-from frame.src.services.llm.llm_adapters.huggingface.huggingface_adapter import HuggingFaceConfig
+from frame.src.services.llm.llm_adapters.huggingface.huggingface_adapter import (
+    HuggingFaceConfig,
+)
 
 import logging
 import time
@@ -94,11 +101,17 @@ class LLMService:
     def get_adapter(self, model_name: str):
         if model_name not in self._adapters:
             if "gpt" in model_name.lower():
-                self._adapters[model_name] = LMQLAdapter(openai_api_key=self.openai_api_key)
+                self._adapters[model_name] = LMQLAdapter(
+                    openai_api_key=self.openai_api_key
+                )
             elif "mistral" in model_name.lower():
-                self._adapters[model_name] = LMQLAdapter(mistral_api_key=self.mistral_api_key)
+                self._adapters[model_name] = LMQLAdapter(
+                    mistral_api_key=self.mistral_api_key
+                )
             elif "huggingface" in model_name.lower():
-                self._adapters[model_name] = HuggingFaceAdapter(huggingface_api_key=self.huggingface_api_key)
+                self._adapters[model_name] = HuggingFaceAdapter(
+                    huggingface_api_key=self.huggingface_api_key
+                )
             else:
                 raise ValueError(f"Unsupported model: {model_name}")
         return self._adapters[model_name]
@@ -187,17 +200,23 @@ class LLMService:
 
         start_time = time.time()
 
-        full_prompt = self._prepare_full_prompt(prompt, include_frame_context, recent_memories)
+        full_prompt = self._prepare_full_prompt(
+            prompt, include_frame_context, recent_memories
+        )
 
         try:
             adapter = self.get_adapter(model)
             config = adapter.get_config(max_tokens=max_tokens, temperature=temperature)
             formatted_prompt = adapter.format_prompt(full_prompt)
-            result = await adapter.get_completion(formatted_prompt, config, additional_context)
+            result = await adapter.get_completion(
+                formatted_prompt, config, additional_context
+            )
 
             end_time = time.time()
             execution_time = end_time - start_time
-            tokens_used = len(full_prompt.split()) + (len(result.split()) if isinstance(result, str) else 0)
+            tokens_used = len(full_prompt.split()) + (
+                len(result.split()) if isinstance(result, str) else 0
+            )
 
             self.metrics.track_usage(model, tokens_used)
 
@@ -274,9 +293,15 @@ class LLMService:
                     config = LMQLConfig(
                         model=model, max_tokens=max_tokens, temperature=temperature
                     )
-                    constraints = [f"EXPECTED_OUTPUT in [{expected_output}]"] if expected_output else []
+                    constraints = (
+                        [f"EXPECTED_OUTPUT in [{expected_output}]"]
+                        if expected_output
+                        else []
+                    )
                     if "lmql" in model.lower():
-                        result = await self.lmql_interface.generate(full_prompt, max_tokens=max_tokens, constraints=constraints)
+                        result = await self.lmql_interface.generate(
+                            full_prompt, max_tokens=max_tokens, constraints=constraints
+                        )
                     elif "dspy" in model.lower():
                         config = DSPyConfig(
                             model=model, max_tokens=max_tokens, temperature=temperature
@@ -303,13 +328,17 @@ class LLMService:
             self.logger.debug(f"Completion generated in {execution_time:.2f} seconds")
             self.logger.debug(f"Tokens used: {tokens_used}")
 
-            if result is None or (isinstance(result, str) and not result.strip()) or (isinstance(result, dict) and 'error' in result):
+            if (
+                result is None
+                or (isinstance(result, str) and not result.strip())
+                or (isinstance(result, dict) and "error" in result)
+            ):
                 self.logger.warning(f"Received invalid response from model: {model}")
                 return {
                     "error": f"Invalid response from model: {model}",
-                    "fallback_response": "I apologize, but I couldn't generate a response at this time. Could you please rephrase your question or provide more context?"
+                    "fallback_response": "I apologize, but I couldn't generate a response at this time. Could you please rephrase your question or provide more context?",
                 }
-        
+
             if isinstance(result, dict):
                 return result
             elif isinstance(result, str):
@@ -334,4 +363,7 @@ class LLMService:
 
         except Exception as e:
             self.logger.error(f"Error in get_completion: {str(e)}")
-            return {"error": str(e), "fallback_response": "I encountered an error while processing your request. Could you please try again?"}
+            return {
+                "error": str(e),
+                "fallback_response": "I encountered an error while processing your request. Could you please try again?",
+            }

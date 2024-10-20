@@ -82,9 +82,7 @@ class HuggingFaceAdapter(LLMAdapterInterface):
 
     def get_config(self, max_tokens: int, temperature: float) -> HuggingFaceConfig:
         return HuggingFaceConfig(
-            model=self.default_model,
-            max_tokens=max_tokens,
-            temperature=temperature
+            model=self.default_model, max_tokens=max_tokens, temperature=temperature
         )
 
     def format_prompt(self, prompt: str) -> str:
@@ -136,9 +134,11 @@ class HuggingFaceAdapter(LLMAdapterInterface):
         inputs = self._tokenizer(prompt, return_tensors="pt")
         input_length = inputs["input_ids"].shape[1]
         max_new_tokens = max(config.max_tokens - input_length, 1)
-        
-        attention_mask = inputs.get("attention_mask", torch.ones_like(inputs["input_ids"]))
-        
+
+        attention_mask = inputs.get(
+            "attention_mask", torch.ones_like(inputs["input_ids"])
+        )
+
         outputs = self._model.generate(
             inputs["input_ids"],
             max_new_tokens=max_new_tokens,
