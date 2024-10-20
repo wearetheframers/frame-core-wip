@@ -42,34 +42,44 @@ class ActionRegistry:
             ResearchAction(),
         ]
         for action in default_actions:
-            self.add_action(
-                action.name,
-                description=action.description,
-                action_func=getattr(action, 'func', None),
-                priority=action.priority,
-            )
+            if action.name not in self.actions:
+                self.add_action(
+                    action.name,
+                    description=action.description,
+                    action_func=getattr(action, 'func', None),
+                    priority=action.priority,
+                )
 
     def extend_actions(self, new_actions: Dict[str, Dict[str, Any]]):
         extend_valid_actions(new_actions)
         self._register_default_actions()
 
     def add_action(
-        self, name: str, description: str = "", action_func: Optional[Callable] = None, priority: int = 5
+        self, action_or_name: Union[BaseAction, str], description: str = "", action_func: Optional[Callable] = None, priority: int = 5
     ):
         """
         Add a new action to the registry.
 
         Args:
-            name (str): The name of the action.
+            action_or_name (Union[BaseAction, str]): The action object or the name of the action.
             action_func (Callable, optional): The function to execute for this action. Defaults to None.
             description (str, optional): A description of the action. Defaults to "".
             priority (int, optional): The priority of the action. Defaults to 5.
         """
+        if isinstance(action_or_name, BaseAction):
+            name = action_or_name.name
+            description = action_or_name.description
+            action_func = getattr(action_or_name, 'execute', None)
+            priority = action_or_name.priority
+        else:
+            name = action_or_name
+
         if priority is not None and not (1 <= priority <= 10):
             raise ValueError("Priority must be between 1 and 10")
         if action_func is None:
-            # set action func to a dummy function
-            action_func = lambda *args, **kwargs: None
+            # set action func to a dummy async function
+            async def action_func(*args, **kwargs):
+                return None
         self.actions[name] = {
             "action_func": action_func,
             "description": description,
@@ -77,6 +87,7 @@ class ActionRegistry:
         }
         if name not in self.valid_actions:
             self.valid_actions.append(name)
+            logger.debug(f"Action '{name}' added to registry.")
 
     def remove_action(self, name: str):
         """
@@ -85,12 +96,15 @@ class ActionRegistry:
         Args:
             name (str): The name of the action to remove.
         """
-        if name in self.actions:
-            del self.actions[name]
-            if name in self.valid_actions:
-                del self.valid_actions[name]
-        else:
-            raise ValueError(f"Action '{name}' not found.")
+        try:
+            if name in self.actions:
+                del self.actions[name]
+                if name in self.valid_actions:
+                    self.valid_actions.remove(name)
+            else:
+                raise ValueError(f"Action '{name}' not found.")
+        except Exception as e:
+            logger.error(f"Error removing action '{name}': {e}")
         return self.actions.get(name, {})
 
     def get_action(self, name: str) -> Optional[Dict[str, Any]]:
@@ -144,15 +158,23 @@ class ActionRegistry:
 
     async def execute_action(self, action_name: str, parameters: dict):
         """Execute an action by its name."""
+        logger.info(f"Available actions before executing '{action_name}': {list(self.actions.keys())}")
+        print("Action name: ", action_name)
+        if action_name == "no_action":
+            logger.info("No action to execute. Skipping.")
+            return None
+
         action = self.get_action(action_name)
         if action:
-            # Filter parameters to match the expected arguments of the action function
             action_func = action["action_func"]
             expected_params = action_func.__code__.co_varnames[:action_func.__code__.co_argcount]
             filtered_params = {k: v for k, v in parameters.items() if k in expected_params}
-            # Ensure 'query' is included in the parameters
-            if 'query' not in filtered_params and 'text' in parameters:
-                filtered_params['query'] = parameters['text']
+            if 'query' in filtered_params and 'query' in parameters:
+                del filtered_params['query']
+            print("Filtered params: ", filtered_params)
+            print("Expected params: ", expected_params)
             return await action_func(self.execution_context, **filtered_params)
         else:
-            raise ValueError(f"Action '{action_name}' not found in the registry.")
+            logger.error(f"Action '{action_name}' not found in the registry.")
+            # raise ValueError(f"Action '{action_name}' not found in the registry.")
+            return None

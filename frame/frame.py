@@ -74,6 +74,9 @@ class Frame:
             os.path.dirname(__file__), "src", "plugins"
         )
         self.plugins = {}
+        self.is_loading_plugins = True
+        self.plugins, _ = load_plugins(self.plugins_dir)
+        self.framer_factory = FramerFactory(FramerConfig(name="DefaultFramer"), self.llm_service, plugins=self.plugins)
         self.is_loading_plugins = False
 
     def set_plugins_dir(self, plugins_dir: str):
@@ -87,12 +90,6 @@ class Frame:
         self.plugins = load_plugins(self.plugins_dir)
 
     def create_framer(self, config: FramerConfig, **kwargs: Any) -> Framer:
-        """
-        Load plugins from the specified plugins directory.
-        """
-        self.is_loading_plugins = True
-        self.plugins = load_plugins(self.plugins_dir)
-        self.is_loading_plugins = False
         """
         Create a new Framer instance.
 
@@ -108,8 +105,7 @@ class Frame:
         Returns:
             Framer: A new Framer instance, fully configured and ready to use.
         """
-        framer_builder = FramerBuilder(config, self.llm_service)
-        return framer_builder.build()
+        return self.framer_factory.create_framer(config, **kwargs)
 
     def load_framer_from_file(self, file_path: str) -> Framer:
         return Framer.load_from_file(file_path, self.llm_service)

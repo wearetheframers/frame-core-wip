@@ -10,6 +10,8 @@ import logging
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
 from frame.src.services.memory.main import MemoryService
 
+from frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin import Mem0SearchExtractSummarizePlugin
+
 # Load configuration
 # Load it from the file that this script (the main.py) is in
 curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -36,9 +38,28 @@ async def main():
     )
     mem0_adapter = Mem0Adapter(api_key=config.get("MEM0_API_KEY"))
     memory_service = MemoryService(adapter=mem0_adapter)
-    framer = await frame.create_framer(config, memory_service=memory_service, plugins=frame.plugins)
+    print("Memory service created: ", memory_service)
+    print("Plugins: ", frame.plugins)
+    print("Permissions: ", config.permissions)
+    framer = await frame.framer_factory.create_framer(memory_service=memory_service, plugins=frame.plugins)
+    mem0_plugin = Mem0SearchExtractSummarizePlugin(framer)
+    
+    # framer.brain.agency.action_registry.add_action(
+    #     "respond with memory retrieval",
+    #     description="This action is ideal for responding to personal questions that involve historical or memory-based "
+    #                 "information about the user or the Framer. It leverages the Framer's memory to retrieve relevant data "
+    #                 "or previously saved texts, providing comprehensive answers or insights based on stored memories. "
+    #                 "When questions reference or relate to past conversations, this action is preferred. It generally "
+    #                 "takes precedence over `think` and `observe` actions, especially for questions. If uncertain whether "
+    #                 "a question can be answered with or without memory, default to this action.",
+    #     action_func=mem0_plugin.mem0_search_extract_summarize,
+    #     priority=8,
+    # )
 
-    # Store some personal memories
+    # Wait until the Framer is ready
+    while not framer.is_ready():
+        logger.warning("Framer is not ready. Retrying...")
+        await asyncio.sleep(1)
     print("Adding memories..")
     print("\t- My favorite color is blue.")
     print("\t- I have a dentist appointment on October 20th.")

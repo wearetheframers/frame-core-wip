@@ -59,8 +59,11 @@ class BasePlugin(ABC):
             description (str): A brief description of what the action does.
         """
         print("Registering action: ", name)
-        self.framer.brain.action_registry.add_action(name, func, description, priority)
-        print("Registered to Framer action registry: ", self.framer.brain.action_registry.actions)
+        if name not in self.framer.brain.action_registry.actions:
+            self.framer.brain.action_registry.add_action(name, func, description, priority)
+            print(f"Action '{name}' registered to Framer action registry.")
+        else:
+            print(f"Action '{name}' already exists in Framer action registry.")
 
     @abstractmethod
     async def execute(self, action: str, params: Dict[str, Any]) -> Any:

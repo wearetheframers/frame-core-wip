@@ -1,5 +1,18 @@
+"""
+Mem0SearchExtractSummarizePlugin
+
+This plugin provides a mechanism to look into memories, retrieve relevant information, and share insights,
+functioning as a Retrieval-Augmented Generation (RAG) mechanism. It is automatically included when the
+'with-memory' permission is granted to a Framer, ensuring that memory-based responses are comprehensive
+and contextually relevant.
+
+Note: This plugin might be refactored into a core component in the future to streamline its integration
+and usage within the Frame framework.
+"""
+
 import logging
 import os
+from frame.src.services.context.execution_context_service import ExecutionContext
 from typing import Any, Dict, List, Optional
 
 from frame.src.framer.brain.plugins.base import BasePlugin
@@ -23,13 +36,13 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         self.logger.addHandler(handler)
         self.mem0_adapter = Mem0Adapter()
 
-    async def on_load(self) -> None:
+    async def on_load(self, framer) -> None:
         # Check for a valid API key before registering the action
         api_key = os.getenv("MEM0_API_KEY", "").strip()
         if not api_key:
             api_key = MEM0_API_KEY
         if api_key:
-            self.framer.agency.action_registry.add_action(
+            framer.agency.action_registry.add_action(
                 "respond with memory retrieval",
                 description="This action is ideal for responding to personal questions that involve historical or memory-based "
                             "information about the user or the Framer. It leverages the Framer's memory to retrieve relevant data "
@@ -41,6 +54,11 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
                 priority=8,
             )
             self.logger.info("Mem0SearchExtractSummarizePlugin registered 'response with memory retrieval' action.")
+            # Remove respond action
+            if "respond" in framer.agency.action_registry.get_all_actions():
+                framer.agency.action_registry.remove_action("respond")
+            else:
+                self.logger.warning("Action 'respond' not found in registry. Skipping removal.")
         else:
             self.logger.warning("Mem0 API key not found or is empty. Action 'response with memory retrieval' will not be registered.")
 
@@ -108,7 +126,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
 
     async def mem0_search_extract_summarize(
         self,
-        query: str,
+        query: str = "",
         user_id: Optional[str] = None,
         agent_id: Optional[str] = None,
         run_id: Optional[str] = None,
@@ -118,6 +136,9 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
     ) -> str:
         if not query:
             raise ValueError("Query cannot be null or empty.")
+        # Ensure the query is a string
+        if not isinstance(query, str):
+            query = str(query)
         self.logger.info(f"Searching Mem0 for query: {query}")
 
         # Ensure at least one required filter is provided

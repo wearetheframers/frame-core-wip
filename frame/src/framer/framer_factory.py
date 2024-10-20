@@ -12,6 +12,7 @@ from frame.src.services.context.execution_context_service import ExecutionContex
 from frame.src.services.memory.main import MemoryService
 from frame.src.services.eq.main import EQService
 from frame.src.constants.models import DEFAULT_MODEL
+import logging
 from frame.src.framer.agency.goals import Goal, GoalStatus
 from frame.src.framer.agency.roles import Role, RoleStatus
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
@@ -32,7 +33,7 @@ class FramerFactory:
     enabling developers to create a wide range of extensions and enhancements.
     """
 
-    def __init__(self, config: FramerConfig, llm_service: LLMService):
+    def __init__(self, config: FramerConfig, llm_service: LLMService, plugins: Optional[Dict[str, Any]] = []):
         """
         Initialize the FramerBuilder with configuration and LLM service.
 
@@ -51,9 +52,10 @@ class FramerFactory:
             raise TypeError("config must be an instance of FramerConfig")
         if not isinstance(llm_service, LLMService):
             raise TypeError("llm_service must be an instance of LLMService")
+        self.logger = logging.getLogger(__name__)
         self.config = config
         self.llm_service = llm_service
-        self.plugins: Dict[str, Any] = {}
+        self.plugins = plugins
 
     async def create_framer(
         self,
@@ -61,7 +63,9 @@ class FramerFactory:
         eq_service: Optional[EQService] = None,
         roles: Optional[List[Role]] = None,
         goals: Optional[List[Goal]] = None,
+        plugins: Optional[Dict[str, Any]] = None,
     ) -> Framer:
+        self.plugins = plugins or {}
         execution_context = ExecutionContext(llm_service=self.llm_service)
         agency = Agency(
             llm_service=self.llm_service,
@@ -98,6 +102,7 @@ class FramerFactory:
             workflow_manager=workflow_manager,
             memory_service=memory_service,
             eq_service=eq_service,
+            plugins=plugins
         )
 
         framer.agency.set_goals(goals)
@@ -105,15 +110,21 @@ class FramerFactory:
 
         # Set the Framer instance in Brain and ActionRegistry
         framer.brain.set_framer(framer)
-        framer.brain.action_registry.set_framer(framer)
+        framer.brain.agency.action_registry.set_framer(framer)
 
         # Notify observers about the Framer being opened
         for observer in framer.observers:
             if hasattr(observer, "on_framer_opened"):
                 observer.on_framer_opened(framer)
 
+        # Call on_load for each plugin
+        for plugin_name, plugin_instance in framer.plugins.items():
+            if hasattr(plugin_instance, "on_load"):
+                self.logger.info(f"Loading plugin: {plugin_name}")
+                await plugin_instance.on_load(framer)
+                self.logger.info(f"Plugin {plugin_name} loaded successfully.")
+
         framer.plugin_loading_complete = True
-        await framer.act()  # Start acting after plugins are loaded
 
         return framer
 

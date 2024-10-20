@@ -86,9 +86,6 @@ class Brain:
         }
         self.memory = Memory(memory_config)
 
-        # Initialize ActionRegistry
-        self.action_registry = ActionRegistry()
-
         # Initialize Agency
         self.agency = Agency(
             llm_service=self.llm_service,
@@ -109,7 +106,7 @@ class Brain:
         )
 
         # Register the respond action using the agency's perform_task method
-        self.action_registry.add_action(
+        self.agency.action_registry.add_action(
             "respond",
             description="Generate a response based on the current context",
             action_func=self.agency.perform_task,
@@ -117,7 +114,7 @@ class Brain:
         )
 
         # Update the agency's action_registry
-        self.agency.action_registry = self.action_registry
+        self.agency.action_registry = self.agency.action_registry
 
     def set_framer(self, framer):
         self.framer = framer
@@ -246,14 +243,14 @@ class Brain:
 
         self.mind.perceptions.append(perception)
         # Log available actions
-        available_actions = self.action_registry.get_all_actions().keys()
-        self.logger.debug(f"Available actions: {available_actions}")
+        available_actions = self.agency.action_registry.get_all_actions().keys()
+        self.logger.info(f"Available actions: {available_actions}")
 
         # Check if 'mem0_search_extract_memories' is a valid action
         if 'mem0_search_extract_memories' in available_actions:
-            self.logger.debug("'mem0_search_extract_memories' is a valid action.")
+            self.logger.info("'mem0_search_extract_memories' is a valid action.")
         else:
-            self.logger.debug("'mem0_search_extract_memories' is NOT a valid action.")
+            self.logger.info("'mem0_search_extract_memories' is NOT a valid action.")
 
         decision = await self.make_decision(perception)
         if decision is None:
@@ -268,7 +265,7 @@ class Brain:
                 related_goals=[],
             )
         if hasattr(self, "framer") and getattr(self.framer, "can_execute", False):
-            await self.execute_decision(decision)
+            await self.execute_decision(decision, perception)
         return decision
 
     async def make_decision(self, perception: Optional[Perception] = None) -> Decision:
@@ -283,6 +280,7 @@ class Brain:
                       including the action to take, parameters, reasoning, confidence,
                       and priority.
         """
+        logger.info(f"Making decision based on perception: {perception}")
         if perception is None:
             return Decision(
                 action="no_action",
@@ -297,11 +295,11 @@ class Brain:
         response = await self._get_decision_prompt(perception)
         decision_data = self.parse_json_response(response)
 
-        logger.debug(f"Decision data received: {decision_data}")
+        logger.info(f"Decision data received: {decision_data}")
 
         action = decision_data.get("action", "respond").lower()
         valid_actions = [
-            action.lower() for action in self.action_registry.get_all_actions().keys()
+            str(action).lower() for action in self.agency.action_registry.get_all_actions().keys()
         ]
 
         # Check if the action is valid
@@ -326,6 +324,7 @@ class Brain:
                     f"Invalid action '{invalid_action}' was generated. Defaulted to '{action}'."
                 )
 
+        logger.info(f"Decision data generated: {decision_data}")
         logger.info(f"Action '{action}' generated: {decision_data}")
 
         parameters = decision_data.get("parameters", {})
@@ -383,6 +382,7 @@ class Brain:
                 goal for goal in active_goals if goal.priority >= priority_int
             ],
         )
+        logger.info(f"Final decision object: {decision}")
         logger.info(f"Decision made: {decision}")
         return decision
 
@@ -396,14 +396,14 @@ class Brain:
         Returns:
             str: The generated decision prompt.
         """
-        valid_actions = self.action_registry.valid_actions
+        valid_actions = self.agency.action_registry.valid_actions
         # action_descriptions = "\n".join(
         #     [
         #         f"- {name.lower()}: {info['description']}"
-        #         for name, info in self.action_registry.actions.items()
+        #         for name, info in self.agency.action_registry.actions.items()
         #     ]
         # )
-
+        logger.info(f"Valid actions: {valid_actions}")
         active_roles = [
             f"{role.name} (Priority: {role.priority.name}, Status: {role.status.name})"
             for role in self.roles
@@ -415,6 +415,9 @@ class Brain:
             if goal.status == GoalStatus.ACTIVE
         ]
 
+        # Log the actions being serialized
+        # self.logger.info(f"Serializing actions for decision prompt: {self.agency.action_registry.actions}")
+
         prompt = f"""Given the following perception and context, decide on the most appropriate action to take.
         Perception: {perception}
         
@@ -425,7 +428,7 @@ class Brain:
         {json.dumps(active_goals, indent=2)}
 
         Valid actions are:
-        {json.dumps({action: f"{self.action_registry.actions[action]['description']} (Priority: {self.action_registry.actions[action]['priority']})" for action in self.action_registry.actions}, indent=2)}
+        {json.dumps({str(action): f"{self.agency.action_registry.actions[action]['description']} (Priority: {self.agency.action_registry.actions[action]['priority']})" for action in self.agency.action_registry.actions}, indent=2)}
         
         For each perception, carefully evaluate:
         - The type and content of the perception
@@ -476,22 +479,21 @@ class Brain:
             }}
             """,
         )
-        logger.debug(f"Raw LLM response: {response}")
+        # logger.info(f"Raw LLM response: {response}")
 
         return response
 
-    async def execute_decision(self, decision: Decision):
+    async def execute_decision(self, decision: Decision, perception: Optional[Perception] = None):
         """
         Execute the decision made by the brain.
 
         Args:
             decision (Decision): The decision to execute.
         """
-        logger.debug(f"Executing decision: {decision.action}")
-        logger.debug(f"Decision parameters: {decision.parameters}")
+        logger.info(f"Executing decision: {decision.action} with params {decision.parameters}")
         result = None
         try:
-            if decision.action not in self.action_registry.get_all_actions():
+            if decision.action not in self.agency.action_registry.get_all_actions():
                 logger.error("Action not found in registry.")
                 raise ValueError(
                     f"Action '{decision.action}' not found in registry."
@@ -509,15 +511,15 @@ class Brain:
                     }
                 )
             else:
-                result = await self.action_registry.execute_action(
+                # Ensure 'perception' is included in parameters if needed
+                if decision.action == "process_perception" and "perception" not in decision.parameters:
+                    decision.parameters["perception"] = perception.data
+
+                result = await self.agency.action_registry.execute_action(
                     decision.action, decision.parameters
                 )
 
-            logger.info(f"Executed action: {decision.action}")
-            logger.debug(f"Action result: {result}")
-
-            logger.info(f"Executed decision: {decision.action}")
-            logger.debug(f"Decision reasoning: {decision.reasoning}")
+            logger.info(f"Action result: {result} with reasoning: {decision.reasoning}.")
 
         except Exception as e:
             logger.error(f"Error executing decision: {e}")

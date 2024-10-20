@@ -79,7 +79,6 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
 
     for warning in conflict_warnings:
         logger.warning(warning)
-
     return plugins, conflict_warnings
 
 

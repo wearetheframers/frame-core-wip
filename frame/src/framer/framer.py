@@ -90,7 +90,11 @@ class Framer:
         # They do not require explicit permissions to be accessed but must be passed into a Framer.
         # The Mem0SearchExtractSummarizePlugin is a default plugin that provides a response mechanism
         # requiring memory retrieval, functioning as a RAG mechanism.
-        if "with_memory" in self.permissions and memory_adapter:
+        # Enforce permission for 'with-mem0-search-extract-summarize-plugin' if 'with-memory' is used
+        if "with-memory" in self.permissions:
+            self.permissions.append("with-mem0-search-extract-summarize-plugin")
+        
+        if "with-memory" in self.permissions and memory_adapter:
             self.memory_service = memory_service or MemoryService(adapter=memory_adapter)
 
         if "with_eq" in self.permissions:
@@ -106,6 +110,8 @@ class Framer:
         self.soul = soul
         self.workflow_manager = workflow_manager
         self.memory_service = memory_service
+        self.roles = roles
+        self.goals = goals
         self.eq_service = eq_service
         self.plugins = plugins or {}
         self.plugin_loading_complete = False
@@ -122,23 +128,32 @@ class Framer:
         self.observers: List[Observer] = []
         self.can_execute = True  # Add can_execute attribute
         self.acting = False
+        # Load plugins asynchronously
+        asyncio.create_task(self.load_plugins())
 
-        # Initialize roles and goals
-        self.roles: List[Dict[str, Any]] = roles if roles is not None else []
-        self.goals: List[Dict[str, Any]] = goals if goals is not None else []
-    
-   
-
-            
-    async def act(self):
+    def act(self):
         """
-        Enable the Framer to process perceptions and make decisions.
-
-        This method sets the Framer to an active state, allowing it to respond
-        to perceptions and execute tasks. It is automatically called during
-        initialization to ensure the Framer starts acting immediately.
+        Enable the Framer to start acting and processing perceptions.
         """
         self.acting = True
+            
+    async def load_plugins(self):
+        """
+        Load all plugins by calling their on_load method.
+        """
+        for plugin_name, plugin_instance in self.plugins.items():
+            if hasattr(plugin_instance, "on_load"):
+                await plugin_instance.on_load(self)
+                # Register plugin actions
+                for action_name, action_func in plugin_instance.get_actions().items():
+                    self.agency.action_registry.add_action(
+                        action_name,
+                        action_func=action_func,
+                        description=f"Action from {plugin_name} plugin",
+                        priority=5  # Default priority, adjust as needed
+                    )
+        self.plugin_loading_complete = True
+        self.act()
         await self.process_queued_perceptions()
 
     async def process_queued_perceptions(self):
@@ -146,7 +161,9 @@ class Framer:
         Process all queued perceptions once the Framer is ready.
         """
         if self.is_ready():
+            logger.info("Processing queued perceptions...")
             while self.perceptions_queue:
+                logger.info(f"Processing perception from queue: {self.perceptions_queue[0]}")
                 perception = self.perceptions_queue.popleft()
                 await self.sense(perception)
 
@@ -165,6 +182,7 @@ class Framer:
             self.agency.set_goals(self.goals)
         else:
             logger.warning("Framer is not ready. Queuing perception.")
+            logger.info(f"Queued perception: {perception}")
 
         # Sort roles and goals by priority
         self.roles.sort(key=lambda x: x.get("priority", 5), reverse=True)

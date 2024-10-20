@@ -463,7 +463,11 @@ class Agency:
         logger.debug(f"Cost incurred: ${cost_incurred:.4f}")
 
         return response
-
+    
+    async def execute_action(self, action_name: str, parameters: dict):
+        """Execute an action by its name using the action registry."""
+        return await self.action_registry.execute_action(action_name, parameters)
+    
     async def execute_decision(self, decision: Decision) -> Any:
         """
         Execute the decision made by the brain.

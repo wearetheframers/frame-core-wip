@@ -7,7 +7,7 @@ import atexit
 
 import json
 from frame.src.framer.config import FramerConfig
-from frame.src.framer.framer_factory import FramerFactory
+from frame.src.framer.brain.decision import Decision
 from frame.src.framer.agency import Agency
 from frame.src.services.context.local_context_service import LocalContext
 from frame.cli.common import process_perception_and_log
@@ -108,7 +108,7 @@ def execute_framer(frame, data, sync, stream):
     import json
     from frame.src.framer.config import FramerConfig
 
-    logger.debug("execute_framer function started")
+    logger.info("execute_framer function started")
 
     name = data.get("name", "Default Framer")
     description = data.get("description")
@@ -118,13 +118,11 @@ def execute_framer(frame, data, sync, stream):
     soul_seed = data.get("soul_seed", "default_soul_seed")
     max_len = data.get("max_len", 512)
 
-    logger.debug(
-        f"Framer configuration: name={name}, description={description}, model={model}"
-    )
-    logger.debug(f"Soul seed: {soul_seed}")
-    logger.debug(f"Prompt: {prompt}")
-    logger.debug(f"Perception: {perception}")
-    logger.debug(f"Max length: {max_len}")
+    logger.info(f"Framer configuration: name={name}, description={description}, model={model}")
+    logger.info(f"Soul seed: {soul_seed}")
+    logger.info(f"Prompt: {prompt}")
+    logger.info(f"Perception: {perception}")
+    logger.info(f"Max length: {max_len}")
 
     if not prompt and not perception:
         logger.error("Neither prompt nor perception provided in the JSON input")
@@ -137,14 +135,14 @@ def execute_framer(frame, data, sync, stream):
         description=description,
         default_model=model,
     )
-    logger.debug(f"FramerConfig created: {config}")
+    logger.info(f"FramerConfig created: {config}")
 
     try:
         if sync:
-            logger.debug("Executing in synchronous mode")
+            logger.info("Executing in synchronous mode")
             result = sync_execute_framer(frame, config, prompt, perception, max_len)
         else:
-            logger.debug("Executing in asynchronous mode")
+            logger.info("Executing in asynchronous mode")
             framer = asyncio.run(
                 run_async(
                     frame,
@@ -158,7 +156,7 @@ def execute_framer(frame, data, sync, stream):
                     stream,
                 )
             )
-        logger.debug(f"Execution completed. Result: {framer}")
+        logger.info(f"Execution completed. Result: {framer}")
         if stream:
 
             async def wait_for_streaming():
@@ -207,16 +205,9 @@ def run_framer(ctx, prompt, name, model, debug, sync, stream):
     if debug:
         logger.setLevel(logging.DEBUG)
 
-    logger.debug(f"Debug flag: {debug}")
-    logger.debug(f"Sync flag: {sync}")
-    logger.debug(f"Stream flag: {stream}")
-    logger.debug(f"Name: {name}")
-    logger.debug(f"Model: {model}")
-    logger.debug(f"Prompt: {prompt}")
-
     data = {"name": name, "model": model, "prompt": prompt}
 
-    logger.debug(f"Final parsed data: {data}")
+    logger.info(f"Final parsed data: {data}")
 
     frame = Frame(
         openai_api_key=ctx.obj.get("openai_api_key"),
@@ -335,16 +326,16 @@ def run_framer_json(ctx, json_input, debug, sync, stream):
 
     if debug:
         logger.setLevel(logging.DEBUG)
-    logger.debug("run_framer command started")
+    logger.info("run_framer command started")
 
     logger.debug(f"Debug flag: {debug}")
     logger.debug(f"Sync flag: {sync}")
     logger.debug(f"Stream flag: {stream}")
-    logger.debug(f"Raw JSON input: {json_input}")
+    # logger.info(f"Raw JSON input: {json_input}")
 
     # Join all parts of json_input into a single string
     json_string = " ".join(json_input)
-    logger.debug(f"Joined JSON input: {json_string}")
+    # logger.debug(f"Joined JSON input: {json_string}")
 
     # Remove any leading/trailing quotes and spaces
     json_string = json_string.strip("'\" ")
@@ -356,12 +347,12 @@ def run_framer_json(ctx, json_input, debug, sync, stream):
         logger.debug(f"Parsed JSON data: {data}")
     except json.JSONDecodeError:
         # If not a valid JSON, treat the entire input as a prompt
-        logger.debug("Input is not a valid JSON. Treating as a prompt.")
+        logger.error("Input is not a valid JSON. Treating as a prompt.")
         data = {"prompt": json_string.strip("'\" ")}
 
-    logger.debug(f"Final parsed data: {data}")
+    logger.info(f"Final parsed data: {data}")
 
-    logger.debug("Creating Frame instance")
+    logger.info("Creating Frame instance")
     frame = Frame(
         openai_api_key=ctx.obj.get("openai_api_key"),
         mistral_api_key=ctx.obj.get("mistral_api_key"),
@@ -370,14 +361,19 @@ def run_framer_json(ctx, json_input, debug, sync, stream):
     )
 
     try:
-        logger.debug("Executing framer")
+        logger.info("Executing framer")
         result = execute_framer(frame, data, sync, stream)
         logger.info(f"Framer execution completed. Result: {result}")
+        if isinstance(result, Decision):
+            logger.info(f"Decision made: {result}")
+            print(f"Decision: {result}")
+        else:
+            logger.warning("No decision was made or result is not a Decision object.")
     except Exception as e:
         logger.error(f"An error occurred during framer execution: {str(e)}")
         logger.exception("Exception details:")
 
-    logger.debug("run_framer command finished")
+    logger.info("run_framer command finished")
     # Log LLM usage metrics
     metrics = frame.get_metrics()
     logger.info("LLM Usage Metrics:")
@@ -399,8 +395,7 @@ async def run_async(
         description=description,
         default_model=model,
     )
-    framer_factory = FramerFactory(config, frame.llm_service)
-    framer = await framer_factory.create_framer()
+    framer = await frame.framer_factory.create_framer()
     context = LocalContext()  # Create a new LocalContext
     framer.agency = Agency(
         llm_service=frame.llm_service,
@@ -439,44 +434,48 @@ async def run_async(
 
             perception_obj = Perception.from_dict(perception)
             decision = await framer.sense(perception_obj)
-        if decision:
-            # Log the summary
-            logger.info("Execution Summary:")
-            total_workflows = len(framer.workflow_manager.workflows)
-            total_tasks = sum(
-                len(workflow.tasks) for workflow in framer.workflow_manager.workflows
-            )
-            logger.info(f"Total Workflows created: {total_workflows}")
-            logger.info(f"Total Tasks created: {total_tasks}")
-            for workflow in framer.workflow_manager.workflows:
-                logger.info(f"Workflow has {len(workflow.tasks)} tasks.")
-                for task in workflow.tasks:
-                    logger.info(
-                        f"Task Name: {task.description}, Task Priority: {task.priority}"
-                    )
-                    # Execute each task and log the result
-                    task_result = await framer.agency.execute_task(task)
-                    logger.info(
-                        f"Executed Task '{task.description}' Result: {task_result}"
-                    )
-            if isinstance(decision, dict):
-                logger.info(
-                    f"Decision reasoning: {decision.get('reasoning', 'No reasoning provided')}"
+            if decision:
+                # Log the summary
+                logger.info("Execution Summary:")
+                print(decision)
+                total_workflows = len(framer.workflow_manager.workflows)
+                total_tasks = sum(
+                    len(workflow.tasks) for workflow in framer.workflow_manager.workflows
                 )
+                # logger.info(f"Total Workflows created: {total_workflows}")
+                # logger.info(f"Total Tasks created: {total_tasks}")
+                for workflow in framer.workflow_manager.workflows:
+                    # logger.info(f"Workflow has {len(workflow.tasks)} tasks.")
+                    for task in workflow.tasks:
+                        # logger.info(
+                            # f"Task Name: {task.description}, Task Priority: {task.priority}"
+                        # )
+                        # Execute each task and log the result
+                        task_result = await framer.agency.execute_task(task)
+                        logger.info(
+                            f"Executed Task '{task.description}' Result: {task_result}"
+                        )
+                if isinstance(decision, dict):
+                    logger.info(
+                        f"Decision reasoning: {decision.get('reasoning', 'No reasoning provided')}"
+                    )
+                else:
+                    logger.info(
+                        f"Decision reasoning: {getattr(decision, 'reasoning', 'No reasoning provided')}"
+                    )
+                _roles = framer.agency.get_roles()
+                _goals = framer.agency.get_goals()
+                for role in _roles:
+                    if role not in _roles:
+                        logger.info(f"Updated role: {role}")
+                for goal in _goals:
+                    if goal not in _goals:
+                        logger.info(f"Updated goal: {goal}")
+                logger.info(f"Decision: {pretty_log(decision)}")
+                return decision
             else:
-                logger.info(
-                    f"Decision reasoning: {getattr(decision, 'reasoning', 'No reasoning provided')}"
-                )
-            _roles = framer.agency.get_roles()
-            _goals = framer.agency.get_goals()
-            for role in _roles:
-                if role not in _roles:
-                    logger.info(f"Updated role: {role}")
-            for goal in _goals:
-                if goal not in _goals:
-                    logger.info(f"Updated goal: {goal}")
-            logger.info(f"Decision: {pretty_log(decision)}")
-        return framer
+                logger.warning("No decision was made.")
+                return None
     except AttributeError as e:
         logger.error(f"An error occurred: {e}")
         logger.error("Make sure the Framer class has a process_perception method.")

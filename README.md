@@ -307,6 +307,76 @@ For custom enterprise support, premium plugin development, or custom development
 
 This project is dual-licensed under the GNU Affero General Public License version 3 (AGPLv3) and a proprietary license. See the [LICENSE](LICENSE) file for details.
 
+## Development
+
+### Testing
+
+To run all tests, navigate to the root directory of the project and execute:
+
+```bash
+pytest
+```
+
+*Note*: Testing can take a little while as we have tests for rate limiting / retry logic, so you can exclude those (they are in the `llm_adapter` tests) if it's slow while developing others:
+
+```python
+pytest -k "not (llm_service or llm_adapter)"
+```
+
+### Documentation
+
+The project uses MkDocs and can also use pdoc3 for documentation. The MkDocs config is in `docs/`, and HTML output is also in `docs/`.
+
+To build and serve MkDocs documentation, run:
+
+```bash
+mkdocs serve --config-file ./mkdocs.yml
+```
+
+You must run the `roam_links_converter.py` script before to convert linked references to their actual paths. 
+
+To serve both MkDocs and pdoc3 simultaneously, use the following command:
+
+```bash
+python scripts\serve_docs.py
+```
+
+This runs MkDocs on port 3010 and pdoc3 on port 3011. This script runs both with live reloading, runs unit tests on initialization and generates a coverage report, and also parses and converts link references automatically. Add `--skip-tests` to skip tests when started.
+
+#### Roam Links Converter
+
+The `roam_links_converter.py` script in `scripts` converts roam-style links (e.g., `[[Link Text]]`) to standard Markdown links. Use it before generating final docs to improve navigation.
+
+To add a doc file to be ignored by the converter, add this anywhere in the markdown file:
+
+```
+<!---
+roam-ignore
+-->
+```
+
+#### Commiting Without Docs
+
+If you're developing locally with docs live reloading, you'll have doc files changed with every commit. To avoid this, you can run:
+
+```bash
+git add -- . ':!docs'
+```
+
+### Linting
+
+```bash
+black .
+```
+
+## License
+
+This project is dual-licensed under the GNU Affero General Public License version 3 (AGPLv3) and a proprietary license. See the [LICENSE](LICENSE) file for details.
+
+## Custom Enterprise Support
+
+For custom enterprise support, development of features, or plugins, please contact our team at [team@frame.dev](mailto:team@frame.dev) or visit our website at [frame.dev/contact].
+
 ## Contributing
 
 Contributions are welcome! Please see the [Contributing](docs/contributing.md) guide for more information.

@@ -12,7 +12,6 @@ import logging
 from typing import Any, Dict, List, Optional
 from frame.src.constants.models import DEFAULT_MODEL
 from frame.src.framer.config import FramerConfig
-from frame.src.framer.framer_factory import FramerFactory
 from frame.src.framer.agency import Agency
 from frame.src.services.context.local_context_service import LocalContext
 from frame.src.framer.framer import Framer
@@ -69,8 +68,8 @@ async def generate_roles_and_goals(framer: Framer, prompt: str) -> None:
         framer (Framer): The Framer instance to update.
         prompt (str): The prompt to generate roles and goals from.
     """
-    logger.debug(f"Generating roles and goals for prompt: {prompt}")
-    logger.debug(f"Framer brain before generating roles and goals: {framer.brain}")
+    logger.info(f"Generating roles and goals for prompt: {prompt}")
+    logger.info(f"Framer brain before generating roles and goals: {framer.brain}")
 
     if framer.brain is None:
         logger.error("Framer brain is None before generating roles and goals")
@@ -136,9 +135,8 @@ async def setup_framer(
         description=description,
         default_model=model.lower(),
     )
-    framer_factory = FramerFactory(config, frame.llm_service)
-    framer = await framer_factory.create_framer()
-    logger.debug(f"Framer brain after build: {framer.brain}")
+    framer = await frame.framer_factory.create_framer()
+    logger.info(f"Framer brain after build: {framer.brain}")
 
     if framer.soul is None:
         logger.warning("Framer's Soul is null. Initializing with default values.")
