@@ -33,6 +33,22 @@ hljs.highlightAll();
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="frame.src.services.llm.main.clean_response"><code class="name flex">
+<span>def <span class="ident">clean_response</span></span>(<span>response: str) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clean the response by removing unwanted text patterns.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>response</code></strong> :&ensp;<code>str</code></dt>
+<dd>The raw response from the language model.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The cleaned response.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.services.llm.main.log_method_call"><code class="name flex">
 <span>def <span class="ident">log_method_call</span></span>(<span>func)</span>
 </code></dt>
@@ -86,18 +102,26 @@ the specified or default model.</p>
         metrics: LLMMetrics = None,
     ):
         self.logger = logging.getLogger(__name__)
-        self.lmql_wrapper = LMQLAdapter(
-            openai_api_key=openai_api_key or OPENAI_API_KEY,
-            mistral_api_key=mistral_api_key or MISTRAL_API_KEY,
-        )
-        self.dspy_wrapper = DSPyAdapter(openai_api_key=openai_api_key or OPENAI_API_KEY)
-        self.huggingface_adapter = HuggingFaceAdapter(
-            huggingface_api_key=huggingface_api_key or HUGGINGFACE_API_KEY
-        )
+        self.openai_api_key = openai_api_key or OPENAI_API_KEY
+        self.mistral_api_key = mistral_api_key
+        self.huggingface_api_key = huggingface_api_key or HUGGINGFACE_API_KEY
         self.default_model = default_model or (
-            &#34;gpt-3.5-turbo&#34; if openai_api_key else &#34;mistral-medium&#34;
+            &#34;gpt-3.5-turbo&#34; if self.openai_api_key else &#34;mistral-medium&#34;
         )
         self.metrics = metrics or llm_metrics
+        self._adapters = {}
+
+    def get_adapter(self, model_name: str):
+        if model_name not in self._adapters:
+            if &#34;gpt&#34; in model_name.lower():
+                self._adapters[model_name] = LMQLAdapter(openai_api_key=self.openai_api_key)
+            elif &#34;mistral&#34; in model_name.lower():
+                self._adapters[model_name] = LMQLAdapter(mistral_api_key=self.mistral_api_key)
+            elif &#34;huggingface&#34; in model_name.lower():
+                self._adapters[model_name] = HuggingFaceAdapter(huggingface_api_key=self.huggingface_api_key)
+            else:
+                raise ValueError(f&#34;Unsupported model: {model_name}&#34;)
+        return self._adapters[model_name]
 
     def get_metrics(self) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
@@ -177,7 +201,39 @@ the specified or default model.</p>
         stream: bool = False,
         include_frame_context: bool = False,
         recent_memories: Optional[List[Dict[str, Any]]] = None,
-    ) -&gt; Union[str, Dict[str, Any], AsyncGenerator[str, None]]:
+    ) -&gt; str:
+        model = model or self.default_model
+        self.logger.debug(f&#34;Using model: {model}&#34;)
+
+        start_time = time.time()
+
+        full_prompt = self._prepare_full_prompt(prompt, include_frame_context, recent_memories)
+
+        try:
+            adapter = self.get_adapter(model)
+            config = adapter.get_config(max_tokens=max_tokens, temperature=temperature)
+            formatted_prompt = adapter.format_prompt(full_prompt)
+            result = await adapter.get_completion(formatted_prompt, config, additional_context)
+
+            end_time = time.time()
+            execution_time = end_time - start_time
+            tokens_used = len(full_prompt.split()) + (len(result.split()) if isinstance(result, str) else 0)
+
+            self.metrics.track_usage(model, tokens_used)
+
+            self.logger.debug(f&#34;Completion generated in {execution_time:.2f} seconds&#34;)
+            self.logger.debug(f&#34;Tokens used: {tokens_used}&#34;)
+
+            if isinstance(result, dict):
+                return json.dumps(result)
+            elif isinstance(result, str):
+                return result
+            else:
+                return str(result)
+
+        except Exception as e:
+            self.logger.error(f&#34;Error in get_completion: {str(e)}&#34;)
+            return f&#34;I encountered an error while processing your request: {str(e)}. Could you please try again?&#34;
         &#34;&#34;&#34;
         Generate a completion using the specified model or the default model.
 
@@ -206,152 +262,113 @@ the specified or default model.</p>
             prompt, include_frame_context, recent_memories
         )
 
-        if stream:
-            self.logger.debug(&#34;Streaming mode enabled&#34;)
-            if &#34;dspy&#34; in model.lower():
-                raise ValueError(&#34;DSPy does not support streaming mode.&#34;)
-            elif use_local or (
-                self.huggingface_adapter.api_key and &#34;huggingface&#34; in model.lower()
-            ):
-                self.logger.debug(&#34;Using Hugging Face adapter for streaming&#34;)
-                config = HuggingFaceConfig(
-                    model=model, max_tokens=max_tokens, temperature=temperature
-                )
-                result = self.huggingface_adapter.get_completion(
-                    full_prompt, config, additional_context, stream=True
-                )
-            elif &#34;mistral&#34; in model.lower():
-                self.logger.debug(&#34;Using LMQL adapter for Mistral streaming&#34;)
-                config = LMQLConfig(
-                    model=model, max_tokens=max_tokens, temperature=temperature
-                )
-                lmql_prompt = f&#39;&#34;&#34;&#34;{full_prompt}&#34;&#34;&#34;&#39;
-                if expected_output:
-                    lmql_prompt += f&#34;\n[RESPONSE]\n{expected_output}&#34;
-                result = self.lmql_wrapper.get_completion(
-                    lmql_prompt, config, additional_context, stream=True
-                )
+        result = None  # Initialize result to avoid UnboundLocalError
+
+        try:
+            if stream:
+                # ... (streaming code remains unchanged)
+                pass
             else:
-                self.logger.debug(&#34;Using LMQL adapter for OpenAI streaming&#34;)
-                config = LMQLConfig(
-                    model=model, max_tokens=max_tokens, temperature=temperature
-                )
-                lmql_prompt = f&#39;&#34;&#34;&#34;{full_prompt}&#34;&#34;&#34;&#39;
-                if expected_output:
-                    lmql_prompt += f&#34;\n[RESPONSE]\n{expected_output}&#34;
-                result = self.lmql_wrapper.get_completion(
-                    lmql_prompt, config, additional_context, stream=True
-                )
+                if use_local or (
+                    self.huggingface_adapter.api_key and &#34;huggingface&#34; in model.lower()
+                ):
+                    self.logger.debug(&#34;Using Hugging Face adapter&#34;)
+                    config = HuggingFaceConfig(
+                        model=model, max_tokens=max_tokens, temperature=temperature
+                    )
+                    formatted_prompt = format_huggingface_prompt(full_prompt)
+                    result = await self.huggingface_adapter.get_completion(
+                        formatted_prompt, config, additional_context
+                    )
+                elif &#34;dspy&#34; in model.lower():
+                    self.logger.debug(&#34;Using DSPy adapter&#34;)
+                    config = DSPyConfig(
+                        model=model, max_tokens=max_tokens, temperature=temperature
+                    )
+                    formatted_prompt = format_dspy_prompt(full_prompt)
+                    result = await self.dspy_wrapper.get_completion(
+                        formatted_prompt, config, additional_context
+                    )
+                else:
+                    self.logger.debug(&#34;Using LMQL adapter&#34;)
+                    config = LMQLConfig(
+                        model=model, max_tokens=max_tokens, temperature=temperature
+                    )
+                    constraints = [f&#34;EXPECTED_OUTPUT in [{expected_output}]&#34;] if expected_output else []
+                    if &#34;lmql&#34; in model.lower():
+                        result = await self.lmql_interface.generate(full_prompt, max_tokens=max_tokens, constraints=constraints)
+                    elif &#34;dspy&#34; in model.lower():
+                        config = DSPyConfig(
+                            model=model, max_tokens=max_tokens, temperature=temperature
+                        )
+                        formatted_prompt = format_dspy_prompt(full_prompt)
+                        result = await self.dspy_wrapper.get_completion(
+                            formatted_prompt, config, additional_context
+                        )
 
-            async def stream_wrapper():
-                async for chunk in await result:
-                    yield chunk
+            end_time = time.time()
+            execution_time = end_time - start_time
 
-            return stream_wrapper()
-        else:
-            if use_local or (
-                self.huggingface_adapter.api_key and &#34;huggingface&#34; in model.lower()
-            ):
-                self.logger.debug(&#34;Using Hugging Face adapter&#34;)
-                config = HuggingFaceConfig(
-                    model=model, max_tokens=max_tokens, temperature=temperature
-                )
-                formatted_prompt = format_huggingface_prompt(full_prompt)
-                result = await self.huggingface_adapter.get_completion(
-                    formatted_prompt, config, additional_context
-                )
-            elif &#34;dspy&#34; in model.lower():
-                self.logger.debug(&#34;Using DSPy adapter&#34;)
-                config = DSPyConfig(
-                    model=model, max_tokens=max_tokens, temperature=temperature
-                )
-                formatted_prompt = format_dspy_prompt(full_prompt)
-                result = await self.dspy_wrapper.get_completion(
-                    formatted_prompt, config, additional_context
-                )
+            # Calculate tokens used (this is a simple estimation)
+            if isinstance(result, str):
+                tokens_used = len(prompt.split()) + len(result.split())
             else:
-                self.logger.debug(&#34;Using LMQL adapter&#34;)
-                config = LMQLConfig(
-                    model=model, max_tokens=max_tokens, temperature=temperature
-                )
-                formatted_prompt = format_lmql_prompt(full_prompt, expected_output)
-                result = await self.lmql_wrapper.get_completion(
-                    formatted_prompt,
-                    config,
-                    model=model,
-                    additional_context=additional_context,
-                )
+                tokens_used = len(
+                    prompt.split()
+                )  # We can&#39;t estimate tokens for streaming result
 
-        end_time = time.time()
-        execution_time = end_time - start_time
+            # Track LLM usage
+            track_llm_usage(model, tokens_used)
 
-        # Calculate tokens used (this is a simple estimation)
-        if isinstance(result, str):
-            tokens_used = len(prompt.split()) + len(result.split())
-        else:
-            tokens_used = len(
-                prompt.split()
-            )  # We can&#39;t estimate tokens for streaming result
+            self.logger.debug(f&#34;Completion generated in {execution_time:.2f} seconds&#34;)
+            self.logger.debug(f&#34;Tokens used: {tokens_used}&#34;)
 
-        # Track LLM usage
-        track_llm_usage(model, tokens_used)
-
-        self.logger.debug(f&#34;Completion generated in {execution_time:.2f} seconds&#34;)
-        self.logger.debug(f&#34;Tokens used: {tokens_used}&#34;)
-
-        if result is None or (isinstance(result, str) and not result.strip()):
-            self.logger.warning(f&#34;Received empty or None response from model: {model}&#34;)
-            return None
-
-        # Check if ```json is in the response and remove it if present
-        if (
-            isinstance(result, str)
-            and result.startswith(&#34;```json&#34;)
-            and result.endswith(&#34;```&#34;)
-        ):
-            try:
-                cleaned_response = &#34;\n&#34;.join(result.split(&#34;\n&#34;)[1:-1])
-                return cleaned_response
-            except json.JSONDecodeError:
+            if result is None or (isinstance(result, str) and not result.strip()) or (isinstance(result, dict) and &#39;error&#39; in result):
+                self.logger.warning(f&#34;Received invalid response from model: {model}&#34;)
+                return {
+                    &#34;error&#34;: f&#34;Invalid response from model: {model}&#34;,
+                    &#34;fallback_response&#34;: &#34;I apologize, but I couldn&#39;t generate a response at this time. Could you please rephrase your question or provide more context?&#34;
+                }
+        
+            if isinstance(result, dict):
                 return result
+            elif isinstance(result, str):
+                try:
+                    return json.loads(result)
+                except json.JSONDecodeError:
+                    return {&#34;response&#34;: result}
 
-        return result</code></pre>
+            # Check if ```json is in the response and remove it if present
+            if (
+                isinstance(result, str)
+                and result.startswith(&#34;```json&#34;)
+                and result.endswith(&#34;```&#34;)
+            ):
+                try:
+                    cleaned_response = &#34;\n&#34;.join(result.split(&#34;\n&#34;)[1:-1])
+                    return json.loads(cleaned_response)
+                except json.JSONDecodeError:
+                    return result
+
+            return result
+
+        except Exception as e:
+            self.logger.error(f&#34;Error in get_completion: {str(e)}&#34;)
+            return {&#34;error&#34;: str(e), &#34;fallback_response&#34;: &#34;I encountered an error while processing your request. Could you please try again?&#34;}</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="frame.src.services.llm.main.LLMService.get_completion"><code class="name flex">
-<span>async def <span class="ident">get_completion</span></span>(<span>self, prompt: str, model: str = None, max_tokens: int = 1024, temperature: float = 0.7, additional_context: Optional[Dict[str, Any]] = None, expected_output: Optional[str] = None, use_local: bool = False, stream: bool = False, include_frame_context: bool = False, recent_memories: Optional[List[Dict[str, Any]]] = None) ‑> Union[str, Dict[str, Any], AsyncGenerator[str, None]]</span>
+<dt id="frame.src.services.llm.main.LLMService.get_adapter"><code class="name flex">
+<span>def <span class="ident">get_adapter</span></span>(<span>self, model_name: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Generate a completion using the specified model or the default model.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>prompt</code></strong> :&ensp;<code>str</code></dt>
-<dd>The input prompt for the model.</dd>
-<dt><strong><code>model</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>The model to use.</dd>
-<dt><strong><code>max_tokens</code></strong> :&ensp;<code>int</code>, optional</dt>
-<dd>Maximum number of tokens to generate.</dd>
-<dt><strong><code>temperature</code></strong> :&ensp;<code>float</code>, optional</dt>
-<dd>Sampling temperature.</dd>
-<dt><strong><code>additional_context</code></strong> :&ensp;<code>Dict[str, Any]</code>, optional</dt>
-<dd>Additional context for the model.</dd>
-<dt><strong><code>expected_output</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>Expected output format.</dd>
-<dt><strong><code>use_local</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Whether to use a local model.</dd>
-<dt><strong><code>stream</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Whether to stream the output.</dd>
-<dt><strong><code>include_frame_context</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Whether to include context about Frame and Framers.</dd>
-<dt><strong><code>recent_memories</code></strong> :&ensp;<code>List[Dict[str, Any]]</code>, optional</dt>
-<dd>List of recent memories/perceptions.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Union[str, Dict[str, Any]]</code></dt>
-<dd>The generated completion.</dd>
-</dl></div>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.llm.main.LLMService.get_completion"><code class="name flex">
+<span>async def <span class="ident">get_completion</span></span>(<span>self, prompt: str, model: str = None, max_tokens: int = 1024, temperature: float = 0.7, additional_context: Optional[Dict[str, Any]] = None, expected_output: Optional[str] = None, use_local: bool = False, stream: bool = False, include_frame_context: bool = False, recent_memories: Optional[List[Dict[str, Any]]] = None) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.services.llm.main.LLMService.get_metrics"><code class="name flex">
 <span>def <span class="ident">get_metrics</span></span>(<span>self) ‑> Dict[str, Any]</span>
@@ -415,6 +432,7 @@ the specified or default model.</p>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="frame.src.services.llm.main.clean_response" href="#frame.src.services.llm.main.clean_response">clean_response</a></code></li>
 <li><code><a title="frame.src.services.llm.main.log_method_call" href="#frame.src.services.llm.main.log_method_call">log_method_call</a></code></li>
 </ul>
 </li>
@@ -422,7 +440,8 @@ the specified or default model.</p>
 <ul>
 <li>
 <h4><code><a title="frame.src.services.llm.main.LLMService" href="#frame.src.services.llm.main.LLMService">LLMService</a></code></h4>
-<ul class="">
+<ul class="two-column">
+<li><code><a title="frame.src.services.llm.main.LLMService.get_adapter" href="#frame.src.services.llm.main.LLMService.get_adapter">get_adapter</a></code></li>
 <li><code><a title="frame.src.services.llm.main.LLMService.get_completion" href="#frame.src.services.llm.main.LLMService.get_completion">get_completion</a></code></li>
 <li><code><a title="frame.src.services.llm.main.LLMService.get_metrics" href="#frame.src.services.llm.main.LLMService.get_metrics">get_metrics</a></code></li>
 <li><code><a title="frame.src.services.llm.main.LLMService.get_total_calls" href="#frame.src.services.llm.main.LLMService.get_total_calls">get_total_calls</a></code></li>

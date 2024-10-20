@@ -37,50 +37,82 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.services.execution_context.ExecutionContext"><code class="flex name class">
 <span>class <span class="ident">ExecutionContext</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../framer/soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None, state: Optional[Dict[str, Any]] = None, process_perception: Optional[Callable] = None, execute_decision: Optional[Callable] = None, config: Optional[<a title="frame.src.framer.config.FramerConfig" href="../framer/config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, perform_task: Optional[Callable] = None, soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../framer/soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None, state: Optional[Dict[str, Any]] = None, process_perception: Optional[Callable] = None, execute_decision: Optional[Callable] = None, config: Optional[<a title="frame.src.framer.config.FramerConfig" href="../framer/config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>] = None, agency: Optional[ForwardRef('Agency')] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ExecutionContext provides a centralized container for various services and state
-that actions might need during execution. It ensures consistent access to resources
-across all actions and facilitates easier testing and modular design.</p>
+<div class="desc"><p>ExecutionContext provides a centralized container for various services, state, and functions
+that actions and components might need during execution. It ensures consistent access to resources
+across all actions and facilitates easier testing, modular design, and state management.</p>
+<p>The ExecutionContext serves as a bridge between different components of the Framer,
+allowing them to share resources and functionality without tight coupling.</p>
+<p>Key features:
+- Centralized service access: Provides access to core services like LLM, memory, and EQ.
+- State management: Maintains a dictionary for storing and retrieving arbitrary state information.
+- Function delegation: Holds references to key functions from other components for easy access.
+- Configuration access: Stores the Framer configuration for global access.
+- Framer reference: Maintains a reference to the parent Framer instance.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
 <dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
-<dd>The language model service.</dd>
-<dt><strong><code>memory_service</code></strong> :&ensp;<code>MemoryService</code></dt>
+<dd>The language model service for text generation and processing.</dd>
+<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
 <dd>The memory service for storing and retrieving information.</dd>
-<dt><strong><code>eq_service</code></strong> :&ensp;<code>EQService</code></dt>
-<dd>The emotional intelligence service.</dd>
-<dt><strong><code>soul</code></strong> :&ensp;<code>Soul</code></dt>
-<dd>The soul component of the Framer.</dd>
+<dt><strong><code>eq_service</code></strong> :&ensp;<code>Optional[EQService]</code></dt>
+<dd>The emotional intelligence service for EQ-related functionality.</dd>
+<dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Soul]</code></dt>
+<dd>The soul component of the Framer, representing its core essence and personality.</dd>
 <dt><strong><code>state</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
 <dd>A dictionary to store any additional state information.</dd>
-<dt><strong><code>process_perception</code></strong> :&ensp;<code>Callable</code></dt>
+<dt><strong><code>process_perception</code></strong> :&ensp;<code>Optional[Callable]</code></dt>
 <dd>A function to process perceptions.</dd>
-<dt><strong><code>execute_decision</code></strong> :&ensp;<code>Callable</code></dt>
+<dt><strong><code>execute_decision</code></strong> :&ensp;<code>Optional[Callable]</code></dt>
 <dd>A function to execute decisions.</dd>
-<dt><strong><code>config</code></strong> :&ensp;<code>FramerConfig</code></dt>
+<dt><strong><code>config</code></strong> :&ensp;<code>Optional[FramerConfig]</code></dt>
 <dd>The configuration for the Framer.</dd>
-</dl></div>
+<dt><strong><code>perform_task</code></strong> :&ensp;<code>Optional[Callable]</code></dt>
+<dd>A function to perform tasks, typically bound from Agency.</dd>
+<dt><strong><code>agency</code></strong> :&ensp;<code>Optional[Agency]</code></dt>
+<dd>The agency component of the Framer.</dd>
+<dt><strong><code>framer</code></strong> :&ensp;<code>Optional[Framer]</code></dt>
+<dd>The parent Framer instance.</dd>
+</dl>
+<p>The ExecutionContext class plays a crucial role in maintaining a clean and modular architecture
+within the Framer system, promoting loose coupling and easier testing of individual components.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ExecutionContext:
     &#34;&#34;&#34;
-    ExecutionContext provides a centralized container for various services and state
-    that actions might need during execution. It ensures consistent access to resources
-    across all actions and facilitates easier testing and modular design.
+    ExecutionContext provides a centralized container for various services, state, and functions
+    that actions and components might need during execution. It ensures consistent access to resources
+    across all actions and facilitates easier testing, modular design, and state management.
+
+    The ExecutionContext serves as a bridge between different components of the Framer,
+    allowing them to share resources and functionality without tight coupling.
+
+    Key features:
+    - Centralized service access: Provides access to core services like LLM, memory, and EQ.
+    - State management: Maintains a dictionary for storing and retrieving arbitrary state information.
+    - Function delegation: Holds references to key functions from other components for easy access.
+    - Configuration access: Stores the Framer configuration for global access.
+    - Framer reference: Maintains a reference to the parent Framer instance.
 
     Attributes:
-        llm_service (LLMService): The language model service.
-        memory_service (MemoryService): The memory service for storing and retrieving information.
-        eq_service (EQService): The emotional intelligence service.
-        soul (Soul): The soul component of the Framer.
+        llm_service (LLMService): The language model service for text generation and processing.
+        memory_service (Optional[MemoryService]): The memory service for storing and retrieving information.
+        eq_service (Optional[EQService]): The emotional intelligence service for EQ-related functionality.
+        soul (Optional[Soul]): The soul component of the Framer, representing its core essence and personality.
         state (Dict[str, Any]): A dictionary to store any additional state information.
-        process_perception (Callable): A function to process perceptions.
-        execute_decision (Callable): A function to execute decisions.
-        config (FramerConfig): The configuration for the Framer.
+        process_perception (Optional[Callable]): A function to process perceptions.
+        execute_decision (Optional[Callable]): A function to execute decisions.
+        config (Optional[FramerConfig]): The configuration for the Framer.
+        perform_task (Optional[Callable]): A function to perform tasks, typically bound from Agency.
+        agency (Optional[Agency]): The agency component of the Framer.
+        framer (Optional[Framer]): The parent Framer instance.
+
+    The ExecutionContext class plays a crucial role in maintaining a clean and modular architecture
+    within the Framer system, promoting loose coupling and easier testing of individual components.
     &#34;&#34;&#34;
 
     def __init__(
@@ -88,20 +120,24 @@ across all actions and facilitates easier testing and modular design.</p>
         llm_service: LLMService,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
+        perform_task: Optional[Callable] = None,
         soul: Optional[Soul] = None,
         state: Optional[Dict[str, Any]] = None,
         process_perception: Optional[Callable] = None,
         execute_decision: Optional[Callable] = None,
         config: Optional[FramerConfig] = None,
+        agency: Optional[&#39;Agency&#39;] = None
     ):
         self.llm_service = llm_service
         self.memory_service = memory_service
         self.eq_service = eq_service
+        self.perform_task = perform_task
         self.soul = soul
         self.state = state or {}
         self.process_perception = process_perception
         self.execute_decision = execute_decision
         self.config = config
+        self.agency = agency
 
     def update_state(self, key, value):
         self.state[key] = value
@@ -123,7 +159,24 @@ across all actions and facilitates easier testing and modular design.</p>
     async def execute_decision_wrapper(self, *args, **kwargs):
         if self.execute_decision:
             return await self.execute_decision(*args, **kwargs)
-        raise NotImplementedError(&#34;execute_decision method not set&#34;)</code></pre>
+        raise NotImplementedError(&#34;execute_decision method not set&#34;)
+
+    async def perform_task_wrapper(self, *args, **kwargs):
+        if self.perform_task:
+            return await self.perform_task(*args, **kwargs)
+        raise NotImplementedError(&#34;perform_task method not set&#34;)
+
+    def set_goals(self, goals):
+        if self.agency:
+            self.agency.set_goals(goals)
+        else:
+            raise AttributeError(&#34;Agency is not set in ExecutionContext&#34;)
+
+    def set_roles(self, roles):
+        if self.agency:
+            self.agency.set_roles(roles)
+        else:
+            raise AttributeError(&#34;Agency is not set in ExecutionContext&#34;)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -145,6 +198,12 @@ across all actions and facilitates easier testing and modular design.</p>
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.services.execution_context.ExecutionContext.perform_task_wrapper"><code class="name flex">
+<span>async def <span class="ident">perform_task_wrapper</span></span>(<span>self, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.services.execution_context.ExecutionContext.process_perception_wrapper"><code class="name flex">
 <span>async def <span class="ident">process_perception_wrapper</span></span>(<span>self, *args, **kwargs)</span>
 </code></dt>
@@ -153,6 +212,18 @@ across all actions and facilitates easier testing and modular design.</p>
 </dd>
 <dt id="frame.src.services.execution_context.ExecutionContext.set_framer"><code class="name flex">
 <span>def <span class="ident">set_framer</span></span>(<span>self, framer)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.execution_context.ExecutionContext.set_goals"><code class="name flex">
+<span>def <span class="ident">set_goals</span></span>(<span>self, goals)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.execution_context.ExecutionContext.set_roles"><code class="name flex">
+<span>def <span class="ident">set_roles</span></span>(<span>self, roles)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -186,8 +257,11 @@ across all actions and facilitates easier testing and modular design.</p>
 <li><code><a title="frame.src.services.execution_context.ExecutionContext.execute_decision_wrapper" href="#frame.src.services.execution_context.ExecutionContext.execute_decision_wrapper">execute_decision_wrapper</a></code></li>
 <li><code><a title="frame.src.services.execution_context.ExecutionContext.get_framer" href="#frame.src.services.execution_context.ExecutionContext.get_framer">get_framer</a></code></li>
 <li><code><a title="frame.src.services.execution_context.ExecutionContext.get_state" href="#frame.src.services.execution_context.ExecutionContext.get_state">get_state</a></code></li>
+<li><code><a title="frame.src.services.execution_context.ExecutionContext.perform_task_wrapper" href="#frame.src.services.execution_context.ExecutionContext.perform_task_wrapper">perform_task_wrapper</a></code></li>
 <li><code><a title="frame.src.services.execution_context.ExecutionContext.process_perception_wrapper" href="#frame.src.services.execution_context.ExecutionContext.process_perception_wrapper">process_perception_wrapper</a></code></li>
 <li><code><a title="frame.src.services.execution_context.ExecutionContext.set_framer" href="#frame.src.services.execution_context.ExecutionContext.set_framer">set_framer</a></code></li>
+<li><code><a title="frame.src.services.execution_context.ExecutionContext.set_goals" href="#frame.src.services.execution_context.ExecutionContext.set_goals">set_goals</a></code></li>
+<li><code><a title="frame.src.services.execution_context.ExecutionContext.set_roles" href="#frame.src.services.execution_context.ExecutionContext.set_roles">set_roles</a></code></li>
 <li><code><a title="frame.src.services.execution_context.ExecutionContext.update_state" href="#frame.src.services.execution_context.ExecutionContext.update_state">update_state</a></code></li>
 </ul>
 </li>

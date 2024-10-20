@@ -164,11 +164,18 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
             kwargs[&#34;filters&#34;] = filters
         results = self.client.search(query, **kwargs)
         if isinstance(results, list):
-            return [{&#34;id&#34;: i, &#34;content&#34;: result} for i, result in enumerate(results[:limit])]
+            return [
+                {&#34;id&#34;: i, &#34;content&#34;: result} for i, result in enumerate(results[:limit])
+            ]
         elif isinstance(results, dict) and &#34;results&#34; in results:
-            return [{&#34;id&#34;: i, &#34;content&#34;: result} for i, result in enumerate(results[&#34;results&#34;][:limit])]
+            return [
+                {&#34;id&#34;: i, &#34;content&#34;: result}
+                for i, result in enumerate(results[&#34;results&#34;][:limit])
+            ]
         else:
-            raise TypeError(&#34;Expected results to be a list or a dictionary with a &#39;results&#39; key&#34;)
+            raise TypeError(
+                &#34;Expected results to be a list or a dictionary with a &#39;results&#39; key&#34;
+            )
 
     def get_all(
         self,

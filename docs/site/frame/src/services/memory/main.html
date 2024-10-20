@@ -51,23 +51,19 @@ hljs.highlightAll();
 
     def store(
         self, memory: str, user_id: str = &#34;default&#34;, metadata: Dict[str, Any] = None
-    ):
-        self.adapter.store(memory, user_id, metadata)
+    ) -&gt; int:
+        return self.adapter.store(memory, user_id, metadata)
 
-    def retrieve_memory(self, memory_id: int, user_id: str = &#34;default&#34;) -&gt; Optional[Any]:
+    def retrieve_memory(
+        self, memory_id: int, user_id: str = &#34;default&#34;
+    ) -&gt; Optional[Any]:
         return self.adapter.retrieve(memory_id, user_id)
 
-    def update_memory(self, memory_id: int, data: str, user_id: str = &#34;default&#34;):
-        self.adapter.update(memory_id, data, user_id)
+    def update_memory(self, memory_id: int, data: str, user_id: str = &#34;default&#34;) -&gt; bool:
+        return self.adapter.update(memory_id, data, user_id)
 
-    def delete_memory(self, memory_id: int, user_id: str = &#34;default&#34;):
-        self.adapter.delete(memory_id, user_id)
-
-    def get_all_memories(self, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
-        return self.adapter.get_all(user_id)
-
-    def search_memories(self, query: str, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
-        return self.adapter.search(query, user_id)
+    def delete_memory(self, memory_id: int, user_id: str = &#34;default&#34;) -&gt; bool:
+        return self.adapter.delete(memory_id, user_id)
 
     def get_all_memories(self, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
         return self.adapter.get_all(user_id)
@@ -77,22 +73,37 @@ hljs.highlightAll();
     ) -&gt; List[Dict[str, Any]]:
         return self.adapter.search(query, user_id)
 
-    def update_memory(self, memory_id: int, data: str, user_id: str = &#34;default&#34;):
-        self.adapter.update(memory_id, data, user_id)
-
     def get_memory_history(self, memory_id: int, user_id: str = &#34;default&#34;) -&gt; List[str]:
-        return self.adapter.history(memory_id, user_id)</code></pre>
+        return self.adapter.history(memory_id, user_id)
+
+    def clear_all_memories(self, user_id: str = &#34;default&#34;) -&gt; bool:
+        return self.adapter.clear_all(user_id)
+
+    def get_memory_count(self, user_id: str = &#34;default&#34;) -&gt; int:
+        return self.adapter.get_count(user_id)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
+<dt id="frame.src.services.memory.main.MemoryService.clear_all_memories"><code class="name flex">
+<span>def <span class="ident">clear_all_memories</span></span>(<span>self, user_id: str = 'default') ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.services.memory.main.MemoryService.delete_memory"><code class="name flex">
-<span>def <span class="ident">delete_memory</span></span>(<span>self, memory_id: int, user_id: str = 'default')</span>
+<span>def <span class="ident">delete_memory</span></span>(<span>self, memory_id: int, user_id: str = 'default') ‑> bool</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.services.memory.main.MemoryService.get_all_memories"><code class="name flex">
 <span>def <span class="ident">get_all_memories</span></span>(<span>self, user_id: str = 'default') ‑> List[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.memory.main.MemoryService.get_memory_count"><code class="name flex">
+<span>def <span class="ident">get_memory_count</span></span>(<span>self, user_id: str = 'default') ‑> int</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -116,13 +127,13 @@ hljs.highlightAll();
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.services.memory.main.MemoryService.store"><code class="name flex">
-<span>def <span class="ident">store</span></span>(<span>self, memory: str, user_id: str = 'default', metadata: Dict[str, Any] = None)</span>
+<span>def <span class="ident">store</span></span>(<span>self, memory: str, user_id: str = 'default', metadata: Dict[str, Any] = None) ‑> int</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.services.memory.main.MemoryService.update_memory"><code class="name flex">
-<span>def <span class="ident">update_memory</span></span>(<span>self, memory_id: int, data: str, user_id: str = 'default')</span>
+<span>def <span class="ident">update_memory</span></span>(<span>self, memory_id: int, data: str, user_id: str = 'default') ‑> bool</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -147,8 +158,10 @@ hljs.highlightAll();
 <li>
 <h4><code><a title="frame.src.services.memory.main.MemoryService" href="#frame.src.services.memory.main.MemoryService">MemoryService</a></code></h4>
 <ul class="two-column">
+<li><code><a title="frame.src.services.memory.main.MemoryService.clear_all_memories" href="#frame.src.services.memory.main.MemoryService.clear_all_memories">clear_all_memories</a></code></li>
 <li><code><a title="frame.src.services.memory.main.MemoryService.delete_memory" href="#frame.src.services.memory.main.MemoryService.delete_memory">delete_memory</a></code></li>
 <li><code><a title="frame.src.services.memory.main.MemoryService.get_all_memories" href="#frame.src.services.memory.main.MemoryService.get_all_memories">get_all_memories</a></code></li>
+<li><code><a title="frame.src.services.memory.main.MemoryService.get_memory_count" href="#frame.src.services.memory.main.MemoryService.get_memory_count">get_memory_count</a></code></li>
 <li><code><a title="frame.src.services.memory.main.MemoryService.get_memory_history" href="#frame.src.services.memory.main.MemoryService.get_memory_history">get_memory_history</a></code></li>
 <li><code><a title="frame.src.services.memory.main.MemoryService.retrieve_memory" href="#frame.src.services.memory.main.MemoryService.retrieve_memory">retrieve_memory</a></code></li>
 <li><code><a title="frame.src.services.memory.main.MemoryService.search_memories" href="#frame.src.services.memory.main.MemoryService.search_memories">search_memories</a></code></li>

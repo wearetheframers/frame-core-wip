@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>frame.src.services.llm.llm_adapters.lmql.lmql_interface API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>frame.src.services.llm.llm_adapters.lmql.lmql_interface</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface"><code class="flex name class">
+<span>class <span class="ident">LMQLInterface</span></span>
+<span>(</span><span>model_name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LMQLInterface:
+    def __init__(self, model_name: str):
+        self.model = lmql.model(model_name)
+
+    def format_prompt_with_constraints(self, prompt: str, constraints: list, distribution: bool = False) -&gt; str:
+        &#34;&#34;&#34;
+        Format a prompt with LMQL constraints and optionally include a distribution clause.
+
+        Args:
+            prompt (str): The input prompt.
+            constraints (list): A list of constraints to apply.
+            distribution (bool): Whether to include a distribution clause.
+
+        Returns:
+            str: The formatted prompt with constraints and optional distribution.
+        &#34;&#34;&#34;
+        constraints_str = &#34; AND &#34;.join(constraints)
+        distribution_clause = &#34;\ndistribution&#34; if distribution else &#34;&#34;
+        return f&#34;{prompt}\nConstraints: {constraints_str}{distribution_clause}&#34;
+
+    def clean_response(self, response: str) -&gt; str:
+        &#34;&#34;&#34;
+        Clean the response by removing unwanted text patterns.
+
+        Args:
+            response (str): The raw response from the language model.
+
+        Returns:
+            str: The cleaned response.
+        &#34;&#34;&#34;
+        unwanted_patterns = [&#34;Response:\n&#34;, &#34;[RESPONSE]&#34;]
+        for pattern in unwanted_patterns:
+            response = response.replace(pattern, &#34;&#34;)
+        return response.strip()
+
+    def set_decoder(self, decoder: Optional[str] = None, decoder_params: Optional[Dict[str, Any]] = None):
+        &#34;&#34;&#34;
+        Set the decoding algorithm and its parameters.
+
+        Args:
+            decoder (Optional[str]): The decoding algorithm to use.
+            decoder_params (Optional[Dict[str, Any]]): Parameters for the decoding algorithm.
+        &#34;&#34;&#34;
+        self.decoder = decoder
+        self.decoder_params = decoder_params
+
+    def apply_decorators(self, value: str, decorators: List[Callable], context: Any) -&gt; str:
+        &#34;&#34;&#34;
+        Apply a list of decorators to a value.
+
+        Args:
+            value (str): The value to be decorated.
+            decorators (List[Callable]): A list of decorator functions.
+            context (Any): The context in which the decorators are applied.
+
+        Returns:
+            str: The decorated value.
+        &#34;&#34;&#34;
+        for decorator in decorators:
+            value = decorator(value, context)
+        return value
+
+    async def generate(self, prompt: str, max_tokens: int = 100, constraints: list = None, distribution: bool = False, control_flow: Optional[Callable] = None, decorators: Optional[List[Callable]] = None) -&gt; str:
+        &#34;&#34;&#34;
+        Generate a response using LMQL with constraints and optionally obtain a distribution.
+        Supports dynamic prompt construction with control flow.
+
+        Args:
+            prompt (str): The input prompt.
+            max_tokens (int): Maximum number of tokens to generate.
+            constraints (list, optional): Constraints to apply during generation.
+            distribution (bool): Whether to obtain a distribution over possible values.
+            control_flow (Callable, optional): A function to dynamically construct the prompt with control flow.
+
+        Returns:
+            str: The generated response or distribution.
+        &#34;&#34;&#34;
+        if control_flow:
+            prompt = control_flow(prompt)
+        context = ProgramState(prompt)  # Pass the prompt to ProgramState
+        if decorators:
+            prompt = self.apply_decorators(prompt, decorators, context)
+            prompt = self.format_prompt_with_constraints(prompt, constraints, distribution)
+        if distribution:
+            return await self.model.score(prompt, max_tokens=max_tokens)
+        else:
+            # Apply LMQL constraints during generation
+            lmql_constraints = self._apply_lmql_constraints(constraints)
+            return await self.model.generate(prompt, max_tokens=max_tokens, constraints=lmql_constraints)
+
+    def _apply_lmql_constraints(self, constraints: list) -&gt; list:
+        &#34;&#34;&#34;
+        Convert user-defined constraints into LMQL-compatible constraints.
+
+        Args:
+            constraints (list): A list of user-defined constraints.
+
+        Returns:
+            list: A list of LMQL-compatible constraints.
+        &#34;&#34;&#34;
+        lmql_constraints = []
+        for constraint in constraints:
+            if isinstance(constraint, str):
+                lmql_constraints.append(constraint)
+            elif isinstance(constraint, tuple) and len(constraint) == 2:
+                constraint_type, value = constraint
+                if constraint_type == &#34;STOPS_AT&#34;:
+                    lmql_constraints.append(f&#34;STOPS_AT({value[0]}, {value[1]})&#34;)
+                elif constraint_type == &#34;INT&#34;:
+                    lmql_constraints.append(f&#34;INT({value})&#34;)
+                elif constraint_type == &#34;CHOICE&#34;:
+                    lmql_constraints.append(f&#34;{value[0]} in set({value[1]})&#34;)
+                elif constraint_type == &#34;LEN&#34;:
+                    lmql_constraints.append(f&#34;len({value[0]}) &lt; {value[1]}&#34;)
+                elif constraint_type == &#34;TOKENS&#34;:
+                    lmql_constraints.append(f&#34;len(TOKENS({value[0]})) &lt; {value[1]}&#34;)
+                elif constraint_type == &#34;REGEX&#34;:
+                    lmql_constraints.append(f&#34;REGEX({value[0]}, r&#39;{value[1]}&#39;)&#34;)
+        return lmql_constraints
+
+    async def score(self, prompt: str, values: list) -&gt; dict:
+        &#34;&#34;&#34;
+        Score different continuation values for a given prompt.
+
+        Args:
+            prompt (str): The prompt to use as a common prefix for all continuations.
+            values (list): The continuation values to score.
+
+        Returns:
+            dict: A dictionary with scores for each continuation.
+        &#34;&#34;&#34;
+        return await self.model.score(prompt, values)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.apply_decorators"><code class="name flex">
+<span>def <span class="ident">apply_decorators</span></span>(<span>self, value: str, decorators: List[Callable], context: Any) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Apply a list of decorators to a value.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>value</code></strong> :&ensp;<code>str</code></dt>
+<dd>The value to be decorated.</dd>
+<dt><strong><code>decorators</code></strong> :&ensp;<code>List[Callable]</code></dt>
+<dd>A list of decorator functions.</dd>
+<dt><strong><code>context</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The context in which the decorators are applied.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The decorated value.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.clean_response"><code class="name flex">
+<span>def <span class="ident">clean_response</span></span>(<span>self, response: str) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clean the response by removing unwanted text patterns.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>response</code></strong> :&ensp;<code>str</code></dt>
+<dd>The raw response from the language model.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The cleaned response.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.format_prompt_with_constraints"><code class="name flex">
+<span>def <span class="ident">format_prompt_with_constraints</span></span>(<span>self, prompt: str, constraints: list, distribution: bool = False) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Format a prompt with LMQL constraints and optionally include a distribution clause.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>prompt</code></strong> :&ensp;<code>str</code></dt>
+<dd>The input prompt.</dd>
+<dt><strong><code>constraints</code></strong> :&ensp;<code>list</code></dt>
+<dd>A list of constraints to apply.</dd>
+<dt><strong><code>distribution</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to include a distribution clause.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The formatted prompt with constraints and optional distribution.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.generate"><code class="name flex">
+<span>async def <span class="ident">generate</span></span>(<span>self, prompt: str, max_tokens: int = 100, constraints: list = None, distribution: bool = False, control_flow: Optional[Callable] = None, decorators: Optional[List[Callable]] = None) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a response using LMQL with constraints and optionally obtain a distribution.
+Supports dynamic prompt construction with control flow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>prompt</code></strong> :&ensp;<code>str</code></dt>
+<dd>The input prompt.</dd>
+<dt><strong><code>max_tokens</code></strong> :&ensp;<code>int</code></dt>
+<dd>Maximum number of tokens to generate.</dd>
+<dt><strong><code>constraints</code></strong> :&ensp;<code>list</code>, optional</dt>
+<dd>Constraints to apply during generation.</dd>
+<dt><strong><code>distribution</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to obtain a distribution over possible values.</dd>
+<dt><strong><code>control_flow</code></strong> :&ensp;<code>Callable</code>, optional</dt>
+<dd>A function to dynamically construct the prompt with control flow.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The generated response or distribution.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.score"><code class="name flex">
+<span>async def <span class="ident">score</span></span>(<span>self, prompt: str, values: list) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Score different continuation values for a given prompt.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>prompt</code></strong> :&ensp;<code>str</code></dt>
+<dd>The prompt to use as a common prefix for all continuations.</dd>
+<dt><strong><code>values</code></strong> :&ensp;<code>list</code></dt>
+<dd>The continuation values to score.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>A dictionary with scores for each continuation.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.set_decoder"><code class="name flex">
+<span>def <span class="ident">set_decoder</span></span>(<span>self, decoder: Optional[str] = None, decoder_params: Optional[Dict[str, Any]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the decoding algorithm and its parameters.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>decoder</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The decoding algorithm to use.</dd>
+<dt><strong><code>decoder_params</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code></dt>
+<dd>Parameters for the decoding algorithm.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql" href="index.html">frame.src.services.llm.llm_adapters.lmql</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface" href="#frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface">LMQLInterface</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.apply_decorators" href="#frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.apply_decorators">apply_decorators</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.clean_response" href="#frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.clean_response">clean_response</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.format_prompt_with_constraints" href="#frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.format_prompt_with_constraints">format_prompt_with_constraints</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.generate" href="#frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.generate">generate</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.score" href="#frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.score">score</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.set_decoder" href="#frame.src.services.llm.llm_adapters.lmql.lmql_interface.LMQLInterface.set_decoder">set_decoder</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>

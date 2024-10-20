@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.brain.Brain"><code class="flex name class">
 <span>class <span class="ident">Brain</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, roles: List[Dict[str, Any]], goals: List[Dict[str, Any]], default_model: str = 'gpt-3.5-turbo', recent_memories_limit: int = 5, soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None, execution_context: Optional[<a title="frame.src.services.execution_context.ExecutionContext" href="../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[ForwardRef('ExecutionContext')] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], default_model: str = 'gpt-3.5-turbo', soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Initialize the Brain with the necessary components.</p>
@@ -45,18 +45,17 @@ hljs.highlightAll();
 <dl>
 <dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
 <dd>The language model service.</dd>
+<dt>execution_context (Optional['ExecutionContext']): The execution context.</dt>
+<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
+<dd>The memory service.</dd>
 <dt><strong><code>roles</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
 <dd>Initial roles for the Brain.</dd>
 <dt><strong><code>goals</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
 <dd>Initial goals for the Brain.</dd>
 <dt><strong><code>default_model</code></strong> :&ensp;<code>str</code></dt>
 <dd>The default language model to use.</dd>
-<dt><strong><code>recent_memories_limit</code></strong> :&ensp;<code>int</code></dt>
-<dd>The number of recent memories to keep. Defaults to 5.</dd>
 <dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Soul]</code></dt>
 <dd>The Soul instance for the Brain.</dd>
-<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
-<dd>The execution context for the Brain.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -64,98 +63,105 @@ hljs.highlightAll();
 </summary>
 <pre><code class="python">class Brain:
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    &#34;&#34;&#34;
-    The Brain class represents the decision-making component of the Framer.
 
-    It processes perceptions, makes decisions, and executes actions based on those decisions.
-    The Brain uses a set of VALID_ACTIONS to determine which actions can be executed.
-    VALID_ACTIONS are derived from the ActionRegistry and default actions.
+    &#34;&#34;&#34;
+    The Brain class represents the central decision-making and cognitive processing component of the Framer.
+
+    It is responsible for processing perceptions, making decisions, and executing actions based on those decisions.
+    The Brain integrates various cognitive functions, including perception processing, decision-making,
+    memory management, and action execution.
+
+    Key features:
+    - Perception processing: Analyzes and interprets incoming perceptions.
+    - Decision-making: Generates decisions based on current context, roles, goals, and perceptions.
+    - Action execution: Executes decided actions using the action registry.
+    - Memory integration: Utilizes the memory service for storing and retrieving information.
+    - LLM integration: Uses language models for generating responses and making decisions.
+    - Role and goal management: Considers active roles and goals in the decision-making process.
+
+    The Brain uses a set of valid actions, derived from the ActionRegistry and default actions,
+    to determine which actions can be executed. This ensures that all actions are within the
+    defined capabilities of the Framer.
+
+    Attributes:
+        llm_service (LLMService): The language model service for text generation and processing.
+        default_model (str): The default language model to use.
+        roles (List[Dict[str, Any]]): List of roles for the Brain.
+        goals (List[Dict[str, Any]]): List of goals for the Brain.
+        soul (Optional[Soul]): The Soul instance associated with this Brain.
+        execution_context (Optional[ExecutionContext]): The execution context for the Brain.
+        mind (Mind): The Mind instance for cognitive processing.
+        memory_service (Optional[MemoryService]): The memory service for storing and retrieving information.
+        action_registry (ActionRegistry): Registry of available actions.
+
+    The Brain class serves as the cognitive core of the Framer, coordinating various components
+    to enable intelligent decision-making and action execution.
     &#34;&#34;&#34;
 
     def __init__(
         self,
         llm_service: LLMService,
-        roles: List[Dict[str, Any]],
-        goals: List[Dict[str, Any]],
+        execution_context: Optional[&#39;ExecutionContext&#39;] = None,
+        memory_service: Optional[MemoryService] = None,
+        roles: List[Dict[str, Any]] = [],
+        goals: List[Dict[str, Any]] = [],
         default_model: str = &#34;gpt-3.5-turbo&#34;,
-        recent_memories_limit: int = 5,
         soul: Optional[Soul] = None,
-        execution_context: Optional[ExecutionContext] = None,
     ):
         &#34;&#34;&#34;
         Initialize the Brain with the necessary components.
 
         Args:
             llm_service (LLMService): The language model service.
+            execution_context (Optional[&#39;ExecutionContext&#39;]): The execution context.
+            memory_service (Optional[MemoryService]): The memory service.
             roles (List[Dict[str, Any]]): Initial roles for the Brain.
             goals (List[Dict[str, Any]]): Initial goals for the Brain.
             default_model (str): The default language model to use.
-            recent_memories_limit (int): The number of recent memories to keep. Defaults to 5.
             soul (Optional[Soul]): The Soul instance for the Brain.
-            execution_context (Optional[ExecutionContext]): The execution context for the Brain.
         &#34;&#34;&#34;
+        self.logger.info(&#34;Initializing Brain&#34;)
         self.llm_service = llm_service
+        self.execution_context = execution_context or ExecutionContext(llm_service=self.llm_service)
         self.default_model = default_model
         self.roles = roles
         self.goals = goals
         self.soul = soul
-        self.execution_context = execution_context or ExecutionContext(
-            llm_service=llm_service,
-            soul=soul,
-            config=FramerConfig(name=&#34;DefaultFramer&#34;, default_model=default_model),
-        )
+        self.memory_service = memory_service
+        self.logger.info(f&#34;Memory service received: {self.memory_service}&#34;)
+        
+        if self.memory_service:
+            self.logger.info(&#34;Creating Memory object&#34;)
+            self.memory = Memory(self.memory_service)
+            self.logger.info(f&#34;Memory object created: {self.memory}&#34;)
+        else:
+            self.logger.warning(&#34;No memory service provided, Memory object not created&#34;)
+            self.memory = None
+        
+        self.mind = Mind(self)
+        # Initialize ActionRegistry
+        self.action_registry = ActionRegistry(execution_context=self.execution_context)
 
-        self.mind = Mind(self, recent_memories_limit)
+        self.logger.info(f&#34;Brain initialized with memory service: {self.memory_service}&#34;)
+        self.logger.info(f&#34;Brain memory object: {self.memory}&#34;)
 
-        memory_config = {
-            &#34;llm&#34;: {
-                &#34;provider&#34;: get_llm_provider(self.default_model),
-                &#34;config&#34;: {
-                    &#34;model&#34;: self.default_model,
-                },
-            }
-        }
-        self.memory = Memory(memory_config)
+    def set_memory_service(self, memory_service: Optional[&#39;MemoryService&#39;]):
+        &#34;&#34;&#34;
+        Set the memory service for the Brain.
 
-        # Initialize Agency
-        self.agency = Agency(
-            llm_service=self.llm_service,
-            context=None,
-            execution_context=ExecutionContext(
-                llm_service=self.llm_service,
-                process_perception=self.process_perception,
-                execute_decision=self.execute_decision,
-                config=FramerConfig(
-                    name=(
-                        self.framer.config.name
-                        if hasattr(self, &#34;framer&#34;)
-                        else &#34;DefaultFramer&#34;
-                    ),
-                    default_model=self.default_model,
-                ),
-            ),
-        )
-
-        # Register the respond action using the agency&#39;s perform_task method
-        self.agency.action_registry.add_action(
-            &#34;respond&#34;,
-            description=&#34;Generate a response based on the current context&#34;,
-            action_func=self.agency.perform_task,
-            priority=5,
-        )
-
-        # Update the agency&#39;s action_registry
-        self.agency.action_registry = self.agency.action_registry
+        Args:
+            memory_service (Optional[MemoryService]): The memory service to set.
+        &#34;&#34;&#34;
+        self.memory_service = memory_service
+        if self.memory_service:
+            self.memory = Memory(self.memory_service)
+            logger.info(f&#34;Set memory service: {self.memory_service}&#34;)
+        else:
+            self.memory = None
+            logger.warning(&#34;Memory service is not set. Memory operations will not be available.&#34;)
 
     def set_framer(self, framer):
         self.framer = framer
-        if hasattr(self.agency, &#34;set_framer&#34;):
-            self.agency.set_framer(framer)
-        else:
-            logger.warning(
-                &#34;Agency does not have a set_framer method. This might cause issues.&#34;
-            )
 
     def get_framer(self):
         return self.framer
@@ -188,24 +194,43 @@ hljs.highlightAll();
         recent_perceptions = self.mind.get_recent_perceptions(5)
         execution_state = self.execution_context.state if self.execution_context else {}
 
-    def parse_json_response(self, response: str) -&gt; Any:
+    def parse_json_response(self, response: Any) -&gt; Any:
         &#34;&#34;&#34;
         Parse JSON response and handle potential errors.
 
         Args:
-            response (str): The JSON response string to parse.
+            response (Any): The response to parse, which could be a string or a dictionary.
 
         Returns:
             Any: The parsed JSON data or an error dictionary.
         &#34;&#34;&#34;
-        result = None
-        result = None
-        result = None
+        if response is None:
+            logger.error(&#34;Received None response, cannot parse JSON.&#34;)
+            return {
+                &#34;action&#34;: &#34;error&#34;,
+                &#34;parameters&#34;: {
+                    &#34;error&#34;: &#34;Received None response&#34;,
+                    &#34;raw_response&#34;: str(response),
+                },
+                &#34;reasoning&#34;: &#34;Failed to parse the decision data due to None response.&#34;,
+                &#34;confidence&#34;: 0.0,
+                &#34;priority&#34;: 1,
+            }
+
+        if isinstance(response, dict):
+            # If response is already a dictionary, return it as is
+            return response
+
         try:
-            # Remove trailing commas from the response
-            response = re.sub(r&#34;,\s*}&#34;, &#34;}&#34;, response)
-            response = re.sub(r&#34;,\s*]&#34;, &#34;]&#34;, response)
-            decision_data = json.loads(response)
+            # If response is a string, try to parse it as JSON
+            if isinstance(response, str):
+                # Remove trailing commas from the response
+                response = re.sub(r&#34;,\s*}&#34;, &#34;}&#34;, response)
+                response = re.sub(r&#34;,\s*]&#34;, &#34;]&#34;, response)
+                decision_data = json.loads(response)
+            else:
+                raise ValueError(f&#34;Unexpected response type: {type(response)}&#34;)
+
             # Ensure priority is a Priority enum
             priority_value = decision_data.get(&#34;priority&#34;, Priority.MEDIUM)
             try:
@@ -214,26 +239,15 @@ hljs.highlightAll();
                 logger.error(f&#34;Invalid priority: {priority_value}. Error: {e}&#34;)
                 decision_data[&#34;priority&#34;] = Priority.MEDIUM.value
             return decision_data
-        except json.JSONDecodeError as e:
-            logger.error(f&#34;JSON parsing error: {e}&#34;)
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.error(f&#34;Parsing error: {e}&#34;)
             logger.error(f&#34;Raw response: {response}&#34;)
-
-            # Check if the response is wrapped in a code block and remove it if present
-            if response.startswith(&#34;```&#34;) and response.endswith(&#34;```&#34;):
-                cleaned_response = &#34;\n&#34;.join(response.split(&#34;\n&#34;)[1:-1])
-                try:
-                    # Remove trailing commas from the cleaned response
-                    cleaned_response = re.sub(r&#34;,\s*}&#34;, &#34;}&#34;, cleaned_response)
-                    cleaned_response = re.sub(r&#34;,\s*]&#34;, &#34;]&#34;, cleaned_response)
-                    return json.loads(cleaned_response)
-                except json.JSONDecodeError:
-                    pass  # If this also fails, continue to the error return
 
             return {
                 &#34;action&#34;: &#34;error&#34;,
                 &#34;parameters&#34;: {
-                    &#34;error&#34;: &#34;Invalid JSON response&#34;,
-                    &#34;raw_response&#34;: response,
+                    &#34;error&#34;: f&#34;Invalid response: {str(e)}&#34;,
+                    &#34;raw_response&#34;: str(response),
                 },
                 &#34;reasoning&#34;: &#34;Failed to parse the decision data.&#34;,
                 &#34;confidence&#34;: 0.0,
@@ -248,18 +262,18 @@ hljs.highlightAll();
             roles (List[Role]): List of Role objects to set.
         &#34;&#34;&#34;
         self.roles = roles
-        self.agency.set_roles(roles)
+        self.execution_context.set_roles(roles)
 
     async def process_perception(
         self,
-        perception: Union[Perception, Dict[str, Any]],
+        perception: Union[&#39;Perception&#39;, Dict[str, Any]],
         goals: Optional[List[Goal]] = None,
-    ) -&gt; Decision:
+    ) -&gt; &#39;Decision&#39;:
         &#34;&#34;&#34;
         Process a perception and make a decision based on it.
 
         Args:
-            perception (Union[Perception, Dict[str, Any]]): The perception to process.
+            perception (Union[&#39;Perception&#39;, Dict[str, Any]]): The perception to process.
             goals (Optional[List[Goal]]): List of Goal objects to set.
 
         Returns:
@@ -267,37 +281,26 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         if goals is not None:
             self.goals = goals
-            self.agency.set_goals(goals)
+            self.execution_context.set_goals(goals)
 
         # Convert perception to Perception object if it is a dictionary
         if isinstance(perception, dict):
             perception = Perception.from_dict(perception)
 
         self.mind.perceptions.append(perception)
-        # Log available actions
-        available_actions = self.agency.action_registry.get_all_actions().keys()
-        self.logger.info(f&#34;Available actions: {available_actions}&#34;)
-
-        # Check if &#39;mem0_search_extract_memories&#39; is a valid action
-        if &#39;mem0_search_extract_memories&#39; in available_actions:
-            self.logger.info(&#34;&#39;mem0_search_extract_memories&#39; is a valid action.&#34;)
-        else:
-            self.logger.info(&#34;&#39;mem0_search_extract_memories&#39; is NOT a valid action.&#34;)
-
+        available_actions = self.action_registry.get_all_actions().keys()
+        self.logger.debug(f&#34;Processing perception: {perception}&#34;)
+        self.logger.debug(f&#34;Avaliable actions: {available_actions}&#34;)
         decision = await self.make_decision(perception)
-        if decision is None:
-            logger.error(&#34;Failed to make a decision. Returning default decision.&#34;)
-            decision = Decision(
-                action=&#34;error&#34;,
-                parameters={},
-                reasoning=&#34;Failed to make a decision&#34;,
-                confidence=0.0,
-                priority=1,
-                related_roles=[],
-                related_goals=[],
-            )
         if hasattr(self, &#34;framer&#34;) and getattr(self.framer, &#34;can_execute&#34;, False):
-            await self.execute_decision(decision, perception)
+            if decision is None:
+                self.logger.warning(&#34;No decision was made for the given perception.&#34;)
+                return None
+            result = await self.execute_decision(decision, perception)
+            return result
+        else:
+            logger.warn(&#34;Framer is not ready to execute decisions. Queuing perception.&#34;)
+            # Code to queue the perception can be added here if needed
         return decision
 
     async def make_decision(self, perception: Optional[Perception] = None) -&gt; Decision:
@@ -325,24 +328,50 @@ hljs.highlightAll();
             )
 
         response = await self._get_decision_prompt(perception)
+        
+        if response is None or (isinstance(response, str) and not response.strip()):
+            logger.error(&#34;Received empty or None response from LLM service&#34;)
+            return Decision(
+                action=&#34;error&#34;,
+                parameters={&#34;error&#34;: &#34;Empty or None response from LLM service&#34;},
+                reasoning=&#34;Failed to get a valid response from the language model&#34;,
+                confidence=0.0,
+                priority=1,
+                related_roles=[],
+                related_goals=[],
+            )
+
         decision_data = self.parse_json_response(response)
 
         logger.info(f&#34;Decision data received: {decision_data}&#34;)
 
+        if isinstance(decision_data, dict) and &#34;error&#34; in decision_data:
+            logger.error(f&#34;Error in decision making: {decision_data[&#39;error&#39;]}&#34;)
+            return Decision(
+                action=&#34;error&#34;,
+                parameters={&#34;error&#34;: decision_data[&#39;error&#39;]},
+                reasoning=&#34;Error occurred during decision making&#34;,
+                confidence=0.0,
+                priority=1,
+                related_roles=[],
+                related_goals=[],
+            )
+
         action = decision_data.get(&#34;action&#34;, &#34;respond&#34;).lower()
         valid_actions = [
-            str(action).lower() for action in self.agency.action_registry.get_all_actions().keys()
+            str(action).lower()
+            for action in self.action_registry.get_all_actions().keys()
         ]
 
         # Check if the action is valid
         if action not in valid_actions:
             # If the action is not valid, check if it&#39;s related to web search or summarization
-            if any(keyword in action for keyword in [&#34;search&#34;, &#34;summarize&#34;, &#34;extract&#34;]):
-                action = &#34;search_extract_summarize&#34;
+            if any(keyword in action for keyword in [&#34;search&#34;, &#34;summarize&#34;, &#34;extract&#34;, &#34;memory&#34;]):
+                action = &#34;respond with memory retrieval&#34;
                 decision_data[&#34;action&#34;] = action
                 decision_data[&#34;reasoning&#34;] = (
                     f&#34;Action &#39;{action}&#39; was generated based on the perception. &#34;
-                    f&#34;Using the search_extract_summarize plugin to process this request.&#34;
+                    f&#34;Using the memory retrieval plugin to process this request.&#34;
                 )
             else:
                 invalid_action = action
@@ -360,7 +389,7 @@ hljs.highlightAll();
         logger.info(f&#34;Action &#39;{action}&#39; generated: {decision_data}&#34;)
 
         parameters = decision_data.get(&#34;parameters&#34;, {})
-        if action == &#34;mem0_search_extract_summarize&#34; and &#34;query&#34; not in parameters:
+        if action == &#34;respond with memory retrieval&#34; and &#34;query&#34; not in parameters:
             parameters[&#34;query&#34;] = perception.data.get(&#34;text&#34;, &#34;&#34;)
         elif &#34;topic&#34; in parameters:
             parameters[&#34;research_topic&#34;] = parameters.pop(&#34;topic&#34;)
@@ -370,12 +399,14 @@ hljs.highlightAll();
         reasoning = decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
 
         # Check if goals are None and generate them if necessary
-        if self.agency.goals is None:
-            _, self.agency.goals = await self.agency.generate_roles_and_goals()
+        if self.execution_context and not self.execution_context.get_goals():
+            # Assuming the execution_context has a method to generate goals
+            goals = await self.execution_context.generate_goals()
+            self.execution_context.set_goals(goals)
 
         # Consider role and goal priorities when setting decision priority
         active_roles = [role for role in self.roles if role.status == RoleStatus.ACTIVE]
-        active_goals = [goal for goal in self.goals if goal.status == GoalStatus.ACTIVE]
+        active_goals = [goal for goal in self.execution_context.get_goals() if goal.status == GoalStatus.ACTIVE]
         roles_priority = max(
             [role.priority for role in active_roles], default=Priority.MEDIUM
         )
@@ -416,6 +447,10 @@ hljs.highlightAll();
         )
         logger.info(f&#34;Final decision object: {decision}&#34;)
         logger.info(f&#34;Decision made: {decision}&#34;)
+        if hasattr(decision, &#39;reasoning&#39;):
+            decision.reasoning += f&#34; (Aligned with {len(active_goals)} active goals)&#34;
+        else:
+            logger.error(&#34;Decision object does not have a &#39;reasoning&#39; attribute.&#34;)
         return decision
 
     async def _get_decision_prompt(self, perception: Optional[Perception]) -&gt; str:
@@ -428,7 +463,7 @@ hljs.highlightAll();
         Returns:
             str: The generated decision prompt.
         &#34;&#34;&#34;
-        valid_actions = self.agency.action_registry.valid_actions
+        valid_actions = self.action_registry.valid_actions
         # action_descriptions = &#34;\n&#34;.join(
         #     [
         #         f&#34;- {name.lower()}: {info[&#39;description&#39;]}&#34;
@@ -460,7 +495,7 @@ hljs.highlightAll();
         {json.dumps(active_goals, indent=2)}
 
         Valid actions are:
-        {json.dumps({str(action): f&#34;{self.agency.action_registry.actions[action][&#39;description&#39;]} (Priority: {self.agency.action_registry.actions[action][&#39;priority&#39;]})&#34; for action in self.agency.action_registry.actions}, indent=2)}
+        {json.dumps({str(action): f&#34;{self.action_registry.actions[action][&#39;description&#39;]} (Priority: {self.action_registry.actions[action][&#39;priority&#39;]})&#34; for action in self.action_registry.actions}, indent=2)}
         
         For each perception, carefully evaluate:
         - The type and content of the perception
@@ -495,60 +530,73 @@ hljs.highlightAll();
         Ensure your decision is well-reasoned, aligns with the current active goals and roles (considering their priorities), and uses only the valid actions provided.
         Use the provided priority levels when assigning priority to your decision, taking into account the priorities of related roles and goals.
         &#34;&#34;&#34;
-        response = await self.llm_service.get_completion(
-            prompt,
-            model=self.default_model,
-            additional_context={&#34;valid_actions&#34;: valid_actions},
-            expected_output=f&#34;&#34;&#34;
-            {{
-                &#34;action&#34;: str where str in {valid_actions},
-                &#34;parameters&#34;: dict,
-                &#34;reasoning&#34;: str,
-                &#34;confidence&#34;: float where 0 &lt;= float &lt;= 1,
-                &#34;priority&#34;: str,
-                &#34;related_roles&#34;: list,
-                &#34;related_goals&#34;: list
-            }}
-            &#34;&#34;&#34;,
-        )
-        # logger.info(f&#34;Raw LLM response: {response}&#34;)
+        try:
+            response = await self.llm_service.get_completion(
+                prompt,
+                model=self.default_model,
+                additional_context={&#34;valid_actions&#34;: valid_actions},
+                expected_output=f&#34;&#34;&#34;
+                {{
+                    &#34;action&#34;: str where str in {valid_actions},
+                    &#34;parameters&#34;: dict,
+                    &#34;reasoning&#34;: str,
+                    &#34;confidence&#34;: float where 0 &lt;= float &lt;= 1,
+                    &#34;priority&#34;: str,
+                    &#34;related_roles&#34;: list,
+                    &#34;related_goals&#34;: list
+                }}
+                &#34;&#34;&#34;,
+            )
+            if isinstance(response, dict) and &#34;error&#34; in response:
+                logger.warning(f&#34;Error in LLM response: {response[&#39;error&#39;]}&#34;)
+                return response
+            return response
+        except Exception as e:
+            logger.error(f&#34;Error in _get_decision_prompt: {str(e)}&#34;)
+            return {&#34;error&#34;: str(e), &#34;fallback_response&#34;: &#34;An error occurred while processing your request.&#34;}
 
-        return response
-
-    async def execute_decision(self, decision: Decision, perception: Optional[Perception] = None):
+    async def execute_decision(
+        self, decision: Decision, perception: Optional[Perception] = None
+    ):
         &#34;&#34;&#34;
         Execute the decision made by the brain.
 
         Args:
             decision (Decision): The decision to execute.
+            perception (Optional[Perception]): The perception that led to this decision.
         &#34;&#34;&#34;
-        logger.info(f&#34;Executing decision: {decision.action} with params {decision.parameters}&#34;)
+        logger.info(
+            f&#34;Executing decision: {decision.action} with params {decision.parameters}&#34;
+        )
         result = None
         try:
-            if decision.action not in self.agency.action_registry.get_all_actions():
-                logger.error(&#34;Action not found in registry.&#34;)
+            if decision.action not in self.action_registry.get_all_actions():
                 logger.error(f&#34;Action &#39;{decision.action}&#39; not found in registry.&#34;)
                 return None
 
-            # For &#39;respond&#39; action, ensure &#39;content&#39; is passed correctly
-            if decision.action == &#34;respond with memory retrieval&#34; and &#34;query&#34; not in decision.parameters:
-                decision.parameters[&#34;query&#34;] = decision.parameters.get(&#34;text&#34;, &#34;&#34;)
+            if decision.action == &#34;respond with memory retrieval&#34;:
+                if &#34;query&#34; not in decision.parameters or not decision.parameters[&#34;query&#34;]:
+                    decision.parameters[&#34;query&#34;] = perception.data.get(&#34;text&#34;, &#34;&#34;) if perception else &#34;&#34;
+                # Ensure the query is passed to the action
+                result = await self.action_registry.execute_action(
+                    decision.action, decision.parameters
+                )
+                return result
             elif decision.action == &#34;respond&#34;:
-                # For &#39;respond&#39; action, we&#39;ll use the agency&#39;s perform_task method directly
-                result = await self.agency.perform_task(
+                # Use the execution_context to perform the task
+                result = await self.execution_context.perform_task(
                     {
                         &#34;description&#34;: decision.parameters.get(&#34;content&#34;, &#34;&#34;),
                         &#34;workflow_id&#34;: &#34;default&#34;,
                     }
                 )
             else:
-                # Ensure &#39;perception&#39; is included in parameters if needed
                 if decision.action == &#34;process_perception&#34; and &#34;perception&#34; not in decision.parameters:
-                    decision.parameters[&#34;perception&#34;] = perception.data
+                    decision.parameters[&#34;perception&#34;] = perception.data if perception else None
 
-                result = await self.agency.action_registry.execute_action(
-                    decision.action, decision.parameters
-                )
+            result = await self.action_registry.execute_action(
+                decision.action, decision.parameters
+            )
 
             logger.info(f&#34;Action result: {result} with reasoning: {decision.reasoning}.&#34;)
 
@@ -558,6 +606,65 @@ hljs.highlightAll();
             result = {&#34;error&#34;: str(e)}
 
         return result
+
+    async def execute_action(self, action_name: str, parameters: dict):
+        &#34;&#34;&#34;Execute an action by its name using the action registry.&#34;&#34;&#34;
+        return await self.action_registry.execute_action(action_name, parameters)
+
+    async def _execute_decision(self, decision: Decision) -&gt; Any:
+        &#34;&#34;&#34;
+        Execute the decision made by the brain.
+
+        Args:
+            decision (Decision): The decision to execute.
+
+        Returns:
+            Any: The result of executing the decision.
+        &#34;&#34;&#34;
+        logger.debug(f&#34;Executing decision: {decision.action}&#34;)
+        logger.debug(f&#34;Decision parameters: {decision.parameters}&#34;)
+        result = None
+        try:
+            # Pass priorities to the LLM to help prioritize tasks based on relevance
+            for (
+                action_name,
+                action_info,
+            ) in self.action_registry.get_all_actions().items():
+                if action_name == decision.action:
+                    if action_name == &#34;think&#34;:
+                        result = await self._execute_think_action(decision)
+                    elif action_name == &#34;respond&#34;:
+                        result = await self.perform_task(
+                            {
+                                &#34;description&#34;: decision.parameters.get(&#34;content&#34;, &#34;&#34;),
+                                &#34;workflow_id&#34;: &#34;default&#34;,
+                            }
+                        )
+                    else:
+                        print(f&#34;Executing action: {action_name}&#34;)
+                        print(&#34;Action info: &#34;, action_info)
+                        try:
+                            result = await self.action_registry.execute_action(
+                                action_name, decision.parameters
+                            )
+                        except Exception as e:
+                            logger.error(f&#34;Error executing action &#39;{action_name}&#39;: {e}&#34;)
+                            result = {&#34;error&#34;: str(e), &#34;fallback_response&#34;: &#34;An error occurred while processing your request. Please try again.&#34;}
+                    break
+            else:
+                raise ValueError(f&#34;Action &#39;{decision.action}&#39; not found in registry.&#34;)
+
+            logger.info(f&#34;Executed action: {decision.action}&#34;)
+            logger.debug(f&#34;Action result: {result}&#34;)
+            logger.debug(f&#34;Decision reasoning: {decision.reasoning}&#34;)
+
+        except Exception as e:
+            logger.error(f&#34;Error executing decision: {e}&#34;)
+            logger.exception(&#34;Detailed traceback:&#34;)
+            result = {&#34;error&#34;: str(e)}
+
+        return result
+
 
     async def _execute_think_action(self, decision: Decision):
         &#34;&#34;&#34;
@@ -649,13 +756,55 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.brain.Brain.logger"><code class="name">var <span class="ident">logger</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>The Brain class represents the central decision-making and cognitive processing component of the Framer.</p>
+<p>It is responsible for processing perceptions, making decisions, and executing actions based on those decisions.
+The Brain integrates various cognitive functions, including perception processing, decision-making,
+memory management, and action execution.</p>
+<p>Key features:
+- Perception processing: Analyzes and interprets incoming perceptions.
+- Decision-making: Generates decisions based on current context, roles, goals, and perceptions.
+- Action execution: Executes decided actions using the action registry.
+- Memory integration: Utilizes the memory service for storing and retrieving information.
+- LLM integration: Uses language models for generating responses and making decisions.
+- Role and goal management: Considers active roles and goals in the decision-making process.</p>
+<p>The Brain uses a set of valid actions, derived from the ActionRegistry and default actions,
+to determine which actions can be executed. This ensures that all actions are within the
+defined capabilities of the Framer.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>The language model service for text generation and processing.</dd>
+<dt><strong><code>default_model</code></strong> :&ensp;<code>str</code></dt>
+<dd>The default language model to use.</dd>
+<dt><strong><code>roles</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>List of roles for the Brain.</dd>
+<dt><strong><code>goals</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>List of goals for the Brain.</dd>
+<dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Soul]</code></dt>
+<dd>The Soul instance associated with this Brain.</dd>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
+<dd>The execution context for the Brain.</dd>
+<dt><strong><code>mind</code></strong> :&ensp;<code>Mind</code></dt>
+<dd>The Mind instance for cognitive processing.</dd>
+<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
+<dd>The memory service for storing and retrieving information.</dd>
+<dt><strong><code>action_registry</code></strong> :&ensp;<code>ActionRegistry</code></dt>
+<dd>Registry of available actions.</dd>
+</dl>
+<p>The Brain class serves as the cognitive core of the Framer, coordinating various components
+to enable intelligent decision-making and action execution.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="frame.src.framer.brain.brain.Brain.execute_action"><code class="name flex">
+<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, parameters: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute an action by its name using the action registry.</p></div>
+</dd>
 <dt id="frame.src.framer.brain.brain.Brain.execute_decision"><code class="name flex">
-<span>async def <span class="ident">execute_decision</span></span>(<span>self, decision: <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>, perception: Optional[<a title="frame.src.framer.brain.perception.perception.Perception" href="perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>] = None)</span>
+<span>async def <span class="ident">execute_decision</span></span>(<span>self, decision: <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>, perception: Optional[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Execute the decision made by the brain.</p>
@@ -663,6 +812,8 @@ hljs.highlightAll();
 <dl>
 <dt><strong><code>decision</code></strong> :&ensp;<code>Decision</code></dt>
 <dd>The decision to execute.</dd>
+<dt><strong><code>perception</code></strong> :&ensp;<code>Optional[Perception]</code></dt>
+<dd>The perception that led to this decision.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.brain.Brain.get_framer"><code class="name flex">
@@ -672,7 +823,7 @@ hljs.highlightAll();
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.brain.brain.Brain.make_decision"><code class="name flex">
-<span>async def <span class="ident">make_decision</span></span>(<span>self, perception: Optional[<a title="frame.src.framer.brain.perception.perception.Perception" href="perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+<span>async def <span class="ident">make_decision</span></span>(<span>self, perception: Optional[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Make a decision on what action to take next based on the current state and perception.</p>
@@ -690,14 +841,14 @@ and priority.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.brain.Brain.parse_json_response"><code class="name flex">
-<span>def <span class="ident">parse_json_response</span></span>(<span>self, response: str) ‑> Any</span>
+<span>def <span class="ident">parse_json_response</span></span>(<span>self, response: Any) ‑> Any</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Parse JSON response and handle potential errors.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>response</code></strong> :&ensp;<code>str</code></dt>
-<dd>The JSON response string to parse.</dd>
+<dt><strong><code>response</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The response to parse, which could be a string or a dictionary.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -706,14 +857,13 @@ and priority.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.brain.Brain.process_perception"><code class="name flex">
-<span>async def <span class="ident">process_perception</span></span>(<span>self, perception: Union[<a title="frame.src.framer.brain.perception.perception.Perception" href="perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>, Dict[str, Any]], goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="../agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+<span>async def <span class="ident">process_perception</span></span>(<span>self, perception: Union[ForwardRef('Perception'), Dict[str, Any]], goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="../agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Process a perception and make a decision based on it.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>perception</code></strong> :&ensp;<code>Union[Perception, Dict[str, Any]]</code></dt>
-<dd>The perception to process.</dd>
+<dt>perception (Union['Perception', Dict[str, Any]]): The perception to process.</dt>
 <dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[Goal]]</code></dt>
 <dd>List of Goal objects to set.</dd>
 </dl>
@@ -728,6 +878,17 @@ and priority.</dd>
 </code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.brain.Brain.set_memory_service"><code class="name flex">
+<span>def <span class="ident">set_memory_service</span></span>(<span>self, memory_service: Optional[ForwardRef('MemoryService')])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the memory service for the Brain.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
+<dd>The memory service to set.</dd>
+</dl></div>
 </dd>
 <dt id="frame.src.framer.brain.brain.Brain.set_roles"><code class="name flex">
 <span>def <span class="ident">set_roles</span></span>(<span>self, roles: List[<a title="frame.src.framer.agency.roles.Role" href="../agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]) ‑> None</span>
@@ -760,6 +921,7 @@ and priority.</dd>
 <li>
 <h4><code><a title="frame.src.framer.brain.brain.Brain" href="#frame.src.framer.brain.brain.Brain">Brain</a></code></h4>
 <ul class="two-column">
+<li><code><a title="frame.src.framer.brain.brain.Brain.execute_action" href="#frame.src.framer.brain.brain.Brain.execute_action">execute_action</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.execute_decision" href="#frame.src.framer.brain.brain.Brain.execute_decision">execute_decision</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.get_framer" href="#frame.src.framer.brain.brain.Brain.get_framer">get_framer</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.logger" href="#frame.src.framer.brain.brain.Brain.logger">logger</a></code></li>
@@ -767,6 +929,7 @@ and priority.</dd>
 <li><code><a title="frame.src.framer.brain.brain.Brain.parse_json_response" href="#frame.src.framer.brain.brain.Brain.parse_json_response">parse_json_response</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.process_perception" href="#frame.src.framer.brain.brain.Brain.process_perception">process_perception</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.set_framer" href="#frame.src.framer.brain.brain.Brain.set_framer">set_framer</a></code></li>
+<li><code><a title="frame.src.framer.brain.brain.Brain.set_memory_service" href="#frame.src.framer.brain.brain.Brain.set_memory_service">set_memory_service</a></code></li>
 <li><code><a title="frame.src.framer.brain.brain.Brain.set_roles" href="#frame.src.framer.brain.brain.Brain.set_roles">set_roles</a></code></li>
 </ul>
 </li>

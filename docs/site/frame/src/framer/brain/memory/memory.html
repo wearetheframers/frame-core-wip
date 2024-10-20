@@ -37,15 +37,14 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.memory.memory.Memory"><code class="flex name class">
 <span>class <span class="ident">Memory</span></span>
-<span>(</span><span>config: Dict[str, Any])</span>
+<span>(</span><span>memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../../../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Memory class manages memory storage and retrieval for Framers.</p>
 <p>It supports both global and multi-user memory contexts. When no user ID is provided,
 memories are stored in a global context. When multiple user IDs are provided, the
 memory retrieval process searches across all specified user IDs.</p>
-<p>This is achieved using the Mem0Adapter, which abstracts away the
-underlying storage solution and provides a flexible interface for memory operations.</p></div>
+<p>This class now uses the MemoryService for all memory operations.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -58,188 +57,151 @@ underlying storage solution and provides a flexible interface for memory operati
     memories are stored in a global context. When multiple user IDs are provided, the
     memory retrieval process searches across all specified user IDs.
 
-    This is achieved using the Mem0Adapter, which abstracts away the
-    underlying storage solution and provides a flexible interface for memory operations.
+    This class now uses the MemoryService for all memory operations.
     &#34;&#34;&#34;
 
-    def __init__(self, config: Dict[str, Any]):
-        self.core = {}
-        self.short_term = []
-        self.mem0 = Mem0Adapter()
-        self.user_id = config.get(&#34;user_id&#34;, &#34;default&#34;)
+    def __init__(self, memory_service: Optional[MemoryService] = None):
+        self.memory_service = memory_service
+        self.user_id = &#34;default&#34;
 
-    def get_core_memory(self, key: str) -&gt; Any:
+    def store(self, memory: str, user_id: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
         &#34;&#34;&#34;
-        Retrieve a specific core memory by its key.
+        Store a memory using the memory service.
 
         Args:
-            key (str): The key of the memory to retrieve.
-
-        Returns:
-            Any: The retrieved memory data, or None if not found.
+            memory (str): The memory to store.
+            user_id (Optional[str]): The user ID to associate with the memory.
+            metadata (Optional[Dict[str, Any]]): Additional metadata for the memory.
         &#34;&#34;&#34;
-        core_memory = self.core.get(key)
-        if core_memory is not None:
-            return core_memory
+        if self.memory_service:
+            self.memory_service.store(memory, user_id or self.user_id, metadata)
+        else:
+            logger.warning(&#34;Memory service is not initialized. Unable to store memory.&#34;)
 
-        mem0_data = self.mem0.get_all(user_id=self.user_id)
-        for memory_id, item in enumerate(mem0_data):
-            if isinstance(item, dict) and item.get(&#34;metadata&#34;, {}).get(&#34;key&#34;) == key:
-                return item.get(&#34;memory&#34;)
-        return None
-
-    def set_core_memory(self, key: str, value: Any) -&gt; Any:
+    def retrieve(self, query: str, user_id: Optional[str] = None) -&gt; List[Dict[str, Any]]:
         &#34;&#34;&#34;
-        Set a value in core memory.
+        Retrieve memories based on a query.
 
         Args:
-            key (str): The key to store the memory under.
-            value (Any): The value to store in memory.
+            query (str): The query to search for in memories.
+            user_id (Optional[str]): The user ID to search memories for.
 
         Returns:
-            Any: The stored value.
+            List[Dict[str, Any]]: A list of matching memories.
         &#34;&#34;&#34;
-        self.core[key] = value
-        self.mem0.store(str(value), user_id=self.user_id, metadata={&#34;key&#34;: key})
-        return value
+        return self.memory_service.search(query, user_id or self.user_id)
 
-    def retrieve_memory(self, key: str) -&gt; Any:
+    def update(self, memory_id: str, memory: str, user_id: Optional[str] = None):
         &#34;&#34;&#34;
-        Alias for get_core_memory for backward compatibility.
+        Update an existing memory.
 
         Args:
-            key (str): The key of the memory to retrieve.
+            memory_id (str): The ID of the memory to update.
+            memory (str): The updated memory content.
+            user_id (Optional[str]): The user ID associated with the memory.
+        &#34;&#34;&#34;
+        self.memory_service.update(memory_id, memory, user_id or self.user_id)
+
+    def delete(self, memory_id: str, user_id: Optional[str] = None):
+        &#34;&#34;&#34;
+        Delete a memory.
+
+        Args:
+            memory_id (str): The ID of the memory to delete.
+            user_id (Optional[str]): The user ID associated with the memory.
+        &#34;&#34;&#34;
+        self.memory_service.delete(memory_id, user_id or self.user_id)
+
+    def get_all_memories(self, user_id: Optional[str] = None) -&gt; List[Dict[str, Any]]:
+        &#34;&#34;&#34;
+        Get all memories for a user.
+
+        Args:
+            user_id (Optional[str]): The user ID to get memories for.
 
         Returns:
-            Any: The retrieved memory data, or None if not found.
+            List[Dict[str, Any]]: A list of all memories for the user.
         &#34;&#34;&#34;
-        return self.get_core_memory(key)
-
-    def add_long_term_memory(
-        self,
-        memory: str,
-        user_id: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-    ):
-        self.mem0.store(memory, user_id=user_id or self.user_id, metadata=metadata)
-
-    def add_short_term_memory(self, memory: Dict[str, Any]):
-        self.short_term.append(memory)
-        if len(self.short_term) &gt; 10:  # Limit short-term memory to last 10 items
-            self.short_term.pop(0)
-
-    def get_all_memories(self) -&gt; Dict[str, Any]:
-        return {
-            &#34;core&#34;: self.core,
-            &#34;long_term&#34;: self.mem0.get_all(user_id=self.user_id),
-            &#34;short_term&#34;: self.short_term,
-        }
-
-    def search_memories(
-        self, query: str, user_id: str = &#34;default&#34;
-    ) -&gt; List[Dict[str, Any]]:
-        core_results = [
-            {&#34;memory&#34;: v, &#34;source&#34;: &#34;core&#34;}
-            for k, v in self.core.items()
-            if query.lower() in str(v).lower()
-        ]
-        mem0_results = self.mem0.search(query, user_id=user_id)
-        return core_results + mem0_results
-
-    def update_memory(self, key: str, value: str):
-        self.core[key] = value
-        self.mem0.update(memory_id=key, data=value)
-
-    def get_memory_history(self, memory_id: int) -&gt; List[str]:
-        return self.mem0.history(memory_id=memory_id)</code></pre>
+        return self.memory_service.get_all(user_id or self.user_id)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="frame.src.framer.brain.memory.memory.Memory.add_long_term_memory"><code class="name flex">
-<span>def <span class="ident">add_long_term_memory</span></span>(<span>self, memory: str, user_id: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None)</span>
+<dt id="frame.src.framer.brain.memory.memory.Memory.delete"><code class="name flex">
+<span>def <span class="ident">delete</span></span>(<span>self, memory_id: str, user_id: Optional[str] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.brain.memory.memory.Memory.add_short_term_memory"><code class="name flex">
-<span>def <span class="ident">add_short_term_memory</span></span>(<span>self, memory: Dict[str, Any])</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
+<div class="desc"><p>Delete a memory.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>memory_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ID of the memory to delete.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The user ID associated with the memory.</dd>
+</dl></div>
 </dd>
 <dt id="frame.src.framer.brain.memory.memory.Memory.get_all_memories"><code class="name flex">
-<span>def <span class="ident">get_all_memories</span></span>(<span>self) ‑> Dict[str, Any]</span>
+<span>def <span class="ident">get_all_memories</span></span>(<span>self, user_id: Optional[str] = None) ‑> List[Dict[str, Any]]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.brain.memory.memory.Memory.get_core_memory"><code class="name flex">
-<span>def <span class="ident">get_core_memory</span></span>(<span>self, key: str) ‑> Any</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Retrieve a specific core memory by its key.</p>
+<div class="desc"><p>Get all memories for a user.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>key</code></strong> :&ensp;<code>str</code></dt>
-<dd>The key of the memory to retrieve.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The user ID to get memories for.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Any</code></dt>
-<dd>The retrieved memory data, or None if not found.</dd>
+<dt><code>List[Dict[str, Any]]</code></dt>
+<dd>A list of all memories for the user.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.brain.memory.memory.Memory.get_memory_history"><code class="name flex">
-<span>def <span class="ident">get_memory_history</span></span>(<span>self, memory_id: int) ‑> List[str]</span>
+<dt id="frame.src.framer.brain.memory.memory.Memory.retrieve"><code class="name flex">
+<span>def <span class="ident">retrieve</span></span>(<span>self, query: str, user_id: Optional[str] = None) ‑> List[Dict[str, Any]]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.brain.memory.memory.Memory.retrieve_memory"><code class="name flex">
-<span>def <span class="ident">retrieve_memory</span></span>(<span>self, key: str) ‑> Any</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Alias for get_core_memory for backward compatibility.</p>
+<div class="desc"><p>Retrieve memories based on a query.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>key</code></strong> :&ensp;<code>str</code></dt>
-<dd>The key of the memory to retrieve.</dd>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>The query to search for in memories.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The user ID to search memories for.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Any</code></dt>
-<dd>The retrieved memory data, or None if not found.</dd>
+<dt><code>List[Dict[str, Any]]</code></dt>
+<dd>A list of matching memories.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.brain.memory.memory.Memory.search_memories"><code class="name flex">
-<span>def <span class="ident">search_memories</span></span>(<span>self, query: str, user_id: str = 'default') ‑> List[Dict[str, Any]]</span>
+<dt id="frame.src.framer.brain.memory.memory.Memory.store"><code class="name flex">
+<span>def <span class="ident">store</span></span>(<span>self, memory: str, user_id: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.brain.memory.memory.Memory.set_core_memory"><code class="name flex">
-<span>def <span class="ident">set_core_memory</span></span>(<span>self, key: str, value: Any) ‑> Any</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set a value in core memory.</p>
+<div class="desc"><p>Store a memory using the memory service.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>key</code></strong> :&ensp;<code>str</code></dt>
-<dd>The key to store the memory under.</dd>
-<dt><strong><code>value</code></strong> :&ensp;<code>Any</code></dt>
-<dd>The value to store in memory.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Any</code></dt>
-<dd>The stored value.</dd>
+<dt><strong><code>memory</code></strong> :&ensp;<code>str</code></dt>
+<dd>The memory to store.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The user ID to associate with the memory.</dd>
+<dt><strong><code>metadata</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code></dt>
+<dd>Additional metadata for the memory.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.brain.memory.memory.Memory.update_memory"><code class="name flex">
-<span>def <span class="ident">update_memory</span></span>(<span>self, key: str, value: str)</span>
+<dt id="frame.src.framer.brain.memory.memory.Memory.update"><code class="name flex">
+<span>def <span class="ident">update</span></span>(<span>self, memory_id: str, memory: str, user_id: Optional[str] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Update an existing memory.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>memory_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ID of the memory to update.</dd>
+<dt><strong><code>memory</code></strong> :&ensp;<code>str</code></dt>
+<dd>The updated memory content.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The user ID associated with the memory.</dd>
+</dl></div>
 </dd>
 </dl>
 </dd>
@@ -261,15 +223,11 @@ underlying storage solution and provides a flexible interface for memory operati
 <li>
 <h4><code><a title="frame.src.framer.brain.memory.memory.Memory" href="#frame.src.framer.brain.memory.memory.Memory">Memory</a></code></h4>
 <ul class="">
-<li><code><a title="frame.src.framer.brain.memory.memory.Memory.add_long_term_memory" href="#frame.src.framer.brain.memory.memory.Memory.add_long_term_memory">add_long_term_memory</a></code></li>
-<li><code><a title="frame.src.framer.brain.memory.memory.Memory.add_short_term_memory" href="#frame.src.framer.brain.memory.memory.Memory.add_short_term_memory">add_short_term_memory</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory.Memory.delete" href="#frame.src.framer.brain.memory.memory.Memory.delete">delete</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory.Memory.get_all_memories" href="#frame.src.framer.brain.memory.memory.Memory.get_all_memories">get_all_memories</a></code></li>
-<li><code><a title="frame.src.framer.brain.memory.memory.Memory.get_core_memory" href="#frame.src.framer.brain.memory.memory.Memory.get_core_memory">get_core_memory</a></code></li>
-<li><code><a title="frame.src.framer.brain.memory.memory.Memory.get_memory_history" href="#frame.src.framer.brain.memory.memory.Memory.get_memory_history">get_memory_history</a></code></li>
-<li><code><a title="frame.src.framer.brain.memory.memory.Memory.retrieve_memory" href="#frame.src.framer.brain.memory.memory.Memory.retrieve_memory">retrieve_memory</a></code></li>
-<li><code><a title="frame.src.framer.brain.memory.memory.Memory.search_memories" href="#frame.src.framer.brain.memory.memory.Memory.search_memories">search_memories</a></code></li>
-<li><code><a title="frame.src.framer.brain.memory.memory.Memory.set_core_memory" href="#frame.src.framer.brain.memory.memory.Memory.set_core_memory">set_core_memory</a></code></li>
-<li><code><a title="frame.src.framer.brain.memory.memory.Memory.update_memory" href="#frame.src.framer.brain.memory.memory.Memory.update_memory">update_memory</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory.Memory.retrieve" href="#frame.src.framer.brain.memory.memory.Memory.retrieve">retrieve</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory.Memory.store" href="#frame.src.framer.brain.memory.memory.Memory.store">store</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory.Memory.update" href="#frame.src.framer.brain.memory.memory.Memory.update">update</a></code></li>
 </ul>
 </li>
 </ul>

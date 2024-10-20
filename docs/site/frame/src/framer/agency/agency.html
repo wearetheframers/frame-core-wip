@@ -37,21 +37,24 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.agency.Agency"><code class="flex name class">
 <span>class <span class="ident">Agency</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, context: Optional[Dict[str, Any]] = None, execution_context: Optional[<a title="frame.src.services.execution_context.ExecutionContext" href="../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[<a title="frame.src.services.execution_context.ExecutionContext" href="../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = [], goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = [], context: Optional[Dict[str, Any]] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>The Agency class represents the decision-making and task management component of a Framer.</p>
-<p>To extend the Agency's capabilities, you can add new actions to the ActionRegistry.
-This allows the Agency to perform additional tasks and manage new workflows.
-It manages roles, goals, tasks, and workflows for the Framer.</p>
-<p>The Agency supports multiple active roles, goals, and tasks simultaneously. This means:
-- Multiple roles can be active at once, allowing the Framer to fulfill various functions concurrently.
-- Multiple goals can be pursued simultaneously, enabling the Framer to work towards various objectives.
-- Multiple tasks can be in progress at the same time, allowing for concurrent action execution.</p>
+<div class="desc"><p>The Agency class represents the task management and decision-making component of a Framer.</p>
+<p>It manages roles, goals, tasks, and workflows, allowing the Framer to perform complex operations
+and adapt to various scenarios. The Agency supports concurrent execution of multiple roles, goals,
+and tasks, enabling sophisticated and multi-faceted behavior.</p>
+<p>Key features:
+- Multi-role support: Multiple roles can be active simultaneously, allowing the Framer to fulfill various functions concurrently.
+- Parallel goal pursuit: Multiple goals can be pursued at the same time, enabling work towards various objectives.
+- Concurrent task execution: Multiple tasks can be in progress simultaneously, facilitating efficient action execution.
+- Dynamic workflow management: Creates and manages workflows to organize and prioritize tasks.
+- Decision-making: Generates decisions based on current context, roles, and goals.
+- LLM integration: Utilizes language models for task execution and decision-making.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
 <dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
-<dd>The execution context containing necessary services.</dd>
+<dd>The execution context containing necessary services and state.</dd>
 <dt><strong><code>roles</code></strong> :&ensp;<code>List[Role]</code></dt>
 <dd>Roles assigned to the Agency. Multiple roles can be active simultaneously.</dd>
 <dt><strong><code>goals</code></strong> :&ensp;<code>List[Goal]</code></dt>
@@ -60,7 +63,15 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <dd>Manages workflows and tasks, supporting concurrent task execution.</dd>
 <dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
 <dd>The Framer instance associated with this Agency.</dd>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>The language model service for text generation and processing.</dd>
+<dt><strong><code>context</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>Additional context information for the Agency.</dd>
+<dt><strong><code>default_model</code></strong> :&ensp;<code>str</code></dt>
+<dd>The default language model to use for text generation.</dd>
 </dl>
+<p>The Agency class serves as a crucial component in the Framer's architecture, enabling complex
+decision-making and task management capabilities.</p>
 <p>Initialize an Agency instance.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -68,8 +79,6 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <dd>The language model service.</dd>
 <dt><strong><code>context</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code></dt>
 <dd>Additional context for the Agency. Defaults to None.</dd>
-<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
-<dd>The execution context for the Agency. Defaults to None.</dd>
 <dt><strong><code>roles</code></strong> :&ensp;<code>Optional[List[Role]]</code></dt>
 <dd>Initial roles for the Agency. Defaults to None.</dd>
 <dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[Goal]]</code></dt>
@@ -81,32 +90,41 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </summary>
 <pre><code class="python">class Agency:
     &#34;&#34;&#34;
-    The Agency class represents the decision-making and task management component of a Framer.
+    The Agency class represents the task management and decision-making component of a Framer.
 
-    To extend the Agency&#39;s capabilities, you can add new actions to the ActionRegistry.
-    This allows the Agency to perform additional tasks and manage new workflows.
-    It manages roles, goals, tasks, and workflows for the Framer.
+    It manages roles, goals, tasks, and workflows, allowing the Framer to perform complex operations
+    and adapt to various scenarios. The Agency supports concurrent execution of multiple roles, goals,
+    and tasks, enabling sophisticated and multi-faceted behavior.
 
-    The Agency supports multiple active roles, goals, and tasks simultaneously. This means:
-    - Multiple roles can be active at once, allowing the Framer to fulfill various functions concurrently.
-    - Multiple goals can be pursued simultaneously, enabling the Framer to work towards various objectives.
-    - Multiple tasks can be in progress at the same time, allowing for concurrent action execution.
+    Key features:
+    - Multi-role support: Multiple roles can be active simultaneously, allowing the Framer to fulfill various functions concurrently.
+    - Parallel goal pursuit: Multiple goals can be pursued at the same time, enabling work towards various objectives.
+    - Concurrent task execution: Multiple tasks can be in progress simultaneously, facilitating efficient action execution.
+    - Dynamic workflow management: Creates and manages workflows to organize and prioritize tasks.
+    - Decision-making: Generates decisions based on current context, roles, and goals.
+    - LLM integration: Utilizes language models for task execution and decision-making.
 
     Attributes:
-        execution_context (ExecutionContext): The execution context containing necessary services.
+        execution_context (ExecutionContext): The execution context containing necessary services and state.
         roles (List[Role]): Roles assigned to the Agency. Multiple roles can be active simultaneously.
         goals (List[Goal]): Goals for the Agency. Multiple goals can be active at the same time.
         workflow_manager (WorkflowManager): Manages workflows and tasks, supporting concurrent task execution.
         framer (Framer): The Framer instance associated with this Agency.
+        llm_service (LLMService): The language model service for text generation and processing.
+        context (Dict[str, Any]): Additional context information for the Agency.
+        default_model (str): The default language model to use for text generation.
+
+    The Agency class serves as a crucial component in the Framer&#39;s architecture, enabling complex
+    decision-making and task management capabilities.
     &#34;&#34;&#34;
 
     def __init__(
         self,
         llm_service: LLMService,
-        context: Optional[Dict[str, Any]] = None,
         execution_context: Optional[ExecutionContext] = None,
-        roles: Optional[List[Role]] = None,
-        goals: Optional[List[Goal]] = None,
+        roles: Optional[List[Role]] = [],
+        goals: Optional[List[Goal]] = [],
+        context: Optional[Dict[str, Any]] = None,
     ):
         &#34;&#34;&#34;
         Initialize an Agency instance.
@@ -114,13 +132,11 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         Args:
             llm_service (LLMService): The language model service.
             context (Optional[Dict[str, Any]]): Additional context for the Agency. Defaults to None.
-            execution_context (Optional[ExecutionContext]): The execution context for the Agency. Defaults to None.
             roles (Optional[List[Role]]): Initial roles for the Agency. Defaults to None.
             goals (Optional[List[Goal]]): Initial goals for the Agency. Defaults to None.
         &#34;&#34;&#34;
         self.llm_service = llm_service
-        self.context = context or {}
-        self.execution_context = execution_context
+        self.execution_context = context or {}
         self.roles: List[Role] = []
         self.goals: List[Goal] = []
         if roles:
@@ -130,7 +146,6 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, &#34;default_model&#34;, DEFAULT_MODEL)
-        self.action_registry = ActionRegistry(execution_context=self.execution_context)
 
     def set_roles(self, roles: Optional[List[Role]] = None) -&gt; None:
         self.roles = roles if roles is not None else []
@@ -348,7 +363,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         Returns:
             List[RoleModel]: A list of generated roles.
         &#34;&#34;&#34;
-        soul = getattr(self.context, &#34;soul&#34;, {})
+        soul = getattr(self.execution_context, &#34;soul&#34;, {})
         prompt = f&#34;&#34;&#34;Generate a role that aligns with the Framer&#39;s current context. 
         The role should be clear, relevant, and directly related to the given information.
         Avoid creating complex scenarios. Keep it simple and focused.
@@ -365,6 +380,17 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                 prompt, model=self.default_model, max_tokens=150, temperature=0.5
             )
             logger.debug(f&#34;Role generation response: {response}&#34;)
+            if response is None:
+                logger.warning(&#34;Received None response while generating role. Using default role.&#34;)
+                return [
+                    Role(
+                        id=&#34;default&#34;,
+                        name=&#34;Task Assistant&#34;,
+                        description=&#34;Assist with the given task or query.&#34;,
+                        priority=5,
+                        status=RoleStatus.ACTIVE,
+                    )
+                ]
             role_data = json.loads(response)
             if not role_data:
                 logger.warning(
@@ -384,12 +410,18 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                 role_data = [role_data]
 
             roles = []
+            existing_role_names = set()
             for r in role_data:
                 r[&#34;priority&#34;] = max(1, min(10, int(r.get(&#34;priority&#34;, 5))))
                 r[&#34;status&#34;] = RoleStatus[r.get(&#34;status&#34;, &#34;ACTIVE&#34;)]
                 # Ensure permissions are a list
                 r[&#34;permissions&#34;] = list(r.get(&#34;permissions&#34;, []))
-                roles.append(Role(**r))
+                if r[&#34;name&#34;] not in existing_role_names:
+                    roles.append(Role(**r))
+                    existing_role_names.add(r[&#34;name&#34;])
+                    logger.info(f&#34;Generated unique role: {r[&#39;name&#39;]}&#34;)
+                else:
+                    logger.warning(f&#34;Duplicate role name generated: {r[&#39;name&#39;]}. Skipping.&#34;)
             return roles
         except Exception as e:
             logger.error(f&#34;Error generating role: {str(e)}&#34;, exc_info=True)
@@ -411,7 +443,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         Returns:
             List[GoalModel]: A list of generated goals.
         &#34;&#34;&#34;
-        soul = getattr(self.context, &#34;soul&#34;, {})
+        soul = getattr(self.execution_context, &#34;soul&#34;, {})
         prompt = f&#34;&#34;&#34;Generate a goal that aligns with the Framer&#39;s current context. 
         The goal should be clear, relevant, and directly related to the given information.
         Avoid creating complex scenarios. Keep it simple and focused.
@@ -429,6 +461,16 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                 prompt, model=self.default_model, max_tokens=150, temperature=0.5
             )
             logger.debug(f&#34;Goal generation response: {response}&#34;)
+            if response is None:
+                logger.warning(&#34;Received None response while generating goal. Using default goal.&#34;)
+                return [
+                    Goal(
+                        name=&#34;Default Goal&#34;,
+                        description=&#34;Assist users based on the given input.&#34;,
+                        priority=5,
+                        status=GoalStatus.ACTIVE,
+                    )
+                ]
             goal_data = json.loads(response)
             if not goal_data:
                 logger.warning(
@@ -447,10 +489,16 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
                 goal_data = [goal_data]
 
             goals = []
+            existing_goal_names = set()
             for g in goal_data:
                 g[&#34;priority&#34;] = max(1, min(10, int(g.get(&#34;priority&#34;, 5))))
                 g[&#34;status&#34;] = GoalStatus[g.get(&#34;status&#34;, &#34;ACTIVE&#34;)]
-                goals.append(Goal(**g))
+                if g[&#34;name&#34;] not in existing_goal_names:
+                    goals.append(Goal(**g))
+                    existing_goal_names.add(g[&#34;name&#34;])
+                    logger.info(f&#34;Generated unique goal: {g[&#39;name&#39;]}&#34;)
+                else:
+                    logger.warning(f&#34;Duplicate goal name generated: {g[&#39;name&#39;]}. Skipping.&#34;)
             return goals
         except Exception as e:
             logger.error(f&#34;Error generating goal: {e}&#34;, exc_info=True)
@@ -523,55 +571,6 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         logger.debug(f&#34;Cost incurred: ${cost_incurred:.4f}&#34;)
 
         return response
-    
-    async def execute_action(self, action_name: str, parameters: dict):
-        &#34;&#34;&#34;Execute an action by its name using the action registry.&#34;&#34;&#34;
-        return await self.action_registry.execute_action(action_name, parameters)
-    
-    async def execute_decision(self, decision: Decision) -&gt; Any:
-        &#34;&#34;&#34;
-        Execute the decision made by the brain.
-
-        Args:
-            decision (Decision): The decision to execute.
-
-        Returns:
-            Any: The result of executing the decision.
-        &#34;&#34;&#34;
-        logger.debug(f&#34;Executing decision: {decision.action}&#34;)
-        logger.debug(f&#34;Decision parameters: {decision.parameters}&#34;)
-        result = None
-        try:
-            # Pass priorities to the LLM to help prioritize tasks based on relevance
-            for action_name, action_info in self.action_registry.get_all_actions().items():
-                if action_name == decision.action:
-                    if action_name == &#34;think&#34;:
-                        result = await self._execute_think_action(decision)
-                    elif action_name == &#34;respond&#34;:
-                        result = await self.perform_task(
-                            {
-                                &#34;description&#34;: decision.parameters.get(&#34;content&#34;, &#34;&#34;),
-                                &#34;workflow_id&#34;: &#34;default&#34;,
-                            }
-                        )
-                    else:
-                        print(f&#34;Executing action: {action_name}&#34;)
-                        print(&#34;Action info: &#34;, action_info)
-                        result = await self.action_registry.execute_action(action_name, decision.parameters)
-                    break
-            else:
-                raise ValueError(f&#34;Action &#39;{decision.action}&#39; not found in registry.&#34;)
-
-            logger.info(f&#34;Executed action: {decision.action}&#34;)
-            logger.debug(f&#34;Action result: {result}&#34;)
-            logger.debug(f&#34;Decision reasoning: {decision.reasoning}&#34;)
-
-        except Exception as e:
-            logger.error(f&#34;Error executing decision: {e}&#34;)
-            logger.exception(&#34;Detailed traceback:&#34;)
-            result = {&#34;error&#34;: str(e)}
-
-        return result
 
     def update_role_status(self, role_id: str, new_status: RoleStatus) -&gt; None:
         for role in self.roles:
@@ -669,28 +668,6 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </code></dt>
 <dd>
 <div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.agency.Agency.execute_action"><code class="name flex">
-<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, parameters: dict)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Execute an action by its name using the action registry.</p></div>
-</dd>
-<dt id="frame.src.framer.agency.agency.Agency.execute_decision"><code class="name flex">
-<span>async def <span class="ident">execute_decision</span></span>(<span>self, decision: <a title="frame.src.framer.brain.decision.decision.Decision" href="../brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>) ‑> Any</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Execute the decision made by the brain.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>decision</code></strong> :&ensp;<code>Decision</code></dt>
-<dd>The decision to execute.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Any</code></dt>
-<dd>The result of executing the decision.</dd>
-</dl></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.execute_task"><code class="name flex">
 <span>async def <span class="ident">execute_task</span></span>(<span>self, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>) ‑> str</span>
@@ -886,8 +863,6 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <li><code><a title="frame.src.framer.agency.agency.Agency.create_task" href="#frame.src.framer.agency.agency.Agency.create_task">create_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.create_workflow" href="#frame.src.framer.agency.agency.Agency.create_workflow">create_workflow</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.evaluate_roles_and_goals" href="#frame.src.framer.agency.agency.Agency.evaluate_roles_and_goals">evaluate_roles_and_goals</a></code></li>
-<li><code><a title="frame.src.framer.agency.agency.Agency.execute_action" href="#frame.src.framer.agency.agency.Agency.execute_action">execute_action</a></code></li>
-<li><code><a title="frame.src.framer.agency.agency.Agency.execute_decision" href="#frame.src.framer.agency.agency.Agency.execute_decision">execute_decision</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.execute_task" href="#frame.src.framer.agency.agency.Agency.execute_task">execute_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.fail_task" href="#frame.src.framer.agency.agency.Agency.fail_task">fail_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.generate_goals" href="#frame.src.framer.agency.agency.Agency.generate_goals">generate_goals</a></code></li>

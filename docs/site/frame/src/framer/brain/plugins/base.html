@@ -77,6 +77,12 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
             framer: The Framer instance to associate with this plugin.
         &#34;&#34;&#34;
         self.framer = framer
+        self.logger = logging.getLogger(self.__class__.__name__)
+        if hasattr(framer, &#39;execution_context&#39;):
+            self.execution_context = framer.execution_context
+        else:
+            self.execution_context = None
+            self.logger.warning(&#34;Framer does not have an execution_context attribute.&#34;)
 
     def remove_action(self, name: str):
         &#34;&#34;&#34;
@@ -86,7 +92,6 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
             name (str): The name of the action to remove.
         &#34;&#34;&#34;
         if name in self.framer.brain.action_registry.actions:
-            # del self.framer.brain.action_registry.actions[name]
             self.framer.brain.action_registry.remove_action(name)
             print(f&#34;Action &#39;{name}&#39; removed from registry.&#34;)
         else:
@@ -102,7 +107,13 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         &#34;&#34;&#34;
         pass
 
-    def add_action(self, name: str, func: callable, description: str, priority: Priority = Priority.MEDIUM):
+    def add_action(
+        self,
+        name: str,
+        func: callable,
+        description: str,
+        priority: Priority = Priority.MEDIUM,
+    ):
         &#34;&#34;&#34;
         Register an action with the Framer&#39;s action registry.
 
@@ -115,7 +126,9 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         &#34;&#34;&#34;
         print(&#34;Registering action: &#34;, name)
         if name not in self.framer.brain.action_registry.actions:
-            self.framer.brain.action_registry.add_action(name, func, description, priority)
+            self.framer.brain.action_registry.add_action(
+                name, func, description, priority
+            )
             print(f&#34;Action &#39;{name}&#39; registered to Framer action registry.&#34;)
         else:
             print(f&#34;Action &#39;{name}&#39; already exists in Framer action registry.&#34;)

@@ -112,7 +112,7 @@ class AsyncOpenAIProtocol(Protocol):
 </dd>
 <dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter"><code class="flex name class">
 <span>class <span class="ident">LMQLAdapter</span></span>
-<span>(</span><span>openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None, openai_client: Optional[<a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol">AsyncOpenAIProtocol</a>] = None, mistral_client: Optional[Any] = None, hf_token: Optional[str] = None)</span>
+<span>(</span><span>openai_api_key: Optional[str] = None, mistral_api_key: Optional[str] = None, openai_client: Optional[<a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.AsyncOpenAIProtocol">AsyncOpenAIProtocol</a>] = None, mistral_client: Optional[Any] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Adapter for LMQL operations with rate limiting.</p>
@@ -153,26 +153,31 @@ setting the default model and generating completions with retry logic.</p>
         mistral_api_key: Optional[str] = None,
         openai_client: Optional[AsyncOpenAIProtocol] = None,
         mistral_client: Optional[Any] = None,
-        hf_token: Optional[str] = None,
     ):
-        self.hf_token = hf_token or HUGGINGFACE_API_KEY
-        if not self.hf_token:
-            logger.warning(&#34;Hugging Face token is not set. Some features may not work.&#34;)
         self.mistral_client = mistral_client
         self.openai_client = (
             openai_client
             if openai_client is not None
             else (AsyncOpenAI(api_key=openai_api_key) if openai_api_key else None)
         )
-        self.mistral_client = (
-            MistralClient(api_key=mistral_api_key, hf_token=self.hf_token)
-            if mistral_api_key or self.hf_token
-            else None
-        )
+        self.mistral_client = None  # Removed MistralClient initialization
         self.default_model = &#34;gpt-3.5-turbo&#34;
         self.token_bucket = TokenBucket(
             capacity=60, fill_rate=1
         )  # 60 requests per minute
+
+    def format_prompt(self, prompt: str, additional_context: Optional[Dict[str, Any]] = None) -&gt; str:
+        &#34;&#34;&#34;
+        Format the prompt for LMQL.
+
+        Args:
+            prompt (str): The input prompt.
+            additional_context (Optional[Dict[str, Any]]): Additional context for the prompt.
+
+        Returns:
+            str: The formatted LMQL prompt.
+        &#34;&#34;&#34;
+        return format_lmql_prompt(prompt, additional_context)
 
     def get_api_key(self, model: Optional[str] = None) -&gt; Optional[str]:
         &#34;&#34;&#34;
@@ -215,6 +220,23 @@ setting the default model and generating completions with retry logic.</p>
         &#34;&#34;&#34;
         self.default_model = model
 
+    def get_config(self, max_tokens: int, temperature: float) -&gt; LMQLConfig:
+        &#34;&#34;&#34;
+        Get the configuration for the LMQL model.
+
+        Args:
+            max_tokens (int): The maximum number of tokens to generate.
+            temperature (float): The temperature for text generation.
+
+        Returns:
+            LMQLConfig: The configuration object for the LMQL model.
+        &#34;&#34;&#34;
+        return LMQLConfig(
+            model=self.default_model,
+            max_tokens=max_tokens,
+            temperature=temperature
+        )
+
     @tenacity.retry(
         stop=tenacity.stop_after_attempt(5),
         wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
@@ -227,6 +249,8 @@ setting the default model and generating completions with retry logic.</p>
         config: LMQLConfig,
         model: Optional[Union[str, Dict[str, Any]]] = None,
         additional_context: Optional[Dict[str, Any]] = None,
+        decoder: Optional[str] = None,
+        decoder_params: Optional[Dict[str, Any]] = None,
     ) -&gt; str:
         &#34;&#34;&#34;
         Generate a completion using the LQML model with retry logic.
@@ -236,6 +260,8 @@ setting the default model and generating completions with retry logic.</p>
             config (LMQLConfig): Configuration for the LQML model.
             model (Optional[Union[str, Dict[str, Any]]], optional): The model to use. If None, uses the default model.
             additional_context (Optional[Dict[str, Any]], optional): Additional context for the model.
+            decoder (Optional[str], optional): The decoding algorithm to use.
+            decoder_params (Optional[Dict[str, Any]], optional): Parameters for the decoding algorithm.
 
         Returns:
             str: The generated completion.
@@ -243,6 +269,10 @@ setting the default model and generating completions with retry logic.</p>
         model_name = (
             model.lower() if isinstance(model, str) else self.default_model.lower()
         )
+
+        # Set the decoder in the LMQLInterface
+        lmql_interface = LMQLInterface(model_name=model_name)
+        lmql_interface.set_decoder(decoder, decoder_params)
 
         if not self.token_bucket.consume(1):
             await asyncio.sleep(1)  # Wait for a token to become available
@@ -260,9 +290,7 @@ setting the default model and generating completions with retry logic.</p>
                     lmql_prompt, config, model_name
                 )
             elif model_name.startswith(&#34;mistral&#34;):
-                response = await self._get_mistral_completion(
-                    lmql_prompt, config, model_name
-                )
+                raise NotImplementedError(&#34;Mistral API is not implemented yet&#34;)
             else:
                 raise ValueError(f&#34;Unsupported model: {model_name}&#34;)
 
@@ -302,24 +330,6 @@ setting the default model and generating completions with retry logic.</p>
             logger.error(error_message)
             raise  # Re-raise the original exception
 
-    async def _get_mistral_completion(
-        self, prompt: str, config: LMQLConfig, model_name: str
-    ) -&gt; str:
-        try:
-            response = await self.mistral_client.generate_completion(
-                prompt=prompt,
-                model=model_name,
-                max_tokens=config.max_tokens,
-                temperature=config.temperature,
-                top_p=config.top_p,
-                frequency_penalty=config.frequency_penalty,
-                presence_penalty=config.presence_penalty,
-            )
-            return response.strip()
-        except Exception as e:
-            logger.error(f&#34;Error in Mistral API call: {e}&#34;)
-            raise
-
     async def _get_openai_completion(
         self, prompt: str, config: LMQLConfig, model_name: str
     ) -&gt; str:
@@ -351,6 +361,24 @@ setting the default model and generating completions with retry logic.</p>
 </ul>
 <h3>Methods</h3>
 <dl>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.format_prompt"><code class="name flex">
+<span>def <span class="ident">format_prompt</span></span>(<span>self, prompt: str, additional_context: Optional[Dict[str, Any]] = None) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Format the prompt for LMQL.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>prompt</code></strong> :&ensp;<code>str</code></dt>
+<dd>The input prompt.</dd>
+<dt><strong><code>additional_context</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code></dt>
+<dd>Additional context for the prompt.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The formatted LMQL prompt.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_api_key"><code class="name flex">
 <span>def <span class="ident">get_api_key</span></span>(<span>self, model: Optional[str] = None) ‑> Optional[str]</span>
 </code></dt>
@@ -373,7 +401,7 @@ setting the default model and generating completions with retry logic.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_completion"><code class="name flex">
-<span>async def <span class="ident">get_completion</span></span>(<span>self, prompt: str, config: <a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig">LMQLConfig</a>, model: Union[str, Dict[str, Any], ForwardRef(None)] = None, additional_context: Optional[Dict[str, Any]] = None) ‑> str</span>
+<span>async def <span class="ident">get_completion</span></span>(<span>self, prompt: str, config: <a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig">LMQLConfig</a>, model: Union[str, Dict[str, Any], ForwardRef(None)] = None, additional_context: Optional[Dict[str, Any]] = None, decoder: Optional[str] = None, decoder_params: Optional[Dict[str, Any]] = None) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate a completion using the LQML model with retry logic.</p>
@@ -387,11 +415,33 @@ setting the default model and generating completions with retry logic.</p>
 <dd>The model to use. If None, uses the default model.</dd>
 <dt><strong><code>additional_context</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code>, optional</dt>
 <dd>Additional context for the model.</dd>
+<dt><strong><code>decoder</code></strong> :&ensp;<code>Optional[str]</code>, optional</dt>
+<dd>The decoding algorithm to use.</dd>
+<dt><strong><code>decoder_params</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code>, optional</dt>
+<dd>Parameters for the decoding algorithm.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>str</code></dt>
 <dd>The generated completion.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_config"><code class="name flex">
+<span>def <span class="ident">get_config</span></span>(<span>self, max_tokens: int, temperature: float) ‑> <a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig">LMQLConfig</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the configuration for the LMQL model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>max_tokens</code></strong> :&ensp;<code>int</code></dt>
+<dd>The maximum number of tokens to generate.</dd>
+<dt><strong><code>temperature</code></strong> :&ensp;<code>float</code></dt>
+<dd>The temperature for text generation.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig">LMQLConfig</a></code></dt>
+<dd>The configuration object for the LMQL model.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.set_default_model"><code class="name flex">
@@ -454,63 +504,6 @@ class LMQLConfig:
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.top_p"><code class="name">var <span class="ident">top_p</span> : float</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient"><code class="flex name class">
-<span>class <span class="ident">MistralClient</span></span>
-<span>(</span><span>api_key: Optional[str] = None, hf_token: Optional[str] = None)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class MistralClient:
-    def __init__(self, api_key: Optional[str] = None, hf_token: Optional[str] = None):
-        self.hf_token = hf_token
-        self.api_key = api_key
-
-    async def generate_completion(
-        self,
-        prompt: str,
-        model: str,
-        max_tokens: int,
-        temperature: float,
-        top_p: float,
-        frequency_penalty: float,
-        presence_penalty: float,
-    ) -&gt; str:
-        tokenizer = AutoTokenizer.from_pretrained(
-            model, token=self.hf_token, trust_remote_code=True
-        )
-        model_instance = lmql.model(
-            model, tokenizer=tokenizer, token=self.hf_token, trust_remote_code=True
-        )
-        if not model_instance:
-            raise ValueError(
-                f&#34;Model {model} could not be loaded. Please check the model identifier and ensure it is available on Hugging Face.&#34;
-            )
-        if asyncio.get_event_loop().is_running():
-            response = await model_instance.generate(prompt, max_tokens=max_tokens)
-        else:
-            response = asyncio.run(
-                model_instance.generate(prompt, max_tokens=max_tokens)
-            )
-
-        if response:
-            return response.strip()
-        else:
-            raise ValueError(&#34;No response from LMQL model&#34;)</code></pre>
-</details>
-<h3>Methods</h3>
-<dl>
-<dt id="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient.generate_completion"><code class="name flex">
-<span>async def <span class="ident">generate_completion</span></span>(<span>self, prompt: str, model: str, max_tokens: int, temperature: float, top_p: float, frequency_penalty: float, presence_penalty: float) ‑> str</span>
-</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -589,8 +582,10 @@ class LMQLConfig:
 <li>
 <h4><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter">LMQLAdapter</a></code></h4>
 <ul class="">
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.format_prompt" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.format_prompt">format_prompt</a></code></li>
 <li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_api_key" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_api_key">get_api_key</a></code></li>
 <li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_completion" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_completion">get_completion</a></code></li>
+<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_config" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.get_config">get_config</a></code></li>
 <li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.set_default_model" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLAdapter.set_default_model">set_default_model</a></code></li>
 </ul>
 </li>
@@ -604,12 +599,6 @@ class LMQLConfig:
 <li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.presence_penalty" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.presence_penalty">presence_penalty</a></code></li>
 <li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.temperature" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.temperature">temperature</a></code></li>
 <li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.top_p" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.LMQLConfig.top_p">top_p</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient">MistralClient</a></code></h4>
-<ul class="">
-<li><code><a title="frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient.generate_completion" href="#frame.src.services.llm.llm_adapters.lmql.lmql_adapter.MistralClient.generate_completion">generate_completion</a></code></li>
 </ul>
 </li>
 <li>

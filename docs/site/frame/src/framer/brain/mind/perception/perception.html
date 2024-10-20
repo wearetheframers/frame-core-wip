@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
-<title>frame.src.models.framer.brain.mind.perception.perception API documentation</title>
+<title>frame.src.framer.brain.mind.perception.perception API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -22,7 +22,7 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>frame.src.models.framer.brain.mind.perception.perception</code></h1>
+<h1 class="title">Module <code>frame.src.framer.brain.mind.perception.perception</code></h1>
 </header>
 <section id="section-intro">
 </section>
@@ -35,9 +35,9 @@ hljs.highlightAll();
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="frame.src.models.framer.brain.mind.perception.perception.Perception"><code class="flex name class">
+<dt id="frame.src.framer.brain.mind.perception.perception.Perception"><code class="flex name class">
 <span>class <span class="ident">Perception</span></span>
-<span>(</span><span>**data: Any)</span>
+<span>(</span><span>type: str, data: Dict[str, Any], source: Optional[str] = None, timestamp: Optional[datetime.datetime] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents a perception in the Frame system.</p>
@@ -47,15 +47,23 @@ or non-human sensory data such as magnetic fields, vibrations, internal states l
 or any other data that can be analyzed by the language model.</p>
 <p>The "prompt" action in a Framer is essentially processing a perception of hearing for text input
 and responding to it.</p>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<p>Initialize a Perception instance.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>type</code></strong> :&ensp;<code>str</code></dt>
+<dd>The type of perception (e.g., 'visual', 'auditory', 'text', 'magnetic', 'internal_state', etc.)</dd>
+<dt><strong><code>data</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>The data associated with the perception. Can contain any type of information.</dd>
+<dt><strong><code>source</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The source of the perception (e.g., 'camera', 'microphone', 'text_input', 'magnetometer', 'internal_sensor', etc.)</dd>
+<dt><strong><code>timestamp</code></strong> :&ensp;<code>Optional[datetime]</code></dt>
+<dd>The timestamp of when the perception was created. If None, current time is used.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Perception(BaseModel):
+<pre><code class="python">class Perception(PerceptionModel):
     &#34;&#34;&#34;
     Represents a perception in the Frame system.
 
@@ -68,30 +76,36 @@ validated to form a valid model.</p>
     and responding to it.
     &#34;&#34;&#34;
 
-    type: str = Field(
-        ...,
-        description=&#34;The type of perception (e.g., &#39;visual&#39;, &#39;auditory&#39;, &#39;text&#39;, &#39;magnetic&#39;, &#39;internal_state&#39;, etc.)&#34;,
-    )
-    data: Dict[str, Any] = Field(
-        ...,
-        description=&#34;The data associated with the perception. Can contain any type of information.&#34;,
-    )
-    source: Optional[str] = Field(
-        None,
-        description=&#34;The source of the perception (e.g., &#39;camera&#39;, &#39;microphone&#39;, &#39;text_input&#39;, &#39;magnetometer&#39;, &#39;internal_sensor&#39;, etc.)&#34;,
-    )
-    timestamp: datetime = Field(
-        default_factory=datetime.utcnow,
-        description=&#34;The timestamp of when the perception was created&#34;,
-    )
+    def __init__(
+        self,
+        type: str,
+        data: Dict[str, Any],
+        source: Optional[str] = None,
+        timestamp: Optional[datetime] = None,
+    ):
+        &#34;&#34;&#34;
+        Initialize a Perception instance.
 
-    @root_validator(pre=True)
-    def check_data_key(cls, values):
-        if &#34;data&#34; not in values or not isinstance(values[&#34;data&#34;], dict):
-            raise ValueError(
-                &#34;Perception data must include a &#39;data&#39; key with a dictionary value.&#34;
-            )
-        return values
+        Args:
+            type (str): The type of perception (e.g., &#39;visual&#39;, &#39;auditory&#39;, &#39;text&#39;, &#39;magnetic&#39;, &#39;internal_state&#39;, etc.)
+            data (Dict[str, Any]): The data associated with the perception. Can contain any type of information.
+            source (Optional[str]): The source of the perception (e.g., &#39;camera&#39;, &#39;microphone&#39;, &#39;text_input&#39;, &#39;magnetometer&#39;, &#39;internal_sensor&#39;, etc.)
+            timestamp (Optional[datetime]): The timestamp of when the perception was created. If None, current time is used.
+        &#34;&#34;&#34;
+        super().__init__(
+            type=type,
+            data=data,
+            source=source,
+            timestamp=timestamp or datetime.utcnow(),
+        )
+
+    def to_dict(self) -&gt; Dict[str, Any]:
+        return {
+            &#34;type&#34;: self.type,
+            &#34;data&#34;: self.data,
+            &#34;source&#34;: self.source,
+            &#34;timestamp&#34;: self.timestamp.isoformat(),
+        }
 
     @classmethod
     def from_dict(cls, perception_dict: Union[Dict[str, Any], str]) -&gt; &#34;Perception&#34;:
@@ -99,57 +113,51 @@ validated to form a valid model.</p>
             return cls(type=&#34;hearing&#34;, data={&#34;text&#34;: perception_dict})
         elif not isinstance(perception_dict, dict):
             raise TypeError(&#34;perception_dict must be a dictionary or a string&#34;)
-        return cls(**perception_dict)</code></pre>
+
+        timestamp = perception_dict.get(&#34;timestamp&#34;)
+        if isinstance(timestamp, str):
+            timestamp = datetime.fromisoformat(timestamp)
+
+        return cls(
+            type=perception_dict.get(&#34;type&#34;, &#34;unknown&#34;),
+            data=perception_dict.get(&#34;data&#34;, {}),
+            source=perception_dict.get(&#34;source&#34;),
+            timestamp=timestamp,
+        )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li><a title="frame.src.models.framer.brain.mind.perception.perception.Perception" href="../../../../models/framer/brain/mind/perception/perception.html#frame.src.models.framer.brain.mind.perception.perception.Perception">Perception</a></li>
 <li>pydantic.main.BaseModel</li>
-</ul>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="frame.src.framer.brain.mind.perception.perception.Perception" href="../../../../../framer/brain/mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="frame.src.models.framer.brain.mind.perception.perception.Perception.data"><code class="name">var <span class="ident">data</span> : Dict[str, Any]</code></dt>
+<dt id="frame.src.framer.brain.mind.perception.perception.Perception.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.brain.mind.perception.perception.Perception.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dt id="frame.src.framer.brain.mind.perception.perception.Perception.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.brain.mind.perception.perception.Perception.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.models.framer.brain.mind.perception.perception.Perception.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.models.framer.brain.mind.perception.perception.Perception.source"><code class="name">var <span class="ident">source</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.models.framer.brain.mind.perception.perception.Perception.timestamp"><code class="name">var <span class="ident">timestamp</span> : datetime.datetime</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.models.framer.brain.mind.perception.perception.Perception.type"><code class="name">var <span class="ident">type</span> : str</code></dt>
+<dt id="frame.src.framer.brain.mind.perception.perception.Perception.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 <h3>Static methods</h3>
 <dl>
-<dt id="frame.src.models.framer.brain.mind.perception.perception.Perception.check_data_key"><code class="name flex">
-<span>def <span class="ident">check_data_key</span></span>(<span>values)</span>
+<dt id="frame.src.framer.brain.mind.perception.perception.Perception.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>perception_dict: Union[str, Dict[str, Any]]) ‑> <a title="frame.src.framer.brain.mind.perception.perception.Perception" href="#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.brain.mind.perception.perception.Perception.from_dict"><code class="name flex">
-<span>def <span class="ident">from_dict</span></span>(<span>perception_dict: Union[str, Dict[str, Any]]) ‑> <a title="frame.src.models.framer.brain.mind.perception.perception.Perception" href="#frame.src.models.framer.brain.mind.perception.perception.Perception">Perception</a></span>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.brain.mind.perception.perception.Perception.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -166,23 +174,19 @@ validated to form a valid model.</p>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="frame.src.models.framer.brain.mind.perception" href="index.html">frame.src.models.framer.brain.mind.perception</a></code></li>
+<li><code><a title="frame.src.framer.brain.mind.perception" href="index.html">frame.src.framer.brain.mind.perception</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception" href="#frame.src.models.framer.brain.mind.perception.perception.Perception">Perception</a></code></h4>
+<h4><code><a title="frame.src.framer.brain.mind.perception.perception.Perception" href="#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a></code></h4>
 <ul class="">
-<li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.check_data_key" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.check_data_key">check_data_key</a></code></li>
-<li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.data" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.data">data</a></code></li>
-<li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.from_dict" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.from_dict">from_dict</a></code></li>
-<li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.model_computed_fields" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.model_computed_fields">model_computed_fields</a></code></li>
-<li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.model_config" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.model_config">model_config</a></code></li>
-<li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.model_fields" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.model_fields">model_fields</a></code></li>
-<li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.source" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.source">source</a></code></li>
-<li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.timestamp" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.timestamp">timestamp</a></code></li>
-<li><code><a title="frame.src.models.framer.brain.mind.perception.perception.Perception.type" href="#frame.src.models.framer.brain.mind.perception.perception.Perception.type">type</a></code></li>
+<li><code><a title="frame.src.framer.brain.mind.perception.perception.Perception.from_dict" href="#frame.src.framer.brain.mind.perception.perception.Perception.from_dict">from_dict</a></code></li>
+<li><code><a title="frame.src.framer.brain.mind.perception.perception.Perception.model_computed_fields" href="#frame.src.framer.brain.mind.perception.perception.Perception.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="frame.src.framer.brain.mind.perception.perception.Perception.model_config" href="#frame.src.framer.brain.mind.perception.perception.Perception.model_config">model_config</a></code></li>
+<li><code><a title="frame.src.framer.brain.mind.perception.perception.Perception.model_fields" href="#frame.src.framer.brain.mind.perception.perception.Perception.model_fields">model_fields</a></code></li>
+<li><code><a title="frame.src.framer.brain.mind.perception.perception.Perception.to_dict" href="#frame.src.framer.brain.mind.perception.perception.Perception.to_dict">to_dict</a></code></li>
 </ul>
 </li>
 </ul>

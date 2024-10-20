@@ -40,12 +40,34 @@ hljs.highlightAll();
 <span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.eq_service.EQService" href="../eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>] = None, soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../../framer/soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None, state: Dict[str, Any] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>ExecutionContext provides a centralized container for various services, state, and functions
+that actions and components might need during execution. It ensures consistent access to resources
+across all actions and facilitates easier testing, modular design, and state management.</p>
+<p>The ExecutionContext serves as a bridge between different components of the Framer,
+allowing them to share resources and functionality without tight coupling.</p>
+<p>Key features:
+- Centralized service access: Provides access to core services like LLM, memory, and EQ.
+- State management: Maintains and updates the current state of the execution.
+- Goal tracking: Manages the current goals of the Framer.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ExecutionContext:
+    &#34;&#34;&#34;
+    ExecutionContext provides a centralized container for various services, state, and functions
+    that actions and components might need during execution. It ensures consistent access to resources
+    across all actions and facilitates easier testing, modular design, and state management.
+
+    The ExecutionContext serves as a bridge between different components of the Framer,
+    allowing them to share resources and functionality without tight coupling.
+
+    Key features:
+    - Centralized service access: Provides access to core services like LLM, memory, and EQ.
+    - State management: Maintains and updates the current state of the execution.
+    - Goal tracking: Manages the current goals of the Framer.
+    &#34;&#34;&#34;
+
     def __init__(
         self,
         llm_service: LLMService,
@@ -59,6 +81,8 @@ hljs.highlightAll();
         self.eq_service = eq_service
         self.soul = soul
         self.state = state or {}
+        self.goals = []
+        self.roles = []
 
     def set_state(self, key: str, value: Any) -&gt; None:
         self.state[key] = value
@@ -82,10 +106,94 @@ hljs.highlightAll();
         self.state.update(new_state)
 
     def get_full_state(self) -&gt; Dict[str, Any]:
-        return self.state.copy()</code></pre>
+        return self.state.copy()
+
+    def set_goals(self, goals: List[Any]):
+        &#34;&#34;&#34;
+        Set the current goals for the Framer.
+
+        Args:
+            goals (List[Any]): A list of Goal objects to set as the current goals.
+        &#34;&#34;&#34;
+        self.goals = goals
+
+    def get_goals(self) -&gt; List[Any]:
+        &#34;&#34;&#34;
+        Get the current goals of the Framer.
+
+        Returns:
+            List[Any]: A list of the current Goal objects.
+        &#34;&#34;&#34;
+        return self.goals
+
+    def set_roles(self, roles: List[Any]):
+        &#34;&#34;&#34;
+        Set the current roles for the Framer.
+
+        Args:
+            roles (List[Any]): A list of Role objects to set as the current roles.
+        &#34;&#34;&#34;
+        self.roles = roles
+
+    def get_roles(self) -&gt; List[Any]:
+        &#34;&#34;&#34;
+        Get the current roles of the Framer.
+
+        Returns:
+            List[Any]: A list of the current Role objects.
+        &#34;&#34;&#34;
+        return self.roles
+
+    async def generate_goals(self) -&gt; List[Any]:
+        &#34;&#34;&#34;
+        Generate new goals for the Framer.
+
+        Returns:
+            List[Any]: A list of newly generated Goal objects.
+        &#34;&#34;&#34;
+        # This is a placeholder implementation. You should implement the actual goal generation logic here.
+        # For now, we&#39;ll return an empty list.
+        return []
+
+    async def perform_task(self, task: Dict[str, Any]) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Perform a task using the LLM service.
+
+        Args:
+            task (Dict[str, Any]): A dictionary containing task details.
+
+        Returns:
+            Dict[str, Any]: The result of the task execution.
+        &#34;&#34;&#34;
+        # This is a simple implementation. You might want to expand this based on your specific needs.
+        prompt = f&#34;Perform the following task: {task[&#39;description&#39;]}&#34;
+        response = await self.llm_service.get_completion(prompt)
+        return {&#34;output&#34;: response}
+
+    async def generate_goals(self) -&gt; List[Any]:
+        &#34;&#34;&#34;
+        Generate new goals for the Framer.
+
+        Returns:
+            List[Any]: A list of newly generated Goal objects.
+        &#34;&#34;&#34;
+        # This is a placeholder implementation. You should implement the actual goal generation logic here.
+        # For now, we&#39;ll return an empty list.
+        return []</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
+<dt id="frame.src.services.context.execution_context_service.ExecutionContext.generate_goals"><code class="name flex">
+<span>async def <span class="ident">generate_goals</span></span>(<span>self) ‑> List[Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate new goals for the Framer.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[Any]</code></dt>
+<dd>A list of newly generated Goal objects.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.services.context.execution_context_service.ExecutionContext.get_eq_service"><code class="name flex">
 <span>def <span class="ident">get_eq_service</span></span>(<span>self) ‑> Optional[<a title="frame.src.services.eq.eq_service.EQService" href="../eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>]</span>
 </code></dt>
@@ -97,6 +205,17 @@ hljs.highlightAll();
 </code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+<dt id="frame.src.services.context.execution_context_service.ExecutionContext.get_goals"><code class="name flex">
+<span>def <span class="ident">get_goals</span></span>(<span>self) ‑> List[Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the current goals of the Framer.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[Any]</code></dt>
+<dd>A list of the current Goal objects.</dd>
+</dl></div>
 </dd>
 <dt id="frame.src.services.context.execution_context_service.ExecutionContext.get_llm_service"><code class="name flex">
 <span>def <span class="ident">get_llm_service</span></span>(<span>self) ‑> <a title="frame.src.services.llm.main.LLMService" href="../llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a></span>
@@ -110,6 +229,17 @@ hljs.highlightAll();
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.services.context.execution_context_service.ExecutionContext.get_roles"><code class="name flex">
+<span>def <span class="ident">get_roles</span></span>(<span>self) ‑> List[Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the current roles of the Framer.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[Any]</code></dt>
+<dd>A list of the current Role objects.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.services.context.execution_context_service.ExecutionContext.get_soul"><code class="name flex">
 <span>def <span class="ident">get_soul</span></span>(<span>self) ‑> Optional[<a title="frame.src.framer.soul.soul.Soul" href="../../framer/soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>]</span>
 </code></dt>
@@ -121,6 +251,44 @@ hljs.highlightAll();
 </code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+<dt id="frame.src.services.context.execution_context_service.ExecutionContext.perform_task"><code class="name flex">
+<span>async def <span class="ident">perform_task</span></span>(<span>self, task: Dict[str, Any]) ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Perform a task using the LLM service.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>A dictionary containing task details.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Dict[str, Any]</code></dt>
+<dd>The result of the task execution.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.services.context.execution_context_service.ExecutionContext.set_goals"><code class="name flex">
+<span>def <span class="ident">set_goals</span></span>(<span>self, goals: List[Any])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the current goals for the Framer.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>goals</code></strong> :&ensp;<code>List[Any]</code></dt>
+<dd>A list of Goal objects to set as the current goals.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.services.context.execution_context_service.ExecutionContext.set_roles"><code class="name flex">
+<span>def <span class="ident">set_roles</span></span>(<span>self, roles: List[Any])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the current roles for the Framer.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>roles</code></strong> :&ensp;<code>List[Any]</code></dt>
+<dd>A list of Role objects to set as the current roles.</dd>
+</dl></div>
 </dd>
 <dt id="frame.src.services.context.execution_context_service.ExecutionContext.set_state"><code class="name flex">
 <span>def <span class="ident">set_state</span></span>(<span>self, key: str, value: Any) ‑> None</span>
@@ -154,12 +322,18 @@ hljs.highlightAll();
 <li>
 <h4><code><a title="frame.src.services.context.execution_context_service.ExecutionContext" href="#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a></code></h4>
 <ul class="two-column">
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.generate_goals" href="#frame.src.services.context.execution_context_service.ExecutionContext.generate_goals">generate_goals</a></code></li>
 <li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_eq_service" href="#frame.src.services.context.execution_context_service.ExecutionContext.get_eq_service">get_eq_service</a></code></li>
 <li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_full_state" href="#frame.src.services.context.execution_context_service.ExecutionContext.get_full_state">get_full_state</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_goals" href="#frame.src.services.context.execution_context_service.ExecutionContext.get_goals">get_goals</a></code></li>
 <li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_llm_service" href="#frame.src.services.context.execution_context_service.ExecutionContext.get_llm_service">get_llm_service</a></code></li>
 <li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_memory_service" href="#frame.src.services.context.execution_context_service.ExecutionContext.get_memory_service">get_memory_service</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_roles" href="#frame.src.services.context.execution_context_service.ExecutionContext.get_roles">get_roles</a></code></li>
 <li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_soul" href="#frame.src.services.context.execution_context_service.ExecutionContext.get_soul">get_soul</a></code></li>
 <li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_state" href="#frame.src.services.context.execution_context_service.ExecutionContext.get_state">get_state</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.perform_task" href="#frame.src.services.context.execution_context_service.ExecutionContext.perform_task">perform_task</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.set_goals" href="#frame.src.services.context.execution_context_service.ExecutionContext.set_goals">set_goals</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.set_roles" href="#frame.src.services.context.execution_context_service.ExecutionContext.set_roles">set_roles</a></code></li>
 <li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.set_state" href="#frame.src.services.context.execution_context_service.ExecutionContext.set_state">set_state</a></code></li>
 <li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.update_state" href="#frame.src.services.context.execution_context_service.ExecutionContext.update_state">update_state</a></code></li>
 </ul>

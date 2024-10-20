@@ -149,7 +149,9 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
         &#34;&#34;&#34;
         return self.memories.get(user_id, [])
 
-    def search(self, query: str, user_id: str = &#34;default&#34;, limit: int = 10) -&gt; List[Dict[str, Any]]:
+    def search(
+        self, query: str, user_id: str = &#34;default&#34;, limit: int = 10
+    ) -&gt; List[Dict[str, Any]]:
         &#34;&#34;&#34;
         Search for memory entries containing the query string for a specific user.
 

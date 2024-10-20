@@ -26,10 +26,18 @@ hljs.highlightAll();
 </header>
 <section id="section-intro">
 <p>Mem0SearchExtractSummarizePlugin</p>
-<p>This plugin provides a mechanism to look into memories, retrieve relevant information, and share insights,
+<p>This plugin provides a mechanism to search memories, extract relevant information, and generate summarized insights,
 functioning as a Retrieval-Augmented Generation (RAG) mechanism. It is automatically included when the
 'with-memory' permission is granted to a Framer, ensuring that memory-based responses are comprehensive
 and contextually relevant.</p>
+<p>The plugin enhances the Framer's ability to provide informed responses by leveraging stored memories
+and contextual information. It integrates seamlessly with the Mem0 memory system to facilitate
+efficient memory retrieval and summarization.</p>
+<p>Key features:
+- Memory search based on user queries
+- Relevant information extraction from memories
+- Summarization of extracted information
+- Integration with the Framer's action registry for easy invocation</p>
 <p>Note: This plugin might be refactored into a core component in the future to streamline its integration
 and usage within the Frame framework.</p>
 </section>
@@ -71,7 +79,11 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
         handler = logging.StreamHandler()
-        handler.setFormatter(logging.Formatter(&#39;%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s&#39;))
+        handler.setFormatter(
+            logging.Formatter(
+                &#34;%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s&#34;
+            )
+        )
         self.logger.addHandler(handler)
         self.mem0_adapter = Mem0Adapter()
 
@@ -81,53 +93,30 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         if not api_key:
             api_key = MEM0_API_KEY
         if api_key:
-            framer.agency.action_registry.add_action(
+            framer.brain.action_registry.add_action(
                 &#34;respond with memory retrieval&#34;,
                 description=&#34;This action is ideal for responding to personal questions that involve historical or memory-based &#34;
-                            &#34;information about the user or the Framer. It leverages the Framer&#39;s memory to retrieve relevant data &#34;
-                            &#34;or previously saved texts, providing comprehensive answers or insights based on stored memories. &#34;
-                            &#34;When questions reference or relate to past conversations, this action is preferred. It generally &#34;
-                            &#34;takes precedence over `think` and `observe` actions, especially for questions. If uncertain whether &#34;
-                            &#34;a question can be answered with or without memory, default to this action.&#34;,
+                &#34;information about the user or the Framer. It leverages the Framer&#39;s memory to retrieve relevant data &#34;
+                &#34;or previously saved texts, providing comprehensive answers or insights based on stored memories. &#34;
+                &#34;When questions reference or relate to past conversations, this action is preferred. It generally &#34;
+                &#34;takes precedence over `think` and `observe` actions, especially for questions. If uncertain whether &#34;
+                &#34;a question can be answered with or without memory, default to this action.&#34;,
                 action_func=self.mem0_search_extract_summarize,
                 priority=8,
             )
-            self.logger.info(&#34;Mem0SearchExtractSummarizePlugin registered &#39;response with memory retrieval&#39; action.&#34;)
-            # Remove respond action
-            if &#34;respond&#34; in framer.agency.action_registry.get_all_actions():
-                self.logger.info(&#34;Removing &#39;respond&#39; action from registry.&#34;)
-                framer.agency.action_registry.remove_action(&#34;respond&#34;)
-                exit()
-            else:
-                self.logger.warning(&#34;Action &#39;respond&#39; not found in registry. Skipping removal.&#34;)
+            self.logger.info(
+                &#34;Mem0SearchExtractSummarizePlugin registered &#39;respond with memory retrieval&#39; action.&#34;
+            )
         else:
-            self.logger.warning(&#34;Mem0 API key not found or is empty. Action &#39;response with memory retrieval&#39; will not be registered.&#34;)
-
-        # # Add a new role for Mem0 searching and summarizing
-        # mem0_researcher_role = Role(
-        #     name=&#34;Mem0 Researcher&#34;,
-        #     description=&#34;Specializes in Mem0 searching, information extraction, and summarization&#34;,
-        #     priority=Priority.HIGH,
-        #     status=RoleStatus.ACTIVE,
-        # )
-        # self.framer.agency.add_role(mem0_researcher_role)
-
-        # # Add a new goal for providing comprehensive answers using Mem0
-        # comprehensive_answer_goal = Goal(
-        #     name=&#34;Provide Comprehensive Answers using Mem0&#34;,
-        #     description=&#34;Gather and synthesize information from Mem0 to provide comprehensive answers&#34;,
-        #     priority=Priority.HIGH,
-        #     status=GoalStatus.ACTIVE,
-        # )
-        # self.framer.agency.add_goal(comprehensive_answer_goal)
+            self.logger.warning(
+                &#34;Mem0 API key not found or is empty. Action &#39;response with memory retrieval&#39; will not be registered.&#34;
+            )
 
     def get_actions(self) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Return a dictionary of actions provided by this plugin.
         &#34;&#34;&#34;
-        return {
-            &#34;respond with memory retrieval&#34;: self.mem0_search_extract_summarize
-        }
+        return {&#34;respond with memory retrieval&#34;: self.mem0_search_extract_summarize}
 
     async def execute(self, action_name: str, parameters: Dict[str, Any]) -&gt; Any:
         &#34;&#34;&#34;
@@ -141,11 +130,14 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
             Any: The result of the action execution.
         &#34;&#34;&#34;
         if action_name == &#34;respond with memory retrieval&#34;:
+            print(&#34;PARAMS: &#34;, parameters)
             return await self.mem0_search_extract_summarize(**parameters)
         else:
             raise ValueError(f&#34;Action {action_name} not found in plugin.&#34;)
-        
-    def filter_search_results(self, search_results: List[Dict[str, Any]]) -&gt; List[Dict[str, Any]]:
+
+    def filter_search_results(
+        self, search_results: List[Dict[str, Any]]
+    ) -&gt; List[Dict[str, Any]]:
         &#34;&#34;&#34;
         Filter search results by memory text to remove duplicate results.
 
@@ -158,7 +150,12 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         memory_texts = set()
         filtered_results = []
         for result in search_results:
-            if isinstance(result, dict) and &#34;content&#34; in result and isinstance(result[&#34;content&#34;], dict) and &#34;memory&#34; in result[&#34;content&#34;]:
+            if (
+                isinstance(result, dict)
+                and &#34;content&#34; in result
+                and isinstance(result[&#34;content&#34;], dict)
+                and &#34;memory&#34; in result[&#34;content&#34;]
+            ):
                 memory_text = result[&#34;content&#34;][&#34;memory&#34;]
                 if memory_text not in memory_texts:
                     memory_texts.add(memory_text)
@@ -167,6 +164,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 
     async def mem0_search_extract_summarize(
         self,
+        execution_context,
         query: str = &#34;&#34;,
         user_id: Optional[str] = None,
         agent_id: Optional[str] = None,
@@ -175,8 +173,42 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         model_name: str = &#34;gpt-4o-mini&#34;,
         text_response: Optional[str] = None,
     ) -&gt; str:
+        self.logger.info(f&#34;mem0_search_extract_summarize called with query: {query}&#34;)
         if not query:
-            raise ValueError(&#34;Query cannot be null or empty.&#34;)
+            self.logger.warning(&#34;Query is empty. Returning default response.&#34;)
+            # Gather Framer state information
+            if not isinstance(execution_context, ExecutionContext):
+                self.logger.error(&#34;Execution context is not properly initialized.&#34;)
+                return Decision(
+                    action=&#34;error&#34;,
+                    parameters={&#34;error&#34;: &#34;Execution context is not properly initialized.&#34;},
+                    reasoning=&#34;Execution context is not properly initialized.&#34;,
+                    confidence=0.0,
+                    priority=1,
+                    related_roles=[],
+                    related_goals=[],
+                )
+            # Ensure the query is a string
+            if not isinstance(query, str):
+                query = str(query)
+
+            soul_state = execution_context.soul.get_current_state() if execution_context.soul else &#34;No soul state available.&#34;
+            recent_thoughts = execution_context.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
+            active_roles = [role.name for role in execution_context.roles if role.status == RoleStatus.ACTIVE]
+            active_goals = [goal.name for goal in execution_context.goals if goal.status == GoalStatus.ACTIVE]
+
+            # Formulate a comprehensive response
+            response = (
+                &#34;I&#39;m sorry, but I don&#39;t have any specific information about that. &#34;
+                &#34;Could you please provide more context or ask a different question?\n\n&#34;
+                &#34;### Framer State Information\n&#34;
+                f&#34;- Soul State: {soul_state}\n&#34;
+                f&#34;- Recent Thoughts: {recent_thoughts}\n&#34;
+                f&#34;- Active Roles: {active_roles}\n&#34;
+                f&#34;- Active Goals: {active_goals}\n&#34;
+            )
+            return response
+        
         # Ensure the query is a string
         if not isinstance(query, str):
             query = str(query)
@@ -186,6 +218,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         if not any([user_id, agent_id, run_id]):
             user_id = &#34;default&#34;
 
+        self.logger.info(f&#34;Searching with user_id: {user_id}, agent_id: {agent_id}, run_id: {run_id}&#34;)
         search_results = self.mem0_adapter.search(
             query, user_id=user_id, agent_id=agent_id, run_id=run_id, filters=filters
         )
@@ -193,13 +226,30 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         self.logger.debug(f&#34;Search results: {search_results}&#34;)
 
         if not search_results:
-            return &#34;No relevant information found in Mem0.&#34;
-        
+            return Decision(
+                action=&#34;respond&#34;,
+                parameters={&#34;response&#34;: &#34;I don&#39;t have any specific information about that in my memory. Is there anything else I can help you with?&#34;},
+                reasoning=&#34;No relevant information found in memory.&#34;,
+                confidence=0.5,
+                priority=1,
+                related_roles=[],
+                related_goals=[],
+            )
+
         # Filter search results by memory text (remove same text results)
         search_results = self.filter_search_results(search_results)
         self.logger.debug(f&#34;Filtered search results: {search_results}&#34;)
 
-        context = &#34;\n&#34;.join([result[&#34;content&#34;][&#34;memory&#34;] for result in search_results if isinstance(result, dict) and &#34;content&#34; in result and isinstance(result[&#34;content&#34;], dict) and &#34;memory&#34; in result[&#34;content&#34;]])
+        context = &#34;\n&#34;.join(
+            [
+                result[&#34;content&#34;][&#34;memory&#34;]
+                for result in search_results
+                if isinstance(result, dict)
+                and &#34;content&#34; in result
+                and isinstance(result[&#34;content&#34;], dict)
+                and &#34;memory&#34; in result[&#34;content&#34;]
+            ]
+        )
         if not context:
             return &#34;No relevant information found in Mem0.&#34;
 
@@ -221,7 +271,6 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 
         Answer:
         &#34;&#34;&#34;
-
 
         response = await self.framer.llm_service.get_completion(
             prompt,
@@ -280,7 +329,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 <div class="desc"><p>Return a dictionary of actions provided by this plugin.</p></div>
 </dd>
 <dt id="frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin.Mem0SearchExtractSummarizePlugin.mem0_search_extract_summarize"><code class="name flex">
-<span>async def <span class="ident">mem0_search_extract_summarize</span></span>(<span>self, query: str = '', user_id: Optional[str] = None, agent_id: Optional[str] = None, run_id: Optional[str] = None, filters: Optional[Dict[str, Any]] = None, model_name: str = 'gpt-4o-mini', text_response: Optional[str] = None) ‑> str</span>
+<span>async def <span class="ident">mem0_search_extract_summarize</span></span>(<span>self, execution_context, query: str = '', user_id: Optional[str] = None, agent_id: Optional[str] = None, run_id: Optional[str] = None, filters: Optional[Dict[str, Any]] = None, model_name: str = 'gpt-4o-mini', text_response: Optional[str] = None) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"></div>

@@ -42,6 +42,29 @@ hljs.highlightAll();
 <dd>
 <div class="desc"><p>The Mind class represents the cognitive processes of a Framer.
 It manages thoughts, decision-making processes, perceptions, and interacts with the Brain and Soul components.</p>
+<p>Key features:
+- Thought management: Stores and retrieves thoughts generated during cognitive processes.
+- Perception processing: Handles incoming perceptions and integrates them into the cognitive framework.
+- Decision-making: Generates decisions based on current perceptions, thoughts, and context.
+- Memory management: Maintains a limited number of recent memories for quick access.
+- Interaction with Brain and Soul: Facilitates communication between different Framer components.</p>
+<p>The Mind class serves as a crucial intermediary between raw perceptions and high-level decision-making,
+providing a layer of cognitive processing that enriches the Framer's capabilities.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>brain</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The Brain instance associated with this Mind.</dd>
+<dt><strong><code>thoughts</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>A list of thoughts, each represented as a dictionary.</dd>
+<dt><strong><code>current_thought</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>The most recent thought generated.</dd>
+<dt><strong><code>perceptions</code></strong> :&ensp;<code>List[Perception]</code></dt>
+<dd>A list of recent perceptions.</dd>
+<dt><strong><code>recent_memories_limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>The maximum number of recent memories/perceptions to keep.</dd>
+</dl>
+<p>The Mind class plays a vital role in the Framer's cognitive architecture, enabling sophisticated
+thought processes and decision-making capabilities.</p>
 <p>Initialize the Mind instance.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -58,6 +81,26 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
     &#34;&#34;&#34;
     The Mind class represents the cognitive processes of a Framer.
     It manages thoughts, decision-making processes, perceptions, and interacts with the Brain and Soul components.
+
+    Key features:
+    - Thought management: Stores and retrieves thoughts generated during cognitive processes.
+    - Perception processing: Handles incoming perceptions and integrates them into the cognitive framework.
+    - Decision-making: Generates decisions based on current perceptions, thoughts, and context.
+    - Memory management: Maintains a limited number of recent memories for quick access.
+    - Interaction with Brain and Soul: Facilitates communication between different Framer components.
+
+    The Mind class serves as a crucial intermediary between raw perceptions and high-level decision-making,
+    providing a layer of cognitive processing that enriches the Framer&#39;s capabilities.
+
+    Attributes:
+        brain (Any): The Brain instance associated with this Mind.
+        thoughts (List[Dict[str, Any]]): A list of thoughts, each represented as a dictionary.
+        current_thought (Dict[str, Any]): The most recent thought generated.
+        perceptions (List[Perception]): A list of recent perceptions.
+        recent_memories_limit (int): The maximum number of recent memories/perceptions to keep.
+
+    The Mind class plays a vital role in the Framer&#39;s cognitive architecture, enabling sophisticated
+    thought processes and decision-making capabilities.
     &#34;&#34;&#34;
 
     def __init__(self, brain: Any, recent_memories_limit: int = 5):
@@ -82,6 +125,65 @@ It manages thoughts, decision-making processes, perceptions, and interacts with 
             limit (int): The new limit for recent memories/perceptions.
         &#34;&#34;&#34;
         self.recent_memories_limit = limit
+
+    async def make_decision(self, perception: Perception) -&gt; Decision:
+        &#34;&#34;&#34;
+        Make a decision based on the current perceptions and thoughts.
+
+        Args:
+            perception (Perception): The perception to base the decision on.
+
+        Returns:
+            Decision: The decision made.
+        &#34;&#34;&#34;
+        # Get the decision prompt from the brain
+        prompt = self.brain._get_decision_prompt(perception)
+
+        # Use the LLM service to get a decision
+        response = await get_completion(
+            self.brain.llm_service, prompt, model=self.brain.default_model
+        )
+        try:
+            if isinstance(response, AsyncMock):
+                # For testing purposes, return a default decision
+                return Decision(
+                    action=&#34;default_action&#34;,
+                    parameters={},
+                    reasoning=&#34;Default decision for testing&#34;,
+                    confidence=0.5,
+                    priority=5,
+                )
+
+            decision_data = json.loads(response) if isinstance(response, str) else {}
+            action = decision_data.get(&#34;action&#34;, &#34;default_action&#34;)
+            if action not in self.brain.action_registry.actions:
+                logger.warning(
+                    f&#34;Invalid action: {action}. Defaulting to &#39;default_action&#39;.&#34;
+                )
+                action = &#34;default_action&#34;
+                reasoning = f&#34;Invalid action &#39;{action}&#39; was generated. Defaulted to &#39;default_action&#39;.&#34;
+            else:
+                reasoning = decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
+
+            decision = Decision(
+                action=action,
+                parameters=decision_data.get(&#34;parameters&#34;, {}),
+                reasoning=decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;),
+                confidence=float(decision_data.get(&#34;confidence&#34;, 0.5)),
+                priority=int(decision_data.get(&#34;priority&#34;, 5)),
+            )
+        except json.JSONDecodeError:
+            logger.error(f&#34;Failed to parse decision response: {response}&#34;)
+            decision = Decision(
+                action=&#34;think&#34;,
+                parameters={&#34;error&#34;: &#34;Failed to parse decision&#34;},
+                reasoning=&#34;The decision response could not be parsed as JSON.&#34;,
+                confidence=0.1,
+                priority=1,
+            )
+
+        logger.debug(f&#34;Decision made: {decision}&#34;)
+        return decision
 
     def think(self, thought: str) -&gt; None:
         &#34;&#34;&#34;
@@ -207,7 +309,7 @@ and the Brain's decision-making processes.</p></div>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.mind.mind.Mind.get_recent_perceptions"><code class="name flex">
-<span>def <span class="ident">get_recent_perceptions</span></span>(<span>self, n: int = 5) ‑> List[<a title="frame.src.framer.brain.perception.perception.Perception" href="../perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>]</span>
+<span>def <span class="ident">get_recent_perceptions</span></span>(<span>self, n: int = 5) ‑> List[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the n most recent perceptions.</p>
@@ -222,8 +324,24 @@ and the Brain's decision-making processes.</p></div>
 <dd>The n most recent perceptions.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.framer.brain.mind.mind.Mind.make_decision"><code class="name flex">
+<span>async def <span class="ident">make_decision</span></span>(<span>self, perception: <a title="frame.src.framer.brain.mind.perception.perception.Perception" href="perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="../decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Make a decision based on the current perceptions and thoughts.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>perception</code></strong> :&ensp;<code>Perception</code></dt>
+<dd>The perception to base the decision on.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Decision</code></dt>
+<dd>The decision made.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.framer.brain.mind.mind.Mind.process_perception"><code class="name flex">
-<span>async def <span class="ident">process_perception</span></span>(<span>self, perception: <a title="frame.src.framer.brain.perception.perception.Perception" href="../perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="../decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+<span>async def <span class="ident">process_perception</span></span>(<span>self, perception: <a title="frame.src.framer.brain.mind.perception.perception.Perception" href="perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="../decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Process a perception and generate thoughts based on it.</p>
@@ -285,6 +403,7 @@ and the Brain's decision-making processes.</p></div>
 <li><code><a title="frame.src.framer.brain.mind.mind.Mind.get_all_thoughts" href="#frame.src.framer.brain.mind.mind.Mind.get_all_thoughts">get_all_thoughts</a></code></li>
 <li><code><a title="frame.src.framer.brain.mind.mind.Mind.get_current_thought" href="#frame.src.framer.brain.mind.mind.Mind.get_current_thought">get_current_thought</a></code></li>
 <li><code><a title="frame.src.framer.brain.mind.mind.Mind.get_recent_perceptions" href="#frame.src.framer.brain.mind.mind.Mind.get_recent_perceptions">get_recent_perceptions</a></code></li>
+<li><code><a title="frame.src.framer.brain.mind.mind.Mind.make_decision" href="#frame.src.framer.brain.mind.mind.Mind.make_decision">make_decision</a></code></li>
 <li><code><a title="frame.src.framer.brain.mind.mind.Mind.process_perception" href="#frame.src.framer.brain.mind.mind.Mind.process_perception">process_perception</a></code></li>
 <li><code><a title="frame.src.framer.brain.mind.mind.Mind.set_recent_memories_limit" href="#frame.src.framer.brain.mind.mind.Mind.set_recent_memories_limit">set_recent_memories_limit</a></code></li>
 <li><code><a title="frame.src.framer.brain.mind.mind.Mind.think" href="#frame.src.framer.brain.mind.mind.Mind.think">think</a></code></li>

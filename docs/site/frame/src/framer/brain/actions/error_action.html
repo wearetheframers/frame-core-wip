@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
-<title>frame.src.framer.brain API documentation</title>
+<title>frame.src.framer.brain.actions.error_action API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -22,52 +22,70 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>frame.src.framer.brain</code></h1>
+<h1 class="title">Module <code>frame.src.framer.brain.actions.error_action</code></h1>
 </header>
 <section id="section-intro">
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt><code class="name"><a title="frame.src.framer.brain.action_registry" href="action_registry.html">frame.src.framer.brain.action_registry</a></code></dt>
+<dt id="frame.src.framer.brain.actions.error_action.ErrorAction"><code class="flex name class">
+<span>class <span class="ident">ErrorAction</span></span>
+</code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.framer.brain.actions" href="actions/index.html">frame.src.framer.brain.actions</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.framer.brain.brain" href="brain.html">frame.src.framer.brain.brain</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.framer.brain.decision" href="decision/index.html">frame.src.framer.brain.decision</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.framer.brain.default_actions" href="default_actions.html">frame.src.framer.brain.default_actions</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.framer.brain.memory" href="memory/index.html">frame.src.framer.brain.memory</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.framer.brain.mind" href="mind/index.html">frame.src.framer.brain.mind</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="frame.src.framer.brain.plugins" href="plugins/index.html">frame.src.framer.brain.plugins</a></code></dt>
-<dd>
-<div class="desc"></div>
+<div class="desc"><p>Base class for all actions in the Frame framework.
+Actions can create Tasks, which can enforce output types.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ErrorAction(BaseAction):
+    def __init__(self):
+        super().__init__(
+            name=&#34;error&#34;,
+            description=&#34;Handle errors by apologizing and attempting to continue the conversation.&#34;,
+            priority=1
+        )
+
+    async def execute(self, execution_context, **kwargs):
+        error_message = kwargs.get(&#34;error&#34;, &#34;An unknown error occurred.&#34;)
+        soul_state = execution_context.soul.get_current_state() if execution_context and execution_context.soul else &#34;No soul state available.&#34;
+        recent_thoughts = execution_context.get_recent_thoughts()[-5:] if execution_context and hasattr(execution_context, &#39;get_recent_thoughts&#39;) else []
+        active_roles = [role.name for role in execution_context.roles if role.status == RoleStatus.ACTIVE] if execution_context and hasattr(execution_context, &#39;roles&#39;) else []
+        active_goals = [goal.name for goal in execution_context.goals if goal.status == GoalStatus.ACTIVE] if execution_context and hasattr(execution_context, &#39;goals&#39;) else []
+
+        response = (
+            f&#34;I apologize, an error occurred: {error_message}. &#34;
+            &#34;Let&#39;s try to continue our conversation.\n\n&#34;
+            &#34;### Current Framer State\n&#34;
+            f&#34;- Soul State: {soul_state}\n&#34;
+            f&#34;- Recent Thoughts: {recent_thoughts}\n&#34;
+            f&#34;- Active Roles: {active_roles}\n&#34;
+            f&#34;- Active Goals: {active_goals}\n&#34;
+        )
+        return {&#34;response&#34;: response}</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.brain.actions.base.BaseAction" href="base.html#frame.src.framer.brain.actions.base.BaseAction">BaseAction</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="frame.src.framer.brain.actions.base.BaseAction" href="base.html#frame.src.framer.brain.actions.base.BaseAction">BaseAction</a></b></code>:
+<ul class="hlist">
+<li><code><a title="frame.src.framer.brain.actions.base.BaseAction.create_task" href="base.html#frame.src.framer.brain.actions.base.BaseAction.create_task">create_task</a></code></li>
+<li><code><a title="frame.src.framer.brain.actions.base.BaseAction.execute" href="base.html#frame.src.framer.brain.actions.base.BaseAction.execute">execute</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
-</section>
-<section>
 </section>
 </article>
 <nav id="sidebar">
@@ -77,19 +95,14 @@ hljs.highlightAll();
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="frame.src.framer" href="../index.html">frame.src.framer</a></code></li>
+<li><code><a title="frame.src.framer.brain.actions" href="index.html">frame.src.framer.brain.actions</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li><code><a title="frame.src.framer.brain.action_registry" href="action_registry.html">frame.src.framer.brain.action_registry</a></code></li>
-<li><code><a title="frame.src.framer.brain.actions" href="actions/index.html">frame.src.framer.brain.actions</a></code></li>
-<li><code><a title="frame.src.framer.brain.brain" href="brain.html">frame.src.framer.brain.brain</a></code></li>
-<li><code><a title="frame.src.framer.brain.decision" href="decision/index.html">frame.src.framer.brain.decision</a></code></li>
-<li><code><a title="frame.src.framer.brain.default_actions" href="default_actions.html">frame.src.framer.brain.default_actions</a></code></li>
-<li><code><a title="frame.src.framer.brain.memory" href="memory/index.html">frame.src.framer.brain.memory</a></code></li>
-<li><code><a title="frame.src.framer.brain.mind" href="mind/index.html">frame.src.framer.brain.mind</a></code></li>
-<li><code><a title="frame.src.framer.brain.plugins" href="plugins/index.html">frame.src.framer.brain.plugins</a></code></li>
+<li>
+<h4><code><a title="frame.src.framer.brain.actions.error_action.ErrorAction" href="#frame.src.framer.brain.actions.error_action.ErrorAction">ErrorAction</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>

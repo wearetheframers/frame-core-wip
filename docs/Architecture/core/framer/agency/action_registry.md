@@ -7,7 +7,7 @@ weight: 55
 
 ## Overview
 
-The ActionRegistry component is responsible for managing and executing actions within the Frame framework. It allows for the registration, retrieval, and execution of actions.
+The ActionRegistry component, now part of the Brain, is responsible for managing and executing actions within the Frame framework. It allows for the registration, retrieval, and execution of actions.
 
 ## Key Features
 

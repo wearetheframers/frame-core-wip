@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
-<title>frame.src.framer.agency.action_registry API documentation</title>
+<title>frame.src.framer.brain.action_registry API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -22,7 +22,7 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>frame.src.framer.agency.action_registry</code></h1>
+<h1 class="title">Module <code>frame.src.framer.brain.action_registry</code></h1>
 </header>
 <section id="section-intro">
 </section>
@@ -35,7 +35,7 @@ hljs.highlightAll();
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="frame.src.framer.agency.action_registry.ActionRegistry"><code class="flex name class">
+<dt id="frame.src.framer.brain.action_registry.ActionRegistry"><code class="flex name class">
 <span>class <span class="ident">ActionRegistry</span></span>
 <span>(</span><span>execution_context=None)</span>
 </code></dt>
@@ -63,15 +63,42 @@ hljs.highlightAll();
             RespondAction(),
             ThinkAction(),
             ResearchAction(),
+            ErrorAction(),
         ]
         for action in default_actions:
-            if action.name not in self.actions:
-                self.add_action(
-                    action.name,
-                    description=action.description,
-                    action_func=getattr(action, &#34;func&#34;, None),
-                    priority=action.priority,
-                )
+            self.add_action(
+                action.name,
+                description=action.description,
+                action_func=action.execute,
+                priority=action.priority,
+            )
+
+    async def error_action(self, execution_context, error_message: str) -&gt; str:
+        &#34;&#34;&#34;
+        Handle errors by apologizing and attempting to continue the conversation.
+
+        Args:
+            execution_context: The execution context of the Framer.
+            error_message (str): The error message to include in the response.
+
+        Returns:
+            str: A response apologizing for the error and attempting to continue the conversation.
+        &#34;&#34;&#34;
+        soul_state = execution_context.soul.get_current_state() if execution_context and execution_context.soul else &#34;No soul state available.&#34;
+        recent_thoughts = execution_context.mind.get_all_thoughts()[-5:] if execution_context and execution_context.mind else []
+        active_roles = [role.name for role in execution_context.roles if role.status == RoleStatus.ACTIVE] if execution_context else []
+        active_goals = [goal.name for goal in execution_context.goals if goal.status == GoalStatus.ACTIVE] if execution_context else []
+
+        response = (
+            f&#34;I&#39;m sorry, an error occurred: {error_message}. &#34;
+            &#34;Let&#39;s try to continue our conversation.\n\n&#34;
+            &#34;### Current Framer State\n&#34;
+            f&#34;- Soul State: {soul_state}\n&#34;
+            f&#34;- Recent Thoughts: {recent_thoughts}\n&#34;
+            f&#34;- Active Roles: {active_roles}\n&#34;
+            f&#34;- Active Goals: {active_goals}\n&#34;
+        )
+        return response.strip() if isinstance(response, str) else str(response)
 
     def extend_actions(self, new_actions: Dict[str, Dict[str, Any]]):
         extend_valid_actions(new_actions)
@@ -104,9 +131,10 @@ hljs.highlightAll();
         if priority is not None and not (1 &lt;= priority &lt;= 10):
             raise ValueError(&#34;Priority must be between 1 and 10&#34;)
         if action_func is None:
-            # set action func to a dummy async function
-            async def action_func(*args, **kwargs):
-                return None
+            # Set action func to a default error handler
+            async def action_func(execution_context, **kwargs):
+                error_message = kwargs.get(&#34;error&#34;, &#34;An error occurred.&#34;)
+                return {&#34;response&#34;: f&#34;Error: {error_message}&#34;}
 
         self.actions[name] = {
             &#34;action_func&#34;: action_func,
@@ -186,37 +214,56 @@ hljs.highlightAll();
 
     async def execute_action(self, action_name: str, parameters: dict):
         &#34;&#34;&#34;Execute an action by its name.&#34;&#34;&#34;
-        logger.info(
-            f&#34;Available actions before executing &#39;{action_name}&#39;: {list(self.actions.keys())}&#34;
-        )
-        print(&#34;Action name: &#34;, action_name)
+        logger.info(f&#34;Available actions before executing &#39;{action_name}&#39;: {list(self.actions.keys())}&#34;)
+        logger.info(f&#34;Action name: {action_name}&#34;)
+        
         if action_name == &#34;no_action&#34;:
             logger.info(&#34;No action to execute. Skipping.&#34;)
             return None
 
         action = self.get_action(action_name)
-        if action:
-            action_func = action[&#34;action_func&#34;]
-            expected_params = action_func.__code__.co_varnames[
-                : action_func.__code__.co_argcount
-            ]
-            filtered_params = {
-                k: v for k, v in parameters.items() if k in expected_params
-            }
-            if &#34;query&#34; in filtered_params and &#34;query&#34; in parameters:
-                del filtered_params[&#34;query&#34;]
-            print(&#34;Filtered params: &#34;, filtered_params)
-            print(&#34;Expected params: &#34;, expected_params)
-            return await action_func(self.execution_context, **filtered_params)
+        if not action:
+            error_message = f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;
+            logger.error(error_message)
+            return await self._handle_error(error_message)
+
+        action_func = action[&#34;action_func&#34;]
+        expected_params = action_func.__code__.co_varnames[:action_func.__code__.co_argcount]
+        filtered_params = {k: v for k, v in parameters.items() if k in expected_params}
+        logger.info(f&#34;Filtered params: {filtered_params}&#34;)
+
+        if &#39;query&#39; in filtered_params:
+            filtered_params[&#39;query&#39;] = parameters.get(&#39;query&#39;, &#39;&#39;)
+
+        try:
+            result = await action_func(self.execution_context, **filtered_params)
+            if result is None:
+                return {&#34;error&#34;: &#34;Action returned None&#34;, &#34;fallback_response&#34;: &#34;The action didn&#39;t produce a response. Please try again.&#34;}
+            elif isinstance(result, dict):
+                return result
+            elif isinstance(result, str):
+                return {&#34;response&#34;: result}
+            else:
+                return {&#34;response&#34;: str(result)}
+        except Exception as e:
+            error_message = f&#34;Error executing action &#39;{action_name}&#39;: {str(e)}&#34;
+            logger.error(error_message)
+            return await self._handle_error(error_message)
+
+    def set_execution_context(self, execution_context):
+        self.execution_context = execution_context
+
+    async def _handle_error(self, error_message: str):
+        error_action = self.get_action(&#34;error&#34;)
+        if error_action:
+            return await error_action[&#34;action_func&#34;](self.execution_context, error=error_message)
         else:
-            logger.error(f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;)
-            # raise ValueError(f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;)
-            return None</code></pre>
+            return {&#34;error&#34;: error_message, &#34;fallback_response&#34;: &#34;An error occurred while processing your request. Please try again.&#34;}</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="frame.src.framer.agency.action_registry.ActionRegistry.add_action"><code class="name flex">
-<span>def <span class="ident">add_action</span></span>(<span>self, action_or_name: Union[<a title="frame.src.framer.agency.actions.base.BaseAction" href="actions/base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a>, str], description: str = '', action_func: Optional[Callable] = None, priority: int = 5)</span>
+<dt id="frame.src.framer.brain.action_registry.ActionRegistry.add_action"><code class="name flex">
+<span>def <span class="ident">add_action</span></span>(<span>self, action_or_name: Union[<a title="frame.src.framer.brain.actions.base.BaseAction" href="actions/base.html#frame.src.framer.brain.actions.base.BaseAction">BaseAction</a>, str], description: str = '', action_func: Optional[Callable] = None, priority: int = 5)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a new action to the registry.</p>
@@ -232,19 +279,37 @@ hljs.highlightAll();
 <dd>The priority of the action. Defaults to 5.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.agency.action_registry.ActionRegistry.execute_action"><code class="name flex">
+<dt id="frame.src.framer.brain.action_registry.ActionRegistry.error_action"><code class="name flex">
+<span>async def <span class="ident">error_action</span></span>(<span>self, execution_context, error_message: str) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Handle errors by apologizing and attempting to continue the conversation.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>execution_context</code></strong></dt>
+<dd>The execution context of the Framer.</dd>
+<dt><strong><code>error_message</code></strong> :&ensp;<code>str</code></dt>
+<dd>The error message to include in the response.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>A response apologizing for the error and attempting to continue the conversation.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.action_registry.ActionRegistry.execute_action"><code class="name flex">
 <span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, parameters: dict)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Execute an action by its name.</p></div>
 </dd>
-<dt id="frame.src.framer.agency.action_registry.ActionRegistry.extend_actions"><code class="name flex">
+<dt id="frame.src.framer.brain.action_registry.ActionRegistry.extend_actions"><code class="name flex">
 <span>def <span class="ident">extend_actions</span></span>(<span>self, new_actions: Dict[str, Dict[str, Any]])</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.framer.agency.action_registry.ActionRegistry.get_action"><code class="name flex">
+<dt id="frame.src.framer.brain.action_registry.ActionRegistry.get_action"><code class="name flex">
 <span>def <span class="ident">get_action</span></span>(<span>self, name: str) ‑> Optional[Dict[str, Any]]</span>
 </code></dt>
 <dd>
@@ -260,19 +325,19 @@ hljs.highlightAll();
 <dd>The action details if found, otherwise None.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.agency.action_registry.ActionRegistry.get_all_actions"><code class="name flex">
+<dt id="frame.src.framer.brain.action_registry.ActionRegistry.get_all_actions"><code class="name flex">
 <span>def <span class="ident">get_all_actions</span></span>(<span>self) ‑> Dict[str, Dict[str, Any]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return all actions in the registry that are also in self.valid_actions.</p></div>
 </dd>
-<dt id="frame.src.framer.agency.action_registry.ActionRegistry.perform_action"><code class="name flex">
+<dt id="frame.src.framer.brain.action_registry.ActionRegistry.perform_action"><code class="name flex">
 <span>async def <span class="ident">perform_action</span></span>(<span>self, name: str, *args, callback: Optional[Callable] = None, callback_args: Optional[tuple] = (), **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.framer.agency.action_registry.ActionRegistry.remove_action"><code class="name flex">
+<dt id="frame.src.framer.brain.action_registry.ActionRegistry.remove_action"><code class="name flex">
 <span>def <span class="ident">remove_action</span></span>(<span>self, name: str)</span>
 </code></dt>
 <dd>
@@ -283,7 +348,13 @@ hljs.highlightAll();
 <dd>The name of the action to remove.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.agency.action_registry.ActionRegistry.set_framer"><code class="name flex">
+<dt id="frame.src.framer.brain.action_registry.ActionRegistry.set_execution_context"><code class="name flex">
+<span>def <span class="ident">set_execution_context</span></span>(<span>self, execution_context)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.action_registry.ActionRegistry.set_framer"><code class="name flex">
 <span>def <span class="ident">set_framer</span></span>(<span>self, framer)</span>
 </code></dt>
 <dd>
@@ -301,22 +372,24 @@ hljs.highlightAll();
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="frame.src.framer.agency" href="index.html">frame.src.framer.agency</a></code></li>
+<li><code><a title="frame.src.framer.brain" href="index.html">frame.src.framer.brain</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="frame.src.framer.agency.action_registry.ActionRegistry" href="#frame.src.framer.agency.action_registry.ActionRegistry">ActionRegistry</a></code></h4>
-<ul class="two-column">
-<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.add_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.add_action">add_action</a></code></li>
-<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.execute_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.execute_action">execute_action</a></code></li>
-<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.extend_actions" href="#frame.src.framer.agency.action_registry.ActionRegistry.extend_actions">extend_actions</a></code></li>
-<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.get_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.get_action">get_action</a></code></li>
-<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.get_all_actions" href="#frame.src.framer.agency.action_registry.ActionRegistry.get_all_actions">get_all_actions</a></code></li>
-<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.perform_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.perform_action">perform_action</a></code></li>
-<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.remove_action" href="#frame.src.framer.agency.action_registry.ActionRegistry.remove_action">remove_action</a></code></li>
-<li><code><a title="frame.src.framer.agency.action_registry.ActionRegistry.set_framer" href="#frame.src.framer.agency.action_registry.ActionRegistry.set_framer">set_framer</a></code></li>
+<h4><code><a title="frame.src.framer.brain.action_registry.ActionRegistry" href="#frame.src.framer.brain.action_registry.ActionRegistry">ActionRegistry</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.brain.action_registry.ActionRegistry.add_action" href="#frame.src.framer.brain.action_registry.ActionRegistry.add_action">add_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.action_registry.ActionRegistry.error_action" href="#frame.src.framer.brain.action_registry.ActionRegistry.error_action">error_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.action_registry.ActionRegistry.execute_action" href="#frame.src.framer.brain.action_registry.ActionRegistry.execute_action">execute_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.action_registry.ActionRegistry.extend_actions" href="#frame.src.framer.brain.action_registry.ActionRegistry.extend_actions">extend_actions</a></code></li>
+<li><code><a title="frame.src.framer.brain.action_registry.ActionRegistry.get_action" href="#frame.src.framer.brain.action_registry.ActionRegistry.get_action">get_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.action_registry.ActionRegistry.get_all_actions" href="#frame.src.framer.brain.action_registry.ActionRegistry.get_all_actions">get_all_actions</a></code></li>
+<li><code><a title="frame.src.framer.brain.action_registry.ActionRegistry.perform_action" href="#frame.src.framer.brain.action_registry.ActionRegistry.perform_action">perform_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.action_registry.ActionRegistry.remove_action" href="#frame.src.framer.brain.action_registry.ActionRegistry.remove_action">remove_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.action_registry.ActionRegistry.set_execution_context" href="#frame.src.framer.brain.action_registry.ActionRegistry.set_execution_context">set_execution_context</a></code></li>
+<li><code><a title="frame.src.framer.brain.action_registry.ActionRegistry.set_framer" href="#frame.src.framer.brain.action_registry.ActionRegistry.set_framer">set_framer</a></code></li>
 </ul>
 </li>
 </ul>

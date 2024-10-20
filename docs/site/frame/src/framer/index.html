@@ -64,7 +64,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.Framer"><code class="flex name class">
 <span>class <span class="ident">Framer</span></span>
-<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.workflow.workflow_manager.WorkflowManager" href="agency/workflow/workflow_manager.html#frame.src.framer.agency.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, memory_adapter: Optional[<a title="frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface" href="brain/memory/memory_adapter_interface.html#frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface">MemoryAdapterInterface</a>] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], plugins: Optional[Dict[str, Any]] = None, plugin_loading_progress: Optional[Callable[[int], None]] = None)</span>
+<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.workflow.workflow_manager.WorkflowManager" href="agency/workflow/workflow_manager.html#frame.src.framer.agency.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, brain: <a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a> = None, memory_adapter: Optional[<a title="frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface" href="brain/memory/memory_adapter_interface.html#frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface">MemoryAdapterInterface</a>] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], plugins: Optional[Dict[str, Any]] = None, plugin_loading_progress: Optional[Callable[[int], None]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -75,24 +75,39 @@ hljs.highlightAll();
 <pre><code class="python">class Framer:
     perceptions_queue: Deque[Union[Perception, Dict[str, Any]]] = deque()
     &#34;&#34;&#34;
-    The Framer class represents an AI agent with cognitive capabilities. It integrates various components
+    The Framer class represents an AI agent with advanced cognitive capabilities. It integrates various components
     such as agency, brain, soul, and workflow management to create a comprehensive AI entity capable of
-    processing perceptions, making decisions, and executing tasks.
+    processing perceptions, making decisions, and executing tasks in a context-aware manner.
+
+    Key features:
+    - Perception processing and decision-making
+    - Task execution and workflow management
+    - Memory management and retrieval
+    - Emotional intelligence integration
+    - Plugin system for extensibility
+    - Role and goal management
+    - Observer pattern for decision notifications
 
     Attributes:
         config (FramerConfig): Configuration settings for the Framer.
-        llm_service (LLMService): The language model service to be used by the Framer.
+        llm_service (LLMService): The language model service used by the Framer for text generation and processing.
         agency (Agency): Manages roles, goals, tasks, and workflows for the Framer.
         brain (Brain): Handles decision-making processes, integrating perceptions, memories, and thoughts.
-        soul (Soul): Represents the core essence and personality of a Framer.
+        soul (Soul): Represents the core essence and personality of the Framer.
         workflow_manager (WorkflowManager): Manages workflows and tasks.
-        memory_service (Optional[MemoryService]): Service for managing memory. Default is None.
+        memory_service (Optional[MemoryService]): Service for managing and retrieving memories. Default is None.
         eq_service (Optional[EQService]): Service for managing emotional intelligence. Default is None.
         roles (Optional[List[Dict[str, Any]]]): List of roles for the Framer. Default is None.
         goals (Optional[List[Dict[str, Any]]]): List of goals for the Framer. Default is None.
         observers (List[Observer]): List of observer functions to notify on decisions.
         can_execute (bool): Determines if decisions are executed automatically. Default is True.
         acting (bool): Indicates if the Framer is actively processing perceptions. Default is False.
+        plugins (Dict[str, Any]): Dictionary of loaded plugins for extended functionality.
+        plugin_loading_complete (bool): Indicates whether all plugins have been loaded.
+        permissions (List[str]): List of permissions granted to the Framer.
+
+    The Framer class serves as the central coordinator for all AI agent operations, managing the interplay
+    between various components to create a cohesive and intelligent entity.
     &#34;&#34;&#34;
 
     def __init__(
@@ -100,9 +115,9 @@ hljs.highlightAll();
         config: FramerConfig,
         llm_service: LLMService,
         agency: Agency,
-        brain: Brain,
         soul: Soul,
         workflow_manager: WorkflowManager,
+        brain: Brain = None,
         memory_adapter: Optional[MemoryAdapterInterface] = None,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
@@ -112,22 +127,33 @@ hljs.highlightAll();
         plugin_loading_progress: Optional[Callable[[int], None]] = None,
     ):
         self.plugin_loading_progress = plugin_loading_progress
-        # Existing initialization code...
-
         self.config = config
-        self.permissions = config.permissions or [&#34;with_memory&#34;, &#34;with_mem0_search_extract_summarize_plugin&#34;, &#34;with_shared_context&#34;]
+        self.permissions = config.permissions or [
+            &#34;with_memory&#34;,
+            # &#34;with_mem0_search_extract_summarize_plugin&#34;,  # Do not allow RAG responses by default
+            # &#34;with_shared_context&#34;, # Do not allow shared context by default
+        ]
+        self.llm_service = llm_service
+
+        self.execution_context = ExecutionContext(llm_service=self.llm_service)
+        self.plugin_loading_progress = plugin_loading_progress
 
         # Initialize services and plugins based on permissions
-        # Services like memory, eq, and shared_context are special plugins called services.
-        # They do not require explicit permissions to be accessed but must be passed into a Framer.
-        # The Mem0SearchExtractSummarizePlugin is a default plugin that provides a response mechanism
-        # requiring memory retrieval, functioning as a RAG mechanism.
-        # Enforce permission for &#39;with-mem0-search-extract-summarize-plugin&#39; if &#39;with-memory&#39; is used
-        if &#34;with-memory&#34; in self.permissions:
-            self.permissions.append(&#34;with-mem0-search-extract-summarize-plugin&#34;)
-        
-        if &#34;with-memory&#34; in self.permissions and memory_adapter:
-            self.memory_service = memory_service or MemoryService(adapter=memory_adapter)
+        if &#34;with_memory&#34; in self.permissions:
+            self.permissions.append(&#34;with_mem0_search_extract_summarize_plugin&#34;)
+
+        logger.info(f&#34;Permissions: {self.permissions}&#34;)
+        logger.info(f&#34;Memory adapter: {memory_adapter}&#34;)
+
+        if &#34;with_memory&#34; in self.permissions and memory_adapter:
+            logger.info(&#34;Creating memory service&#34;)
+            self.memory_service = memory_service or MemoryService(
+                adapter=memory_adapter
+            )
+            logger.info(f&#34;Memory service created: {self.memory_service}&#34;)
+        else:
+            logger.info(&#34;Memory service not created&#34;)
+            self.memory_service = None
 
         if &#34;with_eq&#34; in self.permissions:
             self.eq_service = eq_service or EQService()
@@ -135,40 +161,65 @@ hljs.highlightAll();
         if &#34;with_shared_context&#34; in self.permissions:
             self.shared_context_service = SharedContext()
 
-        self.config = config
-        self.llm_service = llm_service
         self.agency = agency
-        self.brain = brain
         self.soul = soul
         self.workflow_manager = workflow_manager
-        self.memory_service = memory_service
-        self.roles = roles
-        self.goals = goals
-        self.eq_service = eq_service
+        self.roles = roles or []
+        self.goals = goals or []
         self.plugins = plugins or {}
         self.plugin_loading_complete = False
         self._streamed_response = {&#34;status&#34;: &#34;pending&#34;, &#34;result&#34;: &#34;&#34;}
-        self.config = config
-        self.llm_service = llm_service
-        self.agency = agency
-        self.brain = brain
-        self.soul = soul
-        self.workflow_manager = workflow_manager
-        self.memory_service = memory_service
-        self.eq_service = eq_service
+
+        logger.info(&#34;Creating Brain&#34;)
+        self.brain = Brain(
+            llm_service=llm_service,
+            execution_context=self.execution_context,
+            memory_service=self.memory_service,
+            roles=self.roles,
+            goals=self.goals,
+            default_model=config.default_model,
+            soul=soul
+        )
+        logger.info(f&#34;Brain created with memory service: {self.brain.memory_service}&#34;)
+
         self._dynamic_model_choice = False
         self.observers: List[Observer] = []
-        self.can_execute = True  # Add can_execute attribute
+        self.can_execute = True
         self.acting = False
         # Load plugins asynchronously
         asyncio.create_task(self.load_plugins())
+
+        # Generate roles and goals if not provided
+        if not self.roles or not self.goals:
+            asyncio.create_task(self._generate_initial_roles_and_goals())
+
+    async def _generate_initial_roles_and_goals(self):
+        if not self.roles or not self.goals:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+            
+        # Ensure uniqueness
+        self.roles = list({role.name: role for role in self.roles}.values())
+        self.goals = list({goal.name: goal for goal in self.goals}.values())
+        
+        logger.info(f&#34;Generated initial roles: {[role.name for role in self.roles]}&#34;)
+        logger.info(f&#34;Generated initial goals: {[goal.name for goal in self.goals]}&#34;)
+        
+        if hasattr(self.brain, &#39;set_roles&#39;):
+            self.brain.set_roles(self.roles)
+        if hasattr(self.brain, &#39;set_goals&#39;):
+            self.brain.set_goals(self.goals)
+        
+        if hasattr(self.execution_context, &#39;set_roles&#39;):
+            self.execution_context.set_roles(self.roles)
+        if hasattr(self.execution_context, &#39;set_goals&#39;):
+            self.execution_context.set_goals(self.goals)
 
     def act(self):
         &#34;&#34;&#34;
         Enable the Framer to start acting and processing perceptions.
         &#34;&#34;&#34;
         self.acting = True
-            
+
     async def load_plugins(self):
         &#34;&#34;&#34;
         Load all plugins by calling their on_load method.
@@ -176,13 +227,13 @@ hljs.highlightAll();
         for plugin_name, plugin_instance in self.plugins.items():
             if hasattr(plugin_instance, &#34;on_load&#34;):
                 await plugin_instance.on_load(self)
-                # Register plugin actions
+                # Register plugin actions in the brain&#39;s action_registry
                 for action_name, action_func in plugin_instance.get_actions().items():
-                    self.agency.action_registry.add_action(
+                    self.brain.action_registry.add_action(
                         action_name,
                         action_func=action_func,
                         description=f&#34;Action from {plugin_name} plugin&#34;,
-                        priority=5  # Default priority, adjust as needed
+                        priority=5,  # Default priority, adjust as needed
                     )
         self.plugin_loading_complete = True
         self.act()
@@ -195,7 +246,9 @@ hljs.highlightAll();
         if self.is_ready():
             logger.info(&#34;Processing queued perceptions...&#34;)
             while self.perceptions_queue:
-                logger.info(f&#34;Processing perception from queue: {self.perceptions_queue[0]}&#34;)
+                logger.info(
+                    f&#34;Processing perception from queue: {self.perceptions_queue[0]}&#34;
+                )
                 perception = self.perceptions_queue.popleft()
                 await self.sense(perception)
 
@@ -304,7 +357,9 @@ hljs.highlightAll();
 
         export_config_to_markdown(self.config, file_path)
 
-    async def use_plugin_action(self, plugin_name: str, action_name: str, parameters: Dict[str, Any]) -&gt; Any:
+    async def use_plugin_action(
+        self, plugin_name: str, action_name: str, parameters: Dict[str, Any]
+    ) -&gt; Any:
         &#34;&#34;&#34;
         Execute a plugin action directly.
 
@@ -321,13 +376,13 @@ hljs.highlightAll();
         if not plugin:
             logger.warning(f&#34;Plugin {plugin_name} not found. Skipping action.&#34;)
             return {&#34;error&#34;: f&#34;Plugin {plugin_name} not found.&#34;}
-        
+
         action = getattr(plugin, action_name, None)
         if not action:
             raise ValueError(f&#34;Action {action_name} not found in plugin {plugin_name}.&#34;)
-        
+
         return await action(**parameters)
-    
+
     async def perform_task(self, task: Dict[str, Any]) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Perform a task asynchronously.
@@ -360,7 +415,9 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         return self.plugin_loading_complete and self.acting
 
-    async def sense(self, perception: Union[Perception, Dict[str, Any]]) -&gt; Optional[Decision]:
+    async def sense(
+        self, perception: Union[Perception, Dict[str, Any]]
+    ) -&gt; Optional[Decision]:
         &#34;&#34;&#34;
         Process a perception and make a decision.
 
@@ -374,37 +431,39 @@ hljs.highlightAll();
             logger.warning(&#34;Framer is not ready. Queuing perception.&#34;)
             self.perceptions_queue.append(perception)
             return None  # Return None to indicate the perception was queued
-        &#34;&#34;&#34;
-        Process a perception and make a decision.
 
-        Args:
-            perception (Union[Perception, Dict[str, Any]]): The perception to process, can be a Perception object or a dictionary.
-
-        Returns:
-            Decision: The decision made based on the perception.
-        &#34;&#34;&#34;
-        if not self.plugin_loading_complete or not self.acting:
-            logger.warning(&#34;Framer is not ready. Queuing perception.&#34;)
-            self.perceptions_queue.append(perception)
-            return None  # Return None to indicate the perception was queued
         # Convert perception to Perception object if it is a dictionary
         if isinstance(perception, dict):
             perception = Perception.from_dict(perception)
         current_goals = self.agency.get_goals()
         decision = await self.brain.process_perception(perception, current_goals)
 
-        # Consider goal status in decision-making
-        active_goals = [
-            goal for goal in current_goals if goal.status == GoalStatus.ACTIVE
-        ]
-        if active_goals:
-            decision.reasoning += f&#34; (Aligned with {len(active_goals)} active goals)&#34;
+        if decision:
+            if isinstance(decision, dict):
+                decision = Decision(
+                    action=decision.get(&#34;action&#34;, &#34;respond&#34;),
+                    parameters=decision.get(&#34;parameters&#34;, {}),
+                    reasoning=decision.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;),
+                    confidence=decision.get(&#34;confidence&#34;, 0.5),
+                    priority=decision.get(&#34;priority&#34;, 1),
+                    related_roles=decision.get(&#34;related_roles&#34;, []),
+                    related_goals=decision.get(&#34;related_goals&#34;, []),
+                )
+            # Consider goal status in decision-making
+            active_goals = [
+                goal for goal in current_goals if goal.status == GoalStatus.ACTIVE
+            ]
+            if active_goals:
+                decision.reasoning += f&#34; (Aligned with {len(active_goals)} active goals)&#34;
 
-        if hasattr(self, &#34;can_execute&#34;) and self.can_execute:
-            await self.brain.execute_decision(decision)
-        logger.debug(f&#34;Processed perception: {perception}, Decision: {decision}&#34;)
-        self.notify_observers(decision)
-        return decision  
+            if hasattr(self, &#34;can_execute&#34;) and self.can_execute:
+                await self.brain.execute_decision(decision)
+            logger.debug(f&#34;Processed perception: {perception}, Decision: {decision}&#34;)
+            self.notify_observers(decision)
+        else:
+            logger.warning(&#34;No decision was made for the given perception.&#34;)
+
+        return decision
 
     async def prompt(self, text: str) -&gt; Decision:
         &#34;&#34;&#34;
@@ -452,6 +511,14 @@ hljs.highlightAll();
         for plugin in self.plugins.values():
             if hasattr(plugin, &#34;on_decision_made&#34;):
                 plugin.on_decision_made(decision)
+
+    def halt(self):
+        &#34;&#34;&#34;
+        Stop the Framer from processing further actions and tasks.
+        &#34;&#34;&#34;
+        self.acting = False
+        self.can_execute = False
+        logger.info(&#34;Framer halted. No further actions or tasks will be processed.&#34;)
 
     async def generate_tasks_from_perception(
         self,
@@ -524,27 +591,35 @@ hljs.highlightAll();
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="frame.src.framer.Framer.perceptions_queue"><code class="name">var <span class="ident">perceptions_queue</span> : Deque[Union[<a title="frame.src.framer.brain.perception.perception.Perception" href="brain/perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>, Dict[str, Any]]]</code></dt>
+<dt id="frame.src.framer.Framer.perceptions_queue"><code class="name">var <span class="ident">perceptions_queue</span> : Deque[Union[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="brain/mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>, Dict[str, Any]]]</code></dt>
 <dd>
-<div class="desc"><p>The Framer class represents an AI agent with cognitive capabilities. It integrates various components
+<div class="desc"><p>The Framer class represents an AI agent with advanced cognitive capabilities. It integrates various components
 such as agency, brain, soul, and workflow management to create a comprehensive AI entity capable of
-processing perceptions, making decisions, and executing tasks.</p>
+processing perceptions, making decisions, and executing tasks in a context-aware manner.</p>
+<p>Key features:
+- Perception processing and decision-making
+- Task execution and workflow management
+- Memory management and retrieval
+- Emotional intelligence integration
+- Plugin system for extensibility
+- Role and goal management
+- Observer pattern for decision notifications</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
 <dt><strong><code>config</code></strong> :&ensp;<code><a title="frame.src.framer.FramerConfig" href="#frame.src.framer.FramerConfig">FramerConfig</a></code></dt>
 <dd>Configuration settings for the Framer.</dd>
 <dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
-<dd>The language model service to be used by the Framer.</dd>
+<dd>The language model service used by the Framer for text generation and processing.</dd>
 <dt><strong><code>agency</code></strong> :&ensp;<code>Agency</code></dt>
 <dd>Manages roles, goals, tasks, and workflows for the Framer.</dd>
 <dt><strong><code>brain</code></strong> :&ensp;<code>Brain</code></dt>
 <dd>Handles decision-making processes, integrating perceptions, memories, and thoughts.</dd>
 <dt><strong><code>soul</code></strong> :&ensp;<code>Soul</code></dt>
-<dd>Represents the core essence and personality of a Framer.</dd>
+<dd>Represents the core essence and personality of the Framer.</dd>
 <dt><strong><code>workflow_manager</code></strong> :&ensp;<code>WorkflowManager</code></dt>
 <dd>Manages workflows and tasks.</dd>
 <dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
-<dd>Service for managing memory. Default is None.</dd>
+<dd>Service for managing and retrieving memories. Default is None.</dd>
 <dt><strong><code>eq_service</code></strong> :&ensp;<code>Optional[EQService]</code></dt>
 <dd>Service for managing emotional intelligence. Default is None.</dd>
 <dt><strong><code>roles</code></strong> :&ensp;<code>Optional[List[Dict[str, Any]]]</code></dt>
@@ -557,7 +632,15 @@ processing perceptions, making decisions, and executing tasks.</p>
 <dd>Determines if decisions are executed automatically. Default is True.</dd>
 <dt><strong><code>acting</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Indicates if the Framer is actively processing perceptions. Default is False.</dd>
-</dl></div>
+<dt><strong><code>plugins</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>Dictionary of loaded plugins for extended functionality.</dd>
+<dt><strong><code>plugin_loading_complete</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Indicates whether all plugins have been loaded.</dd>
+<dt><strong><code>permissions</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>List of permissions granted to the Framer.</dd>
+</dl>
+<p>The Framer class serves as the central coordinator for all AI agent operations, managing the interplay
+between various components to create a cohesive and intelligent entity.</p></div>
 </dd>
 </dl>
 <h3>Static methods</h3>
@@ -650,7 +733,7 @@ systems, facilitating interoperability and reuse.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.Framer.generate_tasks_from_perception"><code class="name flex">
-<span>async def <span class="ident">generate_tasks_from_perception</span></span>(<span>self, perception: Union[<a title="frame.src.framer.brain.perception.perception.Perception" href="brain/perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>, Dict[str, Any]], max_len: Optional[int] = None) ‑> List[<a title="frame.src.framer.agency.tasks.task.Task" href="agency/tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]</span>
+<span>async def <span class="ident">generate_tasks_from_perception</span></span>(<span>self, perception: Union[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="brain/mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>, Dict[str, Any]], max_len: Optional[int] = None) ‑> List[<a title="frame.src.framer.agency.tasks.task.Task" href="agency/tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate tasks based on the given perception.</p>
@@ -666,6 +749,12 @@ systems, facilitating interoperability and reuse.</p>
 <dt><code>List[Task]</code></dt>
 <dd>A list of generated tasks.</dd>
 </dl></div>
+</dd>
+<dt id="frame.src.framer.Framer.halt"><code class="name flex">
+<span>def <span class="ident">halt</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Stop the Framer from processing further actions and tasks.</p></div>
 </dd>
 <dt id="frame.src.framer.Framer.is_ready"><code class="name flex">
 <span>def <span class="ident">is_ready</span></span>(<span>self) ‑> bool</span>
@@ -745,7 +834,7 @@ systems, facilitating interoperability and reuse.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.Framer.sense"><code class="name flex">
-<span>async def <span class="ident">sense</span></span>(<span>self, perception: Union[<a title="frame.src.framer.brain.perception.perception.Perception" href="brain/perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>, Dict[str, Any]]) ‑> Optional[<a title="frame.src.framer.brain.decision.decision.Decision" href="brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>]</span>
+<span>async def <span class="ident">sense</span></span>(<span>self, perception: Union[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="brain/mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>, Dict[str, Any]]) ‑> Optional[<a title="frame.src.framer.brain.decision.decision.Decision" href="brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Process a perception and make a decision.</p>
@@ -842,7 +931,13 @@ validated to form a valid model.</p>
     use_local_model: bool = False
     # Default permissions include services like memory, eq, and shared_context.
     # These services do not require explicit permissions to be accessed.
-    permissions: Optional[List[str]] = Field(default_factory=lambda: [&#34;with_memory&#34;, &#34;with_mem0_search_extract_summarize_plugin&#34;, &#34;with_shared_context&#34;])
+    permissions: Optional[List[str]] = Field(
+        default_factory=lambda: [
+            &#34;with_memory&#34;,
+            &#34;with_mem0_search_extract_summarize_plugin&#34;,
+            &#34;with_shared_context&#34;,
+        ]
+    )
     mem0_api_key: Optional[str] = MEM0_API_KEY
     &#34;&#34;&#34;
     Configuration class for Framer instances.
@@ -1066,12 +1161,19 @@ It uses the FramerConfigModel to validate and set default values for the configu
 <dd>
 <div class="desc"><p>Factory class for creating Framer instances.</p>
 <p>This class encapsulates the logic for constructing Framer objects,
-ensuring that all necessary components are properly initialized.</p>
-<p>The Framer includes a <code>halt()</code> method to stop its actions and task processing.</p>
+ensuring that all necessary components are properly initialized and configured.</p>
+<p>Key features:
+- Creates fully initialized Framer instances with all required components
+- Supports custom plugin integration for extended functionality
+- Ensures proper initialization of core services like LLM, memory, and EQ
+- Manages role and goal generation for the Framer
+- Handles the loading and configuration of plugins</p>
 <p>The FramerFactory supports the creation of Framers with custom plugins,
 allowing for extensive customization and expansion of capabilities.
 This plugin system is designed to be as flexible and powerful as mods in games,
 enabling developers to create a wide range of extensions and enhancements.</p>
+<p>Note: The Framer includes a <code>halt()</code> method to stop its actions and task processing,
+which can be used for graceful shutdown or pausing of the Framer's operations.</p>
 <p>Initialize the FramerBuilder with configuration and LLM service.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -1089,17 +1191,30 @@ enabling developers to create a wide range of extensions and enhancements.</p>
     Factory class for creating Framer instances.
 
     This class encapsulates the logic for constructing Framer objects,
-    ensuring that all necessary components are properly initialized.
+    ensuring that all necessary components are properly initialized and configured.
 
-    The Framer includes a `halt()` method to stop its actions and task processing.
+    Key features:
+    - Creates fully initialized Framer instances with all required components
+    - Supports custom plugin integration for extended functionality
+    - Ensures proper initialization of core services like LLM, memory, and EQ
+    - Manages role and goal generation for the Framer
+    - Handles the loading and configuration of plugins
 
     The FramerFactory supports the creation of Framers with custom plugins,
     allowing for extensive customization and expansion of capabilities.
     This plugin system is designed to be as flexible and powerful as mods in games,
     enabling developers to create a wide range of extensions and enhancements.
+
+    Note: The Framer includes a `halt()` method to stop its actions and task processing,
+    which can be used for graceful shutdown or pausing of the Framer&#39;s operations.
     &#34;&#34;&#34;
 
-    def __init__(self, config: FramerConfig, llm_service: LLMService, plugins: Optional[Dict[str, Any]] = []):
+    def __init__(
+        self,
+        config: FramerConfig,
+        llm_service: LLMService,
+        plugins: Optional[Dict[str, Any]] = [],
+    ):
         &#34;&#34;&#34;
         Initialize the FramerBuilder with configuration and LLM service.
 
@@ -1139,11 +1254,25 @@ enabling developers to create a wide range of extensions and enhancements.</p>
             context=None,
         )
         # Initialize the Agency component with default permissions
-        self.config.permissions = self.config.permissions or [&#34;with_memory&#34;, &#34;with_mem0_search_extract_summarize_plugin&#34;, &#34;with_shared_context&#34;]
-        roles, goals = await self._generate_roles_and_goals(agency, roles, goals)
+        self.config.permissions = self.config.permissions or [
+            &#34;with_memory&#34;,
+            &#34;with_mem0_search_extract_summarize_plugin&#34;,
+            &#34;with_shared_context&#34;,
+        ]
+        roles, goals = await self._generate_unique_roles_and_goals(agency, roles, goals)
+
+        # Initialize the Soul component with the provided or default seed
+        soul = Soul(seed=self.config.soul_seed)
+        # Initialize the WorkflowManager component
+        workflow_manager = WorkflowManager()
+        # Set the memory service if provided, otherwise create a new one
+        mem0_adapter = Mem0Adapter(api_key=self.config.mem0_api_key)
+        memory_service = memory_service or MemoryService(adapter=mem0_adapter)
+        # Initialize the Brain component with roles, goals, default model
         brain = Brain(
-            # Initialize the Brain component with roles, goals, and default model
             llm_service=self.llm_service,
+            execution_context=execution_context,
+            memory_service=memory_service,
             roles=roles,
             goals=goals,
             default_model=(
@@ -1151,14 +1280,11 @@ enabling developers to create a wide range of extensions and enhancements.</p>
                 if self.config.default_model
                 else DEFAULT_MODEL
             ),
+            soul=soul,
         )
-        # Initialize the Soul component with the provided or default seed
-        soul = Soul(seed=self.config.soul_seed)
-        # Initialize the WorkflowManager component
-        workflow_manager = WorkflowManager()
-        # Set the memory service if provided, otherwise create a new one
-        memory_service = memory_service or MemoryService(adapter=Mem0Adapter())
-
+        
+        # The Mind is now initialized within the Brain constructor
+        mind = brain.mind
         framer = Framer(
             config=self.config,
             llm_service=self.llm_service,
@@ -1168,15 +1294,15 @@ enabling developers to create a wide range of extensions and enhancements.</p>
             workflow_manager=workflow_manager,
             memory_service=memory_service,
             eq_service=eq_service,
-            plugins=plugins
+            plugins=plugins,
         )
 
         framer.agency.set_goals(goals)
         framer.agency.set_roles(roles)
 
-        # Set the Framer instance in Brain and ActionRegistry
+        # Set the Framer instance in Brain
         framer.brain.set_framer(framer)
-        framer.brain.agency.action_registry.set_framer(framer)
+        framer.brain.action_registry.set_framer(framer)
 
         # Notify observers about the Framer being opened
         for observer in framer.observers:
@@ -1194,43 +1320,43 @@ enabling developers to create a wide range of extensions and enhancements.</p>
 
         return framer
 
-    async def _generate_roles_and_goals(self, agency, roles, goals):
+    async def _generate_unique_roles_and_goals(self, agency, roles, goals):
         if roles is None or goals is None:
             roles, goals = await agency.generate_roles_and_goals()
         elif isinstance(roles, list) and len(roles) == 0:
-            roles = []
-            goals = []
+            roles, _ = await agency.generate_roles_and_goals()
         elif isinstance(goals, list) and len(goals) == 0:
-            roles, goals = await agency.generate_roles_and_goals()
-            goals = []
-        elif isinstance(roles, list) and len(roles) == 0 and goals:
-            roles, new_goals = await agency.generate_roles_and_goals()
-            goals.extend(new_goals)
+            _, goals = await agency.generate_roles_and_goals()
 
-        # Ensure goals have a default status of ACTIVE
-        for goal in goals:
-            if isinstance(goal, dict):
-                if &#34;status&#34; not in goal:
-                    goal[&#34;status&#34;] = GoalStatus.ACTIVE.value
+        # Ensure uniqueness of roles and goals
+        unique_roles = {role.name: role for role in roles}
+        unique_goals = {goal.name: goal for goal in goals}
+
+        # Ensure goals and roles have a default status of ACTIVE
+        for item in list(unique_roles.values()) + list(unique_goals.values()):
+            if isinstance(item, dict):
+                item[&#34;status&#34;] = item.get(&#34;status&#34;, GoalStatus.ACTIVE.value)
             else:
-                goal.status = GoalStatus.ACTIVE
-        for role in roles:
-            if isinstance(role, dict):
-                if &#34;status&#34; not in role:
-                    role[&#34;status&#34;] = RoleStatus.ACTIVE.value
-            else:
-                role.status = RoleStatus.ACTIVE
+                item.status = getattr(item, &#34;status&#34;, GoalStatus.ACTIVE)
 
         # Sort roles and goals by priority
-        roles.sort(key=lambda x: x.priority.value if hasattr(x, &#39;priority&#39;) else 5, reverse=True)
-        goals.sort(key=lambda x: x.priority.value if hasattr(x, &#39;priority&#39;) else 5, reverse=True)
+        sorted_roles = sorted(
+            unique_roles.values(),
+            key=lambda x: x.priority.value if hasattr(x, &#34;priority&#34;) else 5,
+            reverse=True,
+        )
+        sorted_goals = sorted(
+            unique_goals.values(),
+            key=lambda x: x.priority.value if hasattr(x, &#34;priority&#34;) else 5,
+            reverse=True,
+        )
 
-        return roles, goals</code></pre>
+        return sorted_roles, sorted_goals</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.FramerFactory.create_framer"><code class="name flex">
-<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None, plugins: Optional[Dict[str, Any]] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.eq_service.EQService" href="../services/eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None, plugins: Optional[Dict[str, Any]] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1271,6 +1397,7 @@ enabling developers to create a wide range of extensions and enhancements.</p>
 <li><code><a title="frame.src.framer.Framer.export_to_file" href="#frame.src.framer.Framer.export_to_file">export_to_file</a></code></li>
 <li><code><a title="frame.src.framer.Framer.export_to_markdown" href="#frame.src.framer.Framer.export_to_markdown">export_to_markdown</a></code></li>
 <li><code><a title="frame.src.framer.Framer.generate_tasks_from_perception" href="#frame.src.framer.Framer.generate_tasks_from_perception">generate_tasks_from_perception</a></code></li>
+<li><code><a title="frame.src.framer.Framer.halt" href="#frame.src.framer.Framer.halt">halt</a></code></li>
 <li><code><a title="frame.src.framer.Framer.is_ready" href="#frame.src.framer.Framer.is_ready">is_ready</a></code></li>
 <li><code><a title="frame.src.framer.Framer.load_from_file" href="#frame.src.framer.Framer.load_from_file">load_from_file</a></code></li>
 <li><code><a title="frame.src.framer.Framer.load_plugins" href="#frame.src.framer.Framer.load_plugins">load_plugins</a></code></li>

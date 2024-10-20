@@ -146,7 +146,12 @@ hljs.highlightAll();
             &#34;models&#34;: dict(self._metrics),
             &#34;total_calls&#34;: self._total_calls,
             &#34;total_cost&#34;: self._total_cost,
-        }</code></pre>
+        }
+
+    def track_usage(self, model: str, tokens: int):
+        self.increment_call(model)
+        cost = calculate_cost(model, tokens)
+        self.add_cost(model, cost)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -180,6 +185,12 @@ hljs.highlightAll();
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.utils.llm_utils.LLMMetrics.track_usage"><code class="name flex">
+<span>def <span class="ident">track_usage</span></span>(<span>self, model: str, tokens: int)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -209,12 +220,13 @@ hljs.highlightAll();
 <ul>
 <li>
 <h4><code><a title="frame.src.utils.llm_utils.LLMMetrics" href="#frame.src.utils.llm_utils.LLMMetrics">LLMMetrics</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="frame.src.utils.llm_utils.LLMMetrics.add_cost" href="#frame.src.utils.llm_utils.LLMMetrics.add_cost">add_cost</a></code></li>
 <li><code><a title="frame.src.utils.llm_utils.LLMMetrics.get_metrics" href="#frame.src.utils.llm_utils.LLMMetrics.get_metrics">get_metrics</a></code></li>
 <li><code><a title="frame.src.utils.llm_utils.LLMMetrics.get_total_calls" href="#frame.src.utils.llm_utils.LLMMetrics.get_total_calls">get_total_calls</a></code></li>
 <li><code><a title="frame.src.utils.llm_utils.LLMMetrics.get_total_cost" href="#frame.src.utils.llm_utils.LLMMetrics.get_total_cost">get_total_cost</a></code></li>
 <li><code><a title="frame.src.utils.llm_utils.LLMMetrics.increment_call" href="#frame.src.utils.llm_utils.LLMMetrics.increment_call">increment_call</a></code></li>
+<li><code><a title="frame.src.utils.llm_utils.LLMMetrics.track_usage" href="#frame.src.utils.llm_utils.LLMMetrics.track_usage">track_usage</a></code></li>
 </ul>
 </li>
 </ul>

@@ -140,7 +140,9 @@ validated to form a valid model.</p>
             decision_dict = json.loads(json_data)
 
         # Convert priority from string or integer to Priority enum
-        decision_dict[&#34;priority&#34;] = Priority.from_value(decision_dict.get(&#34;priority&#34;, Priority.MEDIUM))
+        decision_dict[&#34;priority&#34;] = Priority.from_value(
+            decision_dict.get(&#34;priority&#34;, Priority.MEDIUM)
+        )
 
         return cls(**decision_dict)
 
