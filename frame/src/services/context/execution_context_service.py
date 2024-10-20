@@ -1,9 +1,11 @@
-from typing import Optional, Dict, Any, List
-from frame.src.services.llm.main import LLMService
-from frame.src.services.memory.main import MemoryService
-from frame.src.services.eq.eq_service import EQService
-from frame.src.framer.soul.soul import Soul
+from __future__ import annotations
+from typing import Optional, Dict, Any, List, TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from frame.src.services.llm.main import LLMService
+    from frame.src.services.memory.main import MemoryService
+    from frame.src.services.eq.eq_service import EQService
+    from frame.src.framer.soul.soul import Soul
 
 class ExecutionContext:
     """
@@ -22,10 +24,10 @@ class ExecutionContext:
 
     def __init__(
         self,
-        llm_service: LLMService,
-        memory_service: Optional[MemoryService] = None,
-        eq_service: Optional[EQService] = None,
-        soul: Optional[Soul] = None,
+        llm_service: 'LLMService',
+        memory_service: Optional['MemoryService'] = None,
+        eq_service: Optional['EQService'] = None,
+        soul: Optional['Soul'] = None,
         state: Dict[str, Any] = None,
     ):
         self.llm_service = llm_service
@@ -33,8 +35,8 @@ class ExecutionContext:
         self.eq_service = eq_service
         self.soul = soul
         self.state = state or {}
-        self.goals = []
-        self.roles = []
+        self.goals: List[Any] = []
+        self.roles: List[Any] = []
 
     def set_state(self, key: str, value: Any) -> None:
         self.state[key] = value

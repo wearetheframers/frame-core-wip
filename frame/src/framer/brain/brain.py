@@ -1,35 +1,34 @@
 import json
 import logging
 import re
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union, Callable
+from typing import Any, Dict, List, Optional, Union, Callable
+
+logger = logging.getLogger(__name__)
+
 from frame.src.utils.llm_utils import get_llm_provider
 from frame.src.services.llm.main import LLMService
+from frame.src.services.memory.main import MemoryService
+from frame.src.services.context.execution_context_service import ExecutionContext
+
 from frame.src.framer.soul import Soul
-from frame.src.framer.agency import Role, RoleStatus
-from frame.src.framer.agency import Goal, GoalStatus
-from frame.src.framer.agency import Priority
+from frame.src.framer.agency.roles import Role, RoleStatus
+from frame.src.framer.agency.goals import Goal, GoalStatus
+from frame.src.framer.agency.priority import Priority
 from frame.src.framer.config import FramerConfig
-from frame.src.framer.agency.agency import Agency
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from frame.src.framer.agency.agency import Agency
+
 from .action_registry import ActionRegistry
 from .decision import Decision
 from .mind import Mind
 from .mind.perception import Perception
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from frame.src.services.context.execution_context_service import ExecutionContext
-from frame.src.services.memory.main import MemoryService
-from frame.src.framer.brain.memory.memory import Memory
+from .memory.memory import Memory
 
 logger = logging.getLogger(__name__)
-formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s"
-)
-for handler in logger.handlers:
-    handler.setFormatter(formatter)
 
 class Brain:
-    logger = logging.getLogger(__name__)
 
     """
     The Brain class represents the central decision-making and cognitive processing component of the Framer.
@@ -87,6 +86,7 @@ class Brain:
             default_model (str): The default language model to use.
             soul (Optional[Soul]): The Soul instance for the Brain.
         """
+        self.logger = logging.getLogger(__name__)
         self.logger.info("Initializing Brain")
         self.llm_service = llm_service
         self.execution_context = execution_context or ExecutionContext(llm_service=self.llm_service)

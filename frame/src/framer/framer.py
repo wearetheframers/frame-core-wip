@@ -2,34 +2,32 @@ import asyncio
 import logging
 import time
 import json
-import importlib
-from typing import List, Dict, Any, Optional, Callable, Union, Tuple, Deque
 from collections import deque
-from frame.src.services.llm.main import LLMService
-from frame.src.services.context.shared_context_service import SharedContext
+from typing import List, Dict, Any, Optional, Callable, Union, Tuple, Deque
+
 from frame.src.framer.config import FramerConfig
 from frame.src.framer.agency import Agency
 from frame.src.framer.brain.brain import Brain
-from frame.src.framer.brain.mind.mind import Mind
 from frame.src.framer.soul import Soul
 from frame.src.framer.agency.workflow import WorkflowManager
 from frame.src.framer.agency.tasks.task import Task
 from frame.src.models.framer.agency.tasks import TaskStatus
+from frame.src.framer.brain.mind.perception import Perception
+from frame.src.framer.brain.decision import Decision
+from frame.src.framer.agency.goals import GoalStatus
+
+from frame.src.services.llm.main import LLMService
+from frame.src.services.context.shared_context_service import SharedContext
+from frame.src.services.context import ExecutionContext
+from frame.src.services import MemoryService, EQService
+
 from frame.src.utils.config_parser import (
     parse_json_config,
     parse_markdown_config,
     export_config_to_markdown,
 )
-from frame.src.framer.brain.mind.perception import Perception
-from frame.src.framer.brain.decision import Decision
-from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import DSPyAdapter
-from frame.src.services import MemoryService
-from frame.src.framer.brain.memory.memory_adapter_interface import (
-    MemoryAdapterInterface,
-)
-from frame.src.services import EQService
-from frame.src.framer.agency.goals import GoalStatus
-from frame.src.services.context import ExecutionContext
+
+from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
 
 Observer = Callable[[Decision], None]
@@ -82,7 +80,7 @@ class Framer:
         agency: Agency,
         soul: Soul,
         workflow_manager: WorkflowManager,
-        brain: Brain = None,
+        brain: Optional[Brain] = None,
         memory_adapter: Optional[MemoryAdapterInterface] = None,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,

@@ -1,5 +1,9 @@
 from frame.src.framer.brain.actions.base import BaseAction
-from frame.src.framer.agency import RoleStatus, GoalStatus
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from frame.src.framer.agency.roles import RoleStatus
+    from frame.src.framer.agency.goals import GoalStatus
 
 class ErrorAction(BaseAction):
     def __init__(self):
@@ -13,8 +17,8 @@ class ErrorAction(BaseAction):
         error_message = kwargs.get("error", "An unknown error occurred.")
         soul_state = execution_context.soul.get_current_state() if execution_context and execution_context.soul else "No soul state available."
         recent_thoughts = execution_context.get_recent_thoughts()[-5:] if execution_context and hasattr(execution_context, 'get_recent_thoughts') else []
-        active_roles = [role.name for role in execution_context.roles if role.status == RoleStatus.ACTIVE] if execution_context and hasattr(execution_context, 'roles') else []
-        active_goals = [goal.name for goal in execution_context.goals if goal.status == GoalStatus.ACTIVE] if execution_context and hasattr(execution_context, 'goals') else []
+        active_roles = [role.name for role in execution_context.roles if role.status == 'ACTIVE'] if execution_context and hasattr(execution_context, 'roles') else []
+        active_goals = [goal.name for goal in execution_context.goals if goal.status == 'ACTIVE'] if execution_context and hasattr(execution_context, 'goals') else []
 
         response = (
             f"I apologize, an error occurred: {error_message}. "

@@ -30,6 +30,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Ensure all loggers are set to at least INFO level
+for name in logging.root.manager.loggerDict:
+    logging.getLogger(name).setLevel(logging.INFO)
+
 
 async def main():
     # Initialize Frame

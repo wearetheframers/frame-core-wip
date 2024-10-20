@@ -1,57 +1,48 @@
-from typing import List, Dict, Any, Optional, Tuple, Union, TYPE_CHECKING
-from frame.src.constants.models import DEFAULT_MODEL
-from frame.src.framer.agency.priority import Priority
-from frame.src.framer.agency.tasks import Task, TaskStatus
-from frame.src.framer.agency.workflow import WorkflowManager
-from frame.src.framer.agency.workflow import Workflow
-from frame.src.services.llm import LLMService
-from frame.src.framer.agency.roles import Role, RoleStatus
-from frame.src.framer.agency.goals import Goal, GoalStatus
-
-# Remove this import
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from frame.src.services.execution_context import ExecutionContext
-from frame.src.framer.brain.decision import Decision
-
+from typing import List, Dict, Any, Optional, Tuple, Union
 import json
 import logging
 import time
 
-logger = logging.getLogger(__name__)
-
-
+from frame.src.constants.models import DEFAULT_MODEL
+from .priority import Priority
+from .tasks import Task, TaskStatus
+from .workflow import WorkflowManager, Workflow
+from .roles import Role, RoleStatus
+from .goals import Goal, GoalStatus
+from frame.src.services.llm import LLMService
 from frame.src.services.execution_context import ExecutionContext
+from frame.src.framer.brain.decision import Decision
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from frame.src.framer.brain.brain import Brain
+
+logger = logging.getLogger(__name__)
 
 class Agency:
     """
-    The Agency class represents the task management and decision-making component of a Framer.
+    The Agency class manages task execution, decision-making, and role/goal coordination for a Framer.
 
-    It manages roles, goals, tasks, and workflows, allowing the Framer to perform complex operations
-    and adapt to various scenarios. The Agency supports concurrent execution of multiple roles, goals,
-    and tasks, enabling sophisticated and multi-faceted behavior.
+    It orchestrates complex operations by managing roles, goals, tasks, and workflows. The Agency
+    supports concurrent execution of multiple roles, goals, and tasks, enabling sophisticated
+    and multi-faceted behavior.
 
     Key features:
-    - Multi-role support: Multiple roles can be active simultaneously, allowing the Framer to fulfill various functions concurrently.
-    - Parallel goal pursuit: Multiple goals can be pursued at the same time, enabling work towards various objectives.
-    - Concurrent task execution: Multiple tasks can be in progress simultaneously, facilitating efficient action execution.
-    - Dynamic workflow management: Creates and manages workflows to organize and prioritize tasks.
-    - Decision-making: Generates decisions based on current context, roles, and goals.
-    - LLM integration: Utilizes language models for task execution and decision-making.
+    - Multi-role and multi-goal support
+    - Concurrent task execution
+    - Dynamic workflow management
+    - Decision-making based on context, roles, and goals
+    - LLM integration for task execution and decision-making
 
     Attributes:
-        execution_context (ExecutionContext): The execution context containing necessary services and state.
-        roles (List[Role]): Roles assigned to the Agency. Multiple roles can be active simultaneously.
-        goals (List[Goal]): Goals for the Agency. Multiple goals can be active at the same time.
-        workflow_manager (WorkflowManager): Manages workflows and tasks, supporting concurrent task execution.
-        framer (Framer): The Framer instance associated with this Agency.
-        llm_service (LLMService): The language model service for text generation and processing.
-        context (Dict[str, Any]): Additional context information for the Agency.
-        default_model (str): The default language model to use for text generation.
-
-    The Agency class serves as a crucial component in the Framer's architecture, enabling complex
-    decision-making and task management capabilities.
+        execution_context (ExecutionContext): Contains necessary services and state.
+        roles (List[Role]): Active roles assigned to the Agency.
+        goals (List[Goal]): Active goals for the Agency.
+        workflow_manager (WorkflowManager): Manages workflows and tasks.
+        framer (Framer): The associated Framer instance.
+        llm_service (LLMService): Language model service for text generation.
+        context (Dict[str, Any]): Additional context information.
+        default_model (str): Default language model for text generation.
     """
 
     def __init__(

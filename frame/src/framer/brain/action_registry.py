@@ -9,7 +9,11 @@ if TYPE_CHECKING:
     from frame.src.services import ExecutionContext
 
 logger = logging.getLogger(__name__)
-from frame.src.framer.agency import RoleStatus, GoalStatus
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from frame.src.framer.agency.roles import RoleStatus
+    from frame.src.framer.agency.goals import GoalStatus
 from frame.src.framer.brain.default_actions import (
     VALID_ACTIONS,
     extend_valid_actions,
@@ -65,8 +69,8 @@ class ActionRegistry:
         """
         soul_state = execution_context.soul.get_current_state() if execution_context and execution_context.soul else "No soul state available."
         recent_thoughts = execution_context.mind.get_all_thoughts()[-5:] if execution_context and execution_context.mind else []
-        active_roles = [role.name for role in execution_context.roles if role.status == RoleStatus.ACTIVE] if execution_context else []
-        active_goals = [goal.name for goal in execution_context.goals if goal.status == GoalStatus.ACTIVE] if execution_context else []
+        active_roles = [role.name for role in execution_context.roles if role.status == 'ACTIVE'] if execution_context else []
+        active_goals = [goal.name for goal in execution_context.goals if goal.status == 'ACTIVE'] if execution_context else []
 
         response = (
             f"I'm sorry, an error occurred: {error_message}. "
