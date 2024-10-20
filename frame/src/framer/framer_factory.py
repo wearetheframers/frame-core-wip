@@ -3,14 +3,15 @@ from frame.src.framer.framer import Framer
 
 # Import necessary components for Framer creation
 from frame.src.framer.config import FramerConfig
-from frame.src.services.llm.main import LLMService
-from frame.src.framer.agency.agency import Agency
-from frame.src.framer.brain.brain import Brain
-from frame.src.framer.soul.soul import Soul
+from frame.src.services.llm import LLMService
+from frame.src.framer.agency import Agency
+from frame.src.framer.brain import Brain
+from frame.src.framer.brain.mind import Mind
+from frame.src.framer.soul import Soul
 from frame.src.framer.agency.workflow import WorkflowManager
 from frame.src.services.context.execution_context_service import ExecutionContext
-from frame.src.services.memory.main import MemoryService
-from frame.src.services.eq.main import EQService
+from frame.src.services.memory import MemoryService
+from frame.src.services.eq import EQService
 from frame.src.constants.models import DEFAULT_MODEL
 import logging
 from frame.src.framer.agency.goals import Goal, GoalStatus
@@ -23,14 +24,22 @@ class FramerFactory:
     Factory class for creating Framer instances.
 
     This class encapsulates the logic for constructing Framer objects,
-    ensuring that all necessary components are properly initialized.
+    ensuring that all necessary components are properly initialized and configured.
 
-    The Framer includes a `halt()` method to stop its actions and task processing.
+    Key features:
+    - Creates fully initialized Framer instances with all required components
+    - Supports custom plugin integration for extended functionality
+    - Ensures proper initialization of core services like LLM, memory, and EQ
+    - Manages role and goal generation for the Framer
+    - Handles the loading and configuration of plugins
 
     The FramerFactory supports the creation of Framers with custom plugins,
     allowing for extensive customization and expansion of capabilities.
     This plugin system is designed to be as flexible and powerful as mods in games,
     enabling developers to create a wide range of extensions and enhancements.
+
+    Note: The Framer includes a `halt()` method to stop its actions and task processing,
+    which can be used for graceful shutdown or pausing of the Framer's operations.
     """
 
     def __init__(
@@ -84,9 +93,19 @@ class FramerFactory:
             "with_shared_context",
         ]
         roles, goals = await self._generate_roles_and_goals(agency, roles, goals)
+
+        # Initialize the Soul component with the provided or default seed
+        soul = Soul(seed=self.config.soul_seed)
+        # Initialize the WorkflowManager component
+        workflow_manager = WorkflowManager()
+        # Set the memory service if provided, otherwise create a new one
+        mem0_adapter = Mem0Adapter(api_key=self.config.mem0_api_key)
+        memory_service = memory_service or MemoryService(adapter=mem0_adapter)
+        # Initialize the Brain component with roles, goals, default model
         brain = Brain(
-            # Initialize the Brain component with roles, goals, and default model
             llm_service=self.llm_service,
+            execution_context=execution_context,
+            memory_service=memory_service,
             roles=roles,
             goals=goals,
             default_model=(
@@ -94,14 +113,11 @@ class FramerFactory:
                 if self.config.default_model
                 else DEFAULT_MODEL
             ),
+            soul=soul,
         )
-        # Initialize the Soul component with the provided or default seed
-        soul = Soul(seed=self.config.soul_seed)
-        # Initialize the WorkflowManager component
-        workflow_manager = WorkflowManager()
-        # Set the memory service if provided, otherwise create a new one
-        memory_service = memory_service or MemoryService(adapter=Mem0Adapter())
-
+        
+        # The Mind is now initialized within the Brain constructor
+        mind = brain.mind
         framer = Framer(
             config=self.config,
             llm_service=self.llm_service,
@@ -117,9 +133,9 @@ class FramerFactory:
         framer.agency.set_goals(goals)
         framer.agency.set_roles(roles)
 
-        # Set the Framer instance in Brain and ActionRegistry
+        # Set the Framer instance in Brain
         framer.brain.set_framer(framer)
-        framer.brain.agency.action_registry.set_framer(framer)
+        framer.brain.action_registry.set_framer(framer)
 
         # Notify observers about the Framer being opened
         for observer in framer.observers:

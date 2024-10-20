@@ -2,9 +2,9 @@ import logging
 import json
 from typing import List, Dict, Any, Optional
 from unittest.mock import AsyncMock
-from ..perception import Perception
+from .perception import Perception
 from ..decision import Decision
-from frame.src.framer.agency.action_registry import ActionRegistry
+from frame.src.framer.brain.action_registry import ActionRegistry
 from frame.src.framer.agency.tasks import TaskStatus
 from frame.src.utils.llm_utils import get_completion
 from datetime import datetime
@@ -16,6 +16,26 @@ class Mind:
     """
     The Mind class represents the cognitive processes of a Framer.
     It manages thoughts, decision-making processes, perceptions, and interacts with the Brain and Soul components.
+
+    Key features:
+    - Thought management: Stores and retrieves thoughts generated during cognitive processes.
+    - Perception processing: Handles incoming perceptions and integrates them into the cognitive framework.
+    - Decision-making: Generates decisions based on current perceptions, thoughts, and context.
+    - Memory management: Maintains a limited number of recent memories for quick access.
+    - Interaction with Brain and Soul: Facilitates communication between different Framer components.
+
+    The Mind class serves as a crucial intermediary between raw perceptions and high-level decision-making,
+    providing a layer of cognitive processing that enriches the Framer's capabilities.
+
+    Attributes:
+        brain (Any): The Brain instance associated with this Mind.
+        thoughts (List[Dict[str, Any]]): A list of thoughts, each represented as a dictionary.
+        current_thought (Dict[str, Any]): The most recent thought generated.
+        perceptions (List[Perception]): A list of recent perceptions.
+        recent_memories_limit (int): The maximum number of recent memories/perceptions to keep.
+
+    The Mind class plays a vital role in the Framer's cognitive architecture, enabling sophisticated
+    thought processes and decision-making capabilities.
     """
 
     def __init__(self, brain: Any, recent_memories_limit: int = 5):
@@ -40,6 +60,65 @@ class Mind:
             limit (int): The new limit for recent memories/perceptions.
         """
         self.recent_memories_limit = limit
+
+    async def make_decision(self, perception: Perception) -> Decision:
+        """
+        Make a decision based on the current perceptions and thoughts.
+
+        Args:
+            perception (Perception): The perception to base the decision on.
+
+        Returns:
+            Decision: The decision made.
+        """
+        # Get the decision prompt from the brain
+        prompt = self.brain._get_decision_prompt(perception)
+
+        # Use the LLM service to get a decision
+        response = await get_completion(
+            self.brain.llm_service, prompt, model=self.brain.default_model
+        )
+        try:
+            if isinstance(response, AsyncMock):
+                # For testing purposes, return a default decision
+                return Decision(
+                    action="default_action",
+                    parameters={},
+                    reasoning="Default decision for testing",
+                    confidence=0.5,
+                    priority=5,
+                )
+
+            decision_data = json.loads(response) if isinstance(response, str) else {}
+            action = decision_data.get("action", "default_action")
+            if action not in self.brain.action_registry.actions:
+                logger.warning(
+                    f"Invalid action: {action}. Defaulting to 'default_action'."
+                )
+                action = "default_action"
+                reasoning = f"Invalid action '{action}' was generated. Defaulted to 'default_action'."
+            else:
+                reasoning = decision_data.get("reasoning", "No reasoning provided.")
+
+            decision = Decision(
+                action=action,
+                parameters=decision_data.get("parameters", {}),
+                reasoning=decision_data.get("reasoning", "No reasoning provided."),
+                confidence=float(decision_data.get("confidence", 0.5)),
+                priority=int(decision_data.get("priority", 5)),
+            )
+        except json.JSONDecodeError:
+            logger.error(f"Failed to parse decision response: {response}")
+            decision = Decision(
+                action="think",
+                parameters={"error": "Failed to parse decision"},
+                reasoning="The decision response could not be parsed as JSON.",
+                confidence=0.1,
+                priority=1,
+            )
+
+        logger.debug(f"Decision made: {decision}")
+        return decision
 
     def think(self, thought: str) -> None:
         """

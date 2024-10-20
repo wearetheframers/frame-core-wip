@@ -188,13 +188,18 @@ async def main():
     framer = await frame.create_framer(config)
 
     # Add memories
-    framer.memory_service.store("My favorite color is blue.", user_id="user1")
-    framer.memory_service.store("I have a dentist appointment on October 20th.", user_id="user1")
+    if framer.brain and framer.brain.memory:
+        framer.brain.memory.store("My favorite color is blue.", user_id="user1")
+        framer.brain.memory.store("I have a dentist appointment on October 20th.", user_id="user1")
+        framer.brain.memory.store("I plan to visit Hawaii for my vacation.", user_id="user1")
+    else:
+        print("Brain or Memory service is not initialized. Unable to store memories.")
 
     # Queries
     queries = [
         "What is my favorite color?", # Framer considers this question for memory retrieval
         "When is my next appointment?", # Framer considers this question for memory retrieval
+        "What are my vacation plans?", # Framer considers this question for memory retrieval
         "What is the capital of France?" # Framer considers this question as general knowledge it knows
     ]
 
@@ -210,7 +215,7 @@ async def main():
 asyncio.run(main())
 ```
 
-- **Memory Retrieval**: The Framer retrieves personal information like favorite color and appointment details from memory.
+- **Memory Retrieval**: The Framer retrieves personal information like favorite color, appointment details, and vacation plans from memory.
 - **General Knowledge**: For questions like the capital of France, the Framer uses general knowledge without memory retrieval.
 - **Decision Making**: The Framer decides whether to use memory based on the query context.
 

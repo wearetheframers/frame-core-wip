@@ -9,7 +9,8 @@ from frame.src.services.llm.main import LLMService
 from frame.src.services.context.shared_context_service import SharedContext
 from frame.src.framer.config import FramerConfig
 from frame.src.framer.agency import Agency
-from frame.src.framer.brain import Brain
+from frame.src.framer.brain.brain import Brain
+from frame.src.framer.brain.mind.mind import Mind
 from frame.src.framer.soul import Soul
 from frame.src.framer.agency.workflow import WorkflowManager
 from frame.src.framer.agency.tasks.task import Task
@@ -19,12 +20,7 @@ from frame.src.utils.config_parser import (
     parse_markdown_config,
     export_config_to_markdown,
 )
-from frame.src.utils.llm_utils import (
-    get_completion,
-    choose_best_model_for_tokens,
-)
-from frame.src.utils.token_utils import calculate_token_size
-from frame.src.framer.brain.perception import Perception
+from frame.src.framer.brain.mind.perception import Perception
 from frame.src.framer.brain.decision import Decision
 from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import DSPyAdapter
 from frame.src.services import MemoryService
@@ -32,9 +28,8 @@ from frame.src.framer.brain.memory.memory_adapter_interface import (
     MemoryAdapterInterface,
 )
 from frame.src.services import EQService
-from frame.src.utils.metrics import MetricsManager
-from frame.src.services import ExecutionContext
 from frame.src.framer.agency.goals import GoalStatus
+from frame.src.services.context import ExecutionContext
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
 
 Observer = Callable[[Decision], None]
@@ -45,24 +40,39 @@ logger = logging.getLogger("frame.framer")
 class Framer:
     perceptions_queue: Deque[Union[Perception, Dict[str, Any]]] = deque()
     """
-    The Framer class represents an AI agent with cognitive capabilities. It integrates various components
+    The Framer class represents an AI agent with advanced cognitive capabilities. It integrates various components
     such as agency, brain, soul, and workflow management to create a comprehensive AI entity capable of
-    processing perceptions, making decisions, and executing tasks.
+    processing perceptions, making decisions, and executing tasks in a context-aware manner.
+
+    Key features:
+    - Perception processing and decision-making
+    - Task execution and workflow management
+    - Memory management and retrieval
+    - Emotional intelligence integration
+    - Plugin system for extensibility
+    - Role and goal management
+    - Observer pattern for decision notifications
 
     Attributes:
         config (FramerConfig): Configuration settings for the Framer.
-        llm_service (LLMService): The language model service to be used by the Framer.
+        llm_service (LLMService): The language model service used by the Framer for text generation and processing.
         agency (Agency): Manages roles, goals, tasks, and workflows for the Framer.
         brain (Brain): Handles decision-making processes, integrating perceptions, memories, and thoughts.
-        soul (Soul): Represents the core essence and personality of a Framer.
+        soul (Soul): Represents the core essence and personality of the Framer.
         workflow_manager (WorkflowManager): Manages workflows and tasks.
-        memory_service (Optional[MemoryService]): Service for managing memory. Default is None.
+        memory_service (Optional[MemoryService]): Service for managing and retrieving memories. Default is None.
         eq_service (Optional[EQService]): Service for managing emotional intelligence. Default is None.
         roles (Optional[List[Dict[str, Any]]]): List of roles for the Framer. Default is None.
         goals (Optional[List[Dict[str, Any]]]): List of goals for the Framer. Default is None.
         observers (List[Observer]): List of observer functions to notify on decisions.
         can_execute (bool): Determines if decisions are executed automatically. Default is True.
         acting (bool): Indicates if the Framer is actively processing perceptions. Default is False.
+        plugins (Dict[str, Any]): Dictionary of loaded plugins for extended functionality.
+        plugin_loading_complete (bool): Indicates whether all plugins have been loaded.
+        permissions (List[str]): List of permissions granted to the Framer.
+
+    The Framer class serves as the central coordinator for all AI agent operations, managing the interplay
+    between various components to create a cohesive and intelligent entity.
     """
 
     def __init__(
@@ -70,9 +80,10 @@ class Framer:
         config: FramerConfig,
         llm_service: LLMService,
         agency: Agency,
-        brain: Brain,
         soul: Soul,
         workflow_manager: WorkflowManager,
+        brain: Brain = None,
+        execution_context: Optional[ExecutionContext] = None,
         memory_adapter: Optional[MemoryAdapterInterface] = None,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
@@ -90,6 +101,7 @@ class Framer:
             "with_mem0_search_extract_summarize_plugin",
             "with_shared_context",
         ]
+        self.llm_service = llm_service
 
         # Initialize services and plugins based on permissions
         # Services like memory, eq, and shared_context are special plugins called services.
@@ -111,8 +123,10 @@ class Framer:
         if "with_shared_context" in self.permissions:
             self.shared_context_service = SharedContext()
 
+        if not execution_context:
+            execution_context = ExecutionContext(llm_service=self.llm_service)
+
         self.config = config
-        self.llm_service = llm_service
         self.agency = agency
         self.brain = brain
         self.soul = soul
@@ -127,7 +141,15 @@ class Framer:
         self.config = config
         self.llm_service = llm_service
         self.agency = agency
-        self.brain = brain
+        self.brain = Brain(
+            llm_service=llm_service,
+            execution_context=execution_context,
+            memory_service=memory_service,
+            roles=roles,
+            goals=goals,
+            default_model=config.default_model,
+            soul=soul
+        )
         self.soul = soul
         self.workflow_manager = workflow_manager
         self.memory_service = memory_service
@@ -152,9 +174,9 @@ class Framer:
         for plugin_name, plugin_instance in self.plugins.items():
             if hasattr(plugin_instance, "on_load"):
                 await plugin_instance.on_load(self)
-                # Register plugin actions
+                # Register plugin actions in the brain's action_registry
                 for action_name, action_func in plugin_instance.get_actions().items():
-                    self.agency.action_registry.add_action(
+                    self.brain.action_registry.add_action(
                         action_name,
                         action_func=action_func,
                         description=f"Action from {plugin_name} plugin",
@@ -356,36 +378,30 @@ class Framer:
             logger.warning("Framer is not ready. Queuing perception.")
             self.perceptions_queue.append(perception)
             return None  # Return None to indicate the perception was queued
-        """
-        Process a perception and make a decision.
 
-        Args:
-            perception (Union[Perception, Dict[str, Any]]): The perception to process, can be a Perception object or a dictionary.
-
-        Returns:
-            Decision: The decision made based on the perception.
-        """
-        if not self.plugin_loading_complete or not self.acting:
-            logger.warning("Framer is not ready. Queuing perception.")
-            self.perceptions_queue.append(perception)
-            return None  # Return None to indicate the perception was queued
         # Convert perception to Perception object if it is a dictionary
         if isinstance(perception, dict):
             perception = Perception.from_dict(perception)
         current_goals = self.agency.get_goals()
         decision = await self.brain.process_perception(perception, current_goals)
 
-        # Consider goal status in decision-making
-        active_goals = [
-            goal for goal in current_goals if goal.status == GoalStatus.ACTIVE
-        ]
-        if active_goals:
-            decision.reasoning += f" (Aligned with {len(active_goals)} active goals)"
+        if decision:
+            if isinstance(decision, dict):
+                decision = Decision(**decision)
+            # Consider goal status in decision-making
+            active_goals = [
+                goal for goal in current_goals if goal.status == GoalStatus.ACTIVE
+            ]
+            if active_goals:
+                decision.reasoning += f" (Aligned with {len(active_goals)} active goals)"
 
-        if hasattr(self, "can_execute") and self.can_execute:
-            await self.brain.execute_decision(decision)
-        logger.debug(f"Processed perception: {perception}, Decision: {decision}")
-        self.notify_observers(decision)
+            if hasattr(self, "can_execute") and self.can_execute:
+                await self.execute_decision(decision)
+            logger.debug(f"Processed perception: {perception}, Decision: {decision}")
+            self.notify_observers(decision)
+        else:
+            logger.warning("No decision was made for the given perception.")
+
         return decision
 
     async def prompt(self, text: str) -> Decision:
@@ -434,6 +450,14 @@ class Framer:
         for plugin in self.plugins.values():
             if hasattr(plugin, "on_decision_made"):
                 plugin.on_decision_made(decision)
+
+    def halt(self):
+        """
+        Stop the Framer from processing further actions and tasks.
+        """
+        self.acting = False
+        self.can_execute = False
+        logger.info("Framer halted. No further actions or tasks will be processed.")
 
     async def generate_tasks_from_perception(
         self,

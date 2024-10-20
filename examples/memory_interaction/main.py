@@ -43,16 +43,13 @@ async def main():
             "with_mem0_search_extract_summarize_plugin",
             "with_shared_context",
         ],
+        mem0_api_key=os.environ.get("MEM0_API_KEY")
     )
-    mem0_adapter = Mem0Adapter(api_key=config.get("MEM0_API_KEY"))
-    memory_service = MemoryService(adapter=mem0_adapter)
-    print("Memory service created: ", memory_service)
     print("Plugins: ", frame.plugins)
     print("Permissions: ", config.permissions)
-    framer = await frame.framer_factory.create_framer(
-        memory_service=memory_service, plugins=frame.plugins
-    )
+    framer = await frame.framer_factory.create_framer(plugins=frame.plugins)
     mem0_plugin = Mem0SearchExtractSummarizePlugin(framer)
+    print("Memory service created: ", framer.brain.memory_service)
 
     # framer.brain.agency.action_registry.add_action(
     #     "respond with memory retrieval",
@@ -74,9 +71,10 @@ async def main():
     print("\t- My favorite color is blue.")
     print("\t- I have a dentist appointment on October 20th.")
     print("\t- I plan to visit Hawaii for my vacation.")
-    # framer.memory_service.store("My favorite color is blue.", user_id="user1")
-    # framer.memory_service.store("I have a dentist appointment on October 20th.", user_id="user1")
-    # framer.memory_service.store("I plan to visit Hawaii for my vacation.", user_id="user1")
+    print(framer.memory_service)
+    framer.brain.memory.store("My favorite color is blue.", user_id="user1")
+    framer.brain.memory.store("I have a dentist appointment on October 20th.", user_id="user1")
+    framer.brain.memory.store("I plan to visit Hawaii for my vacation.", user_id="user1")
     print("All memories added.")
     # Query the Framer for personal details
     queries = [
@@ -90,7 +88,7 @@ async def main():
 
     random.shuffle(queries)
     for query in queries:
-        print(f"Query: {query}")
+        print(f"\nQuery: {query}")
         perception = {"type": "hearing", "data": {"text": query}}
         decision = await framer.sense(perception)
         if decision is not None:
@@ -98,10 +96,15 @@ async def main():
             logger.info(f"Reasoning: {decision.reasoning}")
 
             # Execute the decision and get the result
-            result = await framer.agency.execute_decision(decision)
+            result = await framer.brain.execute_decision(decision)
 
             # Print the result of the decision
-            print(f"Response: {result}\n")
+            if isinstance(result, dict) and 'output' in result:
+                print(f"Response: {result['output']}\n")
+            elif isinstance(result, dict) and 'error' in result:
+                print(f"Error: {result['error']}\n")
+            else:
+                print(f"Response: {result}\n")
         else:
             logger.warning("Decision is None, perception was queued.")
 

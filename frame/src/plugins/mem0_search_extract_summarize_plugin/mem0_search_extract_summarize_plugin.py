@@ -1,10 +1,20 @@
 """
 Mem0SearchExtractSummarizePlugin
 
-This plugin provides a mechanism to look into memories, retrieve relevant information, and share insights,
+This plugin provides a mechanism to search memories, extract relevant information, and generate summarized insights,
 functioning as a Retrieval-Augmented Generation (RAG) mechanism. It is automatically included when the
 'with-memory' permission is granted to a Framer, ensuring that memory-based responses are comprehensive
 and contextually relevant.
+
+The plugin enhances the Framer's ability to provide informed responses by leveraging stored memories
+and contextual information. It integrates seamlessly with the Mem0 memory system to facilitate
+efficient memory retrieval and summarization.
+
+Key features:
+- Memory search based on user queries
+- Relevant information extraction from memories
+- Summarization of extracted information
+- Integration with the Framer's action registry for easy invocation
 
 Note: This plugin might be refactored into a core component in the future to streamline its integration
 and usage within the Frame framework.
@@ -46,7 +56,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         if not api_key:
             api_key = MEM0_API_KEY
         if api_key:
-            framer.agency.action_registry.add_action(
+            framer.brain.action_registry.add_action(
                 "respond with memory retrieval",
                 description="This action is ideal for responding to personal questions that involve historical or memory-based "
                 "information about the user or the Framer. It leverages the Framer's memory to retrieve relevant data "
@@ -58,17 +68,16 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
                 priority=8,
             )
             self.logger.info(
-                "Mem0SearchExtractSummarizePlugin registered 'response with memory retrieval' action."
+                "Mem0SearchExtractSummarizePlugin registered 'respond with memory retrieval' action."
             )
             # Remove respond action
-            if "respond" in framer.agency.action_registry.get_all_actions():
-                self.logger.info("Removing 'respond' action from registry.")
-                framer.agency.action_registry.remove_action("respond")
-                exit()
-            else:
-                self.logger.warning(
-                    "Action 'respond' not found in registry. Skipping removal."
-                )
+            # if "respond" in framer.brain.action_registry.get_all_actions():
+                # self.logger.info("Removing 'respond' action from registry.")
+                # framer.agency.action_registry.remove_action("respond")
+            # else:
+                # self.logger.warning(
+                    # "Action 'respond' not found in registry. Skipping removal."
+                # )
         else:
             self.logger.warning(
                 "Mem0 API key not found or is empty. Action 'response with memory retrieval' will not be registered."
@@ -151,8 +160,11 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         model_name: str = "gpt-4o-mini",
         text_response: Optional[str] = None,
     ) -> str:
+        self.logger.info(f"mem0_search_extract_summarize called with query: {query}")
         if not query:
-            raise ValueError("Query cannot be null or empty.")
+            self.logger.warning("Query is empty. Returning default response.")
+            return "I'm sorry, but I don't have any specific information about that in my memory. Could you please provide more context or ask a different question?"
+        
         # Ensure the query is a string
         if not isinstance(query, str):
             query = str(query)
@@ -162,6 +174,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         if not any([user_id, agent_id, run_id]):
             user_id = "default"
 
+        self.logger.info(f"Searching with user_id: {user_id}, agent_id: {agent_id}, run_id: {run_id}")
         search_results = self.mem0_adapter.search(
             query, user_id=user_id, agent_id=agent_id, run_id=run_id, filters=filters
         )
@@ -169,7 +182,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         self.logger.debug(f"Search results: {search_results}")
 
         if not search_results:
-            return "No relevant information found in Mem0."
+            return "I don't have any specific information about that in my memory. Is there anything else I can help you with?"
 
         # Filter search results by memory text (remove same text results)
         search_results = self.filter_search_results(search_results)

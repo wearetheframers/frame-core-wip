@@ -31,7 +31,6 @@ class BasePlugin(ABC):
             name (str): The name of the action to remove.
         """
         if name in self.framer.brain.action_registry.actions:
-            # del self.framer.brain.action_registry.actions[name]
             self.framer.brain.action_registry.remove_action(name)
             print(f"Action '{name}' removed from registry.")
         else:

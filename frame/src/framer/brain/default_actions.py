@@ -17,7 +17,6 @@ VALID_ACTIONS = [
     ResearchAction,
 ]
 
-
 def extend_valid_actions(new_actions: List[str]) -> None:
     """
     Extend the VALID_ACTIONS dictionary with new actions.
@@ -26,3 +25,4 @@ def extend_valid_actions(new_actions: List[str]) -> None:
         new_actions (List[str]): A list of new actions to add.
     """
     VALID_ACTIONS.extend(new_actions)
+

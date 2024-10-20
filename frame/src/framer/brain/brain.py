@@ -1,26 +1,25 @@
 import json
 import logging
-import ast
-import time
-import asyncio
-from asyncio import Future
 import re
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
-from frame.src.framer.agency import Agency
-from frame.src.framer.brain.perception import Perception
-from frame.src.framer.agency import ActionRegistry
-from frame.src.framer.brain.decision import Decision
-from frame.src.framer.brain.mind import Mind
-from frame.src.framer.brain.memory import Memory
-from frame.src.utils.llm_utils import get_llm_provider, get_completion
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union, Callable
+from frame.src.utils.llm_utils import get_llm_provider
 from frame.src.services.llm.main import LLMService
-from frame.src.services.llm.llm_adapters.lmql.lmql_adapter import LMQLConfig
-from frame.src.framer.soul.soul import Soul
-from frame.src.framer.agency.roles import Role, RoleStatus
-from frame.src.framer.agency.goals import Goal, GoalStatus
-from frame.src.framer.agency.priority import Priority
-from frame.src.services.execution_context import ExecutionContext
+from frame.src.framer.soul import Soul
+from frame.src.framer.agency import Role, RoleStatus
+from frame.src.framer.agency import Goal, GoalStatus
+from frame.src.framer.agency import Priority
 from frame.src.framer.config import FramerConfig
+from frame.src.framer.agency.agency import Agency
+from .action_registry import ActionRegistry
+from .decision import Decision
+from .mind import Mind
+from .mind.perception import Perception
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from frame.src.services.context.execution_context_service import ExecutionContext
+from frame.src.services.memory.main import MemoryService
+from frame.src.framer.brain.memory.memory import Memory
 
 logger = logging.getLogger(__name__)
 formatter = logging.Formatter(
@@ -29,104 +28,94 @@ formatter = logging.Formatter(
 for handler in logger.handlers:
     handler.setFormatter(formatter)
 
-
-import logging
-
-
 class Brain:
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    """
-    The Brain class represents the decision-making component of the Framer.
 
-    It processes perceptions, makes decisions, and executes actions based on those decisions.
-    The Brain uses a set of VALID_ACTIONS to determine which actions can be executed.
-    VALID_ACTIONS are derived from the ActionRegistry and default actions.
+    """
+    The Brain class represents the central decision-making and cognitive processing component of the Framer.
+
+    It is responsible for processing perceptions, making decisions, and executing actions based on those decisions.
+    The Brain integrates various cognitive functions, including perception processing, decision-making,
+    memory management, and action execution.
+
+    Key features:
+    - Perception processing: Analyzes and interprets incoming perceptions.
+    - Decision-making: Generates decisions based on current context, roles, goals, and perceptions.
+    - Action execution: Executes decided actions using the action registry.
+    - Memory integration: Utilizes the memory service for storing and retrieving information.
+    - LLM integration: Uses language models for generating responses and making decisions.
+    - Role and goal management: Considers active roles and goals in the decision-making process.
+
+    The Brain uses a set of valid actions, derived from the ActionRegistry and default actions,
+    to determine which actions can be executed. This ensures that all actions are within the
+    defined capabilities of the Framer.
+
+    Attributes:
+        llm_service (LLMService): The language model service for text generation and processing.
+        default_model (str): The default language model to use.
+        roles (List[Dict[str, Any]]): List of roles for the Brain.
+        goals (List[Dict[str, Any]]): List of goals for the Brain.
+        soul (Optional[Soul]): The Soul instance associated with this Brain.
+        execution_context (Optional[ExecutionContext]): The execution context for the Brain.
+        mind (Mind): The Mind instance for cognitive processing.
+        memory_service (Optional[MemoryService]): The memory service for storing and retrieving information.
+        action_registry (ActionRegistry): Registry of available actions.
+
+    The Brain class serves as the cognitive core of the Framer, coordinating various components
+    to enable intelligent decision-making and action execution.
     """
 
     def __init__(
         self,
         llm_service: LLMService,
-        roles: List[Dict[str, Any]],
-        goals: List[Dict[str, Any]],
+        execution_context: Optional['ExecutionContext'] = None,
+        memory_service: Optional[MemoryService] = None,
+        roles: List[Dict[str, Any]] = [],
+        goals: List[Dict[str, Any]] = [],
         default_model: str = "gpt-3.5-turbo",
-        recent_memories_limit: int = 5,
         soul: Optional[Soul] = None,
-        execution_context: Optional[ExecutionContext] = None,
     ):
         """
         Initialize the Brain with the necessary components.
 
         Args:
             llm_service (LLMService): The language model service.
+            execution_context (Optional['ExecutionContext']): The execution context.
+            memory_service (Optional[MemoryService]): The memory service.
             roles (List[Dict[str, Any]]): Initial roles for the Brain.
             goals (List[Dict[str, Any]]): Initial goals for the Brain.
             default_model (str): The default language model to use.
-            recent_memories_limit (int): The number of recent memories to keep. Defaults to 5.
             soul (Optional[Soul]): The Soul instance for the Brain.
-            execution_context (Optional[ExecutionContext]): The execution context for the Brain.
         """
         self.llm_service = llm_service
+        self.execution_context = execution_context
         self.default_model = default_model
         self.roles = roles
         self.goals = goals
         self.soul = soul
-        self.execution_context = execution_context or ExecutionContext(
-            llm_service=llm_service,
-            soul=soul,
-            config=FramerConfig(name="DefaultFramer", default_model=default_model),
-        )
+        self.memory_service = memory_service
+        self.memory = Memory(self.memory_service) if self.memory_service else None
+        self.mind = Mind(self)
+        # Initialize ActionRegistry
+        self.action_registry = ActionRegistry()
 
-        self.mind = Mind(self, recent_memories_limit)
+    def set_memory_service(self, memory_service: Optional['MemoryService']):
+        """
+        Set the memory service for the Brain.
 
-        memory_config = {
-            "llm": {
-                "provider": get_llm_provider(self.default_model),
-                "config": {
-                    "model": self.default_model,
-                },
-            }
-        }
-        self.memory = Memory(memory_config)
-
-        # Initialize Agency
-        self.agency = Agency(
-            llm_service=self.llm_service,
-            context=None,
-            execution_context=ExecutionContext(
-                llm_service=self.llm_service,
-                process_perception=self.process_perception,
-                execute_decision=self.execute_decision,
-                config=FramerConfig(
-                    name=(
-                        self.framer.config.name
-                        if hasattr(self, "framer")
-                        else "DefaultFramer"
-                    ),
-                    default_model=self.default_model,
-                ),
-            ),
-        )
-
-        # Register the respond action using the agency's perform_task method
-        self.agency.action_registry.add_action(
-            "respond",
-            description="Generate a response based on the current context",
-            action_func=self.agency.perform_task,
-            priority=5,
-        )
-
-        # Update the agency's action_registry
-        self.agency.action_registry = self.agency.action_registry
+        Args:
+            memory_service (Optional[MemoryService]): The memory service to set.
+        """
+        self.memory_service = memory_service
+        if self.memory_service:
+            self.memory = Memory(self.memory_service)
+            logger.info(f"Set memory service: {self.memory_service}")
+        else:
+            self.memory = None
+            logger.warning("Memory service is not set. Memory operations will not be available.")
 
     def set_framer(self, framer):
         self.framer = framer
-        if hasattr(self.agency, "set_framer"):
-            self.agency.set_framer(framer)
-        else:
-            logger.warning(
-                "Agency does not have a set_framer method. This might cause issues."
-            )
 
     def get_framer(self):
         return self.framer
@@ -169,8 +158,6 @@ class Brain:
         Returns:
             Any: The parsed JSON data or an error dictionary.
         """
-        result = None
-        result = None
         result = None
         try:
             # Remove trailing commas from the response
@@ -219,18 +206,18 @@ class Brain:
             roles (List[Role]): List of Role objects to set.
         """
         self.roles = roles
-        self.agency.set_roles(roles)
+        self.execution_context.set_roles(roles)
 
     async def process_perception(
         self,
-        perception: Union[Perception, Dict[str, Any]],
+        perception: Union['Perception', Dict[str, Any]],
         goals: Optional[List[Goal]] = None,
-    ) -> Decision:
+    ) -> 'Decision':
         """
         Process a perception and make a decision based on it.
 
         Args:
-            perception (Union[Perception, Dict[str, Any]]): The perception to process.
+            perception (Union['Perception', Dict[str, Any]]): The perception to process.
             goals (Optional[List[Goal]]): List of Goal objects to set.
 
         Returns:
@@ -238,7 +225,7 @@ class Brain:
         """
         if goals is not None:
             self.goals = goals
-            self.agency.set_goals(goals)
+            self.execution_context.set_goals(goals)
 
         # Convert perception to Perception object if it is a dictionary
         if isinstance(perception, dict):
@@ -246,7 +233,7 @@ class Brain:
 
         self.mind.perceptions.append(perception)
         # Log available actions
-        available_actions = self.agency.action_registry.get_all_actions().keys()
+        available_actions = self.action_registry.get_all_actions().keys()
         self.logger.info(f"Available actions: {available_actions}")
 
         # Check if 'mem0_search_extract_memories' is a valid action
@@ -257,9 +244,9 @@ class Brain:
 
         decision = await self.make_decision(perception)
         if decision is None:
-            logger.error("Failed to make a decision. Returning default decision.")
+            self.logger.warning("Failed to make a decision. Returning default decision.")
             decision = Decision(
-                action="error",
+                action="no_action",
                 parameters={},
                 reasoning="Failed to make a decision",
                 confidence=0.0,
@@ -268,7 +255,8 @@ class Brain:
                 related_goals=[],
             )
         if hasattr(self, "framer") and getattr(self.framer, "can_execute", False):
-            await self.execute_decision(decision, perception)
+            result = await self.execute_decision(decision, perception)
+            return result
         return decision
 
     async def make_decision(self, perception: Optional[Perception] = None) -> Decision:
@@ -303,18 +291,18 @@ class Brain:
         action = decision_data.get("action", "respond").lower()
         valid_actions = [
             str(action).lower()
-            for action in self.agency.action_registry.get_all_actions().keys()
+            for action in self.action_registry.get_all_actions().keys()
         ]
 
         # Check if the action is valid
         if action not in valid_actions:
             # If the action is not valid, check if it's related to web search or summarization
-            if any(keyword in action for keyword in ["search", "summarize", "extract"]):
-                action = "search_extract_summarize"
+            if any(keyword in action for keyword in ["search", "summarize", "extract", "memory"]):
+                action = "respond with memory retrieval"
                 decision_data["action"] = action
                 decision_data["reasoning"] = (
                     f"Action '{action}' was generated based on the perception. "
-                    f"Using the search_extract_summarize plugin to process this request."
+                    f"Using the memory retrieval plugin to process this request."
                 )
             else:
                 invalid_action = action
@@ -332,7 +320,7 @@ class Brain:
         logger.info(f"Action '{action}' generated: {decision_data}")
 
         parameters = decision_data.get("parameters", {})
-        if action == "mem0_search_extract_summarize" and "query" not in parameters:
+        if action == "respond with memory retrieval" and "query" not in parameters:
             parameters["query"] = perception.data.get("text", "")
         elif "topic" in parameters:
             parameters["research_topic"] = parameters.pop("topic")
@@ -342,12 +330,14 @@ class Brain:
         reasoning = decision_data.get("reasoning", "No reasoning provided.")
 
         # Check if goals are None and generate them if necessary
-        if self.agency.goals is None:
-            _, self.agency.goals = await self.agency.generate_roles_and_goals()
+        if self.execution_context and not self.execution_context.get_goals():
+            # Assuming the execution_context has a method to generate goals
+            goals = await self.execution_context.generate_goals()
+            self.execution_context.set_goals(goals)
 
         # Consider role and goal priorities when setting decision priority
         active_roles = [role for role in self.roles if role.status == RoleStatus.ACTIVE]
-        active_goals = [goal for goal in self.goals if goal.status == GoalStatus.ACTIVE]
+        active_goals = [goal for goal in self.execution_context.get_goals() if goal.status == GoalStatus.ACTIVE]
         roles_priority = max(
             [role.priority for role in active_roles], default=Priority.MEDIUM
         )
@@ -400,7 +390,7 @@ class Brain:
         Returns:
             str: The generated decision prompt.
         """
-        valid_actions = self.agency.action_registry.valid_actions
+        valid_actions = self.action_registry.valid_actions
         # action_descriptions = "\n".join(
         #     [
         #         f"- {name.lower()}: {info['description']}"
@@ -432,7 +422,7 @@ class Brain:
         {json.dumps(active_goals, indent=2)}
 
         Valid actions are:
-        {json.dumps({str(action): f"{self.agency.action_registry.actions[action]['description']} (Priority: {self.agency.action_registry.actions[action]['priority']})" for action in self.agency.action_registry.actions}, indent=2)}
+        {json.dumps({str(action): f"{self.action_registry.actions[action]['description']} (Priority: {self.action_registry.actions[action]['priority']})" for action in self.action_registry.actions}, indent=2)}
         
         For each perception, carefully evaluate:
         - The type and content of the perception
@@ -495,46 +485,37 @@ class Brain:
 
         Args:
             decision (Decision): The decision to execute.
+            perception (Optional[Perception]): The perception that led to this decision.
         """
         logger.info(
             f"Executing decision: {decision.action} with params {decision.parameters}"
         )
         result = None
         try:
-            if decision.action not in self.agency.action_registry.get_all_actions():
-                logger.error("Action not found in registry.")
+            if decision.action not in self.action_registry.get_all_actions():
                 logger.error(f"Action '{decision.action}' not found in registry.")
                 return None
 
-            # For 'respond' action, ensure 'content' is passed correctly
-            if (
-                decision.action == "respond with memory retrieval"
-                and "query" not in decision.parameters
-            ):
-                decision.parameters["query"] = decision.parameters.get("text", "")
+            if decision.action == "respond with memory retrieval":
+                if "query" not in decision.parameters:
+                    decision.parameters["query"] = perception.data.get("text", "") if perception else ""
             elif decision.action == "respond":
-                # For 'respond' action, we'll use the agency's perform_task method directly
-                result = await self.agency.perform_task(
+                # Use the execution_context to perform the task
+                result = await self.execution_context.perform_task(
                     {
                         "description": decision.parameters.get("content", ""),
                         "workflow_id": "default",
                     }
                 )
             else:
-                # Ensure 'perception' is included in parameters if needed
-                if (
-                    decision.action == "process_perception"
-                    and "perception" not in decision.parameters
-                ):
-                    decision.parameters["perception"] = perception.data
+                if decision.action == "process_perception" and "perception" not in decision.parameters:
+                    decision.parameters["perception"] = perception.data if perception else None
 
-                result = await self.agency.action_registry.execute_action(
-                    decision.action, decision.parameters
-                )
-
-            logger.info(
-                f"Action result: {result} with reasoning: {decision.reasoning}."
+            result = await self.action_registry.execute_action(
+                decision.action, decision.parameters
             )
+
+            logger.info(f"Action result: {result} with reasoning: {decision.reasoning}.")
 
         except Exception as e:
             logger.error(f"Error executing decision: {e}")
@@ -542,6 +523,61 @@ class Brain:
             result = {"error": str(e)}
 
         return result
+
+    async def execute_action(self, action_name: str, parameters: dict):
+        """Execute an action by its name using the action registry."""
+        return await self.action_registry.execute_action(action_name, parameters)
+
+    async def _execute_decision(self, decision: Decision) -> Any:
+        """
+        Execute the decision made by the brain.
+
+        Args:
+            decision (Decision): The decision to execute.
+
+        Returns:
+            Any: The result of executing the decision.
+        """
+        logger.debug(f"Executing decision: {decision.action}")
+        logger.debug(f"Decision parameters: {decision.parameters}")
+        result = None
+        try:
+            # Pass priorities to the LLM to help prioritize tasks based on relevance
+            for (
+                action_name,
+                action_info,
+            ) in self.action_registry.get_all_actions().items():
+                if action_name == decision.action:
+                    if action_name == "think":
+                        result = await self._execute_think_action(decision)
+                    elif action_name == "respond":
+                        result = await self.perform_task(
+                            {
+                                "description": decision.parameters.get("content", ""),
+                                "workflow_id": "default",
+                            }
+                        )
+                    else:
+                        print(f"Executing action: {action_name}")
+                        print("Action info: ", action_info)
+                        result = await self.action_registry.execute_action(
+                            action_name, decision.parameters
+                        )
+                    break
+            else:
+                raise ValueError(f"Action '{decision.action}' not found in registry.")
+
+            logger.info(f"Executed action: {decision.action}")
+            logger.debug(f"Action result: {result}")
+            logger.debug(f"Decision reasoning: {decision.reasoning}")
+
+        except Exception as e:
+            logger.error(f"Error executing decision: {e}")
+            logger.exception("Detailed traceback:")
+            result = {"error": str(e)}
+
+        return result
+
 
     async def _execute_think_action(self, decision: Decision):
         """

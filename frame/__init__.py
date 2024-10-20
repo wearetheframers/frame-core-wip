@@ -74,8 +74,8 @@ from frame.src.framer.agency.workflow import WorkflowManager
 from frame.src.framer.agency.workflow.workflow import Workflow
 from frame.src.framer.agency.tasks.task import Task
 from frame.src.services import LLMService
-from frame.src.framer.brain.perception import Perception
 from frame.src.framer.brain.decision import Decision
+from frame.src.framer.brain.mind.perception import Perception
 from frame.src.framer.framer_factory import FramerBuilder
 from frame.src.framed.framed_factory import FramedBuilder
 from frame.src.services import MemoryService

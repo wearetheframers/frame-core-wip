@@ -2,7 +2,6 @@ from enum import IntEnum
 from typing import Union
 from typing import Union
 
-
 """
 Priority levels and their meanings:
 1. LOWEST: Minimal urgency, can be deferred indefinitely.
@@ -16,7 +15,6 @@ Priority levels and their meanings:
 9. HIGHEST: Extremely high urgency, requires immediate action.
 10. CRITICAL: Maximum urgency, critical action needed immediately.
 """
-
 
 class Priority(IntEnum):
     LOWEST = 1

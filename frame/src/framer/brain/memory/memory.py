@@ -1,10 +1,8 @@
 import logging
 from typing import Dict, Any, List, Optional
-from typing import Dict, Any, List, Optional
-from frame.src.framer.brain.memory.memory_adapters.mem0.mem0_adapter import Mem0Adapter
+from frame.src.services.memory.main import MemoryService
 
 logger = logging.getLogger(__name__)
-
 
 class Memory:
     """
@@ -14,97 +12,69 @@ class Memory:
     memories are stored in a global context. When multiple user IDs are provided, the
     memory retrieval process searches across all specified user IDs.
 
-    This is achieved using the Mem0Adapter, which abstracts away the
-    underlying storage solution and provides a flexible interface for memory operations.
+    This class now uses the MemoryService for all memory operations.
     """
 
-    def __init__(self, config: Dict[str, Any]):
-        self.core = {}
-        self.short_term = []
-        self.mem0 = Mem0Adapter()
-        self.user_id = config.get("user_id", "default")
+    def __init__(self, memory_service: Optional[MemoryService] = None):
+        self.memory_service = memory_service
+        self.user_id = "default"
 
-    def get_core_memory(self, key: str) -> Any:
+    def store(self, memory: str, user_id: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
         """
-        Retrieve a specific core memory by its key.
+        Store a memory using the memory service.
 
         Args:
-            key (str): The key of the memory to retrieve.
-
-        Returns:
-            Any: The retrieved memory data, or None if not found.
+            memory (str): The memory to store.
+            user_id (Optional[str]): The user ID to associate with the memory.
+            metadata (Optional[Dict[str, Any]]): Additional metadata for the memory.
         """
-        core_memory = self.core.get(key)
-        if core_memory is not None:
-            return core_memory
+        if self.memory_service:
+            self.memory_service.store(memory, user_id or self.user_id, metadata)
+        else:
+            logger.warning("Memory service is not initialized. Unable to store memory.")
 
-        mem0_data = self.mem0.get_all(user_id=self.user_id)
-        for memory_id, item in enumerate(mem0_data):
-            if isinstance(item, dict) and item.get("metadata", {}).get("key") == key:
-                return item.get("memory")
-        return None
-
-    def set_core_memory(self, key: str, value: Any) -> Any:
+    def retrieve(self, query: str, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Set a value in core memory.
+        Retrieve memories based on a query.
 
         Args:
-            key (str): The key to store the memory under.
-            value (Any): The value to store in memory.
+            query (str): The query to search for in memories.
+            user_id (Optional[str]): The user ID to search memories for.
 
         Returns:
-            Any: The stored value.
+            List[Dict[str, Any]]: A list of matching memories.
         """
-        self.core[key] = value
-        self.mem0.store(str(value), user_id=self.user_id, metadata={"key": key})
-        return value
+        return self.memory_service.search(query, user_id or self.user_id)
 
-    def retrieve_memory(self, key: str) -> Any:
+    def update(self, memory_id: str, memory: str, user_id: Optional[str] = None):
         """
-        Alias for get_core_memory for backward compatibility.
+        Update an existing memory.
 
         Args:
-            key (str): The key of the memory to retrieve.
+            memory_id (str): The ID of the memory to update.
+            memory (str): The updated memory content.
+            user_id (Optional[str]): The user ID associated with the memory.
+        """
+        self.memory_service.update(memory_id, memory, user_id or self.user_id)
+
+    def delete(self, memory_id: str, user_id: Optional[str] = None):
+        """
+        Delete a memory.
+
+        Args:
+            memory_id (str): The ID of the memory to delete.
+            user_id (Optional[str]): The user ID associated with the memory.
+        """
+        self.memory_service.delete(memory_id, user_id or self.user_id)
+
+    def get_all_memories(self, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Get all memories for a user.
+
+        Args:
+            user_id (Optional[str]): The user ID to get memories for.
 
         Returns:
-            Any: The retrieved memory data, or None if not found.
+            List[Dict[str, Any]]: A list of all memories for the user.
         """
-        return self.get_core_memory(key)
-
-    def add_long_term_memory(
-        self,
-        memory: str,
-        user_id: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-    ):
-        self.mem0.store(memory, user_id=user_id or self.user_id, metadata=metadata)
-
-    def add_short_term_memory(self, memory: Dict[str, Any]):
-        self.short_term.append(memory)
-        if len(self.short_term) > 10:  # Limit short-term memory to last 10 items
-            self.short_term.pop(0)
-
-    def get_all_memories(self) -> Dict[str, Any]:
-        return {
-            "core": self.core,
-            "long_term": self.mem0.get_all(user_id=self.user_id),
-            "short_term": self.short_term,
-        }
-
-    def search_memories(
-        self, query: str, user_id: str = "default"
-    ) -> List[Dict[str, Any]]:
-        core_results = [
-            {"memory": v, "source": "core"}
-            for k, v in self.core.items()
-            if query.lower() in str(v).lower()
-        ]
-        mem0_results = self.mem0.search(query, user_id=user_id)
-        return core_results + mem0_results
-
-    def update_memory(self, key: str, value: str):
-        self.core[key] = value
-        self.mem0.update(memory_id=key, data=value)
-
-    def get_memory_history(self, memory_id: int) -> List[str]:
-        return self.mem0.history(memory_id=memory_id)
+        return self.memory_service.get_all(user_id or self.user_id)

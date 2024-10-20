@@ -2,17 +2,17 @@ import asyncio
 import logging
 import json
 from typing import Dict, Any, Callable, Optional, TYPE_CHECKING, Union
-from frame.src.framer.agency.actions import BaseAction
+from frame.src.framer.brain.actions import BaseAction
 
 if TYPE_CHECKING:
     from frame.src.services import ExecutionContext
 
 logger = logging.getLogger(__name__)
-from frame.src.framer.agency.default_actions import (
+from frame.src.framer.brain.default_actions import (
     VALID_ACTIONS,
     extend_valid_actions,
 )
-from frame.src.framer.agency.actions import (
+from frame.src.framer.brain.default_actions import (
     CreateNewAgentAction,
     GenerateRolesAndGoalsAction,
     ObserveAction,
@@ -180,10 +180,7 @@ class ActionRegistry:
             filtered_params = {
                 k: v for k, v in parameters.items() if k in expected_params
             }
-            if "query" in filtered_params and "query" in parameters:
-                del filtered_params["query"]
             print("Filtered params: ", filtered_params)
-            print("Expected params: ", expected_params)
             return await action_func(self.execution_context, **filtered_params)
         else:
             logger.error(f"Action '{action_name}' not found in the registry.")

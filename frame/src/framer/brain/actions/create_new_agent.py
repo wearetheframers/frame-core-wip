@@ -1,14 +1,12 @@
 from typing import Dict, Any
-from frame.src.framer.agency.actions import BaseAction
 from frame.src.framer.config import FramerConfig
+from frame.src.framer.brain.actions.base import BaseAction
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.framer.agency.actions.base import BaseAction
-
 
 class CreateNewAgentAction(BaseAction):
     def __init__(self):
         super().__init__(
-            "create_new_agent", "Create a new agent with the required properties"
+            "create_new_agent", "Create a new agent with the required properties", 2
         )
 
     async def execute(

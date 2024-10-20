@@ -13,11 +13,11 @@ from autonomous_vehicle_plugin import (
     ChangeLaneAction,
     AutonomousVehiclePlugin,
 )
-from frame.src.framer.agency.actions import BaseAction
+from frame.src.framer.brain.actions import BaseAction
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 from frame.src.framer.brain.decision import Decision
-from frame.src.framer.agency.action_registry import ActionRegistry
+from frame.src.framer.brain.action_registry import ActionRegistry
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

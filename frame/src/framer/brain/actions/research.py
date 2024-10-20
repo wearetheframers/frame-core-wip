@@ -1,6 +1,6 @@
 from typing import Dict, Any
 from frame.src.services.execution_context import ExecutionContext
-from frame.src.framer.agency.actions import BaseAction
+from frame.src.framer.brain.actions import BaseAction
 from frame.src.framer.agency.priority import Priority
 
 
@@ -9,7 +9,7 @@ class ResearchAction(BaseAction):
         super().__init__(
             "research",
             "Perform research on a given topic and summarize findings",
-            5,
+            3,
         )
 
     async def execute(

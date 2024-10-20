@@ -26,7 +26,7 @@ sys.path.insert(0, project_root)
 
 from frame.cli.common import pretty_log
 from frame.src.constants.models import DEFAULT_MODEL
-from frame.src.framer.brain.perception import Perception
+from frame.src.framer.brain.mind.perception import Perception
 from frame.sync_frame import sync_frame
 
 # Set up logging
@@ -89,12 +89,25 @@ def cli(
     logging.getLogger().setLevel(logging.DEBUG if debug else logging.INFO)
 
 
-def execute_framer(frame, data, sync, stream):
+async def wait_for_streaming(framer):
+    last_position = 0
+    while framer._streamed_response["status"] != "finished":
+        new_text = framer._streamed_response["result"][last_position:]
+        if new_text:
+            print(new_text, end="", flush=True)
+            last_position += len(new_text)
+        await asyncio.sleep(0.1)  # Wait for streaming to complete
+    # Print any remaining text after status is finished
+    new_text = framer._streamed_response["result"][last_position:]
+    if new_text:
+        print(new_text, end="", flush=True)
+    return framer._streamed_response["result"]
+
+async def execute_framer(frame, data, sync, stream):
     """
     Execute the Framer based on the provided configuration.
 
-    This function sets up the Framer configuration and executes it in either
-    synchronous or asynchronous mode.
+    This function sets up the Framer configuration and creates a Framer instance.
 
     Args:
         frame (Frame): Frame instance for managing Framer operations.
@@ -103,7 +116,7 @@ def execute_framer(frame, data, sync, stream):
         stream (bool): Flag to enable streaming output.
 
     Returns:
-        Any: Result of the Framer execution.
+        Framer: The created Framer instance.
     """
     import json
     from frame.src.framer.config import FramerConfig
@@ -160,24 +173,8 @@ def execute_framer(frame, data, sync, stream):
             )
         logger.info(f"Execution completed. Result: {framer}")
         if stream:
-
-            async def wait_for_streaming():
-                last_position = 0
-                while framer._streamed_response["status"] != "finished":
-                    new_text = framer._streamed_response["result"][last_position:]
-                    if new_text:
-                        print(new_text, end="", flush=True)
-                        last_position += len(new_text)
-                    await asyncio.sleep(0.1)  # Wait for streaming to complete
-                # Print any remaining text after status is finished
-                new_text = framer._streamed_response["result"][last_position:]
-                if new_text:
-                    print(new_text, end="", flush=True)
-                return framer._streamed_response["result"]
-
-            return asyncio.run(wait_for_streaming())
-        else:
-            return result
+            asyncio.create_task(wait_for_streaming(framer))
+        return framer
     except Exception as e:
         logger.error(f"An error occurred during framer execution: {str(e)}")
         logger.exception("Exception details:")
@@ -200,7 +197,7 @@ def tui():
 @click.option("--sync", is_flag=True, help="Run in synchronous mode")
 @click.option("--stream", is_flag=True, help="Stream the output")
 @click.pass_context
-def run_framer(ctx, prompt, name, model, debug, sync, stream):
+async def run_framer(ctx, prompt, name, model, debug, sync, stream):
     """Run a Framer with the given configuration."""
     from frame.frame import Frame
 
@@ -222,8 +219,16 @@ def run_framer(ctx, prompt, name, model, debug, sync, stream):
     if not HUGGINGFACE_API_KEY:
         logger.warning("Hugging Face API key is not set. Some features may not work.")
 
-    result = execute_framer(frame, data, sync, stream)
-    logger.info(f"Framer execution completed. Result: {result}")
+    framer = await execute_framer(frame, data, sync, stream)
+    
+    # Process the perception and execute the decision
+    perception = {"type": "hearing", "data": {"text": data['prompt']}}
+    decision = await framer.sense(perception)
+    if decision:
+        result = await framer.agency.execute_decision(decision)
+        logger.info(f"Framer execution completed. Result: {result}")
+    else:
+        logger.warning("No decision was made.")
 
     # Log LLM usage metrics
     metrics = frame.get_metrics()
@@ -495,9 +500,9 @@ async def stream_output(framer, prompt):
     print()  # Print a newline at the end
 
 
-def main():
-    cli(obj={})
+async def main():
+    await cli(obj={})
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
