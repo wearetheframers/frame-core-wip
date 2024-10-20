@@ -101,7 +101,9 @@ class Framer:
         ]
         self.llm_service = llm_service
 
-        self.execution_context = execution_context or ExecutionContext(llm_service=self.llm_service)
+        self.execution_context = execution_context or ExecutionContext(
+            llm_service=self.llm_service
+        )
         self.plugin_loading_progress = plugin_loading_progress
 
         # Initialize services and plugins based on permissions

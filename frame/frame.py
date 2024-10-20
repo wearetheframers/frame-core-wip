@@ -238,7 +238,7 @@ class Frame:
 
         # Implement any necessary cleanup for plugins
         for plugin in self.plugins.values():
-            if hasattr(plugin, 'on_shutdown'):
+            if hasattr(plugin, "on_shutdown"):
                 plugin.on_shutdown()
 
         # Implement any final cleanup or resource release

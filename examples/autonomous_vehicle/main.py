@@ -46,13 +46,13 @@ class ProcessPerceptionAction(BaseAction):
         self.action_registry = action_registry
 
     async def execute(self, execution_context: ExecutionContext, **kwargs) -> str:
-        perception = kwargs.get('perception')
-        
+        perception = kwargs.get("perception")
+
         if not perception:
             return "Error: Missing perception"
 
         logger.info(f"\nProcessing perception: {perception}")
-        
+
         # Analyze the perception and make a decision
         decision = self.analyze_perception(perception)
         logger.info(f"Decision made: {decision}")
@@ -61,55 +61,74 @@ class ProcessPerceptionAction(BaseAction):
         result = await self.execute_decision(execution_context, decision)
         return str(result)
 
-    async def execute_decision(self, execution_context: ExecutionContext, decision: Dict[str, Any]) -> str:
-        action = decision.get('action')
-        if action == 'no_action':
+    async def execute_decision(
+        self, execution_context: ExecutionContext, decision: Dict[str, Any]
+    ) -> str:
+        action = decision.get("action")
+        if action == "no_action":
             return f"No action taken: {decision.get('reason')}"
-        
+
         try:
-            result = await self.action_registry.execute_action(action, execution_context=execution_context, **decision)
+            result = await self.action_registry.execute_action(
+                action, execution_context=execution_context, **decision
+            )
             return f"Executed {action}: {result}"
         except Exception as e:
             return f"Error executing action {action}: {str(e)}"
 
     def analyze_perception(self, perception: Dict[str, Any]) -> Dict[str, Any]:
         """Analyze the perception and return a decision."""
-        perception_type = perception.get('type')
-        data = perception.get('data', {})
+        perception_type = perception.get("type")
+        data = perception.get("data", {})
 
-        if perception_type == 'visual':
+        if perception_type == "visual":
             return self.handle_visual_perception(data)
-        elif perception_type == 'audio':
+        elif perception_type == "audio":
             return self.handle_audio_perception(data)
         else:
-            return {"action": "no_action", "reason": f"Unknown perception type: {perception_type}"}
+            return {
+                "action": "no_action",
+                "reason": f"Unknown perception type: {perception_type}",
+            }
 
     def handle_visual_perception(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        object_type = data.get('object')
-        distance = data.get('distance')
+        object_type = data.get("object")
+        distance = data.get("distance")
 
-        if object_type == 'stop sign':
-            if distance == 'close':
+        if object_type == "stop sign":
+            if distance == "close":
                 return {"action": "stop_vehicle", "reason": "Stop sign is close"}
             else:
-                return {"action": "slow_down_vehicle", "reason": "Approaching stop sign"}
-        elif object_type == 'pedestrian':
-            if distance in ['close', 'medium']:
+                return {
+                    "action": "slow_down_vehicle",
+                    "reason": "Approaching stop sign",
+                }
+        elif object_type == "pedestrian":
+            if distance in ["close", "medium"]:
                 return {"action": "slow_down_vehicle", "reason": "Pedestrian detected"}
             else:
                 return {"action": "no_action", "reason": "Pedestrian far away"}
         else:
-            return {"action": "no_action", "reason": f"No specific action for {object_type}"}
+            return {
+                "action": "no_action",
+                "reason": f"No specific action for {object_type}",
+            }
 
     def handle_audio_perception(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        sound = data.get('sound')
-        distance = data.get('distance')
+        sound = data.get("sound")
+        distance = data.get("distance")
 
-        if sound == 'siren':
-            if distance == 'close':
-                return {"action": "change_lane", "reason": "Emergency vehicle approaching"}
+        if sound == "siren":
+            if distance == "close":
+                return {
+                    "action": "change_lane",
+                    "reason": "Emergency vehicle approaching",
+                }
             else:
-                return {"action": "slow_down_vehicle", "reason": "Potential emergency vehicle"}
+                return {
+                    "action": "slow_down_vehicle",
+                    "reason": "Potential emergency vehicle",
+                }
         else:
             return {"action": "no_action", "reason": f"No specific action for {sound}"}
 
@@ -171,7 +190,11 @@ async def main():
 
     for perception in perceptions:
         logger.info(f"Processing perception: {perception}")
-        result = await action_registry.execute_action("process_perception", execution_context=execution_context, perception=perception)
+        result = await action_registry.execute_action(
+            "process_perception",
+            execution_context=execution_context,
+            perception=perception,
+        )
         logger.info(f"Action result: {result}")
         await asyncio.sleep(1)
 

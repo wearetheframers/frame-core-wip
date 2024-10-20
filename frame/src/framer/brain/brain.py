@@ -543,10 +543,14 @@ class Brain:
         result = None
         try:
             if decision.action not in self.action_registry.get_all_actions():
-                logger.warning(f"Action '{decision.action}' not found in registry. Defaulting to 'process_perception'.")
+                logger.warning(
+                    f"Action '{decision.action}' not found in registry. Defaulting to 'process_perception'."
+                )
                 decision.action = "process_perception"
                 if "perception" not in decision.parameters:
-                    decision.parameters["perception"] = perception.data if perception else None
+                    decision.parameters["perception"] = (
+                        perception.data if perception else None
+                    )
 
             if decision.action == "respond with memory retrieval":
                 if (
