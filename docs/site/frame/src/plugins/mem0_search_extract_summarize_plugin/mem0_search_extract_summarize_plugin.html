@@ -181,7 +181,9 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
                 self.logger.error(&#34;Execution context is not properly initialized.&#34;)
                 return Decision(
                     action=&#34;error&#34;,
-                    parameters={&#34;error&#34;: &#34;Execution context is not properly initialized.&#34;},
+                    parameters={
+                        &#34;error&#34;: &#34;Execution context is not properly initialized.&#34;
+                    },
                     reasoning=&#34;Execution context is not properly initialized.&#34;,
                     confidence=0.0,
                     priority=1,
@@ -192,10 +194,24 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
             if not isinstance(query, str):
                 query = str(query)
 
-            soul_state = execution_context.soul.get_current_state() if execution_context.soul else &#34;No soul state available.&#34;
-            recent_thoughts = execution_context.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
-            active_roles = [role.name for role in execution_context.roles if role.status == RoleStatus.ACTIVE]
-            active_goals = [goal.name for goal in execution_context.goals if goal.status == GoalStatus.ACTIVE]
+            soul_state = (
+                execution_context.soul.get_current_state()
+                if execution_context.soul
+                else &#34;No soul state available.&#34;
+            )
+            recent_thoughts = execution_context.mind.get_all_thoughts()[
+                -5:
+            ]  # Get last 5 thoughts
+            active_roles = [
+                role.name
+                for role in execution_context.roles
+                if role.status == RoleStatus.ACTIVE
+            ]
+            active_goals = [
+                goal.name
+                for goal in execution_context.goals
+                if goal.status == GoalStatus.ACTIVE
+            ]
 
             # Formulate a comprehensive response
             response = (
@@ -208,7 +224,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
                 f&#34;- Active Goals: {active_goals}\n&#34;
             )
             return response
-        
+
         # Ensure the query is a string
         if not isinstance(query, str):
             query = str(query)
@@ -218,7 +234,9 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         if not any([user_id, agent_id, run_id]):
             user_id = &#34;default&#34;
 
-        self.logger.info(f&#34;Searching with user_id: {user_id}, agent_id: {agent_id}, run_id: {run_id}&#34;)
+        self.logger.info(
+            f&#34;Searching with user_id: {user_id}, agent_id: {agent_id}, run_id: {run_id}&#34;
+        )
         search_results = self.mem0_adapter.search(
             query, user_id=user_id, agent_id=agent_id, run_id=run_id, filters=filters
         )
@@ -228,7 +246,9 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         if not search_results:
             return Decision(
                 action=&#34;respond&#34;,
-                parameters={&#34;response&#34;: &#34;I don&#39;t have any specific information about that in my memory. Is there anything else I can help you with?&#34;},
+                parameters={
+                    &#34;response&#34;: &#34;I don&#39;t have any specific information about that in my memory. Is there anything else I can help you with?&#34;
+                },
                 reasoning=&#34;No relevant information found in memory.&#34;,
                 confidence=0.5,
                 priority=1,

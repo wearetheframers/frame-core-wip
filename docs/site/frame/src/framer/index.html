@@ -178,7 +178,7 @@ hljs.highlightAll();
             roles=self.roles,
             goals=self.goals,
             default_model=config.default_model,
-            soul=soul
+            soul=soul,
         )
         logger.info(f&#34;Brain created with memory service: {self.brain.memory_service}&#34;)
 
@@ -196,22 +196,22 @@ hljs.highlightAll();
     async def _generate_initial_roles_and_goals(self):
         if not self.roles or not self.goals:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
-            
+
         # Ensure uniqueness
         self.roles = list({role.name: role for role in self.roles}.values())
         self.goals = list({goal.name: goal for goal in self.goals}.values())
-        
+
         logger.info(f&#34;Generated initial roles: {[role.name for role in self.roles]}&#34;)
         logger.info(f&#34;Generated initial goals: {[goal.name for goal in self.goals]}&#34;)
-        
-        if hasattr(self.brain, &#39;set_roles&#39;):
+
+        if hasattr(self.brain, &#34;set_roles&#34;):
             self.brain.set_roles(self.roles)
-        if hasattr(self.brain, &#39;set_goals&#39;):
+        if hasattr(self.brain, &#34;set_goals&#34;):
             self.brain.set_goals(self.goals)
-        
-        if hasattr(self.execution_context, &#39;set_roles&#39;):
+
+        if hasattr(self.execution_context, &#34;set_roles&#34;):
             self.execution_context.set_roles(self.roles)
-        if hasattr(self.execution_context, &#39;set_goals&#39;):
+        if hasattr(self.execution_context, &#34;set_goals&#34;):
             self.execution_context.set_goals(self.goals)
 
     def act(self):
@@ -454,7 +454,9 @@ hljs.highlightAll();
                 goal for goal in current_goals if goal.status == GoalStatus.ACTIVE
             ]
             if active_goals:
-                decision.reasoning += f&#34; (Aligned with {len(active_goals)} active goals)&#34;
+                decision.reasoning += (
+                    f&#34; (Aligned with {len(active_goals)} active goals)&#34;
+                )
 
             if hasattr(self, &#34;can_execute&#34;) and self.can_execute:
                 await self.brain.execute_decision(decision)
@@ -1282,7 +1284,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
             ),
             soul=soul,
         )
-        
+
         # The Mind is now initialized within the Brain constructor
         mind = brain.mind
         framer = Framer(

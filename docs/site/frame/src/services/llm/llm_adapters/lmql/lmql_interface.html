@@ -49,7 +49,9 @@ hljs.highlightAll();
     def __init__(self, model_name: str):
         self.model = lmql.model(model_name)
 
-    def format_prompt_with_constraints(self, prompt: str, constraints: list, distribution: bool = False) -&gt; str:
+    def format_prompt_with_constraints(
+        self, prompt: str, constraints: list, distribution: bool = False
+    ) -&gt; str:
         &#34;&#34;&#34;
         Format a prompt with LMQL constraints and optionally include a distribution clause.
 
@@ -80,7 +82,11 @@ hljs.highlightAll();
             response = response.replace(pattern, &#34;&#34;)
         return response.strip()
 
-    def set_decoder(self, decoder: Optional[str] = None, decoder_params: Optional[Dict[str, Any]] = None):
+    def set_decoder(
+        self,
+        decoder: Optional[str] = None,
+        decoder_params: Optional[Dict[str, Any]] = None,
+    ):
         &#34;&#34;&#34;
         Set the decoding algorithm and its parameters.
 
@@ -91,7 +97,9 @@ hljs.highlightAll();
         self.decoder = decoder
         self.decoder_params = decoder_params
 
-    def apply_decorators(self, value: str, decorators: List[Callable], context: Any) -&gt; str:
+    def apply_decorators(
+        self, value: str, decorators: List[Callable], context: Any
+    ) -&gt; str:
         &#34;&#34;&#34;
         Apply a list of decorators to a value.
 
@@ -107,7 +115,15 @@ hljs.highlightAll();
             value = decorator(value, context)
         return value
 
-    async def generate(self, prompt: str, max_tokens: int = 100, constraints: list = None, distribution: bool = False, control_flow: Optional[Callable] = None, decorators: Optional[List[Callable]] = None) -&gt; str:
+    async def generate(
+        self,
+        prompt: str,
+        max_tokens: int = 100,
+        constraints: list = None,
+        distribution: bool = False,
+        control_flow: Optional[Callable] = None,
+        decorators: Optional[List[Callable]] = None,
+    ) -&gt; str:
         &#34;&#34;&#34;
         Generate a response using LMQL with constraints and optionally obtain a distribution.
         Supports dynamic prompt construction with control flow.
@@ -127,13 +143,17 @@ hljs.highlightAll();
         context = ProgramState(prompt)  # Pass the prompt to ProgramState
         if decorators:
             prompt = self.apply_decorators(prompt, decorators, context)
-            prompt = self.format_prompt_with_constraints(prompt, constraints, distribution)
+            prompt = self.format_prompt_with_constraints(
+                prompt, constraints, distribution
+            )
         if distribution:
             return await self.model.score(prompt, max_tokens=max_tokens)
         else:
             # Apply LMQL constraints during generation
             lmql_constraints = self._apply_lmql_constraints(constraints)
-            return await self.model.generate(prompt, max_tokens=max_tokens, constraints=lmql_constraints)
+            return await self.model.generate(
+                prompt, max_tokens=max_tokens, constraints=lmql_constraints
+            )
 
     def _apply_lmql_constraints(self, constraints: list) -&gt; list:
         &#34;&#34;&#34;

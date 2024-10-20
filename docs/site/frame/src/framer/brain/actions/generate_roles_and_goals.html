@@ -48,8 +48,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <pre><code class="python">class GenerateRolesAndGoalsAction(BaseAction):
     def __init__(self):
         super().__init__(
-            &#34;generate_roles_and_goals&#34;, &#34;Generate roles and goals for the Framer&#34;,
-            2
+            &#34;generate_roles_and_goals&#34;, &#34;Generate roles and goals for the Framer&#34;, 2
         )
 
     async def execute(

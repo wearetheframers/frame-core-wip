@@ -374,7 +374,9 @@ and multi-faceted behavior.</p>
             )
             logger.debug(f&#34;Role generation response: {response}&#34;)
             if response is None:
-                logger.warning(&#34;Received None response while generating role. Using default role.&#34;)
+                logger.warning(
+                    &#34;Received None response while generating role. Using default role.&#34;
+                )
                 return [
                     Role(
                         id=&#34;default&#34;,
@@ -414,7 +416,9 @@ and multi-faceted behavior.</p>
                     existing_role_names.add(r[&#34;name&#34;])
                     logger.info(f&#34;Generated unique role: {r[&#39;name&#39;]}&#34;)
                 else:
-                    logger.warning(f&#34;Duplicate role name generated: {r[&#39;name&#39;]}. Skipping.&#34;)
+                    logger.warning(
+                        f&#34;Duplicate role name generated: {r[&#39;name&#39;]}. Skipping.&#34;
+                    )
             return roles
         except Exception as e:
             logger.error(f&#34;Error generating role: {str(e)}&#34;, exc_info=True)
@@ -455,7 +459,9 @@ and multi-faceted behavior.</p>
             )
             logger.debug(f&#34;Goal generation response: {response}&#34;)
             if response is None:
-                logger.warning(&#34;Received None response while generating goal. Using default goal.&#34;)
+                logger.warning(
+                    &#34;Received None response while generating goal. Using default goal.&#34;
+                )
                 return [
                     Goal(
                         name=&#34;Default Goal&#34;,
@@ -491,7 +497,9 @@ and multi-faceted behavior.</p>
                     existing_goal_names.add(g[&#34;name&#34;])
                     logger.info(f&#34;Generated unique goal: {g[&#39;name&#39;]}&#34;)
                 else:
-                    logger.warning(f&#34;Duplicate goal name generated: {g[&#39;name&#39;]}. Skipping.&#34;)
+                    logger.warning(
+                        f&#34;Duplicate goal name generated: {g[&#39;name&#39;]}. Skipping.&#34;
+                    )
             return goals
         except Exception as e:
             logger.error(f&#34;Error generating goal: {e}&#34;, exc_info=True)

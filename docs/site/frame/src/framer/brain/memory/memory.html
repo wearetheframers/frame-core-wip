@@ -64,7 +64,12 @@ memory retrieval process searches across all specified user IDs.</p>
         self.memory_service = memory_service
         self.user_id = &#34;default&#34;
 
-    def store(self, memory: str, user_id: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
+    def store(
+        self,
+        memory: str,
+        user_id: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ):
         &#34;&#34;&#34;
         Store a memory using the memory service.
 
@@ -78,7 +83,9 @@ memory retrieval process searches across all specified user IDs.</p>
         else:
             logger.warning(&#34;Memory service is not initialized. Unable to store memory.&#34;)
 
-    def retrieve(self, query: str, user_id: Optional[str] = None) -&gt; List[Dict[str, Any]]:
+    def retrieve(
+        self, query: str, user_id: Optional[str] = None
+    ) -&gt; List[Dict[str, Any]]:
         &#34;&#34;&#34;
         Retrieve memories based on a query.
 

@@ -89,9 +89,7 @@ setting the default model and generating completions with retry logic.</p>
 
     def get_config(self, max_tokens: int, temperature: float) -&gt; HuggingFaceConfig:
         return HuggingFaceConfig(
-            model=self.default_model,
-            max_tokens=max_tokens,
-            temperature=temperature
+            model=self.default_model, max_tokens=max_tokens, temperature=temperature
         )
 
     def format_prompt(self, prompt: str) -&gt; str:
@@ -143,9 +141,11 @@ setting the default model and generating completions with retry logic.</p>
         inputs = self._tokenizer(prompt, return_tensors=&#34;pt&#34;)
         input_length = inputs[&#34;input_ids&#34;].shape[1]
         max_new_tokens = max(config.max_tokens - input_length, 1)
-        
-        attention_mask = inputs.get(&#34;attention_mask&#34;, torch.ones_like(inputs[&#34;input_ids&#34;]))
-        
+
+        attention_mask = inputs.get(
+            &#34;attention_mask&#34;, torch.ones_like(inputs[&#34;input_ids&#34;])
+        )
+
         outputs = self._model.generate(
             inputs[&#34;input_ids&#34;],
             max_new_tokens=max_new_tokens,

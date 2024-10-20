@@ -78,7 +78,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         &#34;&#34;&#34;
         self.framer = framer
         self.logger = logging.getLogger(self.__class__.__name__)
-        if hasattr(framer, &#39;execution_context&#39;):
+        if hasattr(framer, &#34;execution_context&#34;):
             self.execution_context = framer.execution_context
         else:
             self.execution_context = None

@@ -166,7 +166,9 @@ setting the default model and generating completions with retry logic.</p>
             capacity=60, fill_rate=1
         )  # 60 requests per minute
 
-    def format_prompt(self, prompt: str, additional_context: Optional[Dict[str, Any]] = None) -&gt; str:
+    def format_prompt(
+        self, prompt: str, additional_context: Optional[Dict[str, Any]] = None
+    ) -&gt; str:
         &#34;&#34;&#34;
         Format the prompt for LMQL.
 
@@ -232,9 +234,7 @@ setting the default model and generating completions with retry logic.</p>
             LMQLConfig: The configuration object for the LMQL model.
         &#34;&#34;&#34;
         return LMQLConfig(
-            model=self.default_model,
-            max_tokens=max_tokens,
-            temperature=temperature
+            model=self.default_model, max_tokens=max_tokens, temperature=temperature
         )
 
     @tenacity.retry(

@@ -84,10 +84,26 @@ hljs.highlightAll();
         Returns:
             str: A response apologizing for the error and attempting to continue the conversation.
         &#34;&#34;&#34;
-        soul_state = execution_context.soul.get_current_state() if execution_context and execution_context.soul else &#34;No soul state available.&#34;
-        recent_thoughts = execution_context.mind.get_all_thoughts()[-5:] if execution_context and execution_context.mind else []
-        active_roles = [role.name for role in execution_context.roles if role.status == &#39;ACTIVE&#39;] if execution_context else []
-        active_goals = [goal.name for goal in execution_context.goals if goal.status == &#39;ACTIVE&#39;] if execution_context else []
+        soul_state = (
+            execution_context.soul.get_current_state()
+            if execution_context and execution_context.soul
+            else &#34;No soul state available.&#34;
+        )
+        recent_thoughts = (
+            execution_context.mind.get_all_thoughts()[-5:]
+            if execution_context and execution_context.mind
+            else []
+        )
+        active_roles = (
+            [role.name for role in execution_context.roles if role.status == &#34;ACTIVE&#34;]
+            if execution_context
+            else []
+        )
+        active_goals = (
+            [goal.name for goal in execution_context.goals if goal.status == &#34;ACTIVE&#34;]
+            if execution_context
+            else []
+        )
 
         response = (
             f&#34;I&#39;m sorry, an error occurred: {error_message}. &#34;
@@ -214,9 +230,11 @@ hljs.highlightAll();
 
     async def execute_action(self, action_name: str, parameters: dict):
         &#34;&#34;&#34;Execute an action by its name.&#34;&#34;&#34;
-        logger.info(f&#34;Available actions before executing &#39;{action_name}&#39;: {list(self.actions.keys())}&#34;)
+        logger.info(
+            f&#34;Available actions before executing &#39;{action_name}&#39;: {list(self.actions.keys())}&#34;
+        )
         logger.info(f&#34;Action name: {action_name}&#34;)
-        
+
         if action_name == &#34;no_action&#34;:
             logger.info(&#34;No action to execute. Skipping.&#34;)
             return None
@@ -228,17 +246,22 @@ hljs.highlightAll();
             return await self._handle_error(error_message)
 
         action_func = action[&#34;action_func&#34;]
-        expected_params = action_func.__code__.co_varnames[:action_func.__code__.co_argcount]
+        expected_params = action_func.__code__.co_varnames[
+            : action_func.__code__.co_argcount
+        ]
         filtered_params = {k: v for k, v in parameters.items() if k in expected_params}
         logger.info(f&#34;Filtered params: {filtered_params}&#34;)
 
-        if &#39;query&#39; in filtered_params:
-            filtered_params[&#39;query&#39;] = parameters.get(&#39;query&#39;, &#39;&#39;)
+        if &#34;query&#34; in filtered_params:
+            filtered_params[&#34;query&#34;] = parameters.get(&#34;query&#34;, &#34;&#34;)
 
         try:
             result = await action_func(self.execution_context, **filtered_params)
             if result is None:
-                return {&#34;error&#34;: &#34;Action returned None&#34;, &#34;fallback_response&#34;: &#34;The action didn&#39;t produce a response. Please try again.&#34;}
+                return {
+                    &#34;error&#34;: &#34;Action returned None&#34;,
+                    &#34;fallback_response&#34;: &#34;The action didn&#39;t produce a response. Please try again.&#34;,
+                }
             elif isinstance(result, dict):
                 return result
             elif isinstance(result, str):
@@ -256,9 +279,14 @@ hljs.highlightAll();
     async def _handle_error(self, error_message: str):
         error_action = self.get_action(&#34;error&#34;)
         if error_action:
-            return await error_action[&#34;action_func&#34;](self.execution_context, error=error_message)
+            return await error_action[&#34;action_func&#34;](
+                self.execution_context, error=error_message
+            )
         else:
-            return {&#34;error&#34;: error_message, &#34;fallback_response&#34;: &#34;An error occurred while processing your request. Please try again.&#34;}</code></pre>
+            return {
+                &#34;error&#34;: error_message,
+                &#34;fallback_response&#34;: &#34;An error occurred while processing your request. Please try again.&#34;,
+            }</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
