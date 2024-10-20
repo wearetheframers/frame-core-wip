@@ -22,7 +22,9 @@ class AutonomousVehiclePlugin(BasePlugin):
         current_time = time.time()
         elapsed_time = current_time - self.last_update_time
         if self.is_driving and self.speed < self.max_speed:
-            self.speed = min(self.max_speed, self.speed + self.acceleration * elapsed_time)
+            self.speed = min(
+                self.max_speed, self.speed + self.acceleration * elapsed_time
+            )
         self.last_update_time = current_time
 
     async def on_load(self):
@@ -45,9 +47,7 @@ class AutonomousVehiclePlugin(BasePlugin):
         self.add_action(
             "start_driving", self.start_driving, "Start driving the autonomous vehicle"
         )
-        self.add_action(
-            "no_action", self.no_action, "Continue with the current action"
-        )
+        self.add_action("no_action", self.no_action, "Continue with the current action")
         self.add_action(
             "brake_vehicle", self.brake_vehicle, "Apply brakes to the vehicle"
         )

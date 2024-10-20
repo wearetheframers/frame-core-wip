@@ -144,7 +144,10 @@ class ProcessPerceptionAction(BaseAction):
         elif condition == "accident_ahead":
             return {"action": "change_lane", "reason": "Accident reported ahead"}
         else:
-            return {"action": "no_action", "reason": f"No specific action for {condition}"}
+            return {
+                "action": "no_action",
+                "reason": f"No specific action for {condition}",
+            }
 
 
 async def main():
@@ -153,7 +156,14 @@ async def main():
     framer = await frame.framer_factory.create_framer(config, plugins=frame.plugins)
 
     # Start driving when the script is run
-    vehicle_plugin = next((plugin for plugin in framer.plugins.values() if isinstance(plugin, AutonomousVehiclePlugin)), None)
+    vehicle_plugin = next(
+        (
+            plugin
+            for plugin in framer.plugins.values()
+            if isinstance(plugin, AutonomousVehiclePlugin)
+        ),
+        None,
+    )
     if vehicle_plugin:
         await vehicle_plugin.start_driving()
         logger.info("Vehicle started driving automatically.")
