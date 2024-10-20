@@ -10,7 +10,7 @@ import logging
 from openai import AsyncOpenAI, AuthenticationError, APIStatusError
 from typing import Protocol, List
 from frame.src.services.llm.llm_adapter_interface import LLMAdapterInterface
-from frame.src.utils.prompt_formatter import format_lmql_prompt
+from frame.src.utils.prompt_formatters import format_lmql_prompt
 
 logger = logging.getLogger(__name__)
 

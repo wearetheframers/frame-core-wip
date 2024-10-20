@@ -338,11 +338,8 @@ class Brain:
 
         # Check if the action is valid
         if action not in valid_actions:
-            # If the action is not valid, check if it's related to web search or summarization
-            if any(
-                keyword in action
-                for keyword in ["search", "summarize", "extract", "memory"]
-            ):
+            # If the action is not valid, check if it's related to memory retrieval
+            if any(keyword in action for keyword in ["memory", "recall", "retrieve"]):
                 action = "respond with memory retrieval"
                 decision_data["action"] = action
                 decision_data["reasoning"] = (
@@ -444,12 +441,6 @@ class Brain:
             str: The generated decision prompt.
         """
         valid_actions = self.action_registry.valid_actions
-        # action_descriptions = "\n".join(
-        #     [
-        #         f"- {name.lower()}: {info['description']}"
-        #         for name, info in self.agency.action_registry.actions.items()
-        #     ]
-        # )
         logger.info(f"Valid actions: {valid_actions}")
         active_roles = [
             f"{role.name} (Priority: {role.priority.name}, Status: {role.status.name})"
@@ -461,9 +452,6 @@ class Brain:
             for goal in self.goals
             if goal.status == GoalStatus.ACTIVE
         ]
-
-        # Log the actions being serialized
-        # self.logger.info(f"Serializing actions for decision prompt: {self.agency.action_registry.actions}")
 
         prompt = f"""Given the following perception and context, decide on the most appropriate action to take.
         Perception: {perception}
@@ -483,17 +471,17 @@ class Brain:
         - The current active goals and roles of the system, considering their priorities and statuses
         - Whether immediate action, further research, or no action is most appropriate
 
-        Examples of personal/memory questions:
+        Examples of personal/memory questions (ALWAYS use 'respond with memory retrieval' for these):
         - "What is my favorite hobby?"
         - "When is my next meeting?"
         - "What did I mention about my travel plans?"
 
-        Examples of general knowledge questions:
+        Examples of general knowledge questions (use 'respond' for these):
         - "What is the largest ocean on Earth?"
         - "How many planets are in the solar system?"
         - "What is the freezing point of water in Fahrenheit?"
 
-        General knowledge questions will have the regular action `respond`. Personal/memory questions will require memory retrieval and should use the `respond with memory retrieval` action.
+        IMPORTANT: For ANY question that seems to require personal information or memory, ALWAYS choose the 'respond with memory retrieval' action. This includes questions about appointments, preferences, past conversations, or any user-specific information.
 
         Priority levels and their meanings:
         {json.dumps({p.name: p.value for p in Priority}, indent=2)}
