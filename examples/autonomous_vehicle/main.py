@@ -18,6 +18,7 @@ from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 from frame.src.framer.brain.decision import Decision
 from frame.src.framer.brain.action_registry import ActionRegistry
+from frame.src.services.context.execution_context_service import ExecutionContext
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -36,25 +37,81 @@ class ProcessPerceptionAction(BaseAction):
     and decision-making.
     """
 
-    def __init__(self):
+    def __init__(self, action_registry: ActionRegistry):
         super().__init__(
             "process_perception",
             "Process a perception and make a decision",
             Priority.HIGH,
         )
+        self.action_registry = action_registry
 
-    async def execute(
-        self, execution_context: ExecutionContext, perception: Dict[str, Any]
-    ) -> str:
+    async def execute(self, execution_context: ExecutionContext, **kwargs) -> str:
+        perception = kwargs.get('perception')
+        
+        if not perception:
+            return "Error: Missing perception"
+
         logger.info(f"\nProcessing perception: {perception}")
-        decision = await execution_context.process_perception(perception)
+        
+        # Analyze the perception and make a decision
+        decision = self.analyze_perception(perception)
         logger.info(f"Decision made: {decision}")
 
-        if isinstance(decision, Decision):
-            await execution_context.execute_decision(decision)
-            return str(decision)
+        # Execute the decision
+        result = await self.execute_decision(execution_context, decision)
+        return str(result)
+
+    async def execute_decision(self, execution_context: ExecutionContext, decision: Dict[str, Any]) -> str:
+        action = decision.get('action')
+        if action == 'no_action':
+            return f"No action taken: {decision.get('reason')}"
+        
+        try:
+            result = await self.action_registry.execute_action(action, execution_context=execution_context, **decision)
+            return f"Executed {action}: {result}"
+        except Exception as e:
+            return f"Error executing action {action}: {str(e)}"
+
+    def analyze_perception(self, perception: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze the perception and return a decision."""
+        perception_type = perception.get('type')
+        data = perception.get('data', {})
+
+        if perception_type == 'visual':
+            return self.handle_visual_perception(data)
+        elif perception_type == 'audio':
+            return self.handle_audio_perception(data)
         else:
-            raise ValueError(f"Expected a Decision object, but got {type(decision)}")
+            return {"action": "no_action", "reason": f"Unknown perception type: {perception_type}"}
+
+    def handle_visual_perception(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        object_type = data.get('object')
+        distance = data.get('distance')
+
+        if object_type == 'stop sign':
+            if distance == 'close':
+                return {"action": "stop_vehicle", "reason": "Stop sign is close"}
+            else:
+                return {"action": "slow_down_vehicle", "reason": "Approaching stop sign"}
+        elif object_type == 'pedestrian':
+            if distance in ['close', 'medium']:
+                return {"action": "slow_down_vehicle", "reason": "Pedestrian detected"}
+            else:
+                return {"action": "no_action", "reason": "Pedestrian far away"}
+        else:
+            return {"action": "no_action", "reason": f"No specific action for {object_type}"}
+
+    def handle_audio_perception(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        sound = data.get('sound')
+        distance = data.get('distance')
+
+        if sound == 'siren':
+            if distance == 'close':
+                return {"action": "change_lane", "reason": "Emergency vehicle approaching"}
+            else:
+                return {"action": "slow_down_vehicle", "reason": "Potential emergency vehicle"}
+        else:
+            return {"action": "no_action", "reason": f"No specific action for {sound}"}
 
 
 async def main():
@@ -62,31 +119,27 @@ async def main():
     config = FramerConfig(name="AutonomousVehicleFramer")
     framer = await frame.framer_factory.create_framer(config, plugins=frame.plugins)
 
-    # This completely replaces the ActionRegistry and the default actions in the original Framer
-    # (By default Framers come with an ActionRegistry created so there's no need to pass one)
     action_registry = ActionRegistry()
     action_registry.actions = {}
     action_registry.valid_actions = []
 
-    # We must set our newly created Action Registry to our Framer's execution_context
-    action_registry.execution_context = framer.brain.agency.execution_context
+    execution_context = ExecutionContext(llm_service=framer.llm_service)
+    execution_context.action_registry = action_registry
+    execution_context.agency = framer.agency
+
     vehicle_plugin = AutonomousVehiclePlugin(framer)
     stop_vehicle_action = StopVehicleAction(vehicle_plugin)
     slow_down_vehicle_action = SlowDownVehicleAction(vehicle_plugin)
     change_lane_action = ChangeLaneAction(vehicle_plugin)
+    process_perception_action = ProcessPerceptionAction(action_registry)
 
     action_registry.add_action(stop_vehicle_action)
     action_registry.add_action(slow_down_vehicle_action)
     action_registry.add_action(change_lane_action)
-
-    process_perception_action = ProcessPerceptionAction()
     action_registry.add_action(process_perception_action)
 
-    # Now we set our Framer's existing action_registry to our new action registry
-    framer.brain.agency.action_registry = action_registry
-
-    # This behavior is desirable in this case as a self-driving vehicle has no need to do typical Framer responses
-    # like research, respond, etc. and it is safer to keep actions to a minimal amount for a self-driving vehicle.
+    framer.brain.action_registry = action_registry
+    framer.execution_context = execution_context
 
     perceptions = [
         {
@@ -118,20 +171,8 @@ async def main():
 
     for perception in perceptions:
         logger.info(f"Processing perception: {perception}")
-        # The sense method allows the Framer to choose any type of action from its behavior,
-        # though it intelligently chooses the most relevant / urgent action to take
-        # decision = await framer.sense(perception)
-        # You could instead enforce a specific action like so
-        decision = await framer.sense(perception)
-        # The process_perception action we've defined results in a new action or decision based on the perception
-        logger.info(f"Decision made: {decision}")
-        if decision:
-            result = await framer.brain.agency.execute_action(
-                decision.action, decision.parameters
-            )
-            logger.info(f"Decision result: {result}")
-        else:
-            logger.warning("No decision was made.")
+        result = await action_registry.execute_action("process_perception", execution_context=execution_context, perception=perception)
+        logger.info(f"Action result: {result}")
         await asyncio.sleep(1)
 
     await framer.close()

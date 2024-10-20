@@ -268,7 +268,7 @@ def execute_framer(frame, data, sync, stream):
     if sync:
         return sync_execute_framer(frame, config, prompt, perception, max_len)
     else:
-        return asyncio.run(
+        return asyncio.create_task(
             run_async(
                 frame,
                 name,
@@ -327,7 +327,7 @@ def sync_execute_framer(frame, config, prompt, perception, max_len):
 @click.option("--sync", is_flag=True, help="Run in synchronous mode")
 @click.option("--stream", is_flag=True, help="Stream the output")
 @click.pass_context
-def run_framer_json(ctx, json_input, debug, sync, stream):
+async def run_framer_json(ctx, json_input, debug, sync, stream):
     """Run a Framer with the given JSON configuration."""
     import json
     from frame.frame import Frame
@@ -339,22 +339,15 @@ def run_framer_json(ctx, json_input, debug, sync, stream):
     logger.debug(f"Debug flag: {debug}")
     logger.debug(f"Sync flag: {sync}")
     logger.debug(f"Stream flag: {stream}")
-    # logger.info(f"Raw JSON input: {json_input}")
 
-    # Join all parts of json_input into a single string
     json_string = " ".join(json_input)
-    # logger.debug(f"Joined JSON input: {json_string}")
-
-    # Remove any leading/trailing quotes and spaces
     json_string = json_string.strip("'\" ")
     logger.debug(f"Stripped JSON input: {json_string}")
 
-    # Check if the input is a valid JSON
     try:
         data = json.loads(json_string)
         logger.debug(f"Parsed JSON data: {data}")
     except json.JSONDecodeError:
-        # If not a valid JSON, treat the entire input as a prompt
         logger.error("Input is not a valid JSON. Treating as a prompt.")
         data = {"prompt": json_string.strip("'\" ")}
 
@@ -371,6 +364,8 @@ def run_framer_json(ctx, json_input, debug, sync, stream):
     try:
         logger.info("Executing framer")
         result = execute_framer(frame, data, sync, stream)
+        if not sync:
+            result = await result  # Await the task if it's asynchronous
         logger.info(f"Framer execution completed. Result: {result}")
         if isinstance(result, Decision):
             logger.info(f"Decision made: {result}")
@@ -380,9 +375,10 @@ def run_framer_json(ctx, json_input, debug, sync, stream):
     except Exception as e:
         logger.error(f"An error occurred during framer execution: {str(e)}")
         logger.exception("Exception details:")
+    finally:
+        frame.shut_down(save_state=False, reset=True)
 
     logger.info("run_framer command finished")
-    # Log LLM usage metrics
     metrics = frame.get_metrics()
     logger.info("LLM Usage Metrics:")
     logger.info(f"Total calls: {metrics['total_calls']}")
@@ -501,9 +497,9 @@ async def stream_output(framer, prompt):
     print()  # Print a newline at the end
 
 
-async def main():
-    await cli(obj={})
+def main():
+    asyncio.run(cli(obj={}))
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

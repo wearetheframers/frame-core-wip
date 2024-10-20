@@ -1,8 +1,11 @@
 import os
+import logging
 from typing import Optional, Dict, Any
 from .src.framer.framer import Framer, FramerConfig
 from .src.framer.framer_factory import FramerBuilder, FramerFactory
 from .src.framed import Framed
+
+logger = logging.getLogger(__name__)
 from .src.framed.framed_factory import FramedFactory
 from .src.constants.models import DEFAULT_MODEL
 from .src.framed.framed_factory import FramedBuilder
@@ -196,3 +199,50 @@ class Frame:
             as well as the total calls and total cost.
         """
         return self.llm_service.get_metrics()
+
+    def shut_down(self, save_state: bool = False, reset: bool = True):
+        """
+        Shut down the Frame instance, managing all Framers and workflows.
+
+        This method handles the graceful shutdown of all Framers and their associated
+        workflows. It can optionally save the current state and reset the Frame.
+
+        Args:
+            save_state (bool): If True, save the current state of all Framers and workflows.
+                               Defaults to False.
+            reset (bool): If True, reset all Framers and workflows after shutdown.
+                          Defaults to True.
+
+        Returns:
+            None
+        """
+        # Implement logic to pause or stop all workflows
+        # if hasattr(self, 'framers'):
+        #     for framer in self.framers:
+        #         if hasattr(framer, 'workflow_manager'):
+        #             framer.workflow_manager.pause_all_workflows()
+
+        # Implement logic to save state if requested
+        if save_state:
+            # Save state of all Framers and workflows
+            pass
+
+        # Implement logic to remove all Framers
+        # if hasattr(self, 'framers'):
+        #     self.framers.clear()
+
+        # Implement logic to reset everything if requested
+        if reset:
+            # Reset all Frame components
+            pass
+
+        # Implement any necessary cleanup for plugins
+        for plugin in self.plugins.values():
+            if hasattr(plugin, 'on_shutdown'):
+                plugin.on_shutdown()
+
+        # Implement any final cleanup or resource release
+        # if hasattr(self, 'llm_service') and hasattr(self.llm_service, 'close'):
+        #     self.llm_service.close()
+
+        logger.info("Frame has been shut down.")

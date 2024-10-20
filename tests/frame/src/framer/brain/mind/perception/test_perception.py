@@ -1,5 +1,5 @@
 import pytest
-from frame.src.framer.brain.perception.perception import Perception
+from frame.src.framer.brain.mind.perception import Perception
 from frame.src.models.framer.brain.mind.perception import Perception as PerceptionModel
 from datetime import datetime, timezone
 from frame.src.services import ExecutionContext

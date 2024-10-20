@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, Mock, patch
-from frame.src.framer.agency.actions.research import perform_research as research
+from frame.src.framer.brain.actions.research import ResearchAction
 from frame.src.services import ExecutionContext
 
 
@@ -18,7 +18,8 @@ def mock_execution_context():
 @patch("builtins.print")
 async def test_research(mock_print, mock_execution_context):
     topic = "AI and Machine Learning"
-    result = await research(mock_execution_context, topic)
+    research_action = ResearchAction()
+    result = await research_action.execute(mock_execution_context, topic=topic)
 
     mock_print.assert_called_once_with(f"Performing research on topic: {topic}")
     mock_execution_context.llm_service.get_completion.assert_called_once_with(

@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from frame.src.framer.agency.actions.respond import generate_response as respond
+from frame.src.framer.brain.actions.respond import RespondAction
 from frame.src.services import ExecutionContext
 
 
@@ -22,7 +22,8 @@ async def test_respond(mock_execution_context):
         "Generated response"
     )
 
-    result = await respond(mock_execution_context)
+    respond_action = RespondAction()
+    result = await respond_action.execute(mock_execution_context)
 
     assert isinstance(result, dict)
     assert "response" in result

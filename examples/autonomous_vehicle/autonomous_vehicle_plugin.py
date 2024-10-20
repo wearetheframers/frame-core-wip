@@ -7,6 +7,10 @@ from frame.src.framer.brain.actions import BaseAction
 
 
 class AutonomousVehiclePlugin(BasePlugin):
+    def __init__(self, framer):
+        super().__init__(framer)
+        self.speed = 0
+        self.lane = 1
 
     async def on_load(self):
         self.add_action(
@@ -55,7 +59,7 @@ class StopVehicleAction(BaseAction):
 
     async def execute(self, execution_context: ExecutionContext, **kwargs) -> str:
         result = await self.vehicle_plugin.stop_vehicle()
-        print(f"{execution_context.config.name}: {result}")
+        print(f"Vehicle: {result}")
         await asyncio.sleep(0.1)
         return result
 
@@ -71,7 +75,7 @@ class SlowDownVehicleAction(BaseAction):
 
     async def execute(self, execution_context: ExecutionContext, **kwargs) -> str:
         result = await self.vehicle_plugin.slow_down_vehicle()
-        print(f"{execution_context.config.name}: {result}")
+        print(f"Vehicle: {result}")
         await asyncio.sleep(0.1)
         return result
 
@@ -87,6 +91,6 @@ class ChangeLaneAction(BaseAction):
 
     async def execute(self, execution_context: ExecutionContext, **kwargs) -> str:
         result = await self.vehicle_plugin.change_lane()
-        print(f"{execution_context.config.name}: {result}")
+        print(f"Vehicle: {result}")
         await asyncio.sleep(0.1)
         return result

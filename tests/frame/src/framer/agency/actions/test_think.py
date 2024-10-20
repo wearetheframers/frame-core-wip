@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
-from frame.src.framer.agency.actions.think import process_thought as think
-from frame.src.framer.agency.action_registry import ActionRegistry
+from frame.src.framer.brain.actions.think import ThinkAction
+from frame.src.framer.brain.action_registry import ActionRegistry
 from frame.src.services import ExecutionContext
 
 
@@ -25,7 +25,8 @@ async def test_think(mock_framer):
     thought = "Processing information..."
     mock_framer.brain._execute_think_action.return_value = {"analysis": "Test analysis"}
 
-    result = await think(mock_framer, thought)
+    think_action = ThinkAction()
+    result = await think_action.execute(mock_framer, thought=thought)
 
     mock_framer.brain.make_decision.assert_called_once_with(
         {"action": "think", "parameters": {"thought": thought}}
@@ -40,7 +41,8 @@ async def test_think_default_thought(mock_framer):
         "analysis": "Default analysis"
     }
 
-    result = await think(mock_framer)
+    think_action = ThinkAction()
+    result = await think_action.execute(mock_framer)
 
     mock_framer.brain.make_decision.assert_called_once_with(
         {"action": "think", "parameters": {"thought": "Processing information..."}}

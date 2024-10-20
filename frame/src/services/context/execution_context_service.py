@@ -21,6 +21,7 @@ class ExecutionContext:
     - Centralized service access: Provides access to core services like LLM, memory, and EQ.
     - State management: Maintains and updates the current state of the execution.
     - Goal tracking: Manages the current goals of the Framer.
+    - Action registry: Stores and manages available actions.
     """
 
     def __init__(
@@ -38,6 +39,7 @@ class ExecutionContext:
         self.state = state or {}
         self.goals: List[Any] = []
         self.roles: List[Any] = []
+        self.action_registry = None
 
     def set_state(self, key: str, value: Any) -> None:
         self.state[key] = value

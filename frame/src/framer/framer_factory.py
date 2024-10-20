@@ -118,6 +118,8 @@ class FramerFactory:
 
         # The Mind is now initialized within the Brain constructor
         mind = brain.mind
+        execution_context = ExecutionContext(llm_service=self.llm_service)
+        execution_context.agency = agency
         framer = Framer(
             config=self.config,
             llm_service=self.llm_service,
@@ -128,6 +130,7 @@ class FramerFactory:
             memory_service=memory_service,
             eq_service=eq_service,
             plugins=plugins,
+            execution_context=execution_context,
         )
 
         framer.agency.set_goals(goals)

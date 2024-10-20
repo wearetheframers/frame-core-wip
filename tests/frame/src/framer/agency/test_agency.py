@@ -6,7 +6,7 @@ from frame.src.framed.framed import Framed
 from frame.src.framer.soul.soul import Soul
 from frame.src.framer.agency import Agency
 from frame.src.framer.agency.roles import Role
-from frame.src.framer.agency.goals import Goals, Goal
+from frame.src.framer.agency.goals import Goal
 from frame.src.services.llm.main import LLMService
 from frame.src.framer.agency.tasks.task import Task
 from frame.src.framer.agency.workflow import Workflow

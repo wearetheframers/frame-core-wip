@@ -2,10 +2,10 @@ import os
 import pytest
 from unittest.mock import patch, MagicMock
 from frame.src.utils.plugin_loader import load_plugins, load_plugin_config
-from frame.src.framer.brain.plugins import PluginBase
+from frame.src.framer.brain.plugins.base import BasePlugin
 
 
-class MockPlugin(PluginBase):
+class MockPlugin(BasePlugin):
     def __init__(self, config):
         super().__init__(config)
         self.actions = {"test_action": self.test_action}

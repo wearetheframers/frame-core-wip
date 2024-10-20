@@ -90,6 +90,7 @@ class Framer:
         goals: List[Dict[str, Any]] = [],
         plugins: Optional[Dict[str, Any]] = None,
         plugin_loading_progress: Optional[Callable[[int], None]] = None,
+        execution_context: Optional[ExecutionContext] = None,
     ):
         self.plugin_loading_progress = plugin_loading_progress
         self.config = config
@@ -100,7 +101,7 @@ class Framer:
         ]
         self.llm_service = llm_service
 
-        self.execution_context = ExecutionContext(llm_service=self.llm_service)
+        self.execution_context = execution_context or ExecutionContext(llm_service=self.llm_service)
         self.plugin_loading_progress = plugin_loading_progress
 
         # Initialize services and plugins based on permissions

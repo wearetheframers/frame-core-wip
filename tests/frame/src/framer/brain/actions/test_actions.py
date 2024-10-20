@@ -1,11 +1,11 @@
 import json
 import pytest
-from frame.src.framer.agency.action_registry import ActionRegistry
+from frame.src.framer.brain.action_registry import ActionRegistry
 from frame.src.services import ExecutionContext
 from unittest.mock import Mock
 from frame.src.services.llm.main import LLMService
 from unittest.mock import Mock, AsyncMock
-from frame.src.framer.agency.actions.base import BaseAction
+from frame.src.framer.brain.actions.base import BaseAction
 from frame.src.services.execution_context import ExecutionContext
 
 

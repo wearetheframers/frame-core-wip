@@ -135,6 +135,7 @@ class Brain:
 
     def set_framer(self, framer):
         self.framer = framer
+        self.action_registry.set_execution_context(self.execution_context)
 
     def get_framer(self):
         return self.framer
@@ -542,8 +543,10 @@ class Brain:
         result = None
         try:
             if decision.action not in self.action_registry.get_all_actions():
-                logger.error(f"Action '{decision.action}' not found in registry.")
-                return None
+                logger.warning(f"Action '{decision.action}' not found in registry. Defaulting to 'process_perception'.")
+                decision.action = "process_perception"
+                if "perception" not in decision.parameters:
+                    decision.parameters["perception"] = perception.data if perception else None
 
             if decision.action == "respond with memory retrieval":
                 if (
@@ -552,27 +555,6 @@ class Brain:
                 ):
                     decision.parameters["query"] = (
                         perception.data.get("text", "") if perception else ""
-                    )
-                # Ensure the query is passed to the action
-                result = await self.action_registry.execute_action(
-                    decision.action, decision.parameters
-                )
-                return result
-            elif decision.action == "respond":
-                # Use the execution_context to perform the task
-                result = await self.execution_context.perform_task(
-                    {
-                        "description": decision.parameters.get("content", ""),
-                        "workflow_id": "default",
-                    }
-                )
-            else:
-                if (
-                    decision.action == "process_perception"
-                    and "perception" not in decision.parameters
-                ):
-                    decision.parameters["perception"] = (
-                        perception.data if perception else None
                     )
 
             result = await self.action_registry.execute_action(

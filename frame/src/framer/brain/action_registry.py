@@ -211,7 +211,7 @@ class ActionRegistry:
         """
         return self.actions.get(name)
 
-    async def execute_action(self, action_name: str, parameters: dict):
+    async def execute_action(self, action_name: str, *args, **kwargs):
         """Execute an action by its name."""
         logger.info(
             f"Available actions before executing '{action_name}': {list(self.actions.keys())}"
@@ -229,17 +229,8 @@ class ActionRegistry:
             return await self._handle_error(error_message)
 
         action_func = action["action_func"]
-        expected_params = action_func.__code__.co_varnames[
-            : action_func.__code__.co_argcount
-        ]
-        filtered_params = {k: v for k, v in parameters.items() if k in expected_params}
-        logger.info(f"Filtered params: {filtered_params}")
-
-        if "query" in filtered_params:
-            filtered_params["query"] = parameters.get("query", "")
-
         try:
-            result = await action_func(self.execution_context, **filtered_params)
+            result = await action_func(*args, **kwargs)
             if result is None:
                 return {
                     "error": "Action returned None",

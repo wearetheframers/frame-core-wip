@@ -5,7 +5,7 @@ from frame.src.framer.brain.brain import Brain
 from frame.src.framer.brain.decision import Decision
 from frame.src.framer.brain.memory import Memory
 from frame.src.framer.brain.mind import Mind
-from frame.src.framer.brain.perception import Perception
+from frame.src.framer.brain.mind.perception import Perception
 from frame.src.framed.config import FramedConfig
 from frame.src.services import ExecutionContext
 
