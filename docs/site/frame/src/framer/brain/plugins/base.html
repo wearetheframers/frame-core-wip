@@ -114,8 +114,11 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
             description (str): A brief description of what the action does.
         &#34;&#34;&#34;
         print(&#34;Registering action: &#34;, name)
-        self.framer.brain.action_registry.add_action(name, func, description, priority)
-        print(&#34;Registered to Framer action registry: &#34;, self.framer.brain.action_registry.actions)
+        if name not in self.framer.brain.action_registry.actions:
+            self.framer.brain.action_registry.add_action(name, func, description, priority)
+            print(f&#34;Action &#39;{name}&#39; registered to Framer action registry.&#34;)
+        else:
+            print(f&#34;Action &#39;{name}&#39; already exists in Framer action registry.&#34;)
 
     @abstractmethod
     async def execute(self, action: str, params: Dict[str, Any]) -&gt; Any:

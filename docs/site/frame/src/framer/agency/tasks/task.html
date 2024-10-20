@@ -103,7 +103,7 @@ validated to form a valid model.</p>
         self.result = None
         self.updated_at = datetime.now()
         self.completed_at = completed_at
-        logger.info(
+        logger.debug(
             f&#34;Created new task with ID: {self.id} and expected results: {self.expected_results}&#34;
         )
         self._execute_callback: Optional[Callable[[], Any]] = None
@@ -197,6 +197,7 @@ validated to form a valid model.</p>
         Args:
             workflow_id (str): The ID of the completed workflow.
         &#34;&#34;&#34;
+        # Placeholder data
         metrics = {&#34;total_tasks&#34;: 5, &#34;completed_tasks&#34;: 3, &#34;total_time&#34;: 10.5}
         logger.info(f&#34;Workflow {workflow_id} completed.&#34;)
         logger.info(f&#34;Workflow metrics: {metrics}&#34;)

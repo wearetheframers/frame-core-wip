@@ -46,7 +46,7 @@ Framers include several default plugins and services that are automatically avai
 
 ### Initialization
 
-To initialize a `Framer` with roles and goals, use the `initialize()` method. This method will automatically call `act()`, enabling the `Framer` to start processing perceptions and making decisions. The `act()` method sets the Framer to an active state, allowing it to respond to perceptions and execute tasks. If you need to stop the `Framer` from acting or making new tasks, use the `halt()` method. The `halt()` method is crucial for pausing the Framer's activities without shutting it down completely.
+Framers start acting immediately upon creation, processing perceptions and making decisions. If you need to stop the `Framer` from acting or making new tasks, use the `halt()` method. The `halt()` method is crucial for pausing the Framer's activities without shutting it down completely.
 
 - Task Management: Create and manage tasks efficiently.
 - Decision Making: Utilize advanced decision-making processes to guide actions.

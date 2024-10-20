@@ -95,7 +95,11 @@ hljs.highlightAll();
         # They do not require explicit permissions to be accessed but must be passed into a Framer.
         # The Mem0SearchExtractSummarizePlugin is a default plugin that provides a response mechanism
         # requiring memory retrieval, functioning as a RAG mechanism.
-        if &#34;with_memory&#34; in self.permissions and memory_adapter:
+        # Enforce permission for &#39;with-mem0-search-extract-summarize-plugin&#39; if &#39;with-memory&#39; is used
+        if &#34;with-memory&#34; in self.permissions:
+            self.permissions.append(&#34;with-mem0-search-extract-summarize-plugin&#34;)
+        
+        if &#34;with-memory&#34; in self.permissions and memory_adapter:
             self.memory_service = memory_service or MemoryService(adapter=memory_adapter)
 
         if &#34;with_eq&#34; in self.permissions:
@@ -111,6 +115,8 @@ hljs.highlightAll();
         self.soul = soul
         self.workflow_manager = workflow_manager
         self.memory_service = memory_service
+        self.roles = roles
+        self.goals = goals
         self.eq_service = eq_service
         self.plugins = plugins or {}
         self.plugin_loading_complete = False
@@ -127,23 +133,32 @@ hljs.highlightAll();
         self.observers: List[Observer] = []
         self.can_execute = True  # Add can_execute attribute
         self.acting = False
+        # Load plugins asynchronously
+        asyncio.create_task(self.load_plugins())
 
-        # Initialize roles and goals
-        self.roles: List[Dict[str, Any]] = roles if roles is not None else []
-        self.goals: List[Dict[str, Any]] = goals if goals is not None else []
-    
-   
-
-            
-    async def act(self):
+    def act(self):
         &#34;&#34;&#34;
-        Enable the Framer to process perceptions and make decisions.
-
-        This method sets the Framer to an active state, allowing it to respond
-        to perceptions and execute tasks. It is automatically called during
-        initialization to ensure the Framer starts acting immediately.
+        Enable the Framer to start acting and processing perceptions.
         &#34;&#34;&#34;
         self.acting = True
+            
+    async def load_plugins(self):
+        &#34;&#34;&#34;
+        Load all plugins by calling their on_load method.
+        &#34;&#34;&#34;
+        for plugin_name, plugin_instance in self.plugins.items():
+            if hasattr(plugin_instance, &#34;on_load&#34;):
+                await plugin_instance.on_load(self)
+                # Register plugin actions
+                for action_name, action_func in plugin_instance.get_actions().items():
+                    self.agency.action_registry.add_action(
+                        action_name,
+                        action_func=action_func,
+                        description=f&#34;Action from {plugin_name} plugin&#34;,
+                        priority=5  # Default priority, adjust as needed
+                    )
+        self.plugin_loading_complete = True
+        self.act()
         await self.process_queued_perceptions()
 
     async def process_queued_perceptions(self):
@@ -151,7 +166,9 @@ hljs.highlightAll();
         Process all queued perceptions once the Framer is ready.
         &#34;&#34;&#34;
         if self.is_ready():
+            logger.info(&#34;Processing queued perceptions...&#34;)
             while self.perceptions_queue:
+                logger.info(f&#34;Processing perception from queue: {self.perceptions_queue[0]}&#34;)
                 perception = self.perceptions_queue.popleft()
                 await self.sense(perception)
 
@@ -170,6 +187,7 @@ hljs.highlightAll();
             self.agency.set_goals(self.goals)
         else:
             logger.warning(&#34;Framer is not ready. Queuing perception.&#34;)
+            logger.info(f&#34;Queued perception: {perception}&#34;)
 
         # Sort roles and goals by priority
         self.roles.sort(key=lambda x: x.get(&#34;priority&#34;, 5), reverse=True)
@@ -547,13 +565,10 @@ ensuring continuity and consistency across different sessions or environments.</
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.framer.Framer.act"><code class="name flex">
-<span>async def <span class="ident">act</span></span>(<span>self)</span>
+<span>def <span class="ident">act</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Enable the Framer to process perceptions and make decisions.</p>
-<p>This method sets the Framer to an active state, allowing it to respond
-to perceptions and execute tasks. It is automatically called during
-initialization to ensure the Framer starts acting immediately.</p></div>
+<div class="desc"><p>Enable the Framer to start acting and processing perceptions.</p></div>
 </dd>
 <dt id="frame.src.framer.framer.Framer.add_observer"><code class="name flex">
 <span>def <span class="ident">add_observer</span></span>(<span>self, observer: Callable[[<a title="frame.src.framer.brain.decision.decision.Decision" href="brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>], None]) ‑> None</span>
@@ -635,6 +650,12 @@ systems, facilitating interoperability and reuse.</p>
 <dt><code>bool</code></dt>
 <dd>True if the Framer is ready, False otherwise.</dd>
 </dl></div>
+</dd>
+<dt id="frame.src.framer.framer.Framer.load_plugins"><code class="name flex">
+<span>async def <span class="ident">load_plugins</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load all plugins by calling their on_load method.</p></div>
 </dd>
 <dt id="frame.src.framer.framer.Framer.notify_observers"><code class="name flex">
 <span>def <span class="ident">notify_observers</span></span>(<span>self, decision: <a title="frame.src.framer.brain.decision.decision.Decision" href="brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>) ‑> None</span>
@@ -760,6 +781,7 @@ systems, facilitating interoperability and reuse.</p>
 <li><code><a title="frame.src.framer.framer.Framer.generate_tasks_from_perception" href="#frame.src.framer.framer.Framer.generate_tasks_from_perception">generate_tasks_from_perception</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.is_ready" href="#frame.src.framer.framer.Framer.is_ready">is_ready</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.load_from_file" href="#frame.src.framer.framer.Framer.load_from_file">load_from_file</a></code></li>
+<li><code><a title="frame.src.framer.framer.Framer.load_plugins" href="#frame.src.framer.framer.Framer.load_plugins">load_plugins</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.notify_observers" href="#frame.src.framer.framer.Framer.notify_observers">notify_observers</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.perceptions_queue" href="#frame.src.framer.framer.Framer.perceptions_queue">perceptions_queue</a></code></li>
 <li><code><a title="frame.src.framer.framer.Framer.perform_task" href="#frame.src.framer.framer.Framer.perform_task">perform_task</a></code></li>

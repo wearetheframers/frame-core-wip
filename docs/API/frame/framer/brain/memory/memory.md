@@ -6,7 +6,9 @@ It supports both global and multi-user memory contexts, as well as different typ
 
 This is achieved using the MemoryService and Mem0Adapter, which abstract away the underlying storage solution and provide a flexible interface for memory operations. The architecture allows for easy swapping of memory components, offering alternatives like RAG with the same interface but different underlying drivers.
 
-The `memory` service functions like a plugin but does not require explicit permissions to be accessed. It is always available to Framers, providing essential memory management capabilities.
+The `memory` service functions like a plugin but does not require explicit permissions to be accessed. It is always available to Framers, providing essential memory management capabilities. 
+
+When `with-memory` is used, the Framer is also given permissions for `with-mem0-search-extract-summarize-plugin`. This ensures that the Framer can respond from memory effectively, leveraging the Mem0SearchExtractSummarizePlugin for comprehensive memory retrieval and response. This plugin might be refactored into a core component in the future to streamline its integration and usage.
 
 ## Memory Types
 

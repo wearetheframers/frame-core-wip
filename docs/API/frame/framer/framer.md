@@ -23,7 +23,7 @@ Framers include several default plugins and services that are automatically avai
 
 - **Services**: `memory`, `eq`, and `shared_context` are special plugins called services. They function like plugins but do not require explicit permissions to be accessed. They are always available to Framers, enhancing their capabilities by providing essential functionalities without the need for additional permissions.
 
-- **Default Plugin**: The `Mem0SearchExtractSummarizePlugin` is included as a default plugin. It provides a mechanism to look into memories, retrieve relevant information, and share insights, functioning as a Retrieval-Augmented Generation (RAG) mechanism. By default, all Framers inherit this action, enabling them to search, extract, and summarize information effectively.
+- **Default Plugin**: The `Mem0SearchExtractSummarizePlugin` is included as a default plugin. It provides a mechanism to look into memories, retrieve relevant information, and share insights, functioning as a Retrieval-Augmented Generation (RAG) mechanism. By default, all Framers inherit this action, enabling them to search, extract, and summarize information effectively. Plugins are loaded automatically during Framer creation.
 
 ### Agency
 
@@ -43,7 +43,9 @@ Represents the core essence and personality of a Framer.
 
 Manages workflows and tasks.
 
-### ExecutionContext
+### Emotional Intelligence
+
+The Framer's decision-making and actions can be influenced by its emotional state if the `with_eq` permission is granted. This feature allows the Framer to simulate emotional responses, affecting how it prioritizes tasks and interacts with users. For example, a Framer in a "curious" state might prioritize exploratory actions, while one in a "calm" state might focus on routine tasks.
 
 Provides a centralized container for various services (LLM, memory, EQ), state information, and functions needed during execution. This component ensures consistency across actions, promotes flexibility in service management, and facilitates easier testing and modular design.
 

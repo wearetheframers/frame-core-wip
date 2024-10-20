@@ -21,7 +21,7 @@ The "prompt" action in a Framer is essentially processing a perception of hearin
 
 ## Usage
 
-To use the Perception class, create an instance and process sensory data:
+To use the Perception class, create an instance and process sensory data. Framers automatically handle perceptions, queuing them if necessary until they are ready to process:
 
 ```python
 from frame.src.framer.brain.perception import Perception

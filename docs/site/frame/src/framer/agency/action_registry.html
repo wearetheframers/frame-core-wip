@@ -65,34 +65,44 @@ hljs.highlightAll();
             ResearchAction(),
         ]
         for action in default_actions:
-            self.add_action(
-                action.name,
-                description=action.description,
-                action_func=getattr(action, &#39;func&#39;, None),
-                priority=action.priority,
-            )
+            if action.name not in self.actions:
+                self.add_action(
+                    action.name,
+                    description=action.description,
+                    action_func=getattr(action, &#39;func&#39;, None),
+                    priority=action.priority,
+                )
 
     def extend_actions(self, new_actions: Dict[str, Dict[str, Any]]):
         extend_valid_actions(new_actions)
         self._register_default_actions()
 
     def add_action(
-        self, name: str, description: str = &#34;&#34;, action_func: Optional[Callable] = None, priority: int = 5
+        self, action_or_name: Union[BaseAction, str], description: str = &#34;&#34;, action_func: Optional[Callable] = None, priority: int = 5
     ):
         &#34;&#34;&#34;
         Add a new action to the registry.
 
         Args:
-            name (str): The name of the action.
+            action_or_name (Union[BaseAction, str]): The action object or the name of the action.
             action_func (Callable, optional): The function to execute for this action. Defaults to None.
             description (str, optional): A description of the action. Defaults to &#34;&#34;.
             priority (int, optional): The priority of the action. Defaults to 5.
         &#34;&#34;&#34;
+        if isinstance(action_or_name, BaseAction):
+            name = action_or_name.name
+            description = action_or_name.description
+            action_func = getattr(action_or_name, &#39;execute&#39;, None)
+            priority = action_or_name.priority
+        else:
+            name = action_or_name
+
         if priority is not None and not (1 &lt;= priority &lt;= 10):
             raise ValueError(&#34;Priority must be between 1 and 10&#34;)
         if action_func is None:
-            # set action func to a dummy function
-            action_func = lambda *args, **kwargs: None
+            # set action func to a dummy async function
+            async def action_func(*args, **kwargs):
+                return None
         self.actions[name] = {
             &#34;action_func&#34;: action_func,
             &#34;description&#34;: description,
@@ -100,6 +110,7 @@ hljs.highlightAll();
         }
         if name not in self.valid_actions:
             self.valid_actions.append(name)
+            logger.debug(f&#34;Action &#39;{name}&#39; added to registry.&#34;)
 
     def remove_action(self, name: str):
         &#34;&#34;&#34;
@@ -108,12 +119,15 @@ hljs.highlightAll();
         Args:
             name (str): The name of the action to remove.
         &#34;&#34;&#34;
-        if name in self.actions:
-            del self.actions[name]
-            if name in self.valid_actions:
-                del self.valid_actions[name]
-        else:
-            raise ValueError(f&#34;Action &#39;{name}&#39; not found.&#34;)
+        try:
+            if name in self.actions:
+                del self.actions[name]
+                if name in self.valid_actions:
+                    self.valid_actions.remove(name)
+            else:
+                raise ValueError(f&#34;Action &#39;{name}&#39; not found.&#34;)
+        except Exception as e:
+            logger.error(f&#34;Error removing action &#39;{name}&#39;: {e}&#34;)
         return self.actions.get(name, {})
 
     def get_action(self, name: str) -&gt; Optional[Dict[str, Any]]:
@@ -167,30 +181,38 @@ hljs.highlightAll();
 
     async def execute_action(self, action_name: str, parameters: dict):
         &#34;&#34;&#34;Execute an action by its name.&#34;&#34;&#34;
+        logger.info(f&#34;Available actions before executing &#39;{action_name}&#39;: {list(self.actions.keys())}&#34;)
+        print(&#34;Action name: &#34;, action_name)
+        if action_name == &#34;no_action&#34;:
+            logger.info(&#34;No action to execute. Skipping.&#34;)
+            return None
+
         action = self.get_action(action_name)
         if action:
-            # Filter parameters to match the expected arguments of the action function
             action_func = action[&#34;action_func&#34;]
             expected_params = action_func.__code__.co_varnames[:action_func.__code__.co_argcount]
             filtered_params = {k: v for k, v in parameters.items() if k in expected_params}
-            # Ensure &#39;query&#39; is included in the parameters
-            if &#39;query&#39; not in filtered_params and &#39;text&#39; in parameters:
-                filtered_params[&#39;query&#39;] = parameters[&#39;text&#39;]
+            if &#39;query&#39; in filtered_params and &#39;query&#39; in parameters:
+                del filtered_params[&#39;query&#39;]
+            print(&#34;Filtered params: &#34;, filtered_params)
+            print(&#34;Expected params: &#34;, expected_params)
             return await action_func(self.execution_context, **filtered_params)
         else:
-            raise ValueError(f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;)</code></pre>
+            logger.error(f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;)
+            # raise ValueError(f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;)
+            return None</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.agency.action_registry.ActionRegistry.add_action"><code class="name flex">
-<span>def <span class="ident">add_action</span></span>(<span>self, name: str, description: str = '', action_func: Optional[Callable] = None, priority: int = 5)</span>
+<span>def <span class="ident">add_action</span></span>(<span>self, action_or_name: Union[<a title="frame.src.framer.agency.actions.base.BaseAction" href="actions/base.html#frame.src.framer.agency.actions.base.BaseAction">BaseAction</a>, str], description: str = '', action_func: Optional[Callable] = None, priority: int = 5)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a new action to the registry.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>The name of the action.</dd>
+<dt><strong><code>action_or_name</code></strong> :&ensp;<code>Union[BaseAction, str]</code></dt>
+<dd>The action object or the name of the action.</dd>
 <dt><strong><code>action_func</code></strong> :&ensp;<code>Callable</code>, optional</dt>
 <dd>The function to execute for this action. Defaults to None.</dd>
 <dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>

@@ -11,7 +11,7 @@ The Decision component represents a decision made by the Brain component of a Fr
 
 ## Key Features
 
-- **Perception Processing**: Decisions are made based on incoming perceptions, which can be any type of data (text, images, sounds) that the Framer can process.
+- **Perception Processing**: Decisions are made based on incoming perceptions, which can be any type of data (text, images, sounds) that the Framer can process. Framers automatically process perceptions as they are received.
 - **Context-Aware Decision Making**: Decisions take into account the Framer's current roles, goals, and available actions.
 - **Priority Management**: Actions can be prioritized to influence decision-making, ensuring that more critical actions are preferred.
 - **Plugin Integration**: Decisions can involve actions provided by plugins, extending the Framer's capabilities.

@@ -89,7 +89,7 @@ creating Framer objects using the FramerFactory.</p></div>
 </dd>
 <dt id="frame.src.framer.framer_factory.FramerFactory"><code class="flex name class">
 <span>class <span class="ident">FramerFactory</span></span>
-<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>)</span>
+<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, plugins: Optional[Dict[str, Any]] = [])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Factory class for creating Framer instances.</p>
@@ -127,7 +127,7 @@ enabling developers to create a wide range of extensions and enhancements.</p>
     enabling developers to create a wide range of extensions and enhancements.
     &#34;&#34;&#34;
 
-    def __init__(self, config: FramerConfig, llm_service: LLMService):
+    def __init__(self, config: FramerConfig, llm_service: LLMService, plugins: Optional[Dict[str, Any]] = []):
         &#34;&#34;&#34;
         Initialize the FramerBuilder with configuration and LLM service.
 
@@ -146,9 +146,10 @@ enabling developers to create a wide range of extensions and enhancements.</p>
             raise TypeError(&#34;config must be an instance of FramerConfig&#34;)
         if not isinstance(llm_service, LLMService):
             raise TypeError(&#34;llm_service must be an instance of LLMService&#34;)
+        self.logger = logging.getLogger(__name__)
         self.config = config
         self.llm_service = llm_service
-        self.plugins: Dict[str, Any] = {}
+        self.plugins = plugins
 
     async def create_framer(
         self,
@@ -156,7 +157,9 @@ enabling developers to create a wide range of extensions and enhancements.</p>
         eq_service: Optional[EQService] = None,
         roles: Optional[List[Role]] = None,
         goals: Optional[List[Goal]] = None,
+        plugins: Optional[Dict[str, Any]] = None,
     ) -&gt; Framer:
+        self.plugins = plugins or {}
         execution_context = ExecutionContext(llm_service=self.llm_service)
         agency = Agency(
             llm_service=self.llm_service,
@@ -193,6 +196,7 @@ enabling developers to create a wide range of extensions and enhancements.</p>
             workflow_manager=workflow_manager,
             memory_service=memory_service,
             eq_service=eq_service,
+            plugins=plugins
         )
 
         framer.agency.set_goals(goals)
@@ -200,15 +204,21 @@ enabling developers to create a wide range of extensions and enhancements.</p>
 
         # Set the Framer instance in Brain and ActionRegistry
         framer.brain.set_framer(framer)
-        framer.brain.action_registry.set_framer(framer)
+        framer.brain.agency.action_registry.set_framer(framer)
 
         # Notify observers about the Framer being opened
         for observer in framer.observers:
             if hasattr(observer, &#34;on_framer_opened&#34;):
                 observer.on_framer_opened(framer)
 
+        # Call on_load for each plugin
+        for plugin_name, plugin_instance in framer.plugins.items():
+            if hasattr(plugin_instance, &#34;on_load&#34;):
+                self.logger.info(f&#34;Loading plugin: {plugin_name}&#34;)
+                await plugin_instance.on_load(framer)
+                self.logger.info(f&#34;Plugin {plugin_name} loaded successfully.&#34;)
+
         framer.plugin_loading_complete = True
-        await framer.act()  # Start acting after plugins are loaded
 
         return framer
 
@@ -248,7 +258,7 @@ enabling developers to create a wide range of extensions and enhancements.</p>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.framer_factory.FramerFactory.create_framer"><code class="name flex">
-<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None, plugins: Optional[Dict[str, Any]] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>

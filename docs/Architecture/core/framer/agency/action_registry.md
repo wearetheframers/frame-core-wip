@@ -27,7 +27,7 @@ The ActionRegistry now uses an ExecutionContext, which provides:
 
 - `__init__(execution_context: ExecutionContext)`: Initializes the ActionRegistry with an ExecutionContext.
 - `register_action(action_name: str, action_func: Callable, ...)`: Registers a new action.
-- `execute_action(action_name: str, parameters: dict)`: Executes an action using the ExecutionContext.
+- `execute_action(action_name: str, parameters: dict)`: Executes an action using the ExecutionContext. Actions can be registered dynamically, allowing for flexible and extensible behavior.
 
 ## Related Components
 

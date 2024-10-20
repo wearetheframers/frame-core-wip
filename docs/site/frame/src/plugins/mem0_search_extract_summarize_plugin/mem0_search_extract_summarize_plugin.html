@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
 <title>frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin API documentation</title>
-<meta name="description" content="">
+<meta name="description" content="Mem0SearchExtractSummarizePlugin …">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
@@ -25,6 +25,13 @@ hljs.highlightAll();
 <h1 class="title">Module <code>frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin</code></h1>
 </header>
 <section id="section-intro">
+<p>Mem0SearchExtractSummarizePlugin</p>
+<p>This plugin provides a mechanism to look into memories, retrieve relevant information, and share insights,
+functioning as a Retrieval-Augmented Generation (RAG) mechanism. It is automatically included when the
+'with-memory' permission is granted to a Framer, ensuring that memory-based responses are comprehensive
+and contextually relevant.</p>
+<p>Note: This plugin might be refactored into a core component in the future to streamline its integration
+and usage within the Frame framework.</p>
 </section>
 <section>
 </section>
@@ -68,13 +75,13 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         self.logger.addHandler(handler)
         self.mem0_adapter = Mem0Adapter()
 
-    async def on_load(self) -&gt; None:
+    async def on_load(self, framer) -&gt; None:
         # Check for a valid API key before registering the action
         api_key = os.getenv(&#34;MEM0_API_KEY&#34;, &#34;&#34;).strip()
         if not api_key:
             api_key = MEM0_API_KEY
         if api_key:
-            self.framer.agency.action_registry.add_action(
+            framer.agency.action_registry.add_action(
                 &#34;respond with memory retrieval&#34;,
                 description=&#34;This action is ideal for responding to personal questions that involve historical or memory-based &#34;
                             &#34;information about the user or the Framer. It leverages the Framer&#39;s memory to retrieve relevant data &#34;
@@ -86,6 +93,11 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
                 priority=8,
             )
             self.logger.info(&#34;Mem0SearchExtractSummarizePlugin registered &#39;response with memory retrieval&#39; action.&#34;)
+            # Remove respond action
+            if &#34;respond&#34; in framer.agency.action_registry.get_all_actions():
+                framer.agency.action_registry.remove_action(&#34;respond&#34;)
+            else:
+                self.logger.warning(&#34;Action &#39;respond&#39; not found in registry. Skipping removal.&#34;)
         else:
             self.logger.warning(&#34;Mem0 API key not found or is empty. Action &#39;response with memory retrieval&#39; will not be registered.&#34;)
 
@@ -153,7 +165,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 
     async def mem0_search_extract_summarize(
         self,
-        query: str,
+        query: str = &#34;&#34;,
         user_id: Optional[str] = None,
         agent_id: Optional[str] = None,
         run_id: Optional[str] = None,
@@ -163,6 +175,9 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
     ) -&gt; str:
         if not query:
             raise ValueError(&#34;Query cannot be null or empty.&#34;)
+        # Ensure the query is a string
+        if not isinstance(query, str):
+            query = str(query)
         self.logger.info(f&#34;Searching Mem0 for query: {query}&#34;)
 
         # Ensure at least one required filter is provided
@@ -263,7 +278,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 <div class="desc"><p>Return a dictionary of actions provided by this plugin.</p></div>
 </dd>
 <dt id="frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin.Mem0SearchExtractSummarizePlugin.mem0_search_extract_summarize"><code class="name flex">
-<span>async def <span class="ident">mem0_search_extract_summarize</span></span>(<span>self, query: str, user_id: Optional[str] = None, agent_id: Optional[str] = None, run_id: Optional[str] = None, filters: Optional[Dict[str, Any]] = None, model_name: str = 'gpt-4o-mini', text_response: Optional[str] = None) ‑> str</span>
+<span>async def <span class="ident">mem0_search_extract_summarize</span></span>(<span>self, query: str = '', user_id: Optional[str] = None, agent_id: Optional[str] = None, run_id: Optional[str] = None, filters: Optional[Dict[str, Any]] = None, model_name: str = 'gpt-4o-mini', text_response: Optional[str] = None) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"></div>

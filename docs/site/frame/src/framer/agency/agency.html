@@ -523,7 +523,11 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
         logger.debug(f&#34;Cost incurred: ${cost_incurred:.4f}&#34;)
 
         return response
-
+    
+    async def execute_action(self, action_name: str, parameters: dict):
+        &#34;&#34;&#34;Execute an action by its name using the action registry.&#34;&#34;&#34;
+        return await self.action_registry.execute_action(action_name, parameters)
+    
     async def execute_decision(self, decision: Decision) -&gt; Any:
         &#34;&#34;&#34;
         Execute the decision made by the brain.
@@ -665,6 +669,12 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 </code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.agency.Agency.execute_action"><code class="name flex">
+<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, parameters: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute an action by its name using the action registry.</p></div>
 </dd>
 <dt id="frame.src.framer.agency.agency.Agency.execute_decision"><code class="name flex">
 <span>async def <span class="ident">execute_decision</span></span>(<span>self, decision: <a title="frame.src.framer.brain.decision.decision.Decision" href="../brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>) ‑> Any</span>
@@ -876,6 +886,7 @@ It manages roles, goals, tasks, and workflows for the Framer.</p>
 <li><code><a title="frame.src.framer.agency.agency.Agency.create_task" href="#frame.src.framer.agency.agency.Agency.create_task">create_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.create_workflow" href="#frame.src.framer.agency.agency.Agency.create_workflow">create_workflow</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.evaluate_roles_and_goals" href="#frame.src.framer.agency.agency.Agency.evaluate_roles_and_goals">evaluate_roles_and_goals</a></code></li>
+<li><code><a title="frame.src.framer.agency.agency.Agency.execute_action" href="#frame.src.framer.agency.agency.Agency.execute_action">execute_action</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.execute_decision" href="#frame.src.framer.agency.agency.Agency.execute_decision">execute_decision</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.execute_task" href="#frame.src.framer.agency.agency.Agency.execute_task">execute_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.agency.Agency.fail_task" href="#frame.src.framer.agency.agency.Agency.fail_task">fail_task</a></code></li>

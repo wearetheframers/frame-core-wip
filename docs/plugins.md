@@ -17,27 +17,29 @@ Frame features a plugin marketplace where premium plugins and community plugins 
 
 ## Default Plugins and Services
 
-Frame includes several default plugins and services that are automatically available to Framers. These include:
+Frame includes several default plugins and services that are automatically available to Framers. These services, such as `LLMService`, `EQService`, `MemoryService`, and `SharedContext`, function as plugins with swappable adapters. This means the underlying implementation of the service can be changed while maintaining the same high-level interface. For instance, instead of using `Mem0`, a `LlamaIndex` adapter could be used. While `LLMService` is passed to the Framer by default, you must specify permissions like `with-eq`, `with-memory`, or `with-shared-context` in the `FramerConfig` to access these services. However, all Framers inherently have permission to access these services without needing explicit permission settings.
 
 - **Services**: `memory`, `eq`, and `shared_context` are special plugins called services. They function like plugins but do not require explicit permissions to be accessed. They are always available to Framers, enhancing their capabilities by providing essential functionalities without the need for additional permissions.
 
 - **Default Plugin**: The `Mem0SearchExtractSummarizePlugin` is included as a default plugin. It provides a mechanism to look into memories, retrieve relevant information, and share insights, functioning as a Retrieval-Augmented Generation (RAG) mechanism. By default, all Framers inherit this action, enabling them to search, extract, and summarize information effectively.
 
-To add a plugin as a default, simply include its permission in the FramerConfig. This ensures that the plugin is automatically available to all Framers without needing to specify it each time.
+To add a plugin as a default, simply include its permission in the FramerConfig. This ensures that the plugin is automatically available to all Framers without needing to specify it each time. Plugins are loaded automatically during Framer creation.
 
-## Plugin Permissions
+## Emotional Intelligence in Plugins
+
+Plugins can also leverage the Framer's emotional state to modify their behavior. If the `with_eq` permission is granted, plugins can access the Framer's emotional state and adjust their actions accordingly. This allows for more dynamic and context-aware plugin behavior, enhancing the Framer's ability to respond to complex scenarios.
 
 Plugins are controlled by a permission system. Each plugin has a corresponding permission that must be granted to a Framer for it to use that plugin. Permissions are specified in the FramerConfig when creating a Framer.
 
-The permission format for plugins is `with<PluginName>`. For example:
-- `with_search_extract_summarize_plugin`: Enables access to the Search Extract Summarize plugin
+The permission format for plugins is `with-<plugin-name>`. For example:
+- `with-search-extract-summarize-plugin`: Enables access to the Search Extract Summarize plugin
 
 To give a Framer access to a plugin, include its permission in the FramerConfig:
 
 ```python
 config = FramerConfig(
     name="Example Framer",
-    permissions=["with_memory", "with_eq", "with_search_extract_summarize_plugin"]
+    permissions=["with-memory", "with-eq", "with-search-extract-summarize-plugin"]
 )
 framer = await frame.create_framer(config)
 ```

@@ -118,9 +118,6 @@ hljs.highlightAll();
         }
         self.memory = Memory(memory_config)
 
-        # Initialize ActionRegistry
-        self.action_registry = ActionRegistry()
-
         # Initialize Agency
         self.agency = Agency(
             llm_service=self.llm_service,
@@ -141,7 +138,7 @@ hljs.highlightAll();
         )
 
         # Register the respond action using the agency&#39;s perform_task method
-        self.action_registry.add_action(
+        self.agency.action_registry.add_action(
             &#34;respond&#34;,
             description=&#34;Generate a response based on the current context&#34;,
             action_func=self.agency.perform_task,
@@ -149,7 +146,7 @@ hljs.highlightAll();
         )
 
         # Update the agency&#39;s action_registry
-        self.agency.action_registry = self.action_registry
+        self.agency.action_registry = self.agency.action_registry
 
     def set_framer(self, framer):
         self.framer = framer
@@ -278,14 +275,14 @@ hljs.highlightAll();
 
         self.mind.perceptions.append(perception)
         # Log available actions
-        available_actions = self.action_registry.get_all_actions().keys()
-        self.logger.debug(f&#34;Available actions: {available_actions}&#34;)
+        available_actions = self.agency.action_registry.get_all_actions().keys()
+        self.logger.info(f&#34;Available actions: {available_actions}&#34;)
 
         # Check if &#39;mem0_search_extract_memories&#39; is a valid action
         if &#39;mem0_search_extract_memories&#39; in available_actions:
-            self.logger.debug(&#34;&#39;mem0_search_extract_memories&#39; is a valid action.&#34;)
+            self.logger.info(&#34;&#39;mem0_search_extract_memories&#39; is a valid action.&#34;)
         else:
-            self.logger.debug(&#34;&#39;mem0_search_extract_memories&#39; is NOT a valid action.&#34;)
+            self.logger.info(&#34;&#39;mem0_search_extract_memories&#39; is NOT a valid action.&#34;)
 
         decision = await self.make_decision(perception)
         if decision is None:
@@ -300,7 +297,7 @@ hljs.highlightAll();
                 related_goals=[],
             )
         if hasattr(self, &#34;framer&#34;) and getattr(self.framer, &#34;can_execute&#34;, False):
-            await self.execute_decision(decision)
+            await self.execute_decision(decision, perception)
         return decision
 
     async def make_decision(self, perception: Optional[Perception] = None) -&gt; Decision:
@@ -315,6 +312,7 @@ hljs.highlightAll();
                       including the action to take, parameters, reasoning, confidence,
                       and priority.
         &#34;&#34;&#34;
+        logger.info(f&#34;Making decision based on perception: {perception}&#34;)
         if perception is None:
             return Decision(
                 action=&#34;no_action&#34;,
@@ -329,11 +327,11 @@ hljs.highlightAll();
         response = await self._get_decision_prompt(perception)
         decision_data = self.parse_json_response(response)
 
-        logger.debug(f&#34;Decision data received: {decision_data}&#34;)
+        logger.info(f&#34;Decision data received: {decision_data}&#34;)
 
         action = decision_data.get(&#34;action&#34;, &#34;respond&#34;).lower()
         valid_actions = [
-            action.lower() for action in self.action_registry.get_all_actions().keys()
+            str(action).lower() for action in self.agency.action_registry.get_all_actions().keys()
         ]
 
         # Check if the action is valid
@@ -358,6 +356,7 @@ hljs.highlightAll();
                     f&#34;Invalid action &#39;{invalid_action}&#39; was generated. Defaulted to &#39;{action}&#39;.&#34;
                 )
 
+        logger.info(f&#34;Decision data generated: {decision_data}&#34;)
         logger.info(f&#34;Action &#39;{action}&#39; generated: {decision_data}&#34;)
 
         parameters = decision_data.get(&#34;parameters&#34;, {})
@@ -415,6 +414,7 @@ hljs.highlightAll();
                 goal for goal in active_goals if goal.priority &gt;= priority_int
             ],
         )
+        logger.info(f&#34;Final decision object: {decision}&#34;)
         logger.info(f&#34;Decision made: {decision}&#34;)
         return decision
 
@@ -428,14 +428,14 @@ hljs.highlightAll();
         Returns:
             str: The generated decision prompt.
         &#34;&#34;&#34;
-        valid_actions = self.action_registry.valid_actions
+        valid_actions = self.agency.action_registry.valid_actions
         # action_descriptions = &#34;\n&#34;.join(
         #     [
         #         f&#34;- {name.lower()}: {info[&#39;description&#39;]}&#34;
-        #         for name, info in self.action_registry.actions.items()
+        #         for name, info in self.agency.action_registry.actions.items()
         #     ]
         # )
-
+        logger.info(f&#34;Valid actions: {valid_actions}&#34;)
         active_roles = [
             f&#34;{role.name} (Priority: {role.priority.name}, Status: {role.status.name})&#34;
             for role in self.roles
@@ -447,6 +447,9 @@ hljs.highlightAll();
             if goal.status == GoalStatus.ACTIVE
         ]
 
+        # Log the actions being serialized
+        # self.logger.info(f&#34;Serializing actions for decision prompt: {self.agency.action_registry.actions}&#34;)
+
         prompt = f&#34;&#34;&#34;Given the following perception and context, decide on the most appropriate action to take.
         Perception: {perception}
         
@@ -457,7 +460,7 @@ hljs.highlightAll();
         {json.dumps(active_goals, indent=2)}
 
         Valid actions are:
-        {json.dumps({action: f&#34;{self.action_registry.actions[action][&#39;description&#39;]} (Priority: {self.action_registry.actions[action][&#39;priority&#39;]})&#34; for action in self.action_registry.actions}, indent=2)}
+        {json.dumps({str(action): f&#34;{self.agency.action_registry.actions[action][&#39;description&#39;]} (Priority: {self.agency.action_registry.actions[action][&#39;priority&#39;]})&#34; for action in self.agency.action_registry.actions}, indent=2)}
         
         For each perception, carefully evaluate:
         - The type and content of the perception
@@ -508,22 +511,21 @@ hljs.highlightAll();
             }}
             &#34;&#34;&#34;,
         )
-        logger.debug(f&#34;Raw LLM response: {response}&#34;)
+        # logger.info(f&#34;Raw LLM response: {response}&#34;)
 
         return response
 
-    async def execute_decision(self, decision: Decision):
+    async def execute_decision(self, decision: Decision, perception: Optional[Perception] = None):
         &#34;&#34;&#34;
         Execute the decision made by the brain.
 
         Args:
             decision (Decision): The decision to execute.
         &#34;&#34;&#34;
-        logger.debug(f&#34;Executing decision: {decision.action}&#34;)
-        logger.debug(f&#34;Decision parameters: {decision.parameters}&#34;)
+        logger.info(f&#34;Executing decision: {decision.action} with params {decision.parameters}&#34;)
         result = None
         try:
-            if decision.action not in self.action_registry.get_all_actions():
+            if decision.action not in self.agency.action_registry.get_all_actions():
                 logger.error(&#34;Action not found in registry.&#34;)
                 raise ValueError(
                     f&#34;Action &#39;{decision.action}&#39; not found in registry.&#34;
@@ -541,15 +543,15 @@ hljs.highlightAll();
                     }
                 )
             else:
-                result = await self.action_registry.execute_action(
+                # Ensure &#39;perception&#39; is included in parameters if needed
+                if decision.action == &#34;process_perception&#34; and &#34;perception&#34; not in decision.parameters:
+                    decision.parameters[&#34;perception&#34;] = perception.data
+
+                result = await self.agency.action_registry.execute_action(
                     decision.action, decision.parameters
                 )
 
-            logger.info(f&#34;Executed action: {decision.action}&#34;)
-            logger.debug(f&#34;Action result: {result}&#34;)
-
-            logger.info(f&#34;Executed decision: {decision.action}&#34;)
-            logger.debug(f&#34;Decision reasoning: {decision.reasoning}&#34;)
+            logger.info(f&#34;Action result: {result} with reasoning: {decision.reasoning}.&#34;)
 
         except Exception as e:
             logger.error(f&#34;Error executing decision: {e}&#34;)
@@ -654,7 +656,7 @@ hljs.highlightAll();
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.brain.Brain.execute_decision"><code class="name flex">
-<span>async def <span class="ident">execute_decision</span></span>(<span>self, decision: <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>)</span>
+<span>async def <span class="ident">execute_decision</span></span>(<span>self, decision: <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>, perception: Optional[<a title="frame.src.framer.brain.perception.perception.Perception" href="perception/perception.html#frame.src.framer.brain.perception.perception.Perception">Perception</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Execute the decision made by the brain.</p>
