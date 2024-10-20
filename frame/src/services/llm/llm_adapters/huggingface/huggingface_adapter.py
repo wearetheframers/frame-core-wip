@@ -4,8 +4,10 @@ from dataclasses import dataclass
 from typing import Dict, Any, Optional
 import time
 import logging
+import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from frame.src.services.llm.llm_adapter_interface import LLMAdapterInterface
+from frame.src.utils.prompt_formatters import format_huggingface_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +59,6 @@ class HuggingFaceAdapter(LLMAdapterInterface):
         token_bucket (TokenBucket): Token bucket for rate limiting.
     """
 
-    """Adapter for Hugging Face operations with rate limiting."""
-
     def __init__(self, huggingface_api_key: str):
         self.huggingface_api_key = huggingface_api_key
         self.default_model = "gpt2"
@@ -66,6 +66,8 @@ class HuggingFaceAdapter(LLMAdapterInterface):
         self.token_bucket = TokenBucket(
             capacity=60, fill_rate=1
         )  # 60 requests per minute
+        self._tokenizer = None
+        self._model = None
 
     def set_default_model(self, model: str):
         """
@@ -75,6 +77,18 @@ class HuggingFaceAdapter(LLMAdapterInterface):
             model (str): The model to set as default.
         """
         self.default_model = model
+        self._tokenizer = None
+        self._model = None
+
+    def get_config(self, max_tokens: int, temperature: float) -> HuggingFaceConfig:
+        return HuggingFaceConfig(
+            model=self.default_model,
+            max_tokens=max_tokens,
+            temperature=temperature
+        )
+
+    def format_prompt(self, prompt: str) -> str:
+        return format_huggingface_prompt(prompt)
 
     @tenacity.retry(
         stop=tenacity.stop_after_attempt(5),
@@ -115,17 +129,25 @@ class HuggingFaceAdapter(LLMAdapterInterface):
     async def _get_huggingface_completion(
         self, prompt: str, config: HuggingFaceConfig, model_name: str
     ) -> str:
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForCausalLM.from_pretrained(model_name)
+        if self._tokenizer is None or self._model is None:
+            self._tokenizer = AutoTokenizer.from_pretrained(model_name)
+            self._model = AutoModelForCausalLM.from_pretrained(model_name)
 
-        inputs = tokenizer(prompt, return_tensors="pt")
-        outputs = model.generate(
+        inputs = self._tokenizer(prompt, return_tensors="pt")
+        input_length = inputs["input_ids"].shape[1]
+        max_new_tokens = max(config.max_tokens - input_length, 1)
+        
+        attention_mask = inputs.get("attention_mask", torch.ones_like(inputs["input_ids"]))
+        
+        outputs = self._model.generate(
             inputs["input_ids"],
-            max_length=config.max_tokens,
+            max_new_tokens=max_new_tokens,
             temperature=config.temperature,
             top_p=config.top_p,
             repetition_penalty=config.repetition_penalty,
             do_sample=True,
+            pad_token_id=self._tokenizer.eos_token_id,
+            attention_mask=attention_mask,
         )
 
-        return tokenizer.decode(outputs[0], skip_special_tokens=True)
+        return self._tokenizer.decode(outputs[0], skip_special_tokens=True)

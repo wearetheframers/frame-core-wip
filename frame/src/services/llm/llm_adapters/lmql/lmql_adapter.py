@@ -1,17 +1,16 @@
 import asyncio
+from frame.src.services.llm.llm_adapters.lmql.lmql_interface import LMQLInterface
 import json
 import tenacity
 import os
-from transformers import AutoTokenizer
-from frame.src.constants.api_keys import HUGGINGFACE_API_KEY
 from dataclasses import dataclass
 from typing import Dict, Any, Optional, Union
 import time
 import logging
 from openai import AsyncOpenAI, AuthenticationError, APIStatusError
-import lmql
 from typing import Protocol, List
 from frame.src.services.llm.llm_adapter_interface import LLMAdapterInterface
+from frame.src.utils.prompt_formatter import format_lmql_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -80,26 +79,31 @@ class LMQLAdapter(LLMAdapterInterface):
         mistral_api_key: Optional[str] = None,
         openai_client: Optional[AsyncOpenAIProtocol] = None,
         mistral_client: Optional[Any] = None,
-        hf_token: Optional[str] = None,
     ):
-        self.hf_token = hf_token or HUGGINGFACE_API_KEY
-        if not self.hf_token:
-            logger.warning("Hugging Face token is not set. Some features may not work.")
         self.mistral_client = mistral_client
         self.openai_client = (
             openai_client
             if openai_client is not None
             else (AsyncOpenAI(api_key=openai_api_key) if openai_api_key else None)
         )
-        self.mistral_client = (
-            MistralClient(api_key=mistral_api_key, hf_token=self.hf_token)
-            if mistral_api_key or self.hf_token
-            else None
-        )
+        self.mistral_client = None  # Removed MistralClient initialization
         self.default_model = "gpt-3.5-turbo"
         self.token_bucket = TokenBucket(
             capacity=60, fill_rate=1
         )  # 60 requests per minute
+
+    def format_prompt(self, prompt: str, additional_context: Optional[Dict[str, Any]] = None) -> str:
+        """
+        Format the prompt for LMQL.
+
+        Args:
+            prompt (str): The input prompt.
+            additional_context (Optional[Dict[str, Any]]): Additional context for the prompt.
+
+        Returns:
+            str: The formatted LMQL prompt.
+        """
+        return format_lmql_prompt(prompt, additional_context)
 
     def get_api_key(self, model: Optional[str] = None) -> Optional[str]:
         """
@@ -142,6 +146,23 @@ class LMQLAdapter(LLMAdapterInterface):
         """
         self.default_model = model
 
+    def get_config(self, max_tokens: int, temperature: float) -> LMQLConfig:
+        """
+        Get the configuration for the LMQL model.
+
+        Args:
+            max_tokens (int): The maximum number of tokens to generate.
+            temperature (float): The temperature for text generation.
+
+        Returns:
+            LMQLConfig: The configuration object for the LMQL model.
+        """
+        return LMQLConfig(
+            model=self.default_model,
+            max_tokens=max_tokens,
+            temperature=temperature
+        )
+
     @tenacity.retry(
         stop=tenacity.stop_after_attempt(5),
         wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
@@ -154,6 +175,8 @@ class LMQLAdapter(LLMAdapterInterface):
         config: LMQLConfig,
         model: Optional[Union[str, Dict[str, Any]]] = None,
         additional_context: Optional[Dict[str, Any]] = None,
+        decoder: Optional[str] = None,
+        decoder_params: Optional[Dict[str, Any]] = None,
     ) -> str:
         """
         Generate a completion using the LQML model with retry logic.
@@ -163,6 +186,8 @@ class LMQLAdapter(LLMAdapterInterface):
             config (LMQLConfig): Configuration for the LQML model.
             model (Optional[Union[str, Dict[str, Any]]], optional): The model to use. If None, uses the default model.
             additional_context (Optional[Dict[str, Any]], optional): Additional context for the model.
+            decoder (Optional[str], optional): The decoding algorithm to use.
+            decoder_params (Optional[Dict[str, Any]], optional): Parameters for the decoding algorithm.
 
         Returns:
             str: The generated completion.
@@ -170,6 +195,10 @@ class LMQLAdapter(LLMAdapterInterface):
         model_name = (
             model.lower() if isinstance(model, str) else self.default_model.lower()
         )
+
+        # Set the decoder in the LMQLInterface
+        lmql_interface = LMQLInterface(model_name=model_name)
+        lmql_interface.set_decoder(decoder, decoder_params)
 
         if not self.token_bucket.consume(1):
             await asyncio.sleep(1)  # Wait for a token to become available
@@ -187,9 +216,7 @@ class LMQLAdapter(LLMAdapterInterface):
                     lmql_prompt, config, model_name
                 )
             elif model_name.startswith("mistral"):
-                response = await self._get_mistral_completion(
-                    lmql_prompt, config, model_name
-                )
+                raise NotImplementedError("Mistral API is not implemented yet")
             else:
                 raise ValueError(f"Unsupported model: {model_name}")
 
@@ -228,24 +255,6 @@ class LMQLAdapter(LLMAdapterInterface):
             error_message = f"Unexpected error in get_completion: {e}"
             logger.error(error_message)
             raise  # Re-raise the original exception
-
-    async def _get_mistral_completion(
-        self, prompt: str, config: LMQLConfig, model_name: str
-    ) -> str:
-        try:
-            response = await self.mistral_client.generate_completion(
-                prompt=prompt,
-                model=model_name,
-                max_tokens=config.max_tokens,
-                temperature=config.temperature,
-                top_p=config.top_p,
-                frequency_penalty=config.frequency_penalty,
-                presence_penalty=config.presence_penalty,
-            )
-            return response.strip()
-        except Exception as e:
-            logger.error(f"Error in Mistral API call: {e}")
-            raise
 
     async def _get_openai_completion(
         self, prompt: str, config: LMQLConfig, model_name: str
@@ -288,7 +297,7 @@ def lmql_adapter(
         LMQLAdapter: An instance of the LMQLAdapter.
     """
     openai_client = AsyncOpenAI(api_key=openai_api_key) if openai_api_key else None
-    mistral_client = MistralClient(api_key=mistral_api_key) if mistral_api_key else None
+    mistral_client = None  # Removed MistralClient initialization
 
     if openai_client and not isinstance(openai_client, AsyncOpenAI):
         raise ValueError("OpenAI client is incorrectly initialized")
@@ -298,41 +307,3 @@ def lmql_adapter(
         mistral_api_key=mistral_api_key,
         hf_token=hf_token,
     )
-
-
-class MistralClient:
-    def __init__(self, api_key: Optional[str] = None, hf_token: Optional[str] = None):
-        self.hf_token = hf_token
-        self.api_key = api_key
-
-    async def generate_completion(
-        self,
-        prompt: str,
-        model: str,
-        max_tokens: int,
-        temperature: float,
-        top_p: float,
-        frequency_penalty: float,
-        presence_penalty: float,
-    ) -> str:
-        tokenizer = AutoTokenizer.from_pretrained(
-            model, token=self.hf_token, trust_remote_code=True
-        )
-        model_instance = lmql.model(
-            model, tokenizer=tokenizer, token=self.hf_token, trust_remote_code=True
-        )
-        if not model_instance:
-            raise ValueError(
-                f"Model {model} could not be loaded. Please check the model identifier and ensure it is available on Hugging Face."
-            )
-        if asyncio.get_event_loop().is_running():
-            response = await model_instance.generate(prompt, max_tokens=max_tokens)
-        else:
-            response = asyncio.run(
-                model_instance.generate(prompt, max_tokens=max_tokens)
-            )
-
-        if response:
-            return response.strip()
-        else:
-            raise ValueError("No response from LMQL model")

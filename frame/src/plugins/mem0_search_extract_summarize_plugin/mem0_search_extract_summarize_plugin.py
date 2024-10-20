@@ -29,6 +29,7 @@ from frame.src.framer.brain.plugins.base import BasePlugin
 from frame.src.framer.agency.goals import Goal, GoalStatus
 from frame.src.framer.agency.roles import Role, RoleStatus
 from frame.src.framer.agency.priority import Priority
+from frame.src.framer.brain.decision import Decision
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter import (
     Mem0Adapter,
 )
@@ -70,36 +71,10 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
             self.logger.info(
                 "Mem0SearchExtractSummarizePlugin registered 'respond with memory retrieval' action."
             )
-            # Remove respond action
-            # if "respond" in framer.brain.action_registry.get_all_actions():
-                # self.logger.info("Removing 'respond' action from registry.")
-                # framer.agency.action_registry.remove_action("respond")
-            # else:
-                # self.logger.warning(
-                    # "Action 'respond' not found in registry. Skipping removal."
-                # )
         else:
             self.logger.warning(
                 "Mem0 API key not found or is empty. Action 'response with memory retrieval' will not be registered."
             )
-
-        # # Add a new role for Mem0 searching and summarizing
-        # mem0_researcher_role = Role(
-        #     name="Mem0 Researcher",
-        #     description="Specializes in Mem0 searching, information extraction, and summarization",
-        #     priority=Priority.HIGH,
-        #     status=RoleStatus.ACTIVE,
-        # )
-        # self.framer.agency.add_role(mem0_researcher_role)
-
-        # # Add a new goal for providing comprehensive answers using Mem0
-        # comprehensive_answer_goal = Goal(
-        #     name="Provide Comprehensive Answers using Mem0",
-        #     description="Gather and synthesize information from Mem0 to provide comprehensive answers",
-        #     priority=Priority.HIGH,
-        #     status=GoalStatus.ACTIVE,
-        # )
-        # self.framer.agency.add_goal(comprehensive_answer_goal)
 
     def get_actions(self) -> Dict[str, Any]:
         """
@@ -119,6 +94,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
             Any: The result of the action execution.
         """
         if action_name == "respond with memory retrieval":
+            print("PARAMS: ", parameters)
             return await self.mem0_search_extract_summarize(**parameters)
         else:
             raise ValueError(f"Action {action_name} not found in plugin.")
@@ -152,6 +128,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
 
     async def mem0_search_extract_summarize(
         self,
+        execution_context,
         query: str = "",
         user_id: Optional[str] = None,
         agent_id: Optional[str] = None,
@@ -163,7 +140,38 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         self.logger.info(f"mem0_search_extract_summarize called with query: {query}")
         if not query:
             self.logger.warning("Query is empty. Returning default response.")
-            return "I'm sorry, but I don't have any specific information about that in my memory. Could you please provide more context or ask a different question?"
+            # Gather Framer state information
+            if not isinstance(execution_context, ExecutionContext):
+                self.logger.error("Execution context is not properly initialized.")
+                return Decision(
+                    action="error",
+                    parameters={"error": "Execution context is not properly initialized."},
+                    reasoning="Execution context is not properly initialized.",
+                    confidence=0.0,
+                    priority=1,
+                    related_roles=[],
+                    related_goals=[],
+                )
+            # Ensure the query is a string
+            if not isinstance(query, str):
+                query = str(query)
+
+            soul_state = execution_context.soul.get_current_state() if execution_context.soul else "No soul state available."
+            recent_thoughts = execution_context.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
+            active_roles = [role.name for role in execution_context.roles if role.status == RoleStatus.ACTIVE]
+            active_goals = [goal.name for goal in execution_context.goals if goal.status == GoalStatus.ACTIVE]
+
+            # Formulate a comprehensive response
+            response = (
+                "I'm sorry, but I don't have any specific information about that. "
+                "Could you please provide more context or ask a different question?\n\n"
+                "### Framer State Information\n"
+                f"- Soul State: {soul_state}\n"
+                f"- Recent Thoughts: {recent_thoughts}\n"
+                f"- Active Roles: {active_roles}\n"
+                f"- Active Goals: {active_goals}\n"
+            )
+            return response
         
         # Ensure the query is a string
         if not isinstance(query, str):
@@ -182,7 +190,15 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         self.logger.debug(f"Search results: {search_results}")
 
         if not search_results:
-            return "I don't have any specific information about that in my memory. Is there anything else I can help you with?"
+            return Decision(
+                action="respond",
+                parameters={"response": "I don't have any specific information about that in my memory. Is there anything else I can help you with?"},
+                reasoning="No relevant information found in memory.",
+                confidence=0.5,
+                priority=1,
+                related_roles=[],
+                related_goals=[],
+            )
 
         # Filter search results by memory text (remove same text results)
         search_results = self.filter_search_results(search_results)

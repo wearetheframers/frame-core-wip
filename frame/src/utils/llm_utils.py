@@ -32,6 +32,11 @@ class LLMMetrics:
             "total_cost": self._total_cost,
         }
 
+    def track_usage(self, model: str, tokens: int):
+        self.increment_call(model)
+        cost = calculate_cost(model, tokens)
+        self.add_cost(model, cost)
+
 
 llm_metrics = LLMMetrics()
 

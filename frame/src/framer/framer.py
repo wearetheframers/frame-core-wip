@@ -83,7 +83,6 @@ class Framer:
         soul: Soul,
         workflow_manager: WorkflowManager,
         brain: Brain = None,
-        execution_context: Optional[ExecutionContext] = None,
         memory_adapter: Optional[MemoryAdapterInterface] = None,
         memory_service: Optional[MemoryService] = None,
         eq_service: Optional[EQService] = None,
@@ -93,29 +92,33 @@ class Framer:
         plugin_loading_progress: Optional[Callable[[int], None]] = None,
     ):
         self.plugin_loading_progress = plugin_loading_progress
-        # Existing initialization code...
-
         self.config = config
         self.permissions = config.permissions or [
             "with_memory",
-            "with_mem0_search_extract_summarize_plugin",
-            "with_shared_context",
+            # "with_mem0_search_extract_summarize_plugin",  # Do not allow RAG responses by default
+            # "with_shared_context", # Do not allow shared context by default
         ]
         self.llm_service = llm_service
 
-        # Initialize services and plugins based on permissions
-        # Services like memory, eq, and shared_context are special plugins called services.
-        # They do not require explicit permissions to be accessed but must be passed into a Framer.
-        # The Mem0SearchExtractSummarizePlugin is a default plugin that provides a response mechanism
-        # requiring memory retrieval, functioning as a RAG mechanism.
-        # Enforce permission for 'with-mem0-search-extract-summarize-plugin' if 'with-memory' is used
-        if "with-memory" in self.permissions:
-            self.permissions.append("with-mem0-search-extract-summarize-plugin")
+        self.execution_context = ExecutionContext(llm_service=self.llm_service)
+        self.plugin_loading_progress = plugin_loading_progress
 
-        if "with-memory" in self.permissions and memory_adapter:
+        # Initialize services and plugins based on permissions
+        if "with_memory" in self.permissions:
+            self.permissions.append("with_mem0_search_extract_summarize_plugin")
+
+        logger.info(f"Permissions: {self.permissions}")
+        logger.info(f"Memory adapter: {memory_adapter}")
+
+        if "with_memory" in self.permissions and memory_adapter:
+            logger.info("Creating memory service")
             self.memory_service = memory_service or MemoryService(
                 adapter=memory_adapter
             )
+            logger.info(f"Memory service created: {self.memory_service}")
+        else:
+            logger.info("Memory service not created")
+            self.memory_service = None
 
         if "with_eq" in self.permissions:
             self.eq_service = eq_service or EQService()
@@ -123,43 +126,58 @@ class Framer:
         if "with_shared_context" in self.permissions:
             self.shared_context_service = SharedContext()
 
-        if not execution_context:
-            execution_context = ExecutionContext(llm_service=self.llm_service)
-
-        self.config = config
         self.agency = agency
-        self.brain = brain
         self.soul = soul
         self.workflow_manager = workflow_manager
-        self.memory_service = memory_service
-        self.roles = roles
-        self.goals = goals
-        self.eq_service = eq_service
+        self.roles = roles or []
+        self.goals = goals or []
         self.plugins = plugins or {}
         self.plugin_loading_complete = False
         self._streamed_response = {"status": "pending", "result": ""}
-        self.config = config
-        self.llm_service = llm_service
-        self.agency = agency
+
+        logger.info("Creating Brain")
         self.brain = Brain(
             llm_service=llm_service,
-            execution_context=execution_context,
-            memory_service=memory_service,
-            roles=roles,
-            goals=goals,
+            execution_context=self.execution_context,
+            memory_service=self.memory_service,
+            roles=self.roles,
+            goals=self.goals,
             default_model=config.default_model,
             soul=soul
         )
-        self.soul = soul
-        self.workflow_manager = workflow_manager
-        self.memory_service = memory_service
-        self.eq_service = eq_service
+        logger.info(f"Brain created with memory service: {self.brain.memory_service}")
+
         self._dynamic_model_choice = False
         self.observers: List[Observer] = []
-        self.can_execute = True  # Add can_execute attribute
+        self.can_execute = True
         self.acting = False
         # Load plugins asynchronously
         asyncio.create_task(self.load_plugins())
+
+        # Generate roles and goals if not provided
+        if not self.roles or not self.goals:
+            asyncio.create_task(self._generate_initial_roles_and_goals())
+
+    async def _generate_initial_roles_and_goals(self):
+        if not self.roles or not self.goals:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+            
+        # Ensure uniqueness
+        self.roles = list({role.name: role for role in self.roles}.values())
+        self.goals = list({goal.name: goal for goal in self.goals}.values())
+        
+        logger.info(f"Generated initial roles: {[role.name for role in self.roles]}")
+        logger.info(f"Generated initial goals: {[goal.name for goal in self.goals]}")
+        
+        if hasattr(self.brain, 'set_roles'):
+            self.brain.set_roles(self.roles)
+        if hasattr(self.brain, 'set_goals'):
+            self.brain.set_goals(self.goals)
+        
+        if hasattr(self.execution_context, 'set_roles'):
+            self.execution_context.set_roles(self.roles)
+        if hasattr(self.execution_context, 'set_goals'):
+            self.execution_context.set_goals(self.goals)
 
     def act(self):
         """
@@ -387,7 +405,15 @@ class Framer:
 
         if decision:
             if isinstance(decision, dict):
-                decision = Decision(**decision)
+                decision = Decision(
+                    action=decision.get("action", "respond"),
+                    parameters=decision.get("parameters", {}),
+                    reasoning=decision.get("reasoning", "No reasoning provided."),
+                    confidence=decision.get("confidence", 0.5),
+                    priority=decision.get("priority", 1),
+                    related_roles=decision.get("related_roles", []),
+                    related_goals=decision.get("related_goals", []),
+                )
             # Consider goal status in decision-making
             active_goals = [
                 goal for goal in current_goals if goal.status == GoalStatus.ACTIVE
@@ -396,7 +422,7 @@ class Framer:
                 decision.reasoning += f" (Aligned with {len(active_goals)} active goals)"
 
             if hasattr(self, "can_execute") and self.can_execute:
-                await self.execute_decision(decision)
+                await self.brain.execute_decision(decision)
             logger.debug(f"Processed perception: {perception}, Decision: {decision}")
             self.notify_observers(decision)
         else:

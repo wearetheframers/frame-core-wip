@@ -1,6 +1,10 @@
+from frame.src.services.llm.llm_adapters.lmql.lmql_interface import LMQLInterface
+
+lmql_interface = LMQLInterface(model_name="gpt-3.5-turbo")
+
 def format_lmql_prompt(prompt: str, expected_output: str = None) -> str:
     """
-    Format a prompt for LMQL.
+    Format a prompt for LMQL using the LMQL interface.
 
     Args:
         prompt (str): The input prompt.
@@ -9,10 +13,10 @@ def format_lmql_prompt(prompt: str, expected_output: str = None) -> str:
     Returns:
         str: The formatted LMQL prompt.
     """
-    formatted_prompt = f'"""{prompt}"""'
+    constraints = []
     if expected_output:
-        formatted_prompt += f"\n[RESPONSE]\n{expected_output}"
-    return formatted_prompt
+        constraints.append(f"EXPECTED_OUTPUT in [{expected_output}]")
+    return lmql_interface.format_prompt_with_constraints(prompt, constraints)
 
 
 def format_dspy_prompt(prompt: str) -> str:

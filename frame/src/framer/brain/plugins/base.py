@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import logging
 from typing import Any, Dict
 from frame.src.framer.agency.priority import Priority
 
@@ -22,6 +23,12 @@ class BasePlugin(ABC):
             framer: The Framer instance to associate with this plugin.
         """
         self.framer = framer
+        self.logger = logging.getLogger(self.__class__.__name__)
+        if hasattr(framer, 'execution_context'):
+            self.execution_context = framer.execution_context
+        else:
+            self.execution_context = None
+            self.logger.warning("Framer does not have an execution_context attribute.")
 
     def remove_action(self, name: str):
         """

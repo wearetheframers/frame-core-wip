@@ -87,17 +87,30 @@ class Brain:
             default_model (str): The default language model to use.
             soul (Optional[Soul]): The Soul instance for the Brain.
         """
+        self.logger.info("Initializing Brain")
         self.llm_service = llm_service
-        self.execution_context = execution_context
+        self.execution_context = execution_context or ExecutionContext(llm_service=self.llm_service)
         self.default_model = default_model
         self.roles = roles
         self.goals = goals
         self.soul = soul
         self.memory_service = memory_service
-        self.memory = Memory(self.memory_service) if self.memory_service else None
+        self.logger.info(f"Memory service received: {self.memory_service}")
+        
+        if self.memory_service:
+            self.logger.info("Creating Memory object")
+            self.memory = Memory(self.memory_service)
+            self.logger.info(f"Memory object created: {self.memory}")
+        else:
+            self.logger.warning("No memory service provided, Memory object not created")
+            self.memory = None
+        
         self.mind = Mind(self)
         # Initialize ActionRegistry
-        self.action_registry = ActionRegistry()
+        self.action_registry = ActionRegistry(execution_context=self.execution_context)
+
+        self.logger.info(f"Brain initialized with memory service: {self.memory_service}")
+        self.logger.info(f"Brain memory object: {self.memory}")
 
     def set_memory_service(self, memory_service: Optional['MemoryService']):
         """
@@ -148,22 +161,43 @@ class Brain:
         recent_perceptions = self.mind.get_recent_perceptions(5)
         execution_state = self.execution_context.state if self.execution_context else {}
 
-    def parse_json_response(self, response: str) -> Any:
+    def parse_json_response(self, response: Any) -> Any:
         """
         Parse JSON response and handle potential errors.
 
         Args:
-            response (str): The JSON response string to parse.
+            response (Any): The response to parse, which could be a string or a dictionary.
 
         Returns:
             Any: The parsed JSON data or an error dictionary.
         """
-        result = None
+        if response is None:
+            logger.error("Received None response, cannot parse JSON.")
+            return {
+                "action": "error",
+                "parameters": {
+                    "error": "Received None response",
+                    "raw_response": str(response),
+                },
+                "reasoning": "Failed to parse the decision data due to None response.",
+                "confidence": 0.0,
+                "priority": 1,
+            }
+
+        if isinstance(response, dict):
+            # If response is already a dictionary, return it as is
+            return response
+
         try:
-            # Remove trailing commas from the response
-            response = re.sub(r",\s*}", "}", response)
-            response = re.sub(r",\s*]", "]", response)
-            decision_data = json.loads(response)
+            # If response is a string, try to parse it as JSON
+            if isinstance(response, str):
+                # Remove trailing commas from the response
+                response = re.sub(r",\s*}", "}", response)
+                response = re.sub(r",\s*]", "]", response)
+                decision_data = json.loads(response)
+            else:
+                raise ValueError(f"Unexpected response type: {type(response)}")
+
             # Ensure priority is a Priority enum
             priority_value = decision_data.get("priority", Priority.MEDIUM)
             try:
@@ -172,26 +206,15 @@ class Brain:
                 logger.error(f"Invalid priority: {priority_value}. Error: {e}")
                 decision_data["priority"] = Priority.MEDIUM.value
             return decision_data
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON parsing error: {e}")
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.error(f"Parsing error: {e}")
             logger.error(f"Raw response: {response}")
-
-            # Check if the response is wrapped in a code block and remove it if present
-            if response.startswith("```") and response.endswith("```"):
-                cleaned_response = "\n".join(response.split("\n")[1:-1])
-                try:
-                    # Remove trailing commas from the cleaned response
-                    cleaned_response = re.sub(r",\s*}", "}", cleaned_response)
-                    cleaned_response = re.sub(r",\s*]", "]", cleaned_response)
-                    return json.loads(cleaned_response)
-                except json.JSONDecodeError:
-                    pass  # If this also fails, continue to the error return
 
             return {
                 "action": "error",
                 "parameters": {
-                    "error": "Invalid JSON response",
-                    "raw_response": response,
+                    "error": f"Invalid response: {str(e)}",
+                    "raw_response": str(response),
                 },
                 "reasoning": "Failed to parse the decision data.",
                 "confidence": 0.0,
@@ -232,31 +255,19 @@ class Brain:
             perception = Perception.from_dict(perception)
 
         self.mind.perceptions.append(perception)
-        # Log available actions
         available_actions = self.action_registry.get_all_actions().keys()
-        self.logger.info(f"Available actions: {available_actions}")
-
-        # Check if 'mem0_search_extract_memories' is a valid action
-        if "mem0_search_extract_memories" in available_actions:
-            self.logger.info("'mem0_search_extract_memories' is a valid action.")
-        else:
-            self.logger.info("'mem0_search_extract_memories' is NOT a valid action.")
-
+        self.logger.debug(f"Processing perception: {perception}")
+        self.logger.debug(f"Avaliable actions: {available_actions}")
         decision = await self.make_decision(perception)
-        if decision is None:
-            self.logger.warning("Failed to make a decision. Returning default decision.")
-            decision = Decision(
-                action="no_action",
-                parameters={},
-                reasoning="Failed to make a decision",
-                confidence=0.0,
-                priority=1,
-                related_roles=[],
-                related_goals=[],
-            )
         if hasattr(self, "framer") and getattr(self.framer, "can_execute", False):
+            if decision is None:
+                self.logger.warning("No decision was made for the given perception.")
+                return None
             result = await self.execute_decision(decision, perception)
             return result
+        else:
+            logger.warn("Framer is not ready to execute decisions. Queuing perception.")
+            # Code to queue the perception can be added here if needed
         return decision
 
     async def make_decision(self, perception: Optional[Perception] = None) -> Decision:
@@ -284,9 +295,34 @@ class Brain:
             )
 
         response = await self._get_decision_prompt(perception)
+        
+        if response is None or (isinstance(response, str) and not response.strip()):
+            logger.error("Received empty or None response from LLM service")
+            return Decision(
+                action="error",
+                parameters={"error": "Empty or None response from LLM service"},
+                reasoning="Failed to get a valid response from the language model",
+                confidence=0.0,
+                priority=1,
+                related_roles=[],
+                related_goals=[],
+            )
+
         decision_data = self.parse_json_response(response)
 
         logger.info(f"Decision data received: {decision_data}")
+
+        if isinstance(decision_data, dict) and "error" in decision_data:
+            logger.error(f"Error in decision making: {decision_data['error']}")
+            return Decision(
+                action="error",
+                parameters={"error": decision_data['error']},
+                reasoning="Error occurred during decision making",
+                confidence=0.0,
+                priority=1,
+                related_roles=[],
+                related_goals=[],
+            )
 
         action = decision_data.get("action", "respond").lower()
         valid_actions = [
@@ -378,6 +414,10 @@ class Brain:
         )
         logger.info(f"Final decision object: {decision}")
         logger.info(f"Decision made: {decision}")
+        if hasattr(decision, 'reasoning'):
+            decision.reasoning += f" (Aligned with {len(active_goals)} active goals)"
+        else:
+            logger.error("Decision object does not have a 'reasoning' attribute.")
         return decision
 
     async def _get_decision_prompt(self, perception: Optional[Perception]) -> str:
@@ -457,25 +497,30 @@ class Brain:
         Ensure your decision is well-reasoned, aligns with the current active goals and roles (considering their priorities), and uses only the valid actions provided.
         Use the provided priority levels when assigning priority to your decision, taking into account the priorities of related roles and goals.
         """
-        response = await self.llm_service.get_completion(
-            prompt,
-            model=self.default_model,
-            additional_context={"valid_actions": valid_actions},
-            expected_output=f"""
-            {{
-                "action": str where str in {valid_actions},
-                "parameters": dict,
-                "reasoning": str,
-                "confidence": float where 0 <= float <= 1,
-                "priority": str,
-                "related_roles": list,
-                "related_goals": list
-            }}
-            """,
-        )
-        # logger.info(f"Raw LLM response: {response}")
-
-        return response
+        try:
+            response = await self.llm_service.get_completion(
+                prompt,
+                model=self.default_model,
+                additional_context={"valid_actions": valid_actions},
+                expected_output=f"""
+                {{
+                    "action": str where str in {valid_actions},
+                    "parameters": dict,
+                    "reasoning": str,
+                    "confidence": float where 0 <= float <= 1,
+                    "priority": str,
+                    "related_roles": list,
+                    "related_goals": list
+                }}
+                """,
+            )
+            if isinstance(response, dict) and "error" in response:
+                logger.warning(f"Error in LLM response: {response['error']}")
+                return response
+            return response
+        except Exception as e:
+            logger.error(f"Error in _get_decision_prompt: {str(e)}")
+            return {"error": str(e), "fallback_response": "An error occurred while processing your request."}
 
     async def execute_decision(
         self, decision: Decision, perception: Optional[Perception] = None
@@ -497,8 +542,13 @@ class Brain:
                 return None
 
             if decision.action == "respond with memory retrieval":
-                if "query" not in decision.parameters:
+                if "query" not in decision.parameters or not decision.parameters["query"]:
                     decision.parameters["query"] = perception.data.get("text", "") if perception else ""
+                # Ensure the query is passed to the action
+                result = await self.action_registry.execute_action(
+                    decision.action, decision.parameters
+                )
+                return result
             elif decision.action == "respond":
                 # Use the execution_context to perform the task
                 result = await self.execution_context.perform_task(
@@ -560,9 +610,13 @@ class Brain:
                     else:
                         print(f"Executing action: {action_name}")
                         print("Action info: ", action_info)
-                        result = await self.action_registry.execute_action(
-                            action_name, decision.parameters
-                        )
+                        try:
+                            result = await self.action_registry.execute_action(
+                                action_name, decision.parameters
+                            )
+                        except Exception as e:
+                            logger.error(f"Error executing action '{action_name}': {e}")
+                            result = {"error": str(e), "fallback_response": "An error occurred while processing your request. Please try again."}
                     break
             else:
                 raise ValueError(f"Action '{decision.action}' not found in registry.")

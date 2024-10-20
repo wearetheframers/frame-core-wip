@@ -3,11 +3,13 @@ import logging
 import json
 from typing import Dict, Any, Callable, Optional, TYPE_CHECKING, Union
 from frame.src.framer.brain.actions import BaseAction
+from frame.src.framer.brain.actions.error_action import ErrorAction
 
 if TYPE_CHECKING:
     from frame.src.services import ExecutionContext
 
 logger = logging.getLogger(__name__)
+from frame.src.framer.agency import RoleStatus, GoalStatus
 from frame.src.framer.brain.default_actions import (
     VALID_ACTIONS,
     extend_valid_actions,
@@ -40,15 +42,42 @@ class ActionRegistry:
             RespondAction(),
             ThinkAction(),
             ResearchAction(),
+            ErrorAction(),
         ]
         for action in default_actions:
-            if action.name not in self.actions:
-                self.add_action(
-                    action.name,
-                    description=action.description,
-                    action_func=getattr(action, "func", None),
-                    priority=action.priority,
-                )
+            self.add_action(
+                action.name,
+                description=action.description,
+                action_func=action.execute,
+                priority=action.priority,
+            )
+
+    async def error_action(self, execution_context, error_message: str) -> str:
+        """
+        Handle errors by apologizing and attempting to continue the conversation.
+
+        Args:
+            execution_context: The execution context of the Framer.
+            error_message (str): The error message to include in the response.
+
+        Returns:
+            str: A response apologizing for the error and attempting to continue the conversation.
+        """
+        soul_state = execution_context.soul.get_current_state() if execution_context and execution_context.soul else "No soul state available."
+        recent_thoughts = execution_context.mind.get_all_thoughts()[-5:] if execution_context and execution_context.mind else []
+        active_roles = [role.name for role in execution_context.roles if role.status == RoleStatus.ACTIVE] if execution_context else []
+        active_goals = [goal.name for goal in execution_context.goals if goal.status == GoalStatus.ACTIVE] if execution_context else []
+
+        response = (
+            f"I'm sorry, an error occurred: {error_message}. "
+            "Let's try to continue our conversation.\n\n"
+            "### Current Framer State\n"
+            f"- Soul State: {soul_state}\n"
+            f"- Recent Thoughts: {recent_thoughts}\n"
+            f"- Active Roles: {active_roles}\n"
+            f"- Active Goals: {active_goals}\n"
+        )
+        return response.strip() if isinstance(response, str) else str(response)
 
     def extend_actions(self, new_actions: Dict[str, Dict[str, Any]]):
         extend_valid_actions(new_actions)
@@ -81,9 +110,10 @@ class ActionRegistry:
         if priority is not None and not (1 <= priority <= 10):
             raise ValueError("Priority must be between 1 and 10")
         if action_func is None:
-            # set action func to a dummy async function
-            async def action_func(*args, **kwargs):
-                return None
+            # Set action func to a default error handler
+            async def action_func(execution_context, **kwargs):
+                error_message = kwargs.get("error", "An error occurred.")
+                return {"response": f"Error: {error_message}"}
 
         self.actions[name] = {
             "action_func": action_func,
@@ -163,26 +193,48 @@ class ActionRegistry:
 
     async def execute_action(self, action_name: str, parameters: dict):
         """Execute an action by its name."""
-        logger.info(
-            f"Available actions before executing '{action_name}': {list(self.actions.keys())}"
-        )
-        print("Action name: ", action_name)
+        logger.info(f"Available actions before executing '{action_name}': {list(self.actions.keys())}")
+        logger.info(f"Action name: {action_name}")
+        
         if action_name == "no_action":
             logger.info("No action to execute. Skipping.")
             return None
 
         action = self.get_action(action_name)
-        if action:
-            action_func = action["action_func"]
-            expected_params = action_func.__code__.co_varnames[
-                : action_func.__code__.co_argcount
-            ]
-            filtered_params = {
-                k: v for k, v in parameters.items() if k in expected_params
-            }
-            print("Filtered params: ", filtered_params)
-            return await action_func(self.execution_context, **filtered_params)
+        if not action:
+            error_message = f"Action '{action_name}' not found in the registry."
+            logger.error(error_message)
+            return await self._handle_error(error_message)
+
+        action_func = action["action_func"]
+        expected_params = action_func.__code__.co_varnames[:action_func.__code__.co_argcount]
+        filtered_params = {k: v for k, v in parameters.items() if k in expected_params}
+        logger.info(f"Filtered params: {filtered_params}")
+
+        if 'query' in filtered_params:
+            filtered_params['query'] = parameters.get('query', '')
+
+        try:
+            result = await action_func(self.execution_context, **filtered_params)
+            if result is None:
+                return {"error": "Action returned None", "fallback_response": "The action didn't produce a response. Please try again."}
+            elif isinstance(result, dict):
+                return result
+            elif isinstance(result, str):
+                return {"response": result}
+            else:
+                return {"response": str(result)}
+        except Exception as e:
+            error_message = f"Error executing action '{action_name}': {str(e)}"
+            logger.error(error_message)
+            return await self._handle_error(error_message)
+
+    def set_execution_context(self, execution_context):
+        self.execution_context = execution_context
+
+    async def _handle_error(self, error_message: str):
+        error_action = self.get_action("error")
+        if error_action:
+            return await error_action["action_func"](self.execution_context, error=error_message)
         else:
-            logger.error(f"Action '{action_name}' not found in the registry.")
-            # raise ValueError(f"Action '{action_name}' not found in the registry.")
-            return None
+            return {"error": error_message, "fallback_response": "An error occurred while processing your request. Please try again."}

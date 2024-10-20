@@ -34,6 +34,7 @@ class ExecutionContext:
         self.soul = soul
         self.state = state or {}
         self.goals = []
+        self.roles = []
 
     def set_state(self, key: str, value: Any) -> None:
         self.state[key] = value
@@ -76,6 +77,24 @@ class ExecutionContext:
             List[Any]: A list of the current Goal objects.
         """
         return self.goals
+
+    def set_roles(self, roles: List[Any]):
+        """
+        Set the current roles for the Framer.
+
+        Args:
+            roles (List[Any]): A list of Role objects to set as the current roles.
+        """
+        self.roles = roles
+
+    def get_roles(self) -> List[Any]:
+        """
+        Get the current roles of the Framer.
+
+        Returns:
+            List[Any]: A list of the current Role objects.
+        """
+        return self.roles
 
     async def generate_goals(self) -> List[Any]:
         """

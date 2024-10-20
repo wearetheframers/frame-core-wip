@@ -92,7 +92,7 @@ class FramerFactory:
             "with_mem0_search_extract_summarize_plugin",
             "with_shared_context",
         ]
-        roles, goals = await self._generate_roles_and_goals(agency, roles, goals)
+        roles, goals = await self._generate_unique_roles_and_goals(agency, roles, goals)
 
         # Initialize the Soul component with the provided or default seed
         soul = Soul(seed=self.config.soul_seed)
@@ -153,44 +153,38 @@ class FramerFactory:
 
         return framer
 
-    async def _generate_roles_and_goals(self, agency, roles, goals):
+    async def _generate_unique_roles_and_goals(self, agency, roles, goals):
         if roles is None or goals is None:
             roles, goals = await agency.generate_roles_and_goals()
         elif isinstance(roles, list) and len(roles) == 0:
-            roles = []
-            goals = []
+            roles, _ = await agency.generate_roles_and_goals()
         elif isinstance(goals, list) and len(goals) == 0:
-            roles, goals = await agency.generate_roles_and_goals()
-            goals = []
-        elif isinstance(roles, list) and len(roles) == 0 and goals:
-            roles, new_goals = await agency.generate_roles_and_goals()
-            goals.extend(new_goals)
+            _, goals = await agency.generate_roles_and_goals()
 
-        # Ensure goals have a default status of ACTIVE
-        for goal in goals:
-            if isinstance(goal, dict):
-                if "status" not in goal:
-                    goal["status"] = GoalStatus.ACTIVE.value
+        # Ensure uniqueness of roles and goals
+        unique_roles = {role.name: role for role in roles}
+        unique_goals = {goal.name: goal for goal in goals}
+
+        # Ensure goals and roles have a default status of ACTIVE
+        for item in list(unique_roles.values()) + list(unique_goals.values()):
+            if isinstance(item, dict):
+                item["status"] = item.get("status", GoalStatus.ACTIVE.value)
             else:
-                goal.status = GoalStatus.ACTIVE
-        for role in roles:
-            if isinstance(role, dict):
-                if "status" not in role:
-                    role["status"] = RoleStatus.ACTIVE.value
-            else:
-                role.status = RoleStatus.ACTIVE
+                item.status = getattr(item, "status", GoalStatus.ACTIVE)
 
         # Sort roles and goals by priority
-        roles.sort(
+        sorted_roles = sorted(
+            unique_roles.values(),
             key=lambda x: x.priority.value if hasattr(x, "priority") else 5,
             reverse=True,
         )
-        goals.sort(
+        sorted_goals = sorted(
+            unique_goals.values(),
             key=lambda x: x.priority.value if hasattr(x, "priority") else 5,
             reverse=True,
         )
 
-        return roles, goals
+        return sorted_roles, sorted_goals
 
 
 class FramerBuilder:

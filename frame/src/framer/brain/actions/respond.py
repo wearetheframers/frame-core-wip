@@ -72,4 +72,6 @@ class RespondAction(BaseAction):
         # Get the completion from the language model
         response = await llm_service.get_completion(prompt)
 
+        if response is None:
+            return {"response": "No response generated."}
         return {"response": response.strip()}

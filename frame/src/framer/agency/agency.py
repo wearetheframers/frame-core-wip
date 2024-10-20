@@ -316,6 +316,17 @@ class Agency:
                 prompt, model=self.default_model, max_tokens=150, temperature=0.5
             )
             logger.debug(f"Role generation response: {response}")
+            if response is None:
+                logger.warning("Received None response while generating role. Using default role.")
+                return [
+                    Role(
+                        id="default",
+                        name="Task Assistant",
+                        description="Assist with the given task or query.",
+                        priority=5,
+                        status=RoleStatus.ACTIVE,
+                    )
+                ]
             role_data = json.loads(response)
             if not role_data:
                 logger.warning(
@@ -335,12 +346,18 @@ class Agency:
                 role_data = [role_data]
 
             roles = []
+            existing_role_names = set()
             for r in role_data:
                 r["priority"] = max(1, min(10, int(r.get("priority", 5))))
                 r["status"] = RoleStatus[r.get("status", "ACTIVE")]
                 # Ensure permissions are a list
                 r["permissions"] = list(r.get("permissions", []))
-                roles.append(Role(**r))
+                if r["name"] not in existing_role_names:
+                    roles.append(Role(**r))
+                    existing_role_names.add(r["name"])
+                    logger.info(f"Generated unique role: {r['name']}")
+                else:
+                    logger.warning(f"Duplicate role name generated: {r['name']}. Skipping.")
             return roles
         except Exception as e:
             logger.error(f"Error generating role: {str(e)}", exc_info=True)
@@ -380,6 +397,16 @@ class Agency:
                 prompt, model=self.default_model, max_tokens=150, temperature=0.5
             )
             logger.debug(f"Goal generation response: {response}")
+            if response is None:
+                logger.warning("Received None response while generating goal. Using default goal.")
+                return [
+                    Goal(
+                        name="Default Goal",
+                        description="Assist users based on the given input.",
+                        priority=5,
+                        status=GoalStatus.ACTIVE,
+                    )
+                ]
             goal_data = json.loads(response)
             if not goal_data:
                 logger.warning(
@@ -398,10 +425,16 @@ class Agency:
                 goal_data = [goal_data]
 
             goals = []
+            existing_goal_names = set()
             for g in goal_data:
                 g["priority"] = max(1, min(10, int(g.get("priority", 5))))
                 g["status"] = GoalStatus[g.get("status", "ACTIVE")]
-                goals.append(Goal(**g))
+                if g["name"] not in existing_goal_names:
+                    goals.append(Goal(**g))
+                    existing_goal_names.add(g["name"])
+                    logger.info(f"Generated unique goal: {g['name']}")
+                else:
+                    logger.warning(f"Duplicate goal name generated: {g['name']}. Skipping.")
             return goals
         except Exception as e:
             logger.error(f"Error generating goal: {e}", exc_info=True)

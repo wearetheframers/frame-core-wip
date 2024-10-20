@@ -10,6 +10,7 @@ import random
 import logging
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
 from frame.src.services.memory.main import MemoryService
+from frame.src.framer.brain.memory.memory import Memory
 
 from frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin import (
     Mem0SearchExtractSummarizePlugin,
@@ -34,6 +35,10 @@ async def main():
     # Initialize Frame
     frame = Frame()
 
+    # Create a memory adapter
+    memory_adapter = Mem0Adapter(api_key=os.environ.get("MEM0_API_KEY"))
+    logger.info(f"Memory adapter created: {memory_adapter}")
+
     # Create a Framer instance with the necessary permissions
     config = FramerConfig(
         name="Memory Framer",
@@ -45,37 +50,32 @@ async def main():
         ],
         mem0_api_key=os.environ.get("MEM0_API_KEY")
     )
-    print("Plugins: ", frame.plugins)
-    print("Permissions: ", config.permissions)
+    logger.info(f"Plugins: {frame.plugins}")
+    logger.info(f"Permissions: {config.permissions}")
+    
     framer = await frame.framer_factory.create_framer(plugins=frame.plugins)
+    framer.brain.set_memory_service(MemoryService(adapter=memory_adapter))
+    logger.info(f"Framer created: {framer}")
+    logger.info(f"Framer brain: {framer.brain}")
+    logger.info(f"Framer brain memory service: {framer.brain.memory_service}")
+    logger.info(f"Framer brain memory: {framer.brain.memory}")
+    
     mem0_plugin = Mem0SearchExtractSummarizePlugin(framer)
-    print("Memory service created: ", framer.brain.memory_service)
-
-    # framer.brain.agency.action_registry.add_action(
-    #     "respond with memory retrieval",
-    #     description="This action is ideal for responding to personal questions that involve historical or memory-based "
-    #                 "information about the user or the Framer. It leverages the Framer's memory to retrieve relevant data "
-    #                 "or previously saved texts, providing comprehensive answers or insights based on stored memories. "
-    #                 "When questions reference or relate to past conversations, this action is preferred. It generally "
-    #                 "takes precedence over `think` and `observe` actions, especially for questions. If uncertain whether "
-    #                 "a question can be answered with or without memory, default to this action.",
-    #     action_func=mem0_plugin.mem0_search_extract_summarize,
-    #     priority=8,
-    # )
+    logger.info(f"Mem0SearchExtractSummarizePlugin created: {mem0_plugin}")
 
     # Wait until the Framer is ready
     while not framer.is_ready():
         logger.warning("Framer is not ready. Retrying...")
         await asyncio.sleep(1)
-    print("Adding memories..")
-    print("\t- My favorite color is blue.")
-    print("\t- I have a dentist appointment on October 20th.")
-    print("\t- I plan to visit Hawaii for my vacation.")
-    print(framer.memory_service)
-    framer.brain.memory.store("My favorite color is blue.", user_id="user1")
-    framer.brain.memory.store("I have a dentist appointment on October 20th.", user_id="user1")
-    framer.brain.memory.store("I plan to visit Hawaii for my vacation.", user_id="user1")
-    print("All memories added.")
+    
+    logger.info("Adding memories...")
+    if framer.brain and framer.brain.memory:
+        framer.brain.memory.store("My favorite color is blue.", user_id="user1")
+        framer.brain.memory.store("I have a dentist appointment on October 20th.", user_id="user1")
+        framer.brain.memory.store("I plan to visit Hawaii for my vacation.", user_id="user1")
+        logger.info("All memories added.")
+    else:
+        logger.error("Brain or Memory object is not initialized. Unable to store memories.")
     # Query the Framer for personal details
     queries = [
         "What is my favorite color?",
@@ -99,10 +99,15 @@ async def main():
             result = await framer.brain.execute_decision(decision)
 
             # Print the result of the decision
-            if isinstance(result, dict) and 'output' in result:
-                print(f"Response: {result['output']}\n")
-            elif isinstance(result, dict) and 'error' in result:
-                print(f"Error: {result['error']}\n")
+            if isinstance(result, dict):
+                if 'output' in result:
+                    print(f"Response: {result['output']}\n")
+                elif 'error' in result:
+                    print(f"Error: {result['error']}\n")
+                elif 'response' in result:
+                    print(f"Response: {result['response']}\n")
+                else:
+                    print(f"Unexpected result format: {result}\n")
             else:
                 print(f"Response: {result}\n")
         else:
