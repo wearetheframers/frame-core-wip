@@ -10,7 +10,11 @@ from frame import Frame, FramerConfig
 from autonomous_vehicle_plugin import (
     StopVehicleAction,
     SlowDownVehicleAction,
+    SpeedUpVehicleAction,
     ChangeLaneAction,
+    StartDrivingAction,
+    NoActionAction,
+    BrakeVehicleAction,
     AutonomousVehiclePlugin,
 )
 from frame.src.framer.brain.actions import BaseAction
@@ -30,13 +34,6 @@ logger.addHandler(handler)
 
 
 class ProcessPerceptionAction(BaseAction):
-    """
-    This replaces some default actions in our Framer like observe etc.
-    It is just meant as a custom function that allows low-level decision-making control
-    suitable for a self-driving vehicle. It demonstrates the logic flow in perception processing
-    and decision-making.
-    """
-
     def __init__(self, action_registry: ActionRegistry):
         super().__init__(
             "process_perception",
@@ -77,7 +74,6 @@ class ProcessPerceptionAction(BaseAction):
             return f"Error executing action {action}: {str(e)}"
 
     def analyze_perception(self, perception: Dict[str, Any]) -> Dict[str, Any]:
-        """Analyze the perception and return a decision."""
         perception_type = perception.get("type")
         data = perception.get("data", {})
 
@@ -85,6 +81,8 @@ class ProcessPerceptionAction(BaseAction):
             return self.handle_visual_perception(data)
         elif perception_type == "audio":
             return self.handle_audio_perception(data)
+        elif perception_type == "traffic":
+            return self.handle_traffic_perception(data)
         else:
             return {
                 "action": "no_action",
@@ -108,6 +106,8 @@ class ProcessPerceptionAction(BaseAction):
                 return {"action": "slow_down_vehicle", "reason": "Pedestrian detected"}
             else:
                 return {"action": "no_action", "reason": "Pedestrian far away"}
+        elif object_type == "green light":
+            return {"action": "speed_up_vehicle", "reason": "Green light ahead"}
         else:
             return {
                 "action": "no_action",
@@ -129,14 +129,36 @@ class ProcessPerceptionAction(BaseAction):
                     "action": "slow_down_vehicle",
                     "reason": "Potential emergency vehicle",
                 }
+        elif sound == "horn":
+            return {"action": "slow_down_vehicle", "reason": "Vehicle honking nearby"}
         else:
             return {"action": "no_action", "reason": f"No specific action for {sound}"}
+
+    def handle_traffic_perception(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        condition = data.get("condition")
+
+        if condition == "clear":
+            return {"action": "speed_up_vehicle", "reason": "Clear traffic conditions"}
+        elif condition == "congested":
+            return {"action": "slow_down_vehicle", "reason": "Traffic congestion ahead"}
+        elif condition == "accident_ahead":
+            return {"action": "change_lane", "reason": "Accident reported ahead"}
+        else:
+            return {"action": "no_action", "reason": f"No specific action for {condition}"}
 
 
 async def main():
     frame = Frame()
     config = FramerConfig(name="AutonomousVehicleFramer")
     framer = await frame.framer_factory.create_framer(config, plugins=frame.plugins)
+
+    # Start driving when the script is run
+    vehicle_plugin = next((plugin for plugin in framer.plugins.values() if isinstance(plugin, AutonomousVehiclePlugin)), None)
+    if vehicle_plugin:
+        await vehicle_plugin.start_driving()
+        logger.info("Vehicle started driving automatically.")
+    else:
+        logger.warning("AutonomousVehiclePlugin not found. Vehicle not started.")
 
     action_registry = ActionRegistry()
     action_registry.actions = {}
@@ -149,12 +171,20 @@ async def main():
     vehicle_plugin = AutonomousVehiclePlugin(framer)
     stop_vehicle_action = StopVehicleAction(vehicle_plugin)
     slow_down_vehicle_action = SlowDownVehicleAction(vehicle_plugin)
+    speed_up_vehicle_action = SpeedUpVehicleAction(vehicle_plugin)
     change_lane_action = ChangeLaneAction(vehicle_plugin)
+    start_driving_action = StartDrivingAction(vehicle_plugin)
+    no_action_action = NoActionAction(vehicle_plugin)
+    brake_vehicle_action = BrakeVehicleAction(vehicle_plugin)
     process_perception_action = ProcessPerceptionAction(action_registry)
 
     action_registry.add_action(stop_vehicle_action)
     action_registry.add_action(slow_down_vehicle_action)
+    action_registry.add_action(speed_up_vehicle_action)
     action_registry.add_action(change_lane_action)
+    action_registry.add_action(start_driving_action)
+    action_registry.add_action(no_action_action)
+    action_registry.add_action(brake_vehicle_action)
     action_registry.add_action(process_perception_action)
 
     framer.brain.action_registry = action_registry
@@ -163,17 +193,22 @@ async def main():
     perceptions = [
         {
             "type": "visual",
-            "data": {"object": "stop sign", "distance": "far"},
+            "data": {"object": "start", "distance": "close"},
             "source": "camera",
         },
         {
             "type": "visual",
-            "data": {"object": "stop sign", "distance": "close"},
+            "data": {"object": "green light", "distance": "medium"},
             "source": "camera",
         },
         {
+            "type": "traffic",
+            "data": {"condition": "clear"},
+            "source": "traffic_system",
+        },
+        {
             "type": "visual",
-            "data": {"object": "pedestrian", "distance": "medium"},
+            "data": {"object": "pedestrian", "distance": "close"},
             "source": "camera",
         },
         {
@@ -182,9 +217,14 @@ async def main():
             "source": "microphone",
         },
         {
-            "type": "audio",
-            "data": {"sound": "siren", "distance": "close"},
-            "source": "microphone",
+            "type": "traffic",
+            "data": {"condition": "accident_ahead"},
+            "source": "traffic_system",
+        },
+        {
+            "type": "visual",
+            "data": {"object": "stop sign", "distance": "close"},
+            "source": "camera",
         },
     ]
 
