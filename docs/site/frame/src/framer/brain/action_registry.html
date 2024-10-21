@@ -248,6 +248,7 @@ hljs.highlightAll();
             return None
 
         action = self.get_action(action_name)
+        print(&#34;Found action: &#34;, action)
         if not action:
             error_message = f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;
             logger.error(error_message)

@@ -40,8 +40,8 @@ hljs.highlightAll();
 <span>(</span><span>name: str, description: str, priority: <a title="frame.src.framer.agency.priority.Priority" href="../../agency/priority.html#frame.src.framer.agency.priority.Priority">Priority</a> = 5)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Base class for all actions in the Frame framework.
-Actions can create Tasks, which can enforce output types.</p></div>
+<div class="desc"><p>Base class for all actions in the Frame framework.</p>
+<p>Actions can create Tasks, which can enforce output types.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -49,6 +49,7 @@ Actions can create Tasks, which can enforce output types.</p></div>
 <pre><code class="python">class BaseAction:
     &#34;&#34;&#34;
     Base class for all actions in the Frame framework.
+
     Actions can create Tasks, which can enforce output types.
     &#34;&#34;&#34;
 
@@ -95,11 +96,14 @@ Actions can create Tasks, which can enforce output types.</p></div>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction" href="adaptive_decision_action.html#frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction">AdaptiveDecisionAction</a></li>
 <li><a title="frame.src.framer.brain.actions.create_new_agent.CreateNewAgentAction" href="create_new_agent.html#frame.src.framer.brain.actions.create_new_agent.CreateNewAgentAction">CreateNewAgentAction</a></li>
 <li><a title="frame.src.framer.brain.actions.error_action.ErrorAction" href="error_action.html#frame.src.framer.brain.actions.error_action.ErrorAction">ErrorAction</a></li>
 <li><a title="frame.src.framer.brain.actions.generate_roles_and_goals.GenerateRolesAndGoalsAction" href="generate_roles_and_goals.html#frame.src.framer.brain.actions.generate_roles_and_goals.GenerateRolesAndGoalsAction">GenerateRolesAndGoalsAction</a></li>
 <li><a title="frame.src.framer.brain.actions.observe.ObserveAction" href="observe.html#frame.src.framer.brain.actions.observe.ObserveAction">ObserveAction</a></li>
 <li><a title="frame.src.framer.brain.actions.research.ResearchAction" href="research.html#frame.src.framer.brain.actions.research.ResearchAction">ResearchAction</a></li>
+<li><a title="frame.src.framer.brain.actions.resource_allocation_action.ResourceAllocationAction" href="resource_allocation_action.html#frame.src.framer.brain.actions.resource_allocation_action.ResourceAllocationAction">ResourceAllocationAction</a></li>
+<li><a title="frame.src.framer.brain.actions.resource_allocation_action.StakeholderEngagementAction" href="resource_allocation_action.html#frame.src.framer.brain.actions.resource_allocation_action.StakeholderEngagementAction">StakeholderEngagementAction</a></li>
 <li><a title="frame.src.framer.brain.actions.respond.RespondAction" href="respond.html#frame.src.framer.brain.actions.respond.RespondAction">RespondAction</a></li>
 <li><a title="frame.src.framer.brain.actions.think.ThinkAction" href="think.html#frame.src.framer.brain.actions.think.ThinkAction">ThinkAction</a></li>
 </ul>

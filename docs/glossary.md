@@ -107,6 +107,10 @@ An adapter for Hugging Face operations with rate limiting. It provides methods t
 
 Implements a token bucket algorithm for rate limiting. It is used to control the rate of requests to various services.
 
+### High-Level Action
+
+A high-level action is an action that can control or orchestrate other actions. It is designed to manage complex tasks by leveraging multiple strategies or sub-actions. Examples include `AdaptiveDecisionAction` and `CreateNewAgentAction`.
+
 ### Decision
 
 Represents a decision made by the [[Brain]] component of a Framer. It includes an action, parameters, reasoning, confidence (default 0.7), priority (default 1), and expected results.

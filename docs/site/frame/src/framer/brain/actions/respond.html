@@ -39,8 +39,8 @@ hljs.highlightAll();
 <span>class <span class="ident">RespondAction</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Base class for all actions in the Frame framework.
-Actions can create Tasks, which can enforce output types.</p></div>
+<div class="desc"><p>Base class for all actions in the Frame framework.</p>
+<p>Actions can create Tasks, which can enforce output types.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -53,6 +53,8 @@ Actions can create Tasks, which can enforce output types.</p></div>
             2,
         )
 
+    @log_execution
+    @measure_performance
     async def execute(
         self, execution_context: ExecutionContext, **kwargs
     ) -&gt; Dict[str, Any]:
@@ -66,8 +68,11 @@ Actions can create Tasks, which can enforce output types.</p></div>
         Returns:
             Dict[str, Any]: A dictionary containing the generated response.
         &#34;&#34;&#34;
-        llm_service = execution_context.llm_service
-        soul = execution_context.soul
+        if isinstance(execution_context, ExecutionContext):
+            llm_service = execution_context.llm_service
+            soul = execution_context.soul
+        else:
+            raise TypeError(&#34;execution_context must be an instance of ExecutionContext&#34;)
 
         # Get the most recent perception
         recent_perception = execution_context.get_state(

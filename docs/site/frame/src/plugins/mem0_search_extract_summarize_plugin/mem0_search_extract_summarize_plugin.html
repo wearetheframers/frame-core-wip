@@ -169,7 +169,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 
     async def mem0_search_extract_summarize(
         self,
-        execution_context: ExecutionContext,
+        execution_context: Optional[ExecutionContext] = None,
         query: str = &#34;&#34;,
         user_id: Optional[str] = None,
         agent_id: Optional[str] = None,
@@ -181,54 +181,14 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         self.logger.info(f&#34;mem0_search_extract_summarize called with query: {query}&#34;)
         if not query:
             self.logger.warning(&#34;Query is empty. Returning default response.&#34;)
-            # Gather Framer state information
-            if not isinstance(execution_context, ExecutionContext):
-                self.logger.error(&#34;Execution context is not properly initialized.&#34;)
-                return Decision(
-                    action=&#34;error&#34;,
-                    parameters={
-                        &#34;error&#34;: &#34;Execution context is not properly initialized.&#34;
-                    },
-                    reasoning=&#34;Execution context is not properly initialized.&#34;,
-                    confidence=0.0,
-                    priority=1,
-                    related_roles=[],
-                    related_goals=[],
-                )
-            # Ensure the query is a string
-            if not isinstance(query, str):
-                query = str(query)
+            query = &#34;default query&#34;  # Set a default query if none is provided
 
-            soul_state = (
-                execution_context.soul.get_current_state()
-                if execution_context.soul
-                else &#34;No soul state available.&#34;
-            )
-            recent_thoughts = execution_context.mind.get_all_thoughts()[
-                -5:
-            ]  # Get last 5 thoughts
-            active_roles = [
-                role.name
-                for role in execution_context.roles
-                if role.status == RoleStatus.ACTIVE
-            ]
-            active_goals = [
-                goal.name
-                for goal in execution_context.goals
-                if goal.status == GoalStatus.ACTIVE
-            ]
+        if execution_context is None:
+            execution_context = self.framer.execution_context
 
-            # Formulate a comprehensive response
-            response = (
-                &#34;I&#39;m sorry, but I don&#39;t have any specific information about that. &#34;
-                &#34;Could you please provide more context or ask a different question?\n\n&#34;
-                &#34;### Framer State Information\n&#34;
-                f&#34;- Soul State: {soul_state}\n&#34;
-                f&#34;- Recent Thoughts: {recent_thoughts}\n&#34;
-                f&#34;- Active Roles: {active_roles}\n&#34;
-                f&#34;- Active Goals: {active_goals}\n&#34;
-            )
-            return response
+        if not isinstance(execution_context, ExecutionContext):
+            self.logger.error(&#34;Execution context is not properly initialized.&#34;)
+            return &#34;Execution context is not properly initialized.&#34;
 
         # Ensure the query is a string
         if not isinstance(query, str):
@@ -354,7 +314,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 <div class="desc"><p>Return a dictionary of actions provided by this plugin.</p></div>
 </dd>
 <dt id="frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin.Mem0SearchExtractSummarizePlugin.mem0_search_extract_summarize"><code class="name flex">
-<span>async def <span class="ident">mem0_search_extract_summarize</span></span>(<span>self, execution_context: <a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>, query: str = '', user_id: Optional[str] = None, agent_id: Optional[str] = None, run_id: Optional[str] = None, filters: Optional[Dict[str, Any]] = None, model_name: str = 'gpt-4o-mini', text_response: Optional[str] = None) ‑> str</span>
+<span>async def <span class="ident">mem0_search_extract_summarize</span></span>(<span>self, execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>] = None, query: str = '', user_id: Optional[str] = None, agent_id: Optional[str] = None, run_id: Optional[str] = None, filters: Optional[Dict[str, Any]] = None, model_name: str = 'gpt-4o-mini', text_response: Optional[str] = None) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"></div>

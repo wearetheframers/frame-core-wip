@@ -35,4 +35,4 @@ action_registry.perform_action("custom_action")
 
 ## API Documentation
 
-::: frame.src.framer.agency.action_registry.ActionRegistry
+::: frame.src.framer.brain.action_registry.ActionRegistry

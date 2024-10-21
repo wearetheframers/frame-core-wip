@@ -139,6 +139,9 @@ hljs.highlightAll();
         plugin_loading_progress: Optional[Callable[[int], None]] = None,
         execution_context: Optional[ExecutionContext] = None,
     ):
+        self.llm_service = llm_service
+        self.memory_service = memory_service
+        self.eq_service = eq_service
         self.plugin_loading_progress = plugin_loading_progress
         self.config = config
         self.permissions = config.permissions or [
@@ -150,6 +153,8 @@ hljs.highlightAll();
 
         self.execution_context = execution_context or ExecutionContext(
             llm_service=self.llm_service,
+            soul=soul,
+            brain=brain
         )
         self.execution_context.soul = soul
         self.execution_context.brain = brain
@@ -217,6 +222,8 @@ hljs.highlightAll();
         if not self.roles or not self.goals:
             asyncio.create_task(self._generate_initial_roles_and_goals())
 
+    @log_execution
+    @measure_performance
     async def _generate_initial_roles_and_goals(self):
         if not self.roles or not self.goals:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()

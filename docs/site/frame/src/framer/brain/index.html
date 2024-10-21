@@ -61,6 +61,10 @@ hljs.highlightAll();
 <dd>
 <div class="desc"></div>
 </dd>
+<dt><code class="name"><a title="frame.src.framer.brain.strategies" href="strategies/index.html">frame.src.framer.brain.strategies</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 </dl>
 </section>
 <section>
@@ -283,6 +287,7 @@ hljs.highlightAll();
             return None
 
         action = self.get_action(action_name)
+        print(&#34;Found action: &#34;, action)
         if not action:
             error_message = f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;
             logger.error(error_message)
@@ -921,6 +926,8 @@ to enable intelligent decision-making and action execution.</p>
         self.roles = roles
         self.execution_context.set_roles(roles)
 
+    @log_execution
+    @measure_performance
     async def process_perception(
         self,
         perception: Union[&#34;Perception&#34;, Dict[str, Any]],
@@ -1025,8 +1032,16 @@ to enable intelligent decision-making and action execution.</p>
             for action in self.action_registry.get_all_actions().keys()
         ]
 
-        # Check if the action is valid
-        if action not in valid_actions:
+        # Retrieve context from the execution context
+        context = self.execution_context.get_full_state()
+        # Determine the best action based on context
+        if context.get(&#34;urgency&#34;, 0) &gt; 7 and context.get(&#34;risk&#34;, 0) &gt; 5:
+            action = &#34;adaptive_decision&#34;
+            decision_data[&#34;action&#34;] = action
+            decision_data[&#34;reasoning&#34;] = (
+                f&#34;High urgency and risk detected. Using &#39;{action}&#39; to adaptively decide the best course of action.&#34;
+            )
+        elif action not in valid_actions:
             # If the action is not valid, check if it&#39;s related to memory retrieval
             if any(keyword in action for keyword in [&#34;memory&#34;, &#34;recall&#34;, &#34;retrieve&#34;]):
                 action = &#34;respond with memory retrieval&#34;
@@ -2422,6 +2437,7 @@ and the Brain's decision-making processes.</p></div>
 <li><code><a title="frame.src.framer.brain.memory" href="memory/index.html">frame.src.framer.brain.memory</a></code></li>
 <li><code><a title="frame.src.framer.brain.mind" href="mind/index.html">frame.src.framer.brain.mind</a></code></li>
 <li><code><a title="frame.src.framer.brain.plugins" href="plugins/index.html">frame.src.framer.brain.plugins</a></code></li>
+<li><code><a title="frame.src.framer.brain.strategies" href="strategies/index.html">frame.src.framer.brain.strategies</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.1">
-<title>frame.src.framer.brain.actions.error_action API documentation</title>
+<title>frame.src.framer.brain.actions.adaptive_decision_action API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -22,7 +22,7 @@ hljs.highlightAll();
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>frame.src.framer.brain.actions.error_action</code></h1>
+<h1 class="title">Module <code>frame.src.framer.brain.actions.adaptive_decision_action</code></h1>
 </header>
 <section id="section-intro">
 </section>
@@ -35,8 +35,8 @@ hljs.highlightAll();
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="frame.src.framer.brain.actions.error_action.ErrorAction"><code class="flex name class">
-<span>class <span class="ident">ErrorAction</span></span>
+<dt id="frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction"><code class="flex name class">
+<span>class <span class="ident">AdaptiveDecisionAction</span></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Base class for all actions in the Frame framework.</p>
@@ -45,52 +45,91 @@ hljs.highlightAll();
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ErrorAction(BaseAction):
+<pre><code class="python">class AdaptiveDecisionAction(BaseAction):
     def __init__(self):
         super().__init__(
-            name=&#34;error&#34;,
-            description=&#34;Handle errors by apologizing and attempting to continue the conversation.&#34;,
-            priority=1,
+            &#34;adaptive_decision&#34;,
+            &#34;Use this action when decisions need to be made dynamically based on varying levels of urgency and risk. &#34;
+            &#34;Ideal for environments where conditions change rapidly, requiring a flexible decision-making approach. &#34;
+            &#34;Examples include financial trading during volatile markets, task prioritization in dynamic project environments, &#34;
+            &#34;or resource allocation in cloud computing under fluctuating demand.&#34;,
+            priority=5,
         )
+        self.strategies = {
+            &#34;conservative&#34;: ConservativeStrategy(),
+            &#34;aggressive&#34;: AggressiveStrategy(),
+            &#34;balanced&#34;: BalancedStrategy(),
+        }
 
-    async def execute(self, execution_context, **kwargs):
-        error_message = kwargs.get(&#34;error&#34;, &#34;An unknown error occurred.&#34;)
-        soul_state = (
-            execution_context.soul.get_current_state()
-            if execution_context and execution_context.soul
-            else &#34;No soul state available.&#34;
-        )
-        recent_thoughts = (
-            execution_context.get_recent_thoughts()[-5:]
-            if execution_context and hasattr(execution_context, &#34;get_recent_thoughts&#34;)
-            else []
-        )
-        active_roles = (
-            [role.name for role in execution_context.roles if role.status == &#34;ACTIVE&#34;]
-            if execution_context and hasattr(execution_context, &#34;roles&#34;)
-            else []
-        )
-        active_goals = (
-            [goal.name for goal in execution_context.goals if goal.status == &#34;ACTIVE&#34;]
-            if execution_context and hasattr(execution_context, &#34;goals&#34;)
-            else []
-        )
+    async def execute(self, execution_context: ExecutionContext, **kwargs: Any) -&gt; Dict[str, Any]:
+        # Determine the best strategy based on the context
+        context = execution_context.get_full_state()
+        context = self.extrapolate_context(context)
+        strategy_name = self.choose_strategy(context)
+        strategy = self.strategies[strategy_name]
+        decision = await strategy.decide(context)
+        return decision
 
-        response = (
-            f&#34;I apologize, an error occurred: {error_message}. &#34;
-            &#34;Let&#39;s try to continue our conversation.\n\n&#34;
-            &#34;### Current Framer State\n&#34;
-            f&#34;- Soul State: {soul_state}\n&#34;
-            f&#34;- Recent Thoughts: {recent_thoughts}\n&#34;
-            f&#34;- Active Roles: {active_roles}\n&#34;
-            f&#34;- Active Goals: {active_goals}\n&#34;
-        )
-        return {&#34;response&#34;: response}</code></pre>
+    def extrapolate_context(self, context: Dict[str, Any]) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Extrapolate missing context data to ensure robust decision-making.
+        &#34;&#34;&#34;
+        if &#34;urgency&#34; not in context or &#34;risk&#34; not in context:
+            # Use historical data or default values to estimate urgency and risk
+            context[&#34;urgency&#34;] = context.get(&#34;historical_urgency&#34;, 5)
+            context[&#34;risk&#34;] = context.get(&#34;historical_risk&#34;, 5)
+
+        # If perception data is available, use it to refine urgency and risk
+        perception_data = context.get(&#34;perception_data&#34;, {})
+        if perception_data:
+            context[&#34;urgency&#34;] = perception_data.get(&#34;urgency&#34;, context[&#34;urgency&#34;])
+            context[&#34;risk&#34;] = perception_data.get(&#34;risk&#34;, context[&#34;risk&#34;])
+
+        return context
+
+    def choose_strategy(self, context: Dict[str, Any]) -&gt; str:
+        # Logic to choose the best strategy based on context
+        urgency = context.get(&#34;urgency&#34;, 0)
+        risk = context.get(&#34;risk&#34;, 0)
+        resources = context.get(&#34;resources&#34;, &#34;moderate&#34;)
+        stakeholders = context.get(&#34;stakeholders&#34;, [])
+        deadline = context.get(&#34;deadline&#34;, None)
+        dependencies = context.get(&#34;dependencies&#34;, [])
+        external_factors = context.get(&#34;external_factors&#34;, [])
+
+        # Example logic considering multiple factors, including extrapolated data
+        if urgency &gt; 7 or (resources == &#34;scarce&#34; and risk &gt; 5):
+            return &#34;aggressive&#34;
+        elif risk &lt; 3 and resources == &#34;abundant&#34;:
+            return &#34;conservative&#34;
+        elif stakeholders and &#34;high&#34; in [s.get(&#34;influence&#34;, &#34;low&#34;) for s in stakeholders]:
+            return &#34;balanced&#34;
+        elif deadline and risk &gt; 5:
+            return &#34;aggressive&#34;
+        elif dependencies and external_factors:
+            return &#34;balanced&#34;
+        else:
+            return &#34;conservative&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="frame.src.framer.brain.actions.base.BaseAction" href="base.html#frame.src.framer.brain.actions.base.BaseAction">BaseAction</a></li>
 </ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction.choose_strategy"><code class="name flex">
+<span>def <span class="ident">choose_strategy</span></span>(<span>self, context: Dict[str, Any]) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction.extrapolate_context"><code class="name flex">
+<span>def <span class="ident">extrapolate_context</span></span>(<span>self, context: Dict[str, Any]) ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extrapolate missing context data to ensure robust decision-making.</p></div>
+</dd>
+</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="frame.src.framer.brain.actions.base.BaseAction" href="base.html#frame.src.framer.brain.actions.base.BaseAction">BaseAction</a></b></code>:
@@ -117,7 +156,11 @@ hljs.highlightAll();
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="frame.src.framer.brain.actions.error_action.ErrorAction" href="#frame.src.framer.brain.actions.error_action.ErrorAction">ErrorAction</a></code></h4>
+<h4><code><a title="frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction" href="#frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction">AdaptiveDecisionAction</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction.choose_strategy" href="#frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction.choose_strategy">choose_strategy</a></code></li>
+<li><code><a title="frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction.extrapolate_context" href="#frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction.extrapolate_context">extrapolate_context</a></code></li>
+</ul>
 </li>
 </ul>
 </li>

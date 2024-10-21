@@ -283,6 +283,7 @@ hljs.highlightAll();
             return None
 
         action = self.get_action(action_name)
+        print(&#34;Found action: &#34;, action)
         if not action:
             error_message = f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;
             logger.error(error_message)
@@ -921,6 +922,8 @@ to enable intelligent decision-making and action execution.</p>
         self.roles = roles
         self.execution_context.set_roles(roles)
 
+    @log_execution
+    @measure_performance
     async def process_perception(
         self,
         perception: Union[&#34;Perception&#34;, Dict[str, Any]],
@@ -1025,8 +1028,16 @@ to enable intelligent decision-making and action execution.</p>
             for action in self.action_registry.get_all_actions().keys()
         ]
 
-        # Check if the action is valid
-        if action not in valid_actions:
+        # Retrieve context from the execution context
+        context = self.execution_context.get_full_state()
+        # Determine the best action based on context
+        if context.get(&#34;urgency&#34;, 0) &gt; 7 and context.get(&#34;risk&#34;, 0) &gt; 5:
+            action = &#34;adaptive_decision&#34;
+            decision_data[&#34;action&#34;] = action
+            decision_data[&#34;reasoning&#34;] = (
+                f&#34;High urgency and risk detected. Using &#39;{action}&#39; to adaptively decide the best course of action.&#34;
+            )
+        elif action not in valid_actions:
             # If the action is not valid, check if it&#39;s related to memory retrieval
             if any(keyword in action for keyword in [&#34;memory&#34;, &#34;recall&#34;, &#34;retrieve&#34;]):
                 action = &#34;respond with memory retrieval&#34;
@@ -1904,6 +1915,9 @@ validated to form a valid model.</p>
         plugin_loading_progress: Optional[Callable[[int], None]] = None,
         execution_context: Optional[ExecutionContext] = None,
     ):
+        self.llm_service = llm_service
+        self.memory_service = memory_service
+        self.eq_service = eq_service
         self.plugin_loading_progress = plugin_loading_progress
         self.config = config
         self.permissions = config.permissions or [
@@ -1915,6 +1929,8 @@ validated to form a valid model.</p>
 
         self.execution_context = execution_context or ExecutionContext(
             llm_service=self.llm_service,
+            soul=soul,
+            brain=brain
         )
         self.execution_context.soul = soul
         self.execution_context.brain = brain
@@ -1982,6 +1998,8 @@ validated to form a valid model.</p>
         if not self.roles or not self.goals:
             asyncio.create_task(self._generate_initial_roles_and_goals())
 
+    @log_execution
+    @measure_performance
     async def _generate_initial_roles_and_goals(self):
         if not self.roles or not self.goals:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
