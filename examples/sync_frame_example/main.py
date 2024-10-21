@@ -9,6 +9,7 @@ from frame.sync_frame import SyncFrame
 from frame.src.framer.config import FramerConfig
 from frame.src.services.llm.main import LLMService
 
+
 def main():
     # Initialize SyncFrame with an LLMService
     llm_service = LLMService()
@@ -30,6 +31,7 @@ def main():
 
     # Clean up
     sync_frame.close_framer(framer)
+
 
 if __name__ == "__main__":
     main()
