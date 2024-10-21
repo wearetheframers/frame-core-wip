@@ -1,7 +1,7 @@
 import asyncio
 import time
 from frame.src.framer.brain.plugins.base import BasePlugin
-from frame.src.services.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 from typing import Dict, Any
 from frame.src.framer.brain.actions import BaseAction
