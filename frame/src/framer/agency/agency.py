@@ -534,6 +534,7 @@ class Agency:
             framer (Framer): The Framer instance to associate with this Agency.
         """
         self.framer = framer
+
     def add_goal(self, goal: Goal) -> None:
         """
         Add a new goal to the Agency.

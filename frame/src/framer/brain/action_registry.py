@@ -29,10 +29,12 @@ from frame.src.framer.brain.default_actions import (
 
 
 class ActionRegistry:
-    def __init__(self, execution_context: Optional['ExecutionContext'] = None):
+    def __init__(self, execution_context: Optional["ExecutionContext"] = None):
         self.actions: Dict[str, Dict[str, Any]] = {}
         self.execution_context = execution_context
-        if not self.execution_context or not hasattr(self.execution_context, 'llm_service'):
+        if not self.execution_context or not hasattr(
+            self.execution_context, "llm_service"
+        ):
             raise ValueError("ExecutionContext must have an llm_service set.")
 
         # Ensure llm_service is set in the execution context

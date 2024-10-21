@@ -1,9 +1,12 @@
 import logging
 from typing import Dict, Any, List, Optional, TYPE_CHECKING
+
 if TYPE_CHECKING:
     from frame.src.services.memory.main import MemoryService
 # Import MemoryService inside the __init__ method to avoid circular import issues
-from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
+from frame.src.framer.brain.memory.memory_adapter_interface import (
+    MemoryAdapterInterface,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +22,12 @@ class Memory:
     This class now uses the MemoryService for all memory operations.
     """
 
-    def __init__(self, memory_service: Optional['MemoryService'] = None):
+    def __init__(self, memory_service: Optional["MemoryService"] = None):
         self.core = None  # Initialize core attribute
         self.mem0 = None  # Initialize mem0 attribute
         if memory_service is None:
             from frame.src.services.memory.main import MemoryService
+
             memory_service = MemoryService()
         self.memory_service = memory_service
         self.user_id = "default"

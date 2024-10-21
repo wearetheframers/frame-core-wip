@@ -497,6 +497,7 @@ async def stream_output(framer, prompt):
 
 def main():
     import asyncio
+
     asyncio.run(cli(obj={}))
 
 

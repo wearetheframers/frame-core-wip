@@ -27,7 +27,9 @@ from frame.src.utils.config_parser import (
     export_config_to_markdown,
 )
 
-from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
+from frame.src.framer.brain.memory.memory_adapter_interface import (
+    MemoryAdapterInterface,
+)
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
 
 Observer = Callable[[Decision], None]
@@ -104,7 +106,7 @@ class Framer:
             soul=soul,
             mind=brain,
             roles=roles,
-            goals=goals
+            goals=goals,
         )
         self.brain.action_registry.set_execution_context(self.execution_context)
 
@@ -161,7 +163,9 @@ class Framer:
         if asyncio.get_event_loop().is_running():
             asyncio.create_task(self.load_plugins())
         else:
-            logger.warning("No running event loop. Plugins will not be loaded immediately.")
+            logger.warning(
+                "No running event loop. Plugins will not be loaded immediately."
+            )
 
         # Generate roles and goals if not provided
         if not self.roles or not self.goals:

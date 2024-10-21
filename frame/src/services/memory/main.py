@@ -1,7 +1,11 @@
 from typing import Dict, Any, List, Optional
-from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
+from frame.src.framer.brain.memory.memory_adapter_interface import (
+    MemoryAdapterInterface,
+)
+
+
 class MemoryService:
-    def __init__(self, adapter: 'MemoryAdapterInterface'):
+    def __init__(self, adapter: "MemoryAdapterInterface"):
         self.adapter = adapter
 
     def add_memory(

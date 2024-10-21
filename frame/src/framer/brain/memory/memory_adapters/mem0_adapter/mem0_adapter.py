@@ -230,7 +230,9 @@ class Mem0Adapter(MemoryAdapterInterface):
         """
         return self.client.get(memory_id)
 
-    def update(self, memory_id: str, new_content: str, user_id: Optional[str] = None) -> Dict[str, Any]:
+    def update(
+        self, memory_id: str, new_content: str, user_id: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Update a specific memory with new content.
 
@@ -243,7 +245,9 @@ class Mem0Adapter(MemoryAdapterInterface):
         """
         return self.client.update(memory_id, new_content)
 
-    def history(self, memory_id: str, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    def history(
+        self, memory_id: str, user_id: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """
         Get the history of how a memory has changed over time.
 
