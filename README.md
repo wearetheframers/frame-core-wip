@@ -1,10 +1,11 @@
 # Frame: Multi-Modal Multi-Agent Cognitive Framework
 
 <div align="center">
+
   <a href="https://frame.dev">
     <img src="docs/frame-logo-transparent.png" alt="Frame Logo" width="320"/>
   </a>
-<!-- Placeholder links with emojis -->
+  <!-- Placeholder links with emojis -->
   <a href="#link1" style="margin: 0 10px;">🔗 Link 1</a>
   <a href="#link2" style="margin: 0 10px;">📄 Link 2</a>
   <a href="#link3" style="margin: 0 10px;">📊 Link 3</a>
