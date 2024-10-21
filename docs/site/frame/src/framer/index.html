@@ -1297,11 +1297,9 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
             execution_context=execution_context,
             context=None,
         )
-        # Initialize the Agency component with default permissions
-        self.config.permissions = self.config.permissions or [
-            &#34;with_memory&#34;,
-            # &#34;with_shared_context&#34;, # Do not allow shared context by default
-        ]
+        # Initialize the Agency component without default permissions
+        # Users must add all permissions for any plugins they want to use
+        self.config.permissions = self.config.permissions or []
         roles, goals = await self._generate_unique_roles_and_goals(agency, roles, goals)
 
         # Initialize the Soul component with the provided or default seed

@@ -15,7 +15,7 @@ Frame includes several default plugins and services that are automatically avail
 
 - **Services**: `memory`, `eq`, and `shared_context` are special plugins called services. They function like plugins but do not require explicit permissions to be accessed. They are always available to Framers, enhancing their capabilities by providing essential functionalities without the need for additional permissions.
 
-- **Default Plugin**: The `Mem0SearchExtractSummarizePlugin` is included as a default plugin. It provides a response mechanism that requires memory retrieval, functioning as a Retrieval-Augmented Generation (RAG) mechanism. By default, all Framers inherit this action, enabling them to search, extract, and summarize information effectively.
+- **Default Plugin**: The `Mem0SearchExtractSummarizePlugin` is included as a default plugin. It provides a response mechanism that requires memory retrieval, functioning as a Retrieval-Augmented Generation (RAG) mechanism. Users must explicitly add permissions for this plugin to enable Framers to search, extract, and summarize information effectively.
 
 - Creation and management of Framer and Framed instances
 - Extensible architecture with a powerful plugin engine

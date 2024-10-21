@@ -61,9 +61,7 @@ async def main():
     logger.info(f"Plugins: {frame.plugins}")
     logger.info(f"Permissions: {config.permissions}")
 
-    framer = await frame.framer_factory.create_framer(
-        plugins=frame.plugins
-    )
+    framer = await frame.framer_factory.create_framer(plugins=frame.plugins)
     framer.brain.set_memory_service(MemoryService(adapter=memory_adapter))
     logger.info(f"Framer created: {framer}")
     logger.info(f"Framer brain: {framer.brain}")

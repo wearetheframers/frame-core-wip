@@ -12,6 +12,7 @@ from frame.src.framer.brain.actions.strategies.decision_strategy import (
 from frame.src.services.context.execution_context_service import ExecutionContext
 from typing import Dict, Any
 
+
 class ResourceAllocationAction(BaseAction):
     def __init__(self):
         super().__init__(
@@ -40,7 +41,9 @@ class ResourceAllocationAction(BaseAction):
         else:
             return "balanced"
 
-    async def execute(self, execution_context: ExecutionContext, **kwargs: Any) -> Dict[str, Any]:
+    async def execute(
+        self, execution_context: ExecutionContext, **kwargs: Any
+    ) -> Dict[str, Any]:
         context = execution_context.get_full_state()
         strategy_name = self.choose_strategy(context)
         strategy = self.strategies[strategy_name]
@@ -59,6 +62,7 @@ class ResourceAllocationAction(BaseAction):
         else:
             return "balanced"
 
+
 class StakeholderEngagementAction(BaseAction):
     def __init__(self):
         super().__init__(
@@ -72,7 +76,9 @@ class StakeholderEngagementAction(BaseAction):
             "balanced": BalancedStrategy(),
         }
 
-    async def execute(self, execution_context: ExecutionContext, **kwargs: Any) -> Dict[str, Any]:
+    async def execute(
+        self, execution_context: ExecutionContext, **kwargs: Any
+    ) -> Dict[str, Any]:
         context = execution_context.get_full_state()
         strategy_name = self.choose_strategy(context)
         strategy = self.strategies[strategy_name]

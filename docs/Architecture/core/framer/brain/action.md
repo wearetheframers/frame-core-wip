@@ -63,6 +63,10 @@ task = self.create_task("Task description", expected_output_type=Dict[str, Any])
 
 This allows for better control over the expected outputs of tasks and can help in maintaining consistency across the framework.
 
+## Permissions
+
+All plugins require explicit permissions to be used. Users must add all permissions for any plugins they want to use. This ensures that Framers only have access to the plugins they are explicitly allowed to use, providing fine-grained control over their capabilities.
+
 ## Related Components
 
 - [[decision]]: Represents a decision made by the Brain component of a Framer, which can lead to action execution and task creation.

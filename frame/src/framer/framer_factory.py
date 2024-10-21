@@ -86,11 +86,9 @@ class FramerFactory:
             execution_context=execution_context,
             context=None,
         )
-        # Initialize the Agency component with default permissions
-        self.config.permissions = self.config.permissions or [
-            "with_memory",
-            # "with_shared_context", # Do not allow shared context by default
-        ]
+        # Initialize the Agency component without default permissions
+        # Users must add all permissions for any plugins they want to use
+        self.config.permissions = self.config.permissions or []
         roles, goals = await self._generate_unique_roles_and_goals(agency, roles, goals)
 
         # Initialize the Soul component with the provided or default seed

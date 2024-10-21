@@ -15,15 +15,17 @@ The plugin system works in conjunction with the Framer's permission system, whic
 
 Frame features a plugin marketplace where premium plugins and community plugins can be developed, given away, or sold. This marketplace fosters a rich ecosystem of extensions and customizations, similar to mod communities in popular games.
 
+All plugins require explicit permissions to be used. Users must add all permissions for any plugins they want to use. This ensures that Framers only have access to the plugins they are explicitly allowed to use, providing fine-grained control over their capabilities.
+
 When Frame is instantiated, it spends time loading plugins, which could be hundreds or thousands, and take a while to load. Framer has an `acting` property to see if it's ready and whether all plugins have loaded or not, called `plugin_loading_complete` and `plugin_loading_progress`. Because of this, users should be aware before adding too many plugins. However, Framer does queue perceptions/interactions to the agent and processes the queue when it is ready, if requests are made before it is ready. So it is not necessary to handle this in your code, but it could result in delays on startup.
 
 ## Default Plugins and Services
 
 Frame includes several default plugins and services that are automatically available to Framers. These services, such as `LLMService`, `EQService`, `MemoryService`, and `SharedContext`, function as plugins with swappable adapters. This means the underlying implementation of the service can be changed while maintaining the same high-level interface. For instance, instead of using `Mem0`, a `LlamaIndex` adapter could be used. While `LLMService` is passed to the Framer by default, you must specify permissions like `with-eq`, `with-memory`, or `with-shared-context` in the `FramerConfig` to access these services. However, all Framers inherently have permission to access these services without needing explicit permission settings.
 
-- **Services**: `memory`, `eq`, and `shared_context` are special plugins called services. They function like plugins but do not require explicit permissions to be accessed. They are always available to Framers, enhancing their capabilities by providing essential functionalities without the need for additional permissions.
+- **Services**: `memory`, `eq`, and `shared_context` are special plugins called services. They function like plugins but require explicit permissions to be accessed. Users must add permissions for these services to be available to Framers, enhancing their capabilities by providing essential functionalities.
 
-- **Default Plugin**: The `Mem0SearchExtractSummarizePlugin` is included as a default plugin. It provides a mechanism to look into memories, retrieve relevant information, and share insights, functioning as a Retrieval-Augmented Generation (RAG) mechanism. By default, all Framers inherit this action, enabling them to search, extract, and summarize information effectively.
+- **Default Plugin**: The `Mem0SearchExtractSummarizePlugin` is included as a default plugin. It provides a mechanism to look into memories, retrieve relevant information, and share insights, functioning as a Retrieval-Augmented Generation (RAG) mechanism. Users must explicitly add permissions for this plugin to enable Framers to search, extract, and summarize information effectively.
 
 To add a plugin as a default, simply include its permission in the FramerConfig. This ensures that the plugin is automatically available to all Framers without needing to specify it each time. Plugins are loaded automatically during Framer creation.
 

@@ -2,7 +2,11 @@ import asyncio
 import logging
 import time
 import json
-from frame.src.utils.decorators import log_execution, validate_input, measure_performance
+from frame.src.utils.decorators import (
+    log_execution,
+    validate_input,
+    measure_performance,
+)
 from collections import deque
 from typing import List, Dict, Any, Optional, Callable, Union, Tuple, Deque
 
@@ -122,9 +126,7 @@ class Framer:
         self.llm_service = llm_service
 
         self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service,
-            soul=soul,
-            brain=brain
+            llm_service=self.llm_service, soul=soul, brain=brain
         )
         self.execution_context.soul = soul
         self.execution_context.brain = brain

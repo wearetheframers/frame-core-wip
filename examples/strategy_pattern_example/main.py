@@ -7,7 +7,10 @@ import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame import Frame, FramerConfig
-from frame.src.framer.brain.actions.adaptive_decision_action import AdaptiveDecisionAction
+from frame.src.framer.brain.actions.adaptive_decision_action import (
+    AdaptiveDecisionAction,
+)
+
 
 async def main():
     # Initialize Frame
@@ -32,12 +35,21 @@ async def main():
         {"urgency": 8, "risk": 2},  # Should choose aggressive strategy
         {"urgency": 3, "risk": 1},  # Should choose conservative strategy
         {"urgency": 5, "risk": 5},  # Should choose balanced strategy
-
         # Real-life scenarios
         {"urgency": 9, "risk": 7, "resources": "limited", "stakeholders": ["team A"]},
-        {"urgency": 2, "risk": 3, "resources": "abundant", "stakeholders": ["team B", "team C"]},
-        {"urgency": 6, "risk": 4, "resources": "moderate", "stakeholders": ["team D"], "deadline": "2024-12-31"},
-
+        {
+            "urgency": 2,
+            "risk": 3,
+            "resources": "abundant",
+            "stakeholders": ["team B", "team C"],
+        },
+        {
+            "urgency": 6,
+            "risk": 4,
+            "resources": "moderate",
+            "stakeholders": ["team D"],
+            "deadline": "2024-12-31",
+        },
         # Complex layered scenarios
         {
             "urgency": 7,
@@ -46,7 +58,7 @@ async def main():
             "stakeholders": ["team E", "team F"],
             "deadline": "2024-11-15",
             "dependencies": ["project X", "project Y"],
-            "external_factors": ["market volatility", "regulatory changes"]
+            "external_factors": ["market volatility", "regulatory changes"],
         },
         {
             "urgency": 4,
@@ -55,17 +67,20 @@ async def main():
             "stakeholders": ["team G"],
             "deadline": "2025-01-20",
             "dependencies": ["project Z"],
-            "external_factors": ["technological advancements", "competitor actions"]
-        }
+            "external_factors": ["technological advancements", "competitor actions"],
+        },
     ]
 
     # Process each context and make a decision
     for context in contexts:
         print(f"\nContext: {context}")
-        decision = await adaptive_action.execute(framer.execution_context, context=context)
+        decision = await adaptive_action.execute(
+            framer.execution_context, context=context
+        )
         print(f"Decision: {decision}")
 
     await framer.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

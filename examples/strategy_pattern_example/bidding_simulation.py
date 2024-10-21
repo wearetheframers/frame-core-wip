@@ -1,13 +1,17 @@
 import asyncio
 
 import os, sys
+
 # Add the project root to the Python path to ensure all modules can be imported correctly
 # If we are running the examples from the source code (not installing package from pip)
 # then you need to have this line uncommented.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame import Frame, FramerConfig
-from frame.src.framer.brain.actions.adaptive_decision_action import AdaptiveDecisionAction
+from frame.src.framer.brain.actions.adaptive_decision_action import (
+    AdaptiveDecisionAction,
+)
+
 
 class BiddingSimulation:
     def __init__(self):
@@ -46,6 +50,7 @@ class BiddingSimulation:
     async def close(self):
         # Close the Framer instance
         await self.framer.close()
+
 
 # Run the bidding simulation
 if __name__ == "__main__":

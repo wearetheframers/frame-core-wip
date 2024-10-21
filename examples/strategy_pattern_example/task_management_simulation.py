@@ -1,13 +1,17 @@
 import asyncio
 
 import os, sys
+
 # Add the project root to the Python path to ensure all modules can be imported correctly
 # If we are running the examples from the source code (not installing package from pip)
 # then you need to have this line uncommented.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame import Frame, FramerConfig
-from frame.src.framer.brain.actions.adaptive_decision_action import AdaptiveDecisionAction
+from frame.src.framer.brain.actions.adaptive_decision_action import (
+    AdaptiveDecisionAction,
+)
+
 
 class TaskManagementSimulation:
     def __init__(self):
@@ -32,7 +36,10 @@ class TaskManagementSimulation:
         task_scenarios = [
             {"priority": 9, "deadline": "2024-10-25"},  # High priority, near deadline
             {"priority": 3, "deadline": "2024-11-10"},  # Low priority, far deadline
-            {"priority": 6, "deadline": "2024-10-30"},  # Moderate priority, moderate deadline
+            {
+                "priority": 6,
+                "deadline": "2024-10-30",
+            },  # Moderate priority, moderate deadline
         ]
 
         # Process each task scenario and make a task management decision
@@ -46,6 +53,7 @@ class TaskManagementSimulation:
     async def close(self):
         # Close the Framer instance
         await self.framer.close()
+
 
 # Run the task management simulation
 if __name__ == "__main__":

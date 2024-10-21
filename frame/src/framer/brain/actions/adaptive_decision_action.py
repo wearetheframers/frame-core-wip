@@ -8,6 +8,7 @@ from frame.src.framer.brain.actions.strategies.decision_strategy import (
 from frame.src.services import ExecutionContext
 from typing import Dict, Any
 
+
 class AdaptiveDecisionAction(BaseAction):
     def __init__(self):
         super().__init__(
@@ -24,7 +25,9 @@ class AdaptiveDecisionAction(BaseAction):
             "balanced": BalancedStrategy(),
         }
 
-    async def execute(self, execution_context: ExecutionContext, **kwargs: Any) -> Dict[str, Any]:
+    async def execute(
+        self, execution_context: ExecutionContext, **kwargs: Any
+    ) -> Dict[str, Any]:
         # Determine the best strategy based on the context
         context = execution_context.get_full_state()
         context = self.extrapolate_context(context)
