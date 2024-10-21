@@ -56,7 +56,22 @@ hljs.highlightAll();
             &#34;conservative&#34;: ConservativeStrategy(),
             &#34;aggressive&#34;: AggressiveStrategy(),
             &#34;balanced&#34;: BalancedStrategy(),
+            &#34;collaborative&#34;: CollaborativeStrategy(),
+            &#34;influential&#34;: InfluentialStrategy(),
         }
+
+    def choose_strategy(self, context: Dict[str, Any]) -&gt; str:
+        stakeholders = context.get(&#34;stakeholders&#34;, [])
+        urgency = context.get(&#34;urgency&#34;, 0)
+
+        if stakeholders and &#34;high&#34; in [s.get(&#34;influence&#34;, &#34;low&#34;) for s in stakeholders]:
+            return &#34;influential&#34;
+        elif urgency &lt; 3:
+            return &#34;conservative&#34;
+        elif stakeholders:
+            return &#34;collaborative&#34;
+        else:
+            return &#34;balanced&#34;
 
     async def execute(self, execution_context: ExecutionContext, **kwargs: Any) -&gt; Dict[str, Any]:
         context = execution_context.get_full_state()
