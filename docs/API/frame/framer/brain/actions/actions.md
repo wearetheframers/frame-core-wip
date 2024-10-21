@@ -97,6 +97,8 @@ The ExecutionContext provides access to necessary services (like LLM, memory, an
 High-level actions are designed to manage complex tasks by leveraging multiple strategies or sub-actions. They can control or orchestrate other actions. Examples include:
 
 - **AdaptiveDecisionAction**: Uses strategies to make adaptive decisions based on context, urgency, and risk.
+- **ResourceAllocationAction**: Allocates resources based on urgency, risk, and available resources, using strategies to optimize resource distribution.
+- **ResourceAllocationAction**: Allocates resources based on urgency, risk, and available resources, using strategies to optimize resource distribution.
 - **CreateNewAgentAction**: Manages the creation of new agents within the framework, coordinating various sub-actions to achieve this goal.
 
 ### Default Actions

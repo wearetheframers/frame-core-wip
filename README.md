@@ -24,6 +24,8 @@ Frame comes with a set of default actions that are available to all Framers. The
 - **ThinkAction**: Engages in deep thinking to generate new insights or tasks.
 - **ResearchAction**: Conducts research to gather information.
 - **AdaptiveDecisionAction**: Makes decisions using an adaptive strategy based on context.
+- **ResourceAllocationAction**: Allocates resources based on urgency, risk, and available resources.
+- **ResourceAllocationAction**: Allocates resources based on urgency, risk, and available resources.
 
 #### Default Strategies
 
