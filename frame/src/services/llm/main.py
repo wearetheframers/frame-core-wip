@@ -1,5 +1,6 @@
 from frame.src.utils.llm_utils import track_llm_usage
 from frame.src.services.llm.llm_adapters.lmql.lmql_interface import LMQLInterface
+from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import DSPyAdapter
 import json
 import functools
 import logging

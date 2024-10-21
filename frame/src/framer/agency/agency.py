@@ -5,10 +5,12 @@ import time
 
 from frame.src.constants.models import DEFAULT_MODEL
 from .priority import Priority
+from .roles import RoleStatus
 from .tasks import Task, TaskStatus
 from .workflow import WorkflowManager, Workflow
-from .roles import Role, RoleStatus
-from .goals import Goal, GoalStatus
+from .roles import Role
+from .goals import Goal
+from frame.src.framer.agency.goals import GoalStatus
 from frame.src.services.llm import LLMService
 from frame.src.services.execution_context import ExecutionContext
 from frame.src.framer.brain.decision import Decision
@@ -64,7 +66,7 @@ class Agency:
             goals (Optional[List[Goal]]): Initial goals for the Agency. Defaults to None.
         """
         self.llm_service = llm_service
-        self.execution_context = context or {}
+        self.execution_context = execution_context or ExecutionContext()
         self.roles: List[Role] = []
         self.goals: List[Goal] = []
         if roles:
@@ -532,3 +534,11 @@ class Agency:
             framer (Framer): The Framer instance to associate with this Agency.
         """
         self.framer = framer
+    def add_goal(self, goal: Goal) -> None:
+        """
+        Add a new goal to the Agency.
+
+        Args:
+            goal (Goal): The goal to add.
+        """
+        self.goals.append(goal)

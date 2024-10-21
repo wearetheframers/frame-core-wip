@@ -1,8 +1,11 @@
 import sys
 import os
 
-# Import Frame from upper dir
+# Add the project root to the Python path to ensure all modules can be imported correctly
+# If we are running the examples from the source code (not installing package from pip)
+# then you need to have this line uncommented.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
 from typing import Optional
 import asyncio
 from frame import Frame, FramerConfig

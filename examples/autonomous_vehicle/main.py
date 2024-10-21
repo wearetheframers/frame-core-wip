@@ -1,9 +1,13 @@
+# Import necessary modules and packages
 import sys
 import logging
 import os
 import asyncio
 from typing import Dict, Any
 
+# Add the project root to the Python path to ensure all modules can be imported correctly
+# If we are running the examples from the source code (not installing package from pip)
+# then you need to have this line uncommented.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame import Frame, FramerConfig
@@ -24,6 +28,7 @@ from frame.src.framer.brain.decision import Decision
 from frame.src.framer.brain.action_registry import ActionRegistry
 from frame.src.services.context.execution_context_service import ExecutionContext
 
+# Set up logging for the module
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
@@ -33,6 +38,7 @@ handler.setFormatter(
 logger.addHandler(handler)
 
 
+# Define a custom action to process perceptions and make decisions
 class ProcessPerceptionAction(BaseAction):
     def __init__(self, action_registry: ActionRegistry):
         super().__init__(
@@ -42,7 +48,9 @@ class ProcessPerceptionAction(BaseAction):
         )
         self.action_registry = action_registry
 
+    # Execute the action based on the given perception
     async def execute(self, execution_context: ExecutionContext, **kwargs) -> str:
+        # Retrieve the perception from the provided arguments
         perception = kwargs.get("perception")
 
         if not perception:
@@ -50,11 +58,11 @@ class ProcessPerceptionAction(BaseAction):
 
         logger.info(f"\nProcessing perception: {perception}")
 
-        # Analyze the perception and make a decision
+        # Analyze the perception and make a decision based on its type and data
         decision = self.analyze_perception(perception)
         logger.info(f"Decision made: {decision}")
 
-        # Execute the decision
+        # Execute the decision using the action registry
         result = await self.execute_decision(execution_context, decision)
         return str(result)
 
@@ -73,7 +81,9 @@ class ProcessPerceptionAction(BaseAction):
         except Exception as e:
             return f"Error executing action {action}: {str(e)}"
 
+    # Analyze the perception to determine the appropriate action
     def analyze_perception(self, perception: Dict[str, Any]) -> Dict[str, Any]:
+        # Determine the type of perception and handle accordingly
         perception_type = perception.get("type")
         data = perception.get("data", {})
 
@@ -89,7 +99,9 @@ class ProcessPerceptionAction(BaseAction):
                 "reason": f"Unknown perception type: {perception_type}",
             }
 
+    # Handle visual perceptions such as detecting objects and their distances
     def handle_visual_perception(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        # Determine the object type and distance to decide on an action
         object_type = data.get("object")
         distance = data.get("distance")
 
@@ -114,7 +126,9 @@ class ProcessPerceptionAction(BaseAction):
                 "reason": f"No specific action for {object_type}",
             }
 
+    # Handle audio perceptions such as detecting sounds and their distances
     def handle_audio_perception(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        # Determine the sound type and distance to decide on an action
         sound = data.get("sound")
         distance = data.get("distance")
 
@@ -134,7 +148,9 @@ class ProcessPerceptionAction(BaseAction):
         else:
             return {"action": "no_action", "reason": f"No specific action for {sound}"}
 
+    # Handle traffic perceptions such as detecting traffic conditions
     def handle_traffic_perception(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        # Determine the traffic condition to decide on an action
         condition = data.get("condition")
 
         if condition == "clear":
@@ -150,12 +166,14 @@ class ProcessPerceptionAction(BaseAction):
             }
 
 
+# Main function to run the autonomous vehicle example
 async def main():
+    # Initialize the Frame and Framer configuration
     frame = Frame()
     config = FramerConfig(name="AutonomousVehicleFramer")
     framer = await frame.framer_factory.create_framer(config, plugins=frame.plugins)
 
-    # Start driving when the script is run
+    # Start driving when the script is run by finding the vehicle plugin
     vehicle_plugin = next(
         (
             plugin
@@ -170,7 +188,10 @@ async def main():
     else:
         logger.warning("AutonomousVehiclePlugin not found. Vehicle not started.")
 
+    # Initialize the ActionRegistry to manage available actions
     action_registry = ActionRegistry()
+    # This is how you can do a custom action registry replacement to clear default actions
+    # action_registry = framer.brain.action_registry
     action_registry.actions = {}
     action_registry.valid_actions = []
 
@@ -197,10 +218,18 @@ async def main():
     action_registry.add_action(brake_vehicle_action)
     action_registry.add_action(process_perception_action)
 
+    # Replace the default action registry with the custom one defined above
     framer.brain.action_registry = action_registry
+    # This is how you can do a custom action registry replacement
+    # framer.brain.action_registry = action_registry
+    # Set the execution context
     framer.execution_context = execution_context
+    # This is how you can do a custom action registry replacement
+    # framer.execution_context = execution_context
 
+    # Define a list of perceptions to simulate the vehicle's environment
     perceptions = [
+        # Each perception includes a type, data, and source
         {
             "type": "visual",
             "data": {"object": "start", "distance": "close"},
@@ -238,7 +267,9 @@ async def main():
         },
     ]
 
+    # Process each perception in the list
     for perception in perceptions:
+        # Log the perception being processed
         logger.info(f"Processing perception: {perception}")
         result = await action_registry.execute_action(
             "process_perception",
@@ -248,7 +279,18 @@ async def main():
         logger.info(f"Action result: {result}")
         await asyncio.sleep(1)
 
+    # Close the Framer instance after processing all perceptions
     await framer.close()
+
+    # Note: The process_perception function is separate from the plugin to demonstrate flexibility.
+    # It takes precedence over the observe action, showing how you can customize the action registry.
+    # This allows for a more hackable and flexible system where you can replace or extend default behaviors.
+    # You can also remove actions from the Framer behavior in plugins programmatically.
+
+    # Note: The process_perception function is separate from the plugin to demonstrate flexibility.
+    # It takes precedence over the observe action, showing how you can customize the action registry.
+    # This allows for a more hackable and flexible system where you can replace or extend default behaviors.
+    # You can also remove actions from the Framer behavior in plugins programmatically.
 
 
 if __name__ == "__main__":

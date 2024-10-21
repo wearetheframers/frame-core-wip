@@ -363,9 +363,7 @@ async def run_framer_json(ctx, json_input, debug, sync, stream):
 
     try:
         logger.info("Executing framer")
-        result = execute_framer(frame, data, sync, stream)
-        if not sync:
-            result = await result  # Await the task if it's asynchronous
+        result = await execute_framer(frame, data, sync, stream)
         logger.info(f"Framer execution completed. Result: {result}")
         if isinstance(result, Decision):
             logger.info(f"Decision made: {result}")
@@ -400,7 +398,7 @@ async def run_async(
         default_model=model,
     )
     framer = await frame.framer_factory.create_framer()
-    context = LocalContext()  # Create a new LocalContext
+    context = LocalContext()  # Ensure context is a LocalContext instance
     framer.agency = Agency(
         llm_service=frame.llm_service,
         context=context,
@@ -498,6 +496,7 @@ async def stream_output(framer, prompt):
 
 
 def main():
+    import asyncio
     asyncio.run(cli(obj={}))
 
 

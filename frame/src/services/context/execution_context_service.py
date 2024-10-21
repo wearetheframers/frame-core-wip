@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Optional, Dict, Any, List, TYPE_CHECKING
+from frame.src.services.llm.main import LLMService
 
 if TYPE_CHECKING:
     from frame.src.services.llm.main import LLMService

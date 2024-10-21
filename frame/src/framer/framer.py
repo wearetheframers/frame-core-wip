@@ -27,9 +27,7 @@ from frame.src.utils.config_parser import (
     export_config_to_markdown,
 )
 
-from frame.src.framer.brain.memory.memory_adapter_interface import (
-    MemoryAdapterInterface,
-)
+from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
 
 Observer = Callable[[Decision], None]
@@ -102,9 +100,13 @@ class Framer:
         self.llm_service = llm_service
 
         self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service
+            llm_service=self.llm_service,
+            soul=soul,
+            mind=brain,
+            roles=roles,
+            goals=goals
         )
-        self.plugin_loading_progress = plugin_loading_progress
+        self.brain.action_registry.set_execution_context(self.execution_context)
 
         # Initialize services and plugins based on permissions
         if "with_memory" in self.permissions:
@@ -149,13 +151,17 @@ class Framer:
             soul=soul,
         )
         logger.info(f"Brain created with memory service: {self.brain.memory_service}")
+        self.brain.action_registry.set_execution_context(self.execution_context)
 
         self._dynamic_model_choice = False
         self.observers: List[Observer] = []
         self.can_execute = True
         self.acting = False
         # Load plugins asynchronously
-        asyncio.create_task(self.load_plugins())
+        if asyncio.get_event_loop().is_running():
+            asyncio.create_task(self.load_plugins())
+        else:
+            logger.warning("No running event loop. Plugins will not be loaded immediately.")
 
         # Generate roles and goals if not provided
         if not self.roles or not self.goals:

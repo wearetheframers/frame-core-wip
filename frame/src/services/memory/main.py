@@ -1,11 +1,10 @@
 from typing import Dict, Any, List, Optional
-
-
+from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
 class MemoryService:
-    def __init__(self, adapter):
+    def __init__(self, adapter: 'MemoryAdapterInterface'):
         self.adapter = adapter
 
-    def store(
+    def add_memory(
         self, memory: str, user_id: str = "default", metadata: Dict[str, Any] = None
     ) -> int:
         return self.adapter.store(memory, user_id, metadata)

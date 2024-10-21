@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional, List, Callable
 from pydantic import BaseModel, Field
 from enum import Enum
 from frame.src.models.framer.agency.tasks import TaskModel, TaskStatus
+from frame.src.utils.id_generator import generate_id
 
 
 class TaskModel(BaseModel):
@@ -77,8 +78,11 @@ class Task(TaskModel):
             updated_at=updated_at,
             completed_at=completed_at,
         )
+        self.subtasks: List[Task] = []
         self.result = None
+        self.created_at = datetime.now()
         self.updated_at = datetime.now()
+        self.actual_duration: Optional[float] = None
         self.completed_at = completed_at
         logger.debug(
             f"Created new task with ID: {self.id} and expected results: {self.expected_results}"

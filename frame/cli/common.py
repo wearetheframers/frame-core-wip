@@ -144,7 +144,7 @@ async def setup_framer(
     else:
         framer.soul.seed = config.soul_seed  # Explicitly set the soul seed
 
-    context: Dict[str, Any] = {}
+    context = LocalContext()  # Ensure context is a LocalContext instance
     framer.agency = Agency(
         llm_service=frame.llm_service,
         context=context,

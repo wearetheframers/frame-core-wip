@@ -1,5 +1,11 @@
 import asyncio
 import os
+
+# Add the project root to the Python path to ensure all modules can be imported correctly
+# If we are running the examples from the source code (not installing package from pip)
+# then you need to have this line uncommented.
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
 from frame.frame import Frame
 from frame.src.framer.config import FramerConfig
 from frame.src.services.llm.main import LLMService

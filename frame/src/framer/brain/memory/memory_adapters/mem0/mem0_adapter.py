@@ -1,8 +1,6 @@
 import os
 from typing import Dict, Any, List, Optional
-from frame.src.framer.brain.memory.memory_adapter_interface import (
-    MemoryAdapterInterface,
-)
+from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
 
 
 class Mem0Adapter(MemoryAdapterInterface):
@@ -73,7 +71,7 @@ class Mem0Adapter(MemoryAdapterInterface):
             return self.memories[user_id][memory_id]["memory"]
         return None
 
-    def update(self, memory_id: int, data: Any, user_id: str = "default") -> None:
+    def update(self, memory_id: int, data: Any, user_id: str = "default", metadata: Optional[Dict[str, Any]] = None) -> None:
         """
         Update a specific memory entry.
 

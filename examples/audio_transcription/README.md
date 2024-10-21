@@ -32,4 +32,8 @@ python main.py
 
 ## Customization
 
+### Custom Action Registry
+
+In the autonomous vehicle example, we demonstrate how to replace the default action registry with a custom one. This allows for a more flexible and hackable system where you can replace or extend default behaviors. The `process_perception` function takes precedence over the observe action, showing how you can customize the action registry. You can also remove actions from the Framer behavior in plugins programmatically.
+
 You can customize the roles, goals, and behavior of the Framer by modifying the `main.py` and `audio_transcription_plugin.py` files.

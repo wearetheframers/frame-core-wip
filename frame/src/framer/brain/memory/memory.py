@@ -1,6 +1,9 @@
 import logging
-from typing import Dict, Any, List, Optional
-from frame.src.services.memory.main import MemoryService
+from typing import Dict, Any, List, Optional, TYPE_CHECKING
+if TYPE_CHECKING:
+    from frame.src.services.memory.main import MemoryService
+# Import MemoryService inside the __init__ method to avoid circular import issues
+from frame.src.framer.brain.memory.memory_adapter_interface import MemoryAdapterInterface
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +19,12 @@ class Memory:
     This class now uses the MemoryService for all memory operations.
     """
 
-    def __init__(self, memory_service: Optional[MemoryService] = None):
+    def __init__(self, memory_service: Optional['MemoryService'] = None):
+        self.core = None  # Initialize core attribute
+        self.mem0 = None  # Initialize mem0 attribute
+        if memory_service is None:
+            from frame.src.services.memory.main import MemoryService
+            memory_service = MemoryService()
         self.memory_service = memory_service
         self.user_id = "default"
 
@@ -35,7 +43,7 @@ class Memory:
             metadata (Optional[Dict[str, Any]]): Additional metadata for the memory.
         """
         if self.memory_service:
-            self.memory_service.store(memory, user_id or self.user_id, metadata)
+            self.memory_service.add_memory(memory, user_id or self.user_id, metadata)
         else:
             logger.warning("Memory service is not initialized. Unable to store memory.")
 
@@ -74,6 +82,26 @@ class Memory:
             user_id (Optional[str]): The user ID associated with the memory.
         """
         self.memory_service.delete(memory_id, user_id or self.user_id)
+
+    def get_core_memory(self) -> Any:
+        """
+        Get the core memory.
+
+        Returns:
+            Any: The core memory object.
+        """
+        return self.core
+
+    def add_short_term_memory(self, memory: str, user_id: Optional[str] = None):
+        """
+        Add a short-term memory.
+
+        Args:
+            memory (str): The memory to add.
+            user_id (Optional[str]): The user ID to associate with the memory.
+        """
+        # Implementation for adding short-term memory
+        pass
 
     def get_all_memories(self, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """
