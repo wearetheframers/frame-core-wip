@@ -1,5 +1,5 @@
 from frame.src.framer.brain.actions import BaseAction
-from frame.src.framer.brain.strategies.decision_strategy import (
+from frame.src.framer.brain.actions.strategies.decision_strategy import (
     DecisionStrategy,
     ConservativeStrategy,
     AggressiveStrategy,
