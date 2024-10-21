@@ -193,7 +193,7 @@ async def main():
 
     # Initialize a new ActionRegistry to manage available actions
     action_registry = ActionRegistry()
-    
+
     # For this example demo, we will show how you can create an entirely new and custom action registry
     # in a plugin, and register it within a Framer to completely replace its behavior (not just default behavior)
     # but its behavior in other plugins.

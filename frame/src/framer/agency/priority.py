@@ -1,6 +1,5 @@
 from enum import IntEnum
 from typing import Union
-from typing import Union
 
 """
 Priority levels and their meanings:

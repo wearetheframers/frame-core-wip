@@ -9,7 +9,7 @@ import json
 from frame.src.framer.config import FramerConfig
 from frame.src.framer.brain.decision import Decision
 from frame.src.framer.agency import Agency
-from frame.src.services.context.local_context_service import LocalContext
+from frame.src.services import ExecutionContext
 from frame.cli.common import process_perception_and_log
 
 from frame.src.utils.cleanup import cleanup
@@ -70,7 +70,7 @@ def cli(
     the provided options.
 
     Args:
-        ctx (LocalContext): Click context object for managing command-line options.
+        ctx (ExecutionContext): Click context object for managing command-line options.
         openai_api_key (str): OpenAI API key for accessing OpenAI services.
         mistral_api_key (str): Mistral API key for accessing Mistral services.
         huggingface_api_key (str): Hugging Face API key for accessing Hugging Face services.
@@ -231,6 +231,9 @@ async def run_framer(ctx, prompt, name, model, debug, sync, stream):
     else:
         logger.warning("No decision was made.")
 
+    # Log the decision details even if no result was returned
+    logger.info(f"Decision details: {decision}")
+
     # Log LLM usage metrics
     metrics = frame.get_metrics()
     logger.info("LLM Usage Metrics:")
@@ -327,7 +330,7 @@ def sync_execute_framer(frame, config, prompt, perception, max_len):
 @click.option("--sync", is_flag=True, help="Run in synchronous mode")
 @click.option("--stream", is_flag=True, help="Stream the output")
 @click.pass_context
-async def run_framer_json(ctx, json_input, debug, sync, stream):
+def run_framer_json(ctx, json_input, debug, sync, stream):
     """Run a Framer with the given JSON configuration."""
     import json
     from frame.frame import Frame
@@ -361,20 +364,25 @@ async def run_framer_json(ctx, json_input, debug, sync, stream):
         default_model=ctx.obj.get("default_model"),
     )
 
-    try:
-        logger.info("Executing framer")
-        result = await execute_framer(frame, data, sync, stream)
-        logger.info(f"Framer execution completed. Result: {result}")
-        if isinstance(result, Decision):
-            logger.info(f"Decision made: {result}")
-            print(f"Decision: {result}")
-        else:
-            logger.warning("No decision was made or result is not a Decision object.")
-    except Exception as e:
-        logger.error(f"An error occurred during framer execution: {str(e)}")
-        logger.exception("Exception details:")
-    finally:
-        frame.shut_down(save_state=False, reset=True)
+    async def run():
+        try:
+            logger.info("Executing framer")
+            result = await execute_framer(frame, data, sync, stream)
+            logger.info(f"Framer execution completed. Result: {result}")
+            if isinstance(result, Decision):
+                logger.info(f"Decision made: {result}")
+                print(f"Decision: {result}")
+            else:
+                logger.warning(
+                    "No decision was made or result is not a Decision object."
+                )
+        except Exception as e:
+            logger.error(f"An error occurred during framer execution: {str(e)}")
+            logger.exception("Exception details:")
+        finally:
+            frame.shut_down(save_state=False, reset=True)
+
+    asyncio.run(run())
 
     logger.info("run_framer command finished")
     metrics = frame.get_metrics()
@@ -398,7 +406,9 @@ async def run_async(
         default_model=model,
     )
     framer = await frame.framer_factory.create_framer()
-    context = LocalContext()  # Ensure context is a LocalContext instance
+    context = ExecutionContext(
+        llm_service=frame.llm_service
+    )  # Ensure context is a ExecutionContext instance
     framer.agency = Agency(
         llm_service=frame.llm_service,
         context=context,

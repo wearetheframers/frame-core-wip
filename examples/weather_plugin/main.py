@@ -1,5 +1,5 @@
 import asyncio
-import os
+import os, sys
 
 # Add the project root to the Python path to ensure all modules can be imported correctly
 # If we are running the examples from the source code (not installing package from pip)

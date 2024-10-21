@@ -27,7 +27,7 @@ from frame.cli.common import (
     execute_framer,
 )
 from frame.src.framer.agency import Agency
-from frame.src.services import LocalContext
+from frame.src.services import ExecutionContext
 
 
 class FramerTUI(App):
@@ -229,7 +229,7 @@ class FramerTUI(App):
         # Set up the soul seed
         self.framer.soul.seed = self.framer.config.soul_seed
 
-        context = LocalContext()
+        context = ExecutionContext()
         self.framer.agency = Agency(
             llm_service=frame.llm_service,
             context=context,

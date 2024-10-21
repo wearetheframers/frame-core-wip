@@ -1,7 +1,9 @@
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional, List, Union, TYPE_CHECKING
-from frame.src.models.framer.agency.tasks import TaskStatus
-from frame.src.framer.agency.priority import Priority
+from frame.src.framer.agency.tasks import TaskStatus
+
+if TYPE_CHECKING:
+    from frame.src.framer.agency.priority import Priority
 
 
 class Decision(BaseModel):
@@ -16,12 +18,16 @@ class Decision(BaseModel):
     confidence: float = Field(
         default=0.7, ge=0, le=1, description="Confidence level of the decision"
     )
-    priority: Union[Priority, int] = Field(
-        default=Priority.MEDIUM, description="Priority of the decision"
+    priority: Union["Priority", int] = Field(
+        default=None, description="Priority of the decision"
     )
-    task_status: TaskStatus = Field(
-        default=TaskStatus.PENDING, description="Status of the associated task"
+    task_status: Optional["TaskStatus"] = Field(
+        default=None, description="Status of the associated task"
     )
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
     result: Optional[Dict[str, Any]] = Field(
         default=None, description="The result of executing the decision"
     )

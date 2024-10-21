@@ -2,11 +2,12 @@ import logging
 from typing import Dict, Any, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from frame.src.services.memory.main import MemoryService
+    from frame.src.services import MemoryService
+
 # Import MemoryService inside the __init__ method to avoid circular import issues
-from frame.src.framer.brain.memory.memory_adapter_interface import (
-    MemoryAdapterInterface,
-)
+from .memory_adapter_interface import MemoryAdapterInterface
+
+__all__ = ["MemoryAdapterInterface", "Memory"]
 
 logger = logging.getLogger(__name__)
 

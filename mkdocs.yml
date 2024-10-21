@@ -51,10 +51,8 @@ nav:
           - Memory: API/frame/services/memory/main.md
           - EQ: API/frame/services/eq/main.md
           - Context:
-              - Local Context Service: API/frame/services/context/local_context_service.md
+              - Execution Context Service: API/frame/services/context/execution_context.md
               - Shared Context Service: API/frame/services/context/shared_context_service.md
-              - Execution Context: API/frame/services/context/execution_context.md
-              - Execution Context Service: API/frame/services/context/execution_context_service.md
       - Utils:
           - Log Manager: API/frame/utils/log_manager.md
           - ID Generator: API/frame/utils/id_generator.md

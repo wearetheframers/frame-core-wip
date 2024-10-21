@@ -3,20 +3,16 @@ from frame.src.framer.framer import Framer
 
 # Import necessary components for Framer creation
 from frame.src.framer.config import FramerConfig
-from frame.src.services.llm import LLMService
-from frame.src.framer.agency import Agency
-from frame.src.framer.brain import Brain
-from frame.src.framer.brain.mind import Mind
+from frame.src.services import LLMService
+from frame.src.framer.agency import Agency, Goal, GoalStatus, Role, RoleStatus
+from frame.src.framer.brain import Brain, Mind
 from frame.src.framer.soul import Soul
-from frame.src.framer.agency.workflow import WorkflowManager
-from frame.src.services.context.execution_context_service import ExecutionContext
-from frame.src.services.memory import MemoryService
-from frame.src.services.eq import EQService
-from frame.src.constants.models import DEFAULT_MODEL
+from frame.src.framer.agency import WorkflowManager
+from frame.src.services import ExecutionContext, EQService, MemoryService
+from frame.src.constants import DEFAULT_MODEL
+from frame.src.framer.brain.memory.memory_adapters import Mem0Adapter
+
 import logging
-from frame.src.framer.agency.goals import Goal, GoalStatus
-from frame.src.framer.agency.roles import Role, RoleStatus
-from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
 
 
 class FramerFactory:
@@ -80,7 +76,11 @@ class FramerFactory:
         plugins: Optional[Dict[str, Any]] = None,
     ) -> Framer:
         self.plugins = plugins or {}
-        execution_context = ExecutionContext(llm_service=self.llm_service)
+        execution_context = ExecutionContext(
+            llm_service=self.llm_service,
+            soul=None,  # We'll set this later
+            brain=None,  # We'll set this later
+        )
         agency = Agency(
             llm_service=self.llm_service,
             execution_context=execution_context,
@@ -89,8 +89,7 @@ class FramerFactory:
         # Initialize the Agency component with default permissions
         self.config.permissions = self.config.permissions or [
             "with_memory",
-            "with_mem0_search_extract_summarize_plugin",
-            "with_shared_context",
+            # "with_shared_context", # Do not allow shared context by default
         ]
         roles, goals = await self._generate_unique_roles_and_goals(agency, roles, goals)
 
@@ -138,7 +137,6 @@ class FramerFactory:
 
         # Set the Framer instance in Brain
         framer.brain.set_framer(framer)
-        framer.brain.action_registry.set_framer(framer)
 
         # Notify observers about the Framer being opened
         for observer in framer.observers:

@@ -13,11 +13,11 @@ from typing import Any, Dict, List, Optional
 from frame.src.constants.models import DEFAULT_MODEL
 from frame.src.framer.config import FramerConfig
 from frame.src.framer.agency import Agency
-from frame.src.services.context.local_context_service import LocalContext
+from frame.src.services import ExecutionContext
 from frame.src.framer.framer import Framer
 from frame.frame import Frame
 from frame.src.framer.brain.decision import Decision
-from frame.src.framer.soul.soul import Soul
+from frame.src.framer.soul import Soul
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +144,7 @@ async def setup_framer(
     else:
         framer.soul.seed = config.soul_seed  # Explicitly set the soul seed
 
-    context = LocalContext()  # Ensure context is a LocalContext instance
+    context = ExecutionContext()  # Ensure context is a ExecutionContext instance
     framer.agency = Agency(
         llm_service=frame.llm_service,
         context=context,

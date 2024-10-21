@@ -1,7 +1,7 @@
 from typing import Dict, Any
 from frame.src.framer.config import FramerConfig
-from frame.src.framer.brain.actions.base import BaseAction
-from frame.src.services.execution_context import ExecutionContext
+from frame.src.framer.brain.actions import BaseAction
+from frame.src.services import ExecutionContext
 
 
 class CreateNewAgentAction(BaseAction):

@@ -1,5 +1,5 @@
 from typing import Dict, Any
-from frame.src.services.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 from frame.src.framer.brain.actions import BaseAction
 from frame.src.framer.agency.priority import Priority
 

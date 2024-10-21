@@ -26,6 +26,7 @@ def test_execution_context_service_update_state(llm_service, soul):
     new_state = {"key": "value"}
     execution_context.update_state(new_state)
     assert execution_context.get_state() == new_state
+    assert execution_context.get_state("key") == "value"
 
 
 def test_execution_context_service_without_soul(llm_service):
@@ -35,7 +36,7 @@ def test_execution_context_service_without_soul(llm_service):
 
 @pytest.mark.asyncio
 async def test_execution_context_service_in_action_registry():
-    from frame.src.framer.agency.action_registry import ActionRegistry
+    from frame.src.framer.brain.action_registry import ActionRegistry
 
     llm_service = LLMService()
     execution_context = ExecutionContext(llm_service=llm_service)
@@ -44,9 +45,7 @@ async def test_execution_context_service_in_action_registry():
     def test_action(execution_context, param):
         return f"Test action with param: {param}"
 
-    action_registry.register_action(
-        "test_action", test_action, "Test action description"
-    )
+    action_registry.add_action("test_action", test_action, "Test action description")
 
     result = await action_registry.execute_action(
         "test_action", {"param": "test_value"}

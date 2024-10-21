@@ -1,9 +1,8 @@
-from frame.src.framer.brain.actions.base import BaseAction
+from frame.src.framer.brain.actions import BaseAction
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from frame.src.framer.agency.roles import RoleStatus
-    from frame.src.framer.agency.goals import GoalStatus
+    from frame.src.framer.agency import RoleStatus, GoalStatus
 
 
 class ErrorAction(BaseAction):

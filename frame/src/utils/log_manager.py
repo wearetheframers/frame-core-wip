@@ -84,7 +84,7 @@ def setup_logging(level: Optional[int] = None, testing: bool = False) -> logging
         logger.addHandler(fh)
         logger.addHandler(ch)
 
-        logger.info("Logging initialized")
+        logger.debug("Logging initialized")
 
         cleanup_old_logs(log_dir)
 
@@ -145,6 +145,8 @@ def cleanup_old_logs(log_dir: str, days: int = 7) -> None:
         log_dir (str): Directory containing the log files.
         days (int): Number of days to keep logs for. Defaults to 7.
     """
+    logger = logging.getLogger("frame")
+    logger.propagate = False
     current_date = datetime.datetime.now().date()
     for log_file in glob.glob(os.path.join(log_dir, "framer_*.log")):
         match = re.search(
@@ -154,4 +156,4 @@ def cleanup_old_logs(log_dir: str, days: int = 7) -> None:
             file_date = datetime.datetime.strptime(match.group(1), "%Y-%m-%d").date()
             if (current_date - file_date).days > days:
                 os.remove(log_file)
-                print(f"Removed old log file: {log_file}")
+                logger.info(f"Removed old log file: {log_file}")

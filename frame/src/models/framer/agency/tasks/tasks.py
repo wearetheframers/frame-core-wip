@@ -2,15 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Any
 from enum import Enum
 from frame.src.framer.agency.priority import Priority
-from .task_status import TaskStatus
-
-
-class TaskStatus(Enum):
-    PENDING = "pending"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELED = "canceled"
+from frame.src.models.framer.agency.tasks import TaskStatus
 
 
 class TaskModel(BaseModel):
@@ -20,6 +12,7 @@ class TaskModel(BaseModel):
     status: TaskStatus = TaskStatus.PENDING
     workflow_id: Optional[str] = None
     expected_results: List[Any] = Field(default_factory=list)
+    subtasks: List["TaskModel"] = Field(default_factory=list)
     updated_at: Optional[str] = None
     created_at: Optional[str] = None
 

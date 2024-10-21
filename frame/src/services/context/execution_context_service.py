@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from frame.src.services.memory.main import MemoryService
     from frame.src.services.eq.eq_service import EQService
     from frame.src.framer.soul.soul import Soul
+    from frame.src.framer.brain.brain import Brain
 
 
 class ExecutionContext:
@@ -31,21 +32,31 @@ class ExecutionContext:
         memory_service: Optional["MemoryService"] = None,
         eq_service: Optional["EQService"] = None,
         soul: Optional["Soul"] = None,
+        brain: Optional["Brain"] = None,
         state: Dict[str, Any] = None,
     ):
         self.llm_service = llm_service
         self.memory_service = memory_service
         self.eq_service = eq_service
         self.soul = soul
+        self.brain = brain
         self.state = state or {}
         self.goals: List[Any] = []
         self.roles: List[Any] = []
         self.action_registry = None
 
+    def set_roles(self, roles: List[Any]):
+        self.roles = roles
+
+    def set_goals(self, goals: List[Any]):
+        self.goals = goals
+
     def set_state(self, key: str, value: Any) -> None:
         self.state[key] = value
 
-    def get_state(self, key: str, default: Any = None) -> Any:
+    def get_state(self, key: Optional[str] = None, default: Any = None) -> Any:
+        if key is None:
+            return self.state
         return self.state.get(key, default)
 
     def get_llm_service(self) -> LLMService:
@@ -59,6 +70,9 @@ class ExecutionContext:
 
     def get_soul(self) -> Optional[Soul]:
         return self.soul
+
+    def get_brain(self) -> Optional["Brain"]:
+        return self.brain
 
     def update_state(self, new_state: Dict[str, Any]) -> None:
         self.state.update(new_state)

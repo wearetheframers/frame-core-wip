@@ -2,8 +2,8 @@ import logging
 import json
 from typing import List, Dict, Any, Optional
 from unittest.mock import AsyncMock
-from .perception import Perception
-from ..decision import Decision
+from frame.src.framer.brain.mind.perception import Perception
+from frame.src.framer.brain.decision import Decision
 from frame.src.framer.brain.action_registry import ActionRegistry
 from frame.src.framer.agency.tasks import TaskStatus
 from frame.src.utils.llm_utils import get_completion

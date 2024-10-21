@@ -7,19 +7,18 @@ from typing import List, Dict, Any, Optional, Callable, Union, Tuple, Deque
 
 from frame.src.framer.config import FramerConfig
 from frame.src.framer.agency import Agency
-from frame.src.framer.brain.brain import Brain
-from frame.src.framer.soul import Soul
 from frame.src.framer.agency.workflow import WorkflowManager
-from frame.src.framer.agency.tasks.task import Task
-from frame.src.models.framer.agency.tasks import TaskStatus
+from frame.src.framer.agency.tasks import Task, TaskStatus
+from frame.src.framer.agency.goals import Goal, GoalStatus
+from frame.src.framer.brain import Brain, Decision
 from frame.src.framer.brain.mind.perception import Perception
-from frame.src.framer.brain.decision import Decision
-from frame.src.framer.agency.goals import GoalStatus
+from frame.src.framer.soul import Soul
 
+from frame.src.services.context.execution_context_service import ExecutionContext
+from frame.src.services.eq.main import EQService
 from frame.src.services.llm.main import LLMService
+from frame.src.services.memory.main import MemoryService
 from frame.src.services.context.shared_context_service import SharedContext
-from frame.src.services.context import ExecutionContext
-from frame.src.services import MemoryService, EQService
 
 from frame.src.utils.config_parser import (
     parse_json_config,
@@ -27,10 +26,15 @@ from frame.src.utils.config_parser import (
     export_config_to_markdown,
 )
 
+from frame.src.framer.brain.memory.memory_adapters import Mem0Adapter
 from frame.src.framer.brain.memory.memory_adapter_interface import (
     MemoryAdapterInterface,
 )
-from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapter
+
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from frame.src.framer.brain.brain import Brain
 
 Observer = Callable[[Decision], None]
 
@@ -38,6 +42,18 @@ logger = logging.getLogger("frame.framer")
 
 
 class Framer:
+    @classmethod
+    async def create(cls, config: FramerConfig, llm_service: LLMService):
+        from frame.src.framer.framer_factory import FramerFactory
+
+        factory = FramerFactory(config, llm_service)
+        framer = await factory.create_framer(
+            memory_service=None,
+            eq_service=None,
+        )
+        await framer._generate_initial_roles_and_goals()
+        return framer
+
     perceptions_queue: Deque[Union[Perception, Dict[str, Any]]] = deque()
     """
     The Framer class represents an AI agent with advanced cognitive capabilities. It integrates various components
@@ -103,12 +119,11 @@ class Framer:
 
         self.execution_context = execution_context or ExecutionContext(
             llm_service=self.llm_service,
-            soul=soul,
-            mind=brain,
-            roles=roles,
-            goals=goals,
         )
-        self.brain.action_registry.set_execution_context(self.execution_context)
+        self.execution_context.soul = soul
+        self.execution_context.brain = brain
+        self.execution_context.set_roles(roles)
+        self.execution_context.set_goals(goals)
 
         # Initialize services and plugins based on permissions
         if "with_memory" in self.permissions:
@@ -131,7 +146,7 @@ class Framer:
             self.eq_service = eq_service or EQService()
 
         if "with_shared_context" in self.permissions:
-            self.shared_context_service = SharedContext()
+            self.shared_context_service = SharedContext(llm_service=self.llm_service)
 
         self.agency = agency
         self.soul = soul
@@ -222,7 +237,8 @@ class Framer:
         Process all queued perceptions once the Framer is ready.
         """
         if self.is_ready():
-            logger.info("Processing queued perceptions...")
+            if self.perceptions_queue:
+                logger.info("Processing queued perceptions before Framer was acting..")
             while self.perceptions_queue:
                 logger.info(
                     f"Processing perception from queue: {self.perceptions_queue[0]}"

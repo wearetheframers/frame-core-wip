@@ -7,16 +7,12 @@ from frame.src.framer.brain.actions.error_action import ErrorAction
 
 if TYPE_CHECKING:
     from frame.src.services import ExecutionContext
+    from frame.src.framer.agency import GoleStatus, RoleStatus
 
-logger = logging.getLogger(__name__)
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from frame.src.framer.agency.roles import RoleStatus
-    from frame.src.framer.agency.goals import GoalStatus
 from frame.src.framer.brain.default_actions import (
-    VALID_ACTIONS,
-    extend_valid_actions,
+    DEFAULT_ACTIONS,
+    extend_default_actions,
 )
 from frame.src.framer.brain.default_actions import (
     CreateNewAgentAction,
@@ -26,6 +22,8 @@ from frame.src.framer.brain.default_actions import (
     ThinkAction,
     ResearchAction,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ActionRegistry:
@@ -108,7 +106,7 @@ class ActionRegistry:
         return response.strip() if isinstance(response, str) else str(response)
 
     def extend_actions(self, new_actions: Dict[str, Dict[str, Any]]):
-        extend_valid_actions(new_actions)
+        extend_default_actions(new_actions)
         self._register_default_actions()
 
     def add_action(

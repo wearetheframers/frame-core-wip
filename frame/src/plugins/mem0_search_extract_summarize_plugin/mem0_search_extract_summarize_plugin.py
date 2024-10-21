@@ -52,28 +52,33 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         self.mem0_adapter = Mem0Adapter()
 
     async def on_load(self, framer) -> None:
-        # Check for a valid API key before registering the action
-        api_key = os.getenv("MEM0_API_KEY", "").strip()
-        if not api_key:
-            api_key = MEM0_API_KEY
-        if api_key:
-            framer.brain.action_registry.add_action(
-                "respond with memory retrieval",
-                description="This action is ideal for responding to personal questions that involve historical or memory-based "
-                "information about the user or the Framer. It leverages the Framer's memory to retrieve relevant data "
-                "or previously saved texts, providing comprehensive answers or insights based on stored memories. "
-                "When questions reference or relate to past conversations, this action is preferred. It generally "
-                "takes precedence over `think` and `observe` actions, especially for questions. If uncertain whether "
-                "a question can be answered with or without memory, default to this action.",
-                action_func=self.mem0_search_extract_summarize,
-                priority=8,
-            )
-            self.logger.info(
-                "Mem0SearchExtractSummarizePlugin registered 'respond with memory retrieval' action."
-            )
+        # Check for the correct permission before registering the action
+        if "with_mem0_search_extract_summarize_plugin" in framer.permissions:
+            api_key = os.getenv("MEM0_API_KEY", "").strip()
+            if not api_key:
+                api_key = MEM0_API_KEY
+            if api_key:
+                framer.brain.action_registry.add_action(
+                    "respond with memory retrieval",
+                    description="This action is ideal for responding to personal questions that involve historical or memory-based "
+                    "information about the user or the Framer. It leverages the Framer's memory to retrieve relevant data "
+                    "or previously saved texts, providing comprehensive answers or insights based on stored memories. "
+                    "When questions reference or relate to past conversations, this action is preferred. It generally "
+                    "takes precedence over `think` and `observe` actions, especially for questions. If uncertain whether "
+                    "a question can be answered with or without memory, default to this action.",
+                    action_func=self.mem0_search_extract_summarize,
+                    priority=8,
+                )
+                self.logger.info(
+                    "Mem0SearchExtractSummarizePlugin registered 'respond with memory retrieval' action."
+                )
+            else:
+                self.logger.warning(
+                    "Mem0 API key not found or is empty. Action 'response with memory retrieval' will not be registered."
+                )
         else:
-            self.logger.warning(
-                "Mem0 API key not found or is empty. Action 'response with memory retrieval' will not be registered."
+            self.logger.info(
+                "Mem0SearchExtractSummarizePlugin not loaded due to missing permission."
             )
 
     def get_actions(self) -> Dict[str, Any]:
@@ -128,7 +133,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
 
     async def mem0_search_extract_summarize(
         self,
-        execution_context,
+        execution_context: ExecutionContext,
         query: str = "",
         user_id: Optional[str] = None,
         agent_id: Optional[str] = None,

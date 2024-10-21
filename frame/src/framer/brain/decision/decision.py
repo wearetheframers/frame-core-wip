@@ -1,13 +1,12 @@
 import json
 from pydantic import Field, BaseModel
 from typing import Dict, Any, Optional, Union, List
-from frame.src.models.framer.brain.decision.decision import Decision as DecisionModel
-from frame.src.models.framer.agency.tasks import TaskStatus
+from frame.src.models.framer.brain.decision import Decision as DecisionModel
 from frame.src.framer.agency.priority import Priority
-
-from typing import TYPE_CHECKING
 from frame.src.framer.agency.roles import Role
 from frame.src.framer.agency.goals import Goal
+from frame.src.framer.agency.tasks import TaskStatus
+from typing import TYPE_CHECKING
 
 
 class Decision(DecisionModel):
@@ -32,7 +31,7 @@ class Decision(DecisionModel):
     expected_results: List[Any] = Field(
         default_factory=list, description="The expected results of the decision"
     )
-    task_status: TaskStatus = Field(
+    task_status: "TaskStatus" = Field(
         default=TaskStatus.PENDING, description="Status of the associated task"
     )
     related_roles: List["Role"] = Field(
@@ -59,6 +58,8 @@ class Decision(DecisionModel):
             decision_dict = json.loads(json_data)
 
         # Convert priority from string or integer to Priority enum
+        from frame.src.framer.agency import Priority
+
         decision_dict["priority"] = Priority.from_value(
             decision_dict.get("priority", Priority.MEDIUM)
         )
@@ -99,7 +100,7 @@ class Decision(DecisionModel):
         confidence: float = 0.7,
         priority: int = 5,
         expected_results: Optional[Any] = None,
-        task_status: TaskStatus = TaskStatus.PENDING,
+        task_status: "TaskStatus" = None,
         related_roles: List["Role"] = None,
         related_goals: List["Goal"] = None,
     ) -> "Decision":

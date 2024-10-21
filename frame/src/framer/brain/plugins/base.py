@@ -24,11 +24,11 @@ class BasePlugin(ABC):
         """
         self.framer = framer
         self.logger = logging.getLogger(self.__class__.__name__)
-        if hasattr(framer, "execution_context"):
-            self.execution_context = framer.execution_context
-        else:
-            self.execution_context = None
-            self.logger.warning("Framer does not have an execution_context attribute.")
+        self.execution_context = getattr(framer, "execution_context", None)
+        if self.execution_context is None:
+            self.logger.warning(
+                "Plugin warning: Framer does not have an execution_context attribute. Possible unexpected behaviors may occur."
+            )
 
     def remove_action(self, name: str):
         """
@@ -39,9 +39,8 @@ class BasePlugin(ABC):
         """
         if name in self.framer.brain.action_registry.actions:
             self.framer.brain.action_registry.remove_action(name)
-            print(f"Action '{name}' removed from registry.")
         else:
-            print(f"Action '{name}' not found in registry.")
+            self.logger.warning(f"Action '{name}' not found in Framer action registry.")
 
     @abstractmethod
     async def on_load(self):
@@ -70,14 +69,17 @@ class BasePlugin(ABC):
             func (callable): The function to be called when the action is performed.
             description (str): A brief description of what the action does.
         """
-        print("Registering action: ", name)
         if name not in self.framer.brain.action_registry.actions:
             self.framer.brain.action_registry.add_action(
                 name, func, description, priority
             )
-            print(f"Action '{name}' registered to Framer action registry.")
+            self.logger.warning(
+                f"Action '{name}' registered in Framer action registry."
+            )
         else:
-            print(f"Action '{name}' already exists in Framer action registry.")
+            self.logger.warning(
+                f"Action '{name}' already exists in Framer action registry."
+            )
 
     @abstractmethod
     async def execute(self, action: str, params: Dict[str, Any]) -> Any:

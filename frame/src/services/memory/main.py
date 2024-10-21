@@ -1,7 +1,10 @@
 from typing import Dict, Any, List, Optional
-from frame.src.framer.brain.memory.memory_adapter_interface import (
-    MemoryAdapterInterface,
-)
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from frame.src.framer.brain.memory.memory_adapter_interface import (
+        MemoryAdapterInterface,
+    )
 
 
 class MemoryService:

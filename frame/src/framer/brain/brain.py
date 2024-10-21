@@ -6,25 +6,25 @@ from typing import Any, Dict, List, Optional, Union, Callable
 logger = logging.getLogger(__name__)
 
 from frame.src.utils.llm_utils import get_llm_provider
-from frame.src.services.llm.main import LLMService
-from frame.src.services.memory.main import MemoryService
-from frame.src.services.context.execution_context_service import ExecutionContext
-
-from frame.src.framer.soul import Soul
+from frame.src.services import ExecutionContext, LLMService
+from frame.src.models.framer.brain.decision.decision import Decision
 from frame.src.framer.agency.roles import Role, RoleStatus
 from frame.src.framer.agency.goals import Goal, GoalStatus
 from frame.src.framer.agency.priority import Priority
-from frame.src.framer.config import FramerConfig
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from frame.src.framer.agency.agency import Agency
+    from frame.src.services import MemoryService
+    from frame.src.framer.agency import Agency
 
-from .action_registry import ActionRegistry
-from .decision import Decision
-from .mind import Mind
-from .mind.perception import Perception
-from .memory.memory import Memory
+from frame.src.framer.soul import Soul
+from frame.src.framer.brain.memory import Memory
+from frame.src.framer.brain.mind import Mind
+from frame.src.framer.brain.mind.perception import Perception
+from frame.src.framer.brain.action_registry import ActionRegistry
+from frame.src.framer.config import FramerConfig
+
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ class Brain:
         self,
         llm_service: LLMService,
         execution_context: Optional["ExecutionContext"] = None,
-        memory_service: Optional[MemoryService] = None,
+        memory_service: Optional["MemoryService"] = None,
         roles: List[Dict[str, Any]] = [],
         goals: List[Dict[str, Any]] = [],
         default_model: str = "gpt-3.5-turbo",
@@ -110,6 +110,8 @@ class Brain:
         self.mind = Mind(self)
         # Initialize ActionRegistry
         self.action_registry = ActionRegistry(execution_context=self.execution_context)
+        if not isinstance(self.execution_context, ExecutionContext):
+            raise TypeError("execution_context must be an instance of ExecutionContext")
 
         self.logger.info(
             f"Brain initialized with memory service: {self.memory_service}"
@@ -140,7 +142,7 @@ class Brain:
     def get_framer(self):
         return self.framer
 
-    async def _execute_think_action(self, decision: Decision) -> Dict[str, Any]:
+    async def _execute_think_action(self, decision: "Decision") -> Dict[str, Any]:
         """
         Execute the 'think' action, which involves pondering on various aspects and potentially creating new tasks.
 
@@ -167,6 +169,44 @@ class Brain:
         recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
         recent_perceptions = self.mind.get_recent_perceptions(5)
         execution_state = self.execution_context.state if self.execution_context else {}
+        # Prepare the prompt for the LLM
+        prompt = f"""
+        Based on the following context, ponder and reflect on the current situation:
+        
+        Soul state: {soul_context}
+        Roles and goals: {roles_and_goals}
+        Recent thoughts: {recent_thoughts}
+        Recent perceptions: {recent_perceptions}
+
+        Current decision: {decision.to_dict()}
+
+        1. Analyze the current situation and provide insights.
+        2. Determine if any new tasks or actions are necessary.
+        3. If new tasks are needed, describe them in detail.
+        4. Decide if a new prompt should be generated for better results.
+
+        Respond with a JSON object containing the following fields:
+        - analysis: Analysis of the current situation.
+        - new_tasks: A list of new tasks if any (each task should have 'description' and 'priority').
+        - generate_new_prompt: A boolean indicating whether a new prompt should be generated.
+        - new_prompt: The new prompt to use if generate_new_prompt is True.
+        """
+        try:
+            await self.llm_service.get_completion(
+                prompt,
+                model=self.default_model,
+                expected_output=f"""
+                {{
+                    "analysis": str,
+                    "new_tasks": list,
+                    "generate_new_prompt": bool,
+                    "new_prompt": str
+                }}
+                """,
+            )
+        except Exception as e:
+            logger.error(f"Error in _execute_think_action: {str(e)}")
+            return {"error": str(e)}
 
     def parse_json_response(self, response: Any) -> Any:
         """
@@ -228,7 +268,7 @@ class Brain:
                 "priority": 1,
             }
 
-    def set_roles(self, roles: List[Role]) -> None:
+    def set_roles(self, roles: List["Role"]) -> None:
         """
         Set the roles for the Agency.
 
@@ -241,7 +281,7 @@ class Brain:
     async def process_perception(
         self,
         perception: Union["Perception", Dict[str, Any]],
-        goals: Optional[List[Goal]] = None,
+        goals: Optional[List["Goal"]] = None,
     ) -> "Decision":
         """
         Process a perception and make a decision based on it.
@@ -253,6 +293,7 @@ class Brain:
         Returns:
             Decision: The decision made based on the perception.
         """
+
         if goals is not None:
             self.goals = goals
             self.execution_context.set_goals(goals)
@@ -277,7 +318,11 @@ class Brain:
             # Code to queue the perception can be added here if needed
         return decision
 
-    async def make_decision(self, perception: Optional[Perception] = None) -> Decision:
+    async def make_decision(
+        self, perception: Optional[Perception] = None
+    ) -> "Decision":
+        from frame.src.framer.brain.decision import Decision
+
         """
         Make a decision on what action to take next based on the current state and perception.
 
@@ -441,8 +486,9 @@ class Brain:
         Returns:
             str: The generated decision prompt.
         """
-        valid_actions = self.action_registry.valid_actions
-        logger.info(f"Valid actions: {valid_actions}")
+        valid_actions = self.action_registry.get_all_actions()
+        logger.debug(f"Valid actions: {valid_actions}")
+
         active_roles = [
             f"{role.name} (Priority: {role.priority.name}, Status: {role.status.name})"
             for role in self.roles
@@ -485,6 +531,8 @@ class Brain:
         IMPORTANT: For ANY question that seems to require personal information or memory, ALWAYS choose the 'respond with memory retrieval' action. This includes questions about appointments, preferences, past conversations, or any user-specific information.
 
         Priority levels and their meanings:
+        from frame.src.framer.agency.priority import Priority
+
         {json.dumps({p.name: p.value for p in Priority}, indent=2)}
 
         Respond with a JSON object containing the following fields:
@@ -528,8 +576,10 @@ class Brain:
             }
 
     async def execute_decision(
-        self, decision: Decision, perception: Optional[Perception] = None
+        self, decision: "Decision", perception: Optional[Perception] = None
     ):
+        from frame.src.framer.brain.decision import Decision
+
         """
         Execute the decision made by the brain.
 

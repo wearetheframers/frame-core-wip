@@ -1,6 +1,6 @@
 from typing import Tuple, List, Dict, Any
 from frame.src.framer.brain.actions import BaseAction
-from frame.src.services.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 
 
 class GenerateRolesAndGoalsAction(BaseAction):
