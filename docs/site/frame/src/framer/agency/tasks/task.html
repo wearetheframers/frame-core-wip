@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.tasks.task.Task"><code class="flex name class">
 <span>class <span class="ident">Task</span></span>
-<span>(</span><span>description: str, workflow_id: str, priority: int = 5, status: <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../../models/framer/agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a> = TaskStatus.PENDING, expected_results: Optional[List[Any]] = None, dependencies: List[str] = None, parent_task_id: Optional[str] = None, assigned_to: Optional[str] = None, estimated_duration: Optional[float] = None, tags: List[str] = None, type: Optional[str] = None, data: Optional[Dict[str, Any]] = None, updated_at: Optional[datetime.datetime] = None, completed_at: Optional[datetime.datetime] = None)</span>
+<span>(</span><span>description: str, workflow_id: str, priority: int = 5, status: <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../../models/framer/agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a> = TaskStatus.PENDING, expected_results: Optional[List[Any]] = None, dependencies: List[str] = None, parent_task_id: Optional[str] = None, assigned_to: Optional[str] = None, estimated_duration: Optional[float] = None, tags: List[str] = None, type: Optional[str] = None, data: Optional[Dict[str, Any]] = None, updated_at: Optional[datetime.datetime] = None, completed_at: Optional[datetime.datetime] = None, stakeholders: Optional[List[Dict[str, Any]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents a task within the Frame-Core system.</p>
@@ -80,7 +80,12 @@ validated to form a valid model.</p>
         data: Optional[Dict[str, Any]] = None,
         updated_at: Optional[datetime] = None,
         completed_at: Optional[datetime] = None,
+        stakeholders: Optional[List[Dict[str, Any]]] = None,
     ):
+        self.stakeholders = stakeholders or []
+        for stakeholder in self.stakeholders:
+            stakeholder[&#39;id&#39;] = stakeholder.get(&#39;id&#39;, generate_id())
+            stakeholder[&#39;roles&#39;] = stakeholder.get(&#39;roles&#39;, [])
         task_id = generate_id()
         if not (1 &lt;= priority &lt;= 10):
             raise ValueError(&#34;Priority must be between 1 and 10&#34;)

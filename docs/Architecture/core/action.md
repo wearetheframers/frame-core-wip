@@ -32,6 +32,48 @@ Actions are fundamental components within the Frame framework, representing task
 
 ## Usage
 
+Actions in Frame are executable tasks that a Framer can perform. They are concrete implementations of tasks that can be executed in response to decisions made by the Framer. Actions are registered in the Framer's action registry and can be invoked directly by the Framer or automatically in its decision-making as it senses perceptions.
+
+### Default Actions
+
+Frame comes with a set of default actions that are available to all Framers. Actions can potentially lead to the creation of new actions. All default Framer actions can create new actions.
+
+- **AdaptiveDecisionAction**: Makes decisions using an adaptive strategy based on context.
+- **CreateNewAgentAction**: Creates new agents within the framework.
+- **GenerateRolesAndGoalsAction**: Generates roles and goals for the Framer.
+- **ObserveAction**: Processes observations and generates insights or actions.
+- **RespondAction**: Generates a default response based on the current context.
+- **ThinkAction**: Engages in deep thinking to generate new insights or tasks.
+- **ResearchAction**: Conducts research to gather information.
+- **ResourceAllocationAction**: Allocates resources based on urgency, risk, and available resources.
+
+### Creating New Actions
+
+To create a new action, follow these steps:
+
+1. Define a new class that inherits from `BaseAction`.
+2. Implement the `execute` method with the action's logic.
+3. Register the action with the Framer's action registry.
+
+Example:
+
+```python
+from frame.src.framer.brain.actions.base import BaseAction
+from frame.src.services import ExecutionContext
+
+class MyCustomAction(BaseAction):
+    def __init__(self):
+        # First param is name of action
+        # Second param is description of action which is used for contextualizing when the Framer
+        # should choose the action
+        # Third param is the priority level of the action with 10 being the highest
+        super().__init__("my_custom_action", "Description of the action", 3)
+
+    async def execute(self, execution_context: ExecutionContext, **kwargs):
+        # Implement action logic here
+        return {"result": "Action executed successfully"}
+```
+
 Actions are typically registered and managed through the `ActionRegistry` in `default_actions.py`. Here's an example of defining and registering an action:
 
 ```python

@@ -3,269 +3,144 @@ title: Plugins and Actions
 weight: 50
 ---
 
-Frame provides a powerful and flexible plugin system that allows you to extend the functionality of Framers by adding new actions. This system is designed to be as expansive and customizable as mods in games, allowing for unlimited plugins and expansions to be developed. This document explains how to create, register, and use plugins and actions in the Frame framework.
+Frame features a powerful and flexible plugin system inspired by game mods, allowing developers to extend the functionality of Framers. This system supports a community marketplace where plugins can be shared, sold, or given away, fostering a rich ecosystem of extensions and customizations. Plugins change Framer behaviors by adding or removing actions.
 
-## Introduction
+## Actions / Plugins
 
-Plugins in Frame are essentially new actions that can be added to the `ActionRegistry`. These actions can be used by Framers to perform specific tasks or integrate with external services. By creating plugins, you can extend the capabilities of your AI agents to handle domain-specific tasks or interact with custom APIs.
+Actions in Frame are executable tasks that a Framer can perform. They are concrete implementations of tasks that can be executed in response to decisions made by the Framer. Actions are registered in the Framer's action registry and can be invoked directly by the Framer or automatically in its decision-making as it senses perceptions.
 
-Framers use plugins to enhance their ability to process various types of perceptions (such as text, images, or sounds) and perform a wide range of actions. When a plugin action is well-described, the Framer can make reasonable decisions to take that action based on the current context, its internal thinking process, and the action's priority compared to other possible actions.
+### Default Actions
 
-The plugin system works in conjunction with the Framer's permission system, which determines which plugins a Framer has access to. This allows for fine-grained control over a Framer's capabilities and ensures that Framers only use actions they are explicitly allowed to perform.
+Frame comes with a set of default actions that are available to all Framers. Actions can potentially lead to the creation of new actions. All default Framer actions can create new actions.
 
-Frame features a plugin marketplace where premium plugins and community plugins can be developed, given away, or sold. This marketplace fosters a rich ecosystem of extensions and customizations, similar to mod communities in popular games.
+- **AdaptiveDecisionAction**: Makes decisions using an adaptive strategy based on context.
+- **CreateNewAgentAction**: Creates new agents within the framework.
+- **GenerateRolesAndGoalsAction**: Generates roles and goals for the Framer.
+- **ObserveAction**: Processes observations and generates insights or actions.
+- **RespondAction**: Generates a default response based on the current context.
+- **ThinkAction**: Engages in deep thinking to generate new insights or tasks.
+- **ResearchAction**: Conducts research to gather information.
+- **ResourceAllocationAction**: Allocates resources based on urgency, risk, and available resources.
 
-All plugins require explicit permissions to be used. Users must add all permissions for any plugins they want to use. This ensures that Framers only have access to the plugins they are explicitly allowed to use, providing fine-grained control over their capabilities.
+### Default Plugins
 
-When Frame is instantiated, it spends time loading plugins, which could be hundreds or thousands, and take a while to load. Framer has an `acting` property to see if it's ready and whether all plugins have loaded or not, called `plugin_loading_complete` and `plugin_loading_progress`. Because of this, users should be aware before adding too many plugins. However, Framer does queue perceptions/interactions to the agent and processes the queue when it is ready, if requests are made before it is ready. So it is not necessary to handle this in your code, but it could result in delays on startup.
+- **EQService**: Manages emotional intelligence aspects.
+- **MemoryService**: Handles memory storage and retrieval.
+- **SharedContext**: Manages shared context across components.
+- **Mem0SearchExtractSummarizePlugin**: Enables memory retrieval and summarization.
 
-## Default Plugins and Services
+### Permissions
 
-Frame includes several default plugins and services that are automatically available to Framers. These services, such as `LLMService`, `EQService`, `MemoryService`, and `SharedContext`, function as plugins with swappable adapters. This means the underlying implementation of the service can be changed while maintaining the same high-level interface. For instance, instead of using `Mem0`, a `LlamaIndex` adapter could be used. While `LLMService` is passed to the Framer by default, you must specify permissions like `with-eq`, `with-memory`, or `with-shared-context` in the `FramerConfig` to access these services. However, all Framers inherently have permission to access these services without needing explicit permission settings.
+By default, Framers have **no** access to default or installed plugins unless they are specified.
 
-- **Services**: `memory`, `eq`, and `shared_context` are special plugins called services. They function like plugins but require explicit permissions to be accessed. Users must add permissions for these services to be available to Framers, enhancing their capabilities by providing essential functionalities.
+- **with_memory**: Allows access to memory services for storing and retrieving information. While Framer has access to memory by default, if you want it to respond with RAG-like features and automatically determine when to use memory retrieval versus responding without looking into any memories, you need to ensure the `with_mem0_search_extract_summarize` permission is enabled.
+- **with_eq**: Enables emotional intelligence features for more nuanced interactions.
+- **with_shared_context**: Provides access to shared context services for collaboration.
 
-- **Default Plugin**: The `Mem0SearchExtractSummarizePlugin` is included as a default plugin. It provides a mechanism to look into memories, retrieve relevant information, and share insights, functioning as a Retrieval-Augmented Generation (RAG) mechanism. Users must explicitly add permissions for this plugin to enable Framers to search, extract, and summarize information effectively.
+### Creating New Actions
 
-To add a plugin as a default, simply include its permission in the FramerConfig. This ensures that the plugin is automatically available to all Framers without needing to specify it each time. Plugins are loaded automatically during Framer creation.
+To create a new action, follow these steps:
 
-## Emotional Intelligence in Plugins
+1. Define a new class that inherits from `BaseAction`.
+2. Implement the `execute` method with the action's logic.
+3. Register the action with the Framer's action registry.
 
-Plugins can also leverage the Framer's emotional state to modify their behavior. If the `with_eq` permission is granted, plugins can access the Framer's emotional state and adjust their actions accordingly. This allows for more dynamic and context-aware plugin behavior, enhancing the Framer's ability to respond to complex scenarios.
-
-Plugins are controlled by a permission system. Each plugin has a corresponding permission that must be granted to a Framer for it to use that plugin. Permissions are specified in the FramerConfig when creating a Framer.
-
-The permission format for plugins is `with-<plugin-name>`. For example:
-- `with-search-extract-summarize-plugin`: Enables access to the Search Extract Summarize plugin
-
-To give a Framer access to a plugin, include its permission in the FramerConfig:
+Example:
 
 ```python
-config = FramerConfig(
-    name="Example Framer",
-    permissions=["with-memory", "with-eq", "with-search-extract-summarize-plugin"]
-)
-framer = await frame.create_framer(config)
+from frame.src.framer.brain.actions.base import BaseAction
+from frame.src.services import ExecutionContext
+
+class MyCustomAction(BaseAction):
+    def __init__(self):
+        # First param is name of action
+        # Second param is description of action which is used for contextualizing when the Framer
+        # should choose the action
+        # Third param is the priority level of the action with 10 being the highest
+        super().__init__("my_custom_action", "Description of the action", 3)
+
+    async def execute(self, execution_context: ExecutionContext, **kwargs):
+        # Implement action logic here
+        return {"result": "Action executed successfully"}
 ```
 
-This configuration gives the Framer access to the Memory service, EQ service, and the Search Extract Summarize plugin.
+### Example: Weather Forecast Plugin
 
-## Base Plugin
+Here's an example of how to develop, import, and run a plugin that provides weather forecasts:
 
-### Custom Action Registry
-
-In the autonomous vehicle example, we demonstrate how to replace the default action registry with a custom one. This allows for a more flexible and hackable system where you can replace or extend default behaviors. The `process_perception` function takes precedence over the observe action, showing how you can customize the action registry. You can also remove actions from the Framer behavior in plugins programmatically.
-
-All plugins in Frame should inherit from the `BasePlugin` class. This base class provides a common interface and some utility methods for all plugins. Here's an overview of the `BasePlugin` class:
+1. **Create the Plugin**: Define a new plugin class in a Python file, e.g., `weather_plugin.py`.
 
 ```python
-from abc import ABC, abstractmethod
+from frame.src.framer.brain.plugins.base import BasePlugin
 from typing import Any, Dict
 
-class BasePlugin(ABC):
-    def __init__(self, framer):
-        self.framer = framer
-
-    @abstractmethod
+class WeatherPlugin(BasePlugin):
     async def on_load(self):
-        pass
-
-    def register_action(self, name: str, func: callable, description: str):
-        self.framer.brain.action_registry.register_action(name, func, description)
-
-    def remove_action(self, name: str):
-        """
-        Remove an action from the action registry by its name.
-
-        Args:
-            name (str): The name of the action to remove.
-        """
-        if name in self.framer.brain.action_registry.actions:
-            del self.framer.brain.action_registry.actions[name]
-            self.framer.logger.info(f"Action '{name}' removed from registry.")
-        else:
-            self.framer.logger.warning(f"Action '{name}' not found in registry.")
-
-    @abstractmethod
-    async def execute(self, action: str, params: Dict[str, Any]) -> Any:
-        pass
-```
-
-## Creating a New Plugin
-
-To create a new plugin, follow these steps:
-
-1. Create a new Python file in the `frame/src/plugins/` directory (e.g., `my_custom_plugin.py`).
-2. Define a new class that inherits from `PluginBase`.
-3. Implement the required methods: `on_load()` and `execute()`.
-4. Add any additional methods or attributes specific to your plugin.
-
-Here's an example of a simple custom plugin:
-
-```python
-from frame.src.framer.brain.plugin_base import PluginBase
-from typing import Any, Dict
-
-class MyCustomPlugin(PluginBase):
-    async def on_load(self):
-        self.register_action("custom_action", self.custom_action, "Perform a custom action")
-
-    async def execute(self, action: str, params: Dict[str, Any]) -> Any:
-        if action == "custom_action":
-            return await self.custom_action(params)
-        else:
-            raise ValueError(f"Unknown action: {action}")
-
-    async def custom_action(self, params: Dict[str, Any]) -> str:
-        return f"Custom action executed with params: {params}"
-```
-
-## Registering and Using a Plugin
-
-To use a plugin with a Framer instance:
-
-1. Import the plugin
-2. Initialize the plugin with the Framer instance
-3. Register the plugin with the Framer
-
-Here's an example:
-
-```python
-from frame import Frame
-from frame.src.framer.config import FramerConfig
-from frame.src.plugins.my_custom_plugin import MyCustomPlugin
-
-# Initialize Frame
-frame = Frame()
-
-# Create a Framer instance
-config = FramerConfig(name="CustomFramer", default_model="gpt-3.5-turbo")
-framer = await frame.create_framer(config)
-
-# Initialize and register the plugin
-custom_plugin = MyCustomPlugin(framer)
-framer.register_plugin("my_custom_plugin", custom_plugin)
-
-# Use the plugin
-result = await framer.use_plugin("my_custom_plugin", "custom_action", {"param1": "value1"})
-print(result)
-```
-
-## Plugin Loading
-
-### Ignoring Folders
-
-The plugin loader is designed to ignore any folders that start with an underscore (`_`). This allows you to keep certain directories in the plugins folder without them being loaded as plugins. This can be useful for storing shared resources, documentation, or other non-plugin files.
-
-### Ignoring Folders
-
-The plugin loader is designed to ignore any folders that start with an underscore (`_`). This allows you to keep certain directories in the plugins folder without them being loaded as plugins. This can be useful for storing shared resources, documentation, or other non-plugin files.
-
-Plugins are loaded automatically by the Frame system. The `load_plugins` function in `frame/src/utils/plugin_loader.py` is responsible for discovering and loading plugins. Here's an overview of how it works:
-
-1. The function scans the specified plugins directory (default is `frame/src/plugins/`).
-2. For each subdirectory, it attempts to import a module and find a plugin class.
-3. If a valid plugin class is found (inheriting from `PluginBase`), it's instantiated and added to the plugins dictionary.
-4. The function checks for conflicting action names across all plugins.
-5. If conflicts are found, warnings are logged, and only the first occurrence of an action name is kept.
-6. The function also loads plugin-specific configurations from environment variables or a `config.json` file in the plugin's directory.
-
-You can customize the plugins directory by setting the `plugins_dir` parameter when initializing the Frame instance:
-
-```python
-frame = Frame(plugins_dir="/path/to/custom/plugins")
-```
-
-### Handling Conflicting Actions
-
-When loading plugins, Frame checks for conflicting action names across all plugins. If a conflict is detected:
-
-1. A warning message is logged for each conflicting action.
-2. Only the first occurrence of an action name is kept and made available for use.
-3. Subsequent actions with the same name are skipped.
-
-This behavior ensures that the system remains stable while still allowing for a wide range of plugins to be loaded. Developers should be aware of this behavior and design their plugins accordingly, using unique action names when possible.
-
-#### Best Practices for Plugin Developers
-
-To avoid conflicts and ensure your plugin's actions are loaded successfully:
-
-1. Use unique and descriptive names for your actions.
-2. Prefix action names with your plugin name (e.g., `weather_get_forecast` instead of just `get_forecast`).
-3. Document all action names provided by your plugin clearly in its documentation.
-4. If your plugin is designed to override or replace actions from another plugin, clearly state this in the documentation and consider providing a way to disable the conflicting actions.
-
-When loading plugins, Frame checks for conflicting action names across all plugins. If a conflict is detected:
-
-1. A warning message is logged for each conflicting action.
-2. Only the first occurrence of an action name is kept and made available for use.
-3. Subsequent actions with the same name are skipped.
-
-This behavior ensures that the system remains stable while still allowing for a wide range of plugins to be loaded. Developers should be aware of this behavior and design their plugins accordingly, using unique action names when possible.
-
-## Best Practices
-
-When creating plugins, consider the following best practices:
-
-1. **Modularity**: Keep your plugin focused on a specific set of related functionalities.
-2. **Error Handling**: Implement proper error handling in your plugin methods.
-3. **Documentation**: Provide clear docstrings for your plugin class and methods.
-4. **Configuration**: Use the built-in configuration loading system for any plugin-specific settings.
-5. **Testing**: Write unit tests for your plugin to ensure its functionality.
-
-By following these guidelines, you can create powerful and flexible plugins to extend the capabilities of your Frame-based AI agents.
-
-## Action Component
-
-**Action Model**: Represents an executable action within the framework.
-- Properties:
-    - `name` (str): The name of the action.
-    - `function` (callable): The function that implements the action logic.
-    - `description` (str): A brief description of what the action does.
-    - `priority` (int): A priority score from 1 (lowest) to 10 (highest).
-
-These models help standardize the structure of actions and decisions throughout the framework.
-
-## Creating a New Action
-
-To create a new action within a plugin, follow these steps:
-
-1. Define a method in your plugin class that implements the action logic.
-2. Register the action in the `on_load` method of your plugin.
-
-Here's an example:
-
-```python
-class WeatherPlugin(PluginBase):
-    async def on_load(self):
-        self.register_action("get_weather", self.get_weather, "Fetch weather information for a location")
+        self.add_action("get_weather", self.get_weather, "Fetch weather information for a location")
 
     async def execute(self, action: str, params: Dict[str, Any]) -> Any:
         if action == "get_weather":
-            return await self.get_weather(params.get("location"), params.get("api_key"))
+            # Use the parse_location function to extract the location from natural language
+            location = await self.parse_location(params.get("prompt"))
+            return await self.get_weather(location)
         else:
             raise ValueError(f"Unknown action: {action}")
 
-    async def get_weather(self, location: str, api_key: str) -> Dict[str, Any]:
-        # Implementation of weather fetching logic
-        pass
+    async def parse_location(self, prompt: str) -> str:
+        # Use Frame's get_completion method with LMQL prompt templating to parse location
+        formatted_prompt = format_lmql_prompt(prompt, expected_output="location")
+        response = await self.framer.get_completion(formatted_prompt)
+        return response.strip()
+
+    async def get_weather(self, location: str) -> str:
+        # Example of fetching weather data from a real API
+        import requests
+
+        api_key = "your_api_key_here"
+        base_url = "http://api.weatherapi.com/v1/current.json"
+        response = requests.get(base_url, params={"key": api_key, "q": location})
+        data = response.json()
+
+        if "error" in data:
+            return f"Error fetching weather data: {data['error']['message']}"
+        
+        weather = data["current"]["condition"]["text"]
+        temperature = data["current"]["temp_c"]
+        return f"Weather for {location}: {weather}, {temperature}C"
 ```
 
-## Registering a New Action
-
-Actions are automatically registered when you call `self.register_action()` in your plugin's `on_load()` method. The `register_action` method accepts the following parameters:
-
-- `name` (str): The name of the action (used to call it later).
-- `function` (callable): The action function itself.
-- `description` (str): A brief description of what the action does.
-
-## Using a Registered Action
-
-Once a plugin is registered with a Framer, its actions can be used as follows:
+2. **Register the Plugin**: Import and register the plugin with a Framer instance.
 
 ```python
-result = await framer.use_plugin("weather_plugin", "get_weather", {"location": "London,UK", "api_key": "your_api_key"})
-print(f"Weather data: {result}")
+from frame import Frame, FramerConfig
+from weather_plugin import WeatherPlugin
+
+async def main():
+    frame = Frame()
+    config = FramerConfig(name="WeatherFramer", default_model="gpt-4o-mini")
+    framer = await frame.create_framer(config)
+
+    # Register the plugin
+    weather_plugin = WeatherPlugin(framer)
+    framer.plugins["weather_plugin"] = weather_plugin
+
+    # Use the plugin with a prompt
+    response = await framer.prompt("How's the weather today in NY?")
+    print(f"Response using prompt: {response}")
+
+    # Use the plugin with a sense method
+    perception = {"type": "thought", "data": {"text": "I want to know what the weather is like in New York today since I am going there later."}}
+    # Framer's decision making should prompt it to fetch the weather for the location
+    decision = await framer.sense(perception)
+    if decision:
+        response = await framer.agency.execute_decision(decision)
+        print(f"Response using sense: {response}")
+
+    await framer.close()
+
+asyncio.run(main())
 ```
 
-By following these guidelines and examples, you can create powerful and flexible plugins and actions to extend the capabilities of your Frame-based AI agents.
+The Framer intelligently chooses the best decision / action to take based on the perception (in this case a user message), conversational history, assigned roles, assigned goals, soul state, and the priority levels and descriptions of the other actions.
+
+A plugin can also remove actions from the action registry whenever a plugin is loaded (though this could result in unexpected behavior for other plugins). This can help ensure more safe and restricted behavior, or enforce specific types of behavioral flows for the Framer. An example of this is in `examples/autonomous_vehicle/`.

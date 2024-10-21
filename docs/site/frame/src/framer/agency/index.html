@@ -1442,7 +1442,7 @@ attributes &ndash; see the documentation for details.</p></div>
 </dd>
 <dt id="frame.src.framer.agency.Workflow"><code class="flex name class">
 <span>class <span class="ident">Workflow</span></span>
-<span>(</span><span>name: str, is_async: bool = False)</span>
+<span>(</span><span>name: str, is_async: bool = False, stakeholders: Optional[List[Dict[str, Any]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1451,7 +1451,11 @@ attributes &ndash; see the documentation for details.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Workflow:
-    def __init__(self, name: str, is_async: bool = False):
+    def __init__(self, name: str, is_async: bool = False, stakeholders: Optional[List[Dict[str, Any]]] = None):
+        self.stakeholders = stakeholders or []
+        for stakeholder in self.stakeholders:
+            stakeholder[&#39;id&#39;] = stakeholder.get(&#39;id&#39;, generate_id())
+            stakeholder[&#39;roles&#39;] = stakeholder.get(&#39;roles&#39;, [])
         self.name = name
         self.tasks: List[Task] = []
         self.is_async = is_async

@@ -1,7 +1,8 @@
 from datetime import datetime
+from typing import Any, Dict, Optional, List, Callable
 from frame.src.utils.id_generator import generate_id
 import logging
-from typing import Any, Dict, Optional, List, Callable
+from frame.src.framer.agency.roles import Role
 from pydantic import BaseModel, Field
 from enum import Enum
 from frame.src.models.framer.agency.tasks import TaskModel, TaskStatus
@@ -58,7 +59,12 @@ class Task(TaskModel):
         data: Optional[Dict[str, Any]] = None,
         updated_at: Optional[datetime] = None,
         completed_at: Optional[datetime] = None,
+        stakeholders: Optional[List[Dict[str, Any]]] = None,
     ):
+        self.stakeholders = stakeholders or []
+        for stakeholder in self.stakeholders:
+            stakeholder['id'] = stakeholder.get('id', generate_id())
+            stakeholder['roles'] = stakeholder.get('roles', [])
         task_id = generate_id()
         if not (1 <= priority <= 10):
             raise ValueError("Priority must be between 1 and 10")
