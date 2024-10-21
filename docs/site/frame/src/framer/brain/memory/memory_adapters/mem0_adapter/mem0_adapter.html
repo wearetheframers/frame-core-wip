@@ -269,7 +269,9 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
         &#34;&#34;&#34;
         return self.client.get(memory_id)
 
-    def update(self, memory_id: str, new_content: str, user_id: Optional[str] = None) -&gt; Dict[str, Any]:
+    def update(
+        self, memory_id: str, new_content: str, user_id: Optional[str] = None
+    ) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Update a specific memory with new content.
 
@@ -282,7 +284,9 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
         &#34;&#34;&#34;
         return self.client.update(memory_id, new_content)
 
-    def history(self, memory_id: str, user_id: Optional[str] = None) -&gt; List[Dict[str, Any]]:
+    def history(
+        self, memory_id: str, user_id: Optional[str] = None
+    ) -&gt; List[Dict[str, Any]]:
         &#34;&#34;&#34;
         Get the history of how a memory has changed over time.
 

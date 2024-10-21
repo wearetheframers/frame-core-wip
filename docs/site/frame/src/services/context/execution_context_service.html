@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.services.context.execution_context_service.ExecutionContext"><code class="flex name class">
 <span>class <span class="ident">ExecutionContext</span></span>
-<span>(</span><span>llm_service: "'LLMService'", memory_service: "Optional['MemoryService']" = None, eq_service: "Optional['EQService']" = None, soul: "Optional['Soul']" = None, state: Dict[str, Any] = None)</span>
+<span>(</span><span>llm_service: "'LLMService'", memory_service: "Optional['MemoryService']" = None, eq_service: "Optional['EQService']" = None, soul: "Optional['Soul']" = None, brain: "Optional['Brain']" = None, state: Dict[str, Any] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ExecutionContext provides a centralized container for various services, state, and functions
@@ -76,21 +76,31 @@ allowing them to share resources and functionality without tight coupling.</p>
         memory_service: Optional[&#34;MemoryService&#34;] = None,
         eq_service: Optional[&#34;EQService&#34;] = None,
         soul: Optional[&#34;Soul&#34;] = None,
+        brain: Optional[&#34;Brain&#34;] = None,
         state: Dict[str, Any] = None,
     ):
         self.llm_service = llm_service
         self.memory_service = memory_service
         self.eq_service = eq_service
         self.soul = soul
+        self.brain = brain
         self.state = state or {}
         self.goals: List[Any] = []
         self.roles: List[Any] = []
         self.action_registry = None
 
+    def set_roles(self, roles: List[Any]):
+        self.roles = roles
+
+    def set_goals(self, goals: List[Any]):
+        self.goals = goals
+
     def set_state(self, key: str, value: Any) -&gt; None:
         self.state[key] = value
 
-    def get_state(self, key: str, default: Any = None) -&gt; Any:
+    def get_state(self, key: Optional[str] = None, default: Any = None) -&gt; Any:
+        if key is None:
+            return self.state
         return self.state.get(key, default)
 
     def get_llm_service(self) -&gt; LLMService:
@@ -104,6 +114,9 @@ allowing them to share resources and functionality without tight coupling.</p>
 
     def get_soul(self) -&gt; Optional[Soul]:
         return self.soul
+
+    def get_brain(self) -&gt; Optional[&#34;Brain&#34;]:
+        return self.brain
 
     def update_state(self, new_state: Dict[str, Any]) -&gt; None:
         self.state.update(new_state)
@@ -184,6 +197,10 @@ allowing them to share resources and functionality without tight coupling.</p>
         # For now, we&#39;ll return an empty list.
         return []</code></pre>
 </details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="frame.src.services.context.shared_context_service.SharedContext" href="shared_context_service.html#frame.src.services.context.shared_context_service.SharedContext">SharedContext</a></li>
+</ul>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.services.context.execution_context_service.ExecutionContext.generate_goals"><code class="name flex">
@@ -196,6 +213,12 @@ allowing them to share resources and functionality without tight coupling.</p>
 <dt><code>List[Any]</code></dt>
 <dd>A list of newly generated Goal objects.</dd>
 </dl></div>
+</dd>
+<dt id="frame.src.services.context.execution_context_service.ExecutionContext.get_brain"><code class="name flex">
+<span>def <span class="ident">get_brain</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.services.context.execution_context_service.ExecutionContext.get_eq_service"><code class="name flex">
 <span>def <span class="ident">get_eq_service</span></span>(<span>self)</span>
@@ -250,7 +273,7 @@ allowing them to share resources and functionality without tight coupling.</p>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.services.context.execution_context_service.ExecutionContext.get_state"><code class="name flex">
-<span>def <span class="ident">get_state</span></span>(<span>self, key: str, default: Any = None) ‑> Any</span>
+<span>def <span class="ident">get_state</span></span>(<span>self, key: Optional[str] = None, default: Any = None) ‑> Any</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -326,6 +349,7 @@ allowing them to share resources and functionality without tight coupling.</p>
 <h4><code><a title="frame.src.services.context.execution_context_service.ExecutionContext" href="#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a></code></h4>
 <ul class="two-column">
 <li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.generate_goals" href="#frame.src.services.context.execution_context_service.ExecutionContext.generate_goals">generate_goals</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_brain" href="#frame.src.services.context.execution_context_service.ExecutionContext.get_brain">get_brain</a></code></li>
 <li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_eq_service" href="#frame.src.services.context.execution_context_service.ExecutionContext.get_eq_service">get_eq_service</a></code></li>
 <li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_full_state" href="#frame.src.services.context.execution_context_service.ExecutionContext.get_full_state">get_full_state</a></code></li>
 <li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_goals" href="#frame.src.services.context.execution_context_service.ExecutionContext.get_goals">get_goals</a></code></li>

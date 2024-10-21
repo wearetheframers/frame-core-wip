@@ -46,10 +46,12 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ActionRegistry:
-    def __init__(self, execution_context: Optional[&#39;ExecutionContext&#39;] = None):
+    def __init__(self, execution_context: Optional[&#34;ExecutionContext&#34;] = None):
         self.actions: Dict[str, Dict[str, Any]] = {}
         self.execution_context = execution_context
-        if not self.execution_context or not hasattr(self.execution_context, &#39;llm_service&#39;):
+        if not self.execution_context or not hasattr(
+            self.execution_context, &#34;llm_service&#34;
+        ):
             raise ValueError(&#34;ExecutionContext must have an llm_service set.&#34;)
 
         # Ensure llm_service is set in the execution context
@@ -123,7 +125,7 @@ hljs.highlightAll();
         return response.strip() if isinstance(response, str) else str(response)
 
     def extend_actions(self, new_actions: Dict[str, Dict[str, Any]]):
-        extend_valid_actions(new_actions)
+        extend_default_actions(new_actions)
         self._register_default_actions()
 
     def add_action(

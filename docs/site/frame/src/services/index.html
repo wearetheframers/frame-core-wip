@@ -37,10 +37,6 @@ hljs.highlightAll();
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="frame.src.services.execution_context" href="execution_context.html">frame.src.services.execution_context</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt><code class="name"><a title="frame.src.services.llm" href="llm/index.html">frame.src.services.llm</a></code></dt>
 <dd>
 <div class="desc"></div>
@@ -109,7 +105,7 @@ hljs.highlightAll();
 </dd>
 <dt id="frame.src.services.ExecutionContext"><code class="flex name class">
 <span>class <span class="ident">ExecutionContext</span></span>
-<span>(</span><span>llm_service: "'<a title="frame.src.services.LLMService" href="#frame.src.services.LLMService">LLMService</a>'", memory_service: "Optional['<a title="frame.src.services.MemoryService" href="#frame.src.services.MemoryService">MemoryService</a>']" = None, eq_service: "Optional['<a title="frame.src.services.EQService" href="#frame.src.services.EQService">EQService</a>']" = None, soul: "Optional['Soul']" = None, state: Dict[str, Any] = None)</span>
+<span>(</span><span>llm_service: "'<a title="frame.src.services.LLMService" href="#frame.src.services.LLMService">LLMService</a>'", memory_service: "Optional['<a title="frame.src.services.MemoryService" href="#frame.src.services.MemoryService">MemoryService</a>']" = None, eq_service: "Optional['<a title="frame.src.services.EQService" href="#frame.src.services.EQService">EQService</a>']" = None, soul: "Optional['Soul']" = None, brain: "Optional['Brain']" = None, state: Dict[str, Any] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ExecutionContext provides a centralized container for various services, state, and functions
@@ -148,21 +144,31 @@ allowing them to share resources and functionality without tight coupling.</p>
         memory_service: Optional[&#34;MemoryService&#34;] = None,
         eq_service: Optional[&#34;EQService&#34;] = None,
         soul: Optional[&#34;Soul&#34;] = None,
+        brain: Optional[&#34;Brain&#34;] = None,
         state: Dict[str, Any] = None,
     ):
         self.llm_service = llm_service
         self.memory_service = memory_service
         self.eq_service = eq_service
         self.soul = soul
+        self.brain = brain
         self.state = state or {}
         self.goals: List[Any] = []
         self.roles: List[Any] = []
         self.action_registry = None
 
+    def set_roles(self, roles: List[Any]):
+        self.roles = roles
+
+    def set_goals(self, goals: List[Any]):
+        self.goals = goals
+
     def set_state(self, key: str, value: Any) -&gt; None:
         self.state[key] = value
 
-    def get_state(self, key: str, default: Any = None) -&gt; Any:
+    def get_state(self, key: Optional[str] = None, default: Any = None) -&gt; Any:
+        if key is None:
+            return self.state
         return self.state.get(key, default)
 
     def get_llm_service(self) -&gt; LLMService:
@@ -176,6 +182,9 @@ allowing them to share resources and functionality without tight coupling.</p>
 
     def get_soul(self) -&gt; Optional[Soul]:
         return self.soul
+
+    def get_brain(self) -&gt; Optional[&#34;Brain&#34;]:
+        return self.brain
 
     def update_state(self, new_state: Dict[str, Any]) -&gt; None:
         self.state.update(new_state)
@@ -256,6 +265,10 @@ allowing them to share resources and functionality without tight coupling.</p>
         # For now, we&#39;ll return an empty list.
         return []</code></pre>
 </details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="frame.src.services.context.shared_context_service.SharedContext" href="context/shared_context_service.html#frame.src.services.context.shared_context_service.SharedContext">SharedContext</a></li>
+</ul>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.services.ExecutionContext.generate_goals"><code class="name flex">
@@ -268,6 +281,12 @@ allowing them to share resources and functionality without tight coupling.</p>
 <dt><code>List[Any]</code></dt>
 <dd>A list of newly generated Goal objects.</dd>
 </dl></div>
+</dd>
+<dt id="frame.src.services.ExecutionContext.get_brain"><code class="name flex">
+<span>def <span class="ident">get_brain</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.services.ExecutionContext.get_eq_service"><code class="name flex">
 <span>def <span class="ident">get_eq_service</span></span>(<span>self)</span>
@@ -322,7 +341,7 @@ allowing them to share resources and functionality without tight coupling.</p>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.services.ExecutionContext.get_state"><code class="name flex">
-<span>def <span class="ident">get_state</span></span>(<span>self, key: str, default: Any = None) ‑> Any</span>
+<span>def <span class="ident">get_state</span></span>(<span>self, key: Optional[str] = None, default: Any = None) ‑> Any</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -761,157 +780,6 @@ the specified or default model.</p>
 </dd>
 </dl>
 </dd>
-<dt id="frame.src.services.LocalContext"><code class="flex name class">
-<span>class <span class="ident">LocalContext</span></span>
-<span>(</span><span>soul: Optional[Any] = None, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Local Context Service Module</p>
-<p>This module provides the LocalContext class, which manages local context
-for agent components, allowing them to share information with each other.
-It serves as a base class for more specialized local contexts.</p>
-<p>Initialize the Context.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Any]</code></dt>
-<dd>The soul attribute for the context.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class LocalContext:
-    &#34;&#34;&#34;
-    Local Context Service Module
-
-    This module provides the LocalContext class, which manages local context
-    for agent components, allowing them to share information with each other.
-    It serves as a base class for more specialized local contexts.
-    &#34;&#34;&#34;
-
-    def __init__(self, soul: Optional[Any] = None, **kwargs):
-        &#34;&#34;&#34;
-        Initialize the Context.
-
-        Args:
-            soul (Optional[Any]): The soul attribute for the context.
-        &#34;&#34;&#34;
-        self._data = {
-            &#34;soul&#34;: soul,
-            &#34;state&#34;: kwargs,
-            &#34;history&#34;: [],
-            &#34;roles&#34;: [],
-            &#34;goals&#34;: [],
-        }
-        for key, value in kwargs.items():
-            self._data[key] = value
-
-    def add_to_history(self, entry: str):
-        &#34;&#34;&#34;
-        Add an entry to the history.
-
-        Args:
-            entry (str): The entry to add to the history.
-        &#34;&#34;&#34;
-        self._data[&#34;history&#34;].append(entry)
-
-    def __setattr__(self, name, value):
-        if name.startswith(&#34;_&#34;):
-            super().__setattr__(name, value)
-        else:
-            self._data[name] = value
-
-    def __getattr__(self, name):
-        if name in self._data:
-            return self._data[name]
-        raise AttributeError(
-            f&#34;&#39;{self.__class__.__name__}&#39; object has no attribute &#39;{name}&#39;&#34;
-        )
-
-    def get(self, key, default=None):
-        return self._data.get(key, default)
-
-    def get_roles(self) -&gt; List[Dict[str, Any]]:
-        return self._data[&#34;roles&#34;]
-
-    def set_roles(self, roles: List[Dict[str, Any]]) -&gt; None:
-        self._data[&#34;roles&#34;] = roles
-
-    def get_goals(self) -&gt; List[Dict[str, Any]]:
-        return self._data[&#34;goals&#34;]
-
-    def set_goals(self, goals: List[Dict[str, Any]]) -&gt; None:
-        self._data[&#34;goals&#34;] = goals
-
-    def set_soul(self, soul: Any) -&gt; None:
-        &#34;&#34;&#34;
-        Set the soul for the context.
-
-        Args:
-            soul (Any): The soul to set.
-        &#34;&#34;&#34;
-        self._data[&#34;soul&#34;] = soul</code></pre>
-</details>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="frame.src.services.context.shared_context_service.SharedContext" href="context/shared_context_service.html#frame.src.services.context.shared_context_service.SharedContext">SharedContext</a></li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="frame.src.services.LocalContext.add_to_history"><code class="name flex">
-<span>def <span class="ident">add_to_history</span></span>(<span>self, entry: str)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add an entry to the history.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>entry</code></strong> :&ensp;<code>str</code></dt>
-<dd>The entry to add to the history.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.services.LocalContext.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, key, default=None)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.services.LocalContext.get_goals"><code class="name flex">
-<span>def <span class="ident">get_goals</span></span>(<span>self) ‑> List[Dict[str, Any]]</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.services.LocalContext.get_roles"><code class="name flex">
-<span>def <span class="ident">get_roles</span></span>(<span>self) ‑> List[Dict[str, Any]]</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.services.LocalContext.set_goals"><code class="name flex">
-<span>def <span class="ident">set_goals</span></span>(<span>self, goals: List[Dict[str, Any]]) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.services.LocalContext.set_roles"><code class="name flex">
-<span>def <span class="ident">set_roles</span></span>(<span>self, roles: List[Dict[str, Any]]) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.services.LocalContext.set_soul"><code class="name flex">
-<span>def <span class="ident">set_soul</span></span>(<span>self, soul: Any) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the soul for the context.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>soul</code></strong> :&ensp;<code>Any</code></dt>
-<dd>The soul to set.</dd>
-</dl></div>
-</dd>
-</dl>
-</dd>
 <dt id="frame.src.services.MemoryService"><code class="flex name class">
 <span>class <span class="ident">MemoryService</span></span>
 <span>(</span><span>adapter: MemoryAdapterInterface)</span>
@@ -923,7 +791,7 @@ It serves as a base class for more specialized local contexts.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class MemoryService:
-    def __init__(self, adapter: &#39;MemoryAdapterInterface&#39;):
+    def __init__(self, adapter: &#34;MemoryAdapterInterface&#34;):
         self.adapter = adapter
 
     def add_memory(
@@ -1021,36 +889,40 @@ It serves as a base class for more specialized local contexts.</p>
 </dd>
 <dt id="frame.src.services.SharedContext"><code class="flex name class">
 <span>class <span class="ident">SharedContext</span></span>
-<span>(</span><span>soul: Optional[Any] = None, **kwargs)</span>
+<span>(</span><span>llm_service: "'<a title="frame.src.services.LLMService" href="#frame.src.services.LLMService">LLMService</a>'", memory_service: "Optional['<a title="frame.src.services.MemoryService" href="#frame.src.services.MemoryService">MemoryService</a>']" = None, eq_service: "Optional['<a title="frame.src.services.EQService" href="#frame.src.services.EQService">EQService</a>']" = None, soul: "Optional['Soul']" = None, brain: "Optional['Brain']" = None, state: Dict[str, Any] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Local Context Service Module</p>
-<p>This module provides the LocalContext class, which manages local context
-for agent components, allowing them to share information with each other.
-It serves as a base class for more specialized local contexts.</p>
-<p>Initialize the Context.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Any]</code></dt>
-<dd>The soul attribute for the context.</dd>
-</dl></div>
+<div class="desc"><p>ExecutionContext provides a centralized container for various services, state, and functions
+that actions and components might need during execution. It ensures consistent access to resources
+across all actions and facilitates easier testing, modular design, and state management.</p>
+<p>The ExecutionContext serves as a bridge between different components of the Framer,
+allowing them to share resources and functionality without tight coupling.</p>
+<p>Key features:
+- Centralized service access: Provides access to core services like LLM, memory, and EQ.
+- State management: Maintains and updates the current state of the execution.
+- Goal tracking: Manages the current goals of the Framer.
+- Action registry: Stores and manages available actions.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class SharedContext(LocalContext):
+<pre><code class="python">class SharedContext(ExecutionContext):
     pass</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="frame.src.services.context.local_context_service.LocalContext" href="context/local_context_service.html#frame.src.services.context.local_context_service.LocalContext">LocalContext</a></li>
+<li><a title="frame.src.services.context.execution_context_service.ExecutionContext" href="context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a></li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="frame.src.services.context.local_context_service.LocalContext" href="context/local_context_service.html#frame.src.services.context.local_context_service.LocalContext">LocalContext</a></b></code>:
+<li><code><b><a title="frame.src.services.context.execution_context_service.ExecutionContext" href="context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a></b></code>:
 <ul class="hlist">
-<li><code><a title="frame.src.services.context.local_context_service.LocalContext.add_to_history" href="context/local_context_service.html#frame.src.services.context.local_context_service.LocalContext.add_to_history">add_to_history</a></code></li>
-<li><code><a title="frame.src.services.context.local_context_service.LocalContext.set_soul" href="context/local_context_service.html#frame.src.services.context.local_context_service.LocalContext.set_soul">set_soul</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.generate_goals" href="context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext.generate_goals">generate_goals</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_goals" href="context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext.get_goals">get_goals</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_roles" href="context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext.get_roles">get_roles</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.perform_task" href="context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext.perform_task">perform_task</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.set_goals" href="context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext.set_goals">set_goals</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.set_roles" href="context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext.set_roles">set_roles</a></code></li>
 </ul>
 </li>
 </ul>
@@ -1072,7 +944,6 @@ It serves as a base class for more specialized local contexts.</p>
 <ul>
 <li><code><a title="frame.src.services.context" href="context/index.html">frame.src.services.context</a></code></li>
 <li><code><a title="frame.src.services.eq" href="eq/index.html">frame.src.services.eq</a></code></li>
-<li><code><a title="frame.src.services.execution_context" href="execution_context.html">frame.src.services.execution_context</a></code></li>
 <li><code><a title="frame.src.services.llm" href="llm/index.html">frame.src.services.llm</a></code></li>
 <li><code><a title="frame.src.services.memory" href="memory/index.html">frame.src.services.memory</a></code></li>
 </ul>
@@ -1089,6 +960,7 @@ It serves as a base class for more specialized local contexts.</p>
 <h4><code><a title="frame.src.services.ExecutionContext" href="#frame.src.services.ExecutionContext">ExecutionContext</a></code></h4>
 <ul class="two-column">
 <li><code><a title="frame.src.services.ExecutionContext.generate_goals" href="#frame.src.services.ExecutionContext.generate_goals">generate_goals</a></code></li>
+<li><code><a title="frame.src.services.ExecutionContext.get_brain" href="#frame.src.services.ExecutionContext.get_brain">get_brain</a></code></li>
 <li><code><a title="frame.src.services.ExecutionContext.get_eq_service" href="#frame.src.services.ExecutionContext.get_eq_service">get_eq_service</a></code></li>
 <li><code><a title="frame.src.services.ExecutionContext.get_full_state" href="#frame.src.services.ExecutionContext.get_full_state">get_full_state</a></code></li>
 <li><code><a title="frame.src.services.ExecutionContext.get_goals" href="#frame.src.services.ExecutionContext.get_goals">get_goals</a></code></li>
@@ -1113,18 +985,6 @@ It serves as a base class for more specialized local contexts.</p>
 <li><code><a title="frame.src.services.LLMService.get_total_calls" href="#frame.src.services.LLMService.get_total_calls">get_total_calls</a></code></li>
 <li><code><a title="frame.src.services.LLMService.get_total_cost" href="#frame.src.services.LLMService.get_total_cost">get_total_cost</a></code></li>
 <li><code><a title="frame.src.services.LLMService.set_default_model" href="#frame.src.services.LLMService.set_default_model">set_default_model</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="frame.src.services.LocalContext" href="#frame.src.services.LocalContext">LocalContext</a></code></h4>
-<ul class="two-column">
-<li><code><a title="frame.src.services.LocalContext.add_to_history" href="#frame.src.services.LocalContext.add_to_history">add_to_history</a></code></li>
-<li><code><a title="frame.src.services.LocalContext.get" href="#frame.src.services.LocalContext.get">get</a></code></li>
-<li><code><a title="frame.src.services.LocalContext.get_goals" href="#frame.src.services.LocalContext.get_goals">get_goals</a></code></li>
-<li><code><a title="frame.src.services.LocalContext.get_roles" href="#frame.src.services.LocalContext.get_roles">get_roles</a></code></li>
-<li><code><a title="frame.src.services.LocalContext.set_goals" href="#frame.src.services.LocalContext.set_goals">set_goals</a></code></li>
-<li><code><a title="frame.src.services.LocalContext.set_roles" href="#frame.src.services.LocalContext.set_roles">set_roles</a></code></li>
-<li><code><a title="frame.src.services.LocalContext.set_soul" href="#frame.src.services.LocalContext.set_soul">set_soul</a></code></li>
 </ul>
 </li>
 <li>

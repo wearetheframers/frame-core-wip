@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.brain.Brain"><code class="flex name class">
 <span>class <span class="ident">Brain</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[ForwardRef('ExecutionContext')] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], default_model: str = 'gpt-3.5-turbo', soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[ForwardRef('ExecutionContext')] = None, memory_service: Optional[ForwardRef('MemoryService')] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], default_model: str = 'gpt-3.5-turbo', soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Brain class represents the central decision-making and cognitive processing component of the Framer.</p>
@@ -137,7 +137,7 @@ to enable intelligent decision-making and action execution.</p>
         self,
         llm_service: LLMService,
         execution_context: Optional[&#34;ExecutionContext&#34;] = None,
-        memory_service: Optional[MemoryService] = None,
+        memory_service: Optional[&#34;MemoryService&#34;] = None,
         roles: List[Dict[str, Any]] = [],
         goals: List[Dict[str, Any]] = [],
         default_model: str = &#34;gpt-3.5-turbo&#34;,
@@ -179,6 +179,8 @@ to enable intelligent decision-making and action execution.</p>
         self.mind = Mind(self)
         # Initialize ActionRegistry
         self.action_registry = ActionRegistry(execution_context=self.execution_context)
+        if not isinstance(self.execution_context, ExecutionContext):
+            raise TypeError(&#34;execution_context must be an instance of ExecutionContext&#34;)
 
         self.logger.info(
             f&#34;Brain initialized with memory service: {self.memory_service}&#34;
@@ -209,7 +211,7 @@ to enable intelligent decision-making and action execution.</p>
     def get_framer(self):
         return self.framer
 
-    async def _execute_think_action(self, decision: Decision) -&gt; Dict[str, Any]:
+    async def _execute_think_action(self, decision: &#34;Decision&#34;) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Execute the &#39;think&#39; action, which involves pondering on various aspects and potentially creating new tasks.
 
@@ -236,6 +238,44 @@ to enable intelligent decision-making and action execution.</p>
         recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
         recent_perceptions = self.mind.get_recent_perceptions(5)
         execution_state = self.execution_context.state if self.execution_context else {}
+        # Prepare the prompt for the LLM
+        prompt = f&#34;&#34;&#34;
+        Based on the following context, ponder and reflect on the current situation:
+        
+        Soul state: {soul_context}
+        Roles and goals: {roles_and_goals}
+        Recent thoughts: {recent_thoughts}
+        Recent perceptions: {recent_perceptions}
+
+        Current decision: {decision.to_dict()}
+
+        1. Analyze the current situation and provide insights.
+        2. Determine if any new tasks or actions are necessary.
+        3. If new tasks are needed, describe them in detail.
+        4. Decide if a new prompt should be generated for better results.
+
+        Respond with a JSON object containing the following fields:
+        - analysis: Analysis of the current situation.
+        - new_tasks: A list of new tasks if any (each task should have &#39;description&#39; and &#39;priority&#39;).
+        - generate_new_prompt: A boolean indicating whether a new prompt should be generated.
+        - new_prompt: The new prompt to use if generate_new_prompt is True.
+        &#34;&#34;&#34;
+        try:
+            await self.llm_service.get_completion(
+                prompt,
+                model=self.default_model,
+                expected_output=f&#34;&#34;&#34;
+                {{
+                    &#34;analysis&#34;: str,
+                    &#34;new_tasks&#34;: list,
+                    &#34;generate_new_prompt&#34;: bool,
+                    &#34;new_prompt&#34;: str
+                }}
+                &#34;&#34;&#34;,
+            )
+        except Exception as e:
+            logger.error(f&#34;Error in _execute_think_action: {str(e)}&#34;)
+            return {&#34;error&#34;: str(e)}
 
     def parse_json_response(self, response: Any) -&gt; Any:
         &#34;&#34;&#34;
@@ -297,7 +337,7 @@ to enable intelligent decision-making and action execution.</p>
                 &#34;priority&#34;: 1,
             }
 
-    def set_roles(self, roles: List[Role]) -&gt; None:
+    def set_roles(self, roles: List[&#34;Role&#34;]) -&gt; None:
         &#34;&#34;&#34;
         Set the roles for the Agency.
 
@@ -310,7 +350,7 @@ to enable intelligent decision-making and action execution.</p>
     async def process_perception(
         self,
         perception: Union[&#34;Perception&#34;, Dict[str, Any]],
-        goals: Optional[List[Goal]] = None,
+        goals: Optional[List[&#34;Goal&#34;]] = None,
     ) -&gt; &#34;Decision&#34;:
         &#34;&#34;&#34;
         Process a perception and make a decision based on it.
@@ -322,6 +362,7 @@ to enable intelligent decision-making and action execution.</p>
         Returns:
             Decision: The decision made based on the perception.
         &#34;&#34;&#34;
+
         if goals is not None:
             self.goals = goals
             self.execution_context.set_goals(goals)
@@ -346,7 +387,11 @@ to enable intelligent decision-making and action execution.</p>
             # Code to queue the perception can be added here if needed
         return decision
 
-    async def make_decision(self, perception: Optional[Perception] = None) -&gt; Decision:
+    async def make_decision(
+        self, perception: Optional[Perception] = None
+    ) -&gt; &#34;Decision&#34;:
+        from frame.src.framer.brain.decision import Decision
+
         &#34;&#34;&#34;
         Make a decision on what action to take next based on the current state and perception.
 
@@ -510,8 +555,9 @@ to enable intelligent decision-making and action execution.</p>
         Returns:
             str: The generated decision prompt.
         &#34;&#34;&#34;
-        valid_actions = self.action_registry.valid_actions
-        logger.info(f&#34;Valid actions: {valid_actions}&#34;)
+        valid_actions = self.action_registry.get_all_actions()
+        logger.debug(f&#34;Valid actions: {valid_actions}&#34;)
+
         active_roles = [
             f&#34;{role.name} (Priority: {role.priority.name}, Status: {role.status.name})&#34;
             for role in self.roles
@@ -554,6 +600,8 @@ to enable intelligent decision-making and action execution.</p>
         IMPORTANT: For ANY question that seems to require personal information or memory, ALWAYS choose the &#39;respond with memory retrieval&#39; action. This includes questions about appointments, preferences, past conversations, or any user-specific information.
 
         Priority levels and their meanings:
+        from frame.src.framer.agency.priority import Priority
+
         {json.dumps({p.name: p.value for p in Priority}, indent=2)}
 
         Respond with a JSON object containing the following fields:
@@ -597,8 +645,10 @@ to enable intelligent decision-making and action execution.</p>
             }
 
     async def execute_decision(
-        self, decision: Decision, perception: Optional[Perception] = None
+        self, decision: &#34;Decision&#34;, perception: Optional[Perception] = None
     ):
+        from frame.src.framer.brain.decision import Decision
+
         &#34;&#34;&#34;
         Execute the decision made by the brain.
 
@@ -801,17 +851,10 @@ to enable intelligent decision-making and action execution.</p>
 <div class="desc"><p>Execute an action by its name using the action registry.</p></div>
 </dd>
 <dt id="frame.src.framer.brain.brain.Brain.execute_decision"><code class="name flex">
-<span>async def <span class="ident">execute_decision</span></span>(<span>self, decision: <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>, perception: Optional[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>] = None)</span>
+<span>async def <span class="ident">execute_decision</span></span>(<span>self, decision: Decision, perception: Optional[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Execute the decision made by the brain.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>decision</code></strong> :&ensp;<code>Decision</code></dt>
-<dd>The decision to execute.</dd>
-<dt><strong><code>perception</code></strong> :&ensp;<code>Optional[Perception]</code></dt>
-<dd>The perception that led to this decision.</dd>
-</dl></div>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.brain.brain.Brain.get_framer"><code class="name flex">
 <span>def <span class="ident">get_framer</span></span>(<span>self)</span>
@@ -820,22 +863,10 @@ to enable intelligent decision-making and action execution.</p>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.brain.brain.Brain.make_decision"><code class="name flex">
-<span>async def <span class="ident">make_decision</span></span>(<span>self, perception: Optional[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+<span>async def <span class="ident">make_decision</span></span>(<span>self, perception: Optional[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>] = None) ‑> <a title="frame.src.models.framer.brain.decision.decision.Decision" href="../../models/framer/brain/decision/decision.html#frame.src.models.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Make a decision on what action to take next based on the current state and perception.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>perception</code></strong> :&ensp;<code>Optional[Perception]</code></dt>
-<dd>The current perception of the environment.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Decision</code></dt>
-<dd>The decision made based on the current state and perception,
-including the action to take, parameters, reasoning, confidence,
-and priority.</dd>
-</dl></div>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.brain.brain.Brain.parse_json_response"><code class="name flex">
 <span>def <span class="ident">parse_json_response</span></span>(<span>self, response: Any) ‑> Any</span>
@@ -854,7 +885,7 @@ and priority.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.brain.Brain.process_perception"><code class="name flex">
-<span>async def <span class="ident">process_perception</span></span>(<span>self, perception: Union[ForwardRef('Perception'), Dict[str, Any]], goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="../agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+<span>async def <span class="ident">process_perception</span></span>(<span>self, perception: Union[ForwardRef('Perception'), Dict[str, Any]], goals: Optional[List[ForwardRef('Goal')]] = None) ‑> <a title="frame.src.models.framer.brain.decision.decision.Decision" href="../../models/framer/brain/decision/decision.html#frame.src.models.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Process a perception and make a decision based on it.</p>
@@ -888,7 +919,7 @@ and priority.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.brain.Brain.set_roles"><code class="name flex">
-<span>def <span class="ident">set_roles</span></span>(<span>self, roles: List[<a title="frame.src.framer.agency.roles.Role" href="../agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]) ‑> None</span>
+<span>def <span class="ident">set_roles</span></span>(<span>self, roles: List[ForwardRef('Role')]) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the roles for the Agency.</p>

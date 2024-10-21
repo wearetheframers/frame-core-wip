@@ -73,6 +73,18 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Framer:
+    @classmethod
+    async def create(cls, config: FramerConfig, llm_service: LLMService):
+        from frame.src.framer.framer_factory import FramerFactory
+
+        factory = FramerFactory(config, llm_service)
+        framer = await factory.create_framer(
+            memory_service=None,
+            eq_service=None,
+        )
+        await framer._generate_initial_roles_and_goals()
+        return framer
+
     perceptions_queue: Deque[Union[Perception, Dict[str, Any]]] = deque()
     &#34;&#34;&#34;
     The Framer class represents an AI agent with advanced cognitive capabilities. It integrates various components
@@ -138,12 +150,11 @@ hljs.highlightAll();
 
         self.execution_context = execution_context or ExecutionContext(
             llm_service=self.llm_service,
-            soul=soul,
-            mind=brain,
-            roles=roles,
-            goals=goals
         )
-        self.brain.action_registry.set_execution_context(self.execution_context)
+        self.execution_context.soul = soul
+        self.execution_context.brain = brain
+        self.execution_context.set_roles(roles)
+        self.execution_context.set_goals(goals)
 
         # Initialize services and plugins based on permissions
         if &#34;with_memory&#34; in self.permissions:
@@ -166,7 +177,7 @@ hljs.highlightAll();
             self.eq_service = eq_service or EQService()
 
         if &#34;with_shared_context&#34; in self.permissions:
-            self.shared_context_service = SharedContext()
+            self.shared_context_service = SharedContext(llm_service=self.llm_service)
 
         self.agency = agency
         self.soul = soul
@@ -198,7 +209,9 @@ hljs.highlightAll();
         if asyncio.get_event_loop().is_running():
             asyncio.create_task(self.load_plugins())
         else:
-            logger.warning(&#34;No running event loop. Plugins will not be loaded immediately.&#34;)
+            logger.warning(
+                &#34;No running event loop. Plugins will not be loaded immediately.&#34;
+            )
 
         # Generate roles and goals if not provided
         if not self.roles or not self.goals:
@@ -255,7 +268,8 @@ hljs.highlightAll();
         Process all queued perceptions once the Framer is ready.
         &#34;&#34;&#34;
         if self.is_ready():
-            logger.info(&#34;Processing queued perceptions...&#34;)
+            if self.perceptions_queue:
+                logger.info(&#34;Processing queued perceptions before Framer was acting..&#34;)
             while self.perceptions_queue:
                 logger.info(
                     f&#34;Processing perception from queue: {self.perceptions_queue[0]}&#34;
@@ -658,6 +672,12 @@ between various components to create a cohesive and intelligent entity.</p></div
 </dl>
 <h3>Static methods</h3>
 <dl>
+<dt id="frame.src.framer.Framer.create"><code class="name flex">
+<span>async def <span class="ident">create</span></span>(<span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.framer.Framer.load_from_file"><code class="name flex">
 <span>def <span class="ident">load_from_file</span></span>(<span>file_path: str, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
@@ -1260,7 +1280,11 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
         plugins: Optional[Dict[str, Any]] = None,
     ) -&gt; Framer:
         self.plugins = plugins or {}
-        execution_context = ExecutionContext(llm_service=self.llm_service)
+        execution_context = ExecutionContext(
+            llm_service=self.llm_service,
+            soul=None,  # We&#39;ll set this later
+            brain=None,  # We&#39;ll set this later
+        )
         agency = Agency(
             llm_service=self.llm_service,
             execution_context=execution_context,
@@ -1269,8 +1293,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
         # Initialize the Agency component with default permissions
         self.config.permissions = self.config.permissions or [
             &#34;with_memory&#34;,
-            &#34;with_mem0_search_extract_summarize_plugin&#34;,
-            &#34;with_shared_context&#34;,
+            # &#34;with_shared_context&#34;, # Do not allow shared context by default
         ]
         roles, goals = await self._generate_unique_roles_and_goals(agency, roles, goals)
 
@@ -1318,7 +1341,6 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
 
         # Set the Framer instance in Brain
         framer.brain.set_framer(framer)
-        framer.brain.action_registry.set_framer(framer)
 
         # Notify observers about the Framer being opened
         for observer in framer.observers:
@@ -1372,7 +1394,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.FramerFactory.create_framer"><code class="name flex">
-<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.eq_service.EQService" href="../services/eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None, plugins: Optional[Dict[str, Any]] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None, plugins: Optional[Dict[str, Any]] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1410,6 +1432,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
 <li><code><a title="frame.src.framer.Framer.act" href="#frame.src.framer.Framer.act">act</a></code></li>
 <li><code><a title="frame.src.framer.Framer.add_observer" href="#frame.src.framer.Framer.add_observer">add_observer</a></code></li>
 <li><code><a title="frame.src.framer.Framer.close" href="#frame.src.framer.Framer.close">close</a></code></li>
+<li><code><a title="frame.src.framer.Framer.create" href="#frame.src.framer.Framer.create">create</a></code></li>
 <li><code><a title="frame.src.framer.Framer.export_to_file" href="#frame.src.framer.Framer.export_to_file">export_to_file</a></code></li>
 <li><code><a title="frame.src.framer.Framer.export_to_markdown" href="#frame.src.framer.Framer.export_to_markdown">export_to_markdown</a></code></li>
 <li><code><a title="frame.src.framer.Framer.generate_tasks_from_perception" href="#frame.src.framer.Framer.generate_tasks_from_perception">generate_tasks_from_perception</a></code></li>

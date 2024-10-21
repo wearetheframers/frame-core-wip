@@ -95,6 +95,7 @@ validated to form a valid model.</p>
     status: TaskStatus = TaskStatus.PENDING
     workflow_id: Optional[str] = None
     expected_results: List[Any] = Field(default_factory=list)
+    subtasks: List[&#34;TaskModel&#34;] = Field(default_factory=list)
     updated_at: Optional[str] = None
     created_at: Optional[str] = None</code></pre>
 </details>
@@ -136,7 +137,11 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.agency.tasks.tasks.TaskModel.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.models.framer.agency.tasks.tasks.TaskStatus" href="#frame.src.models.framer.agency.tasks.tasks.TaskStatus">TaskStatus</a></code></dt>
+<dt id="frame.src.models.framer.agency.tasks.tasks.TaskModel.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.models.framer.agency.tasks.tasks.TaskModel.subtasks"><code class="name">var <span class="ident">subtasks</span> : List[<a title="frame.src.models.framer.agency.tasks.tasks.TaskModel" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel">TaskModel</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -145,100 +150,6 @@ validated to form a valid model.</p>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.models.framer.agency.tasks.tasks.TaskModel.workflow_id"><code class="name">var <span class="ident">workflow_id</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="frame.src.models.framer.agency.tasks.tasks.TaskStatus"><code class="flex name class">
-<span>class <span class="ident">TaskStatus</span></span>
-<span>(</span><span>*args, **kwds)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Create a collection of name/value pairs.</p>
-<p>Example enumeration:</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; class Color(Enum):
-...     RED = 1
-...     BLUE = 2
-...     GREEN = 3
-</code></pre>
-<p>Access them by:</p>
-<ul>
-<li>attribute access:</li>
-</ul>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>Color.RED
-<Color.RED: 1></p>
-</blockquote>
-</blockquote>
-</blockquote>
-<ul>
-<li>value lookup:</li>
-</ul>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>Color(1)
-<Color.RED: 1></p>
-</blockquote>
-</blockquote>
-</blockquote>
-<ul>
-<li>name lookup:</li>
-</ul>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>Color['RED']
-<Color.RED: 1></p>
-</blockquote>
-</blockquote>
-</blockquote>
-<p>Enumerations can be iterated over, and know how many members they have:</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; len(Color)
-3
-</code></pre>
-<pre><code class="language-python-repl">&gt;&gt;&gt; list(Color)
-[&lt;Color.RED: 1&gt;, &lt;Color.BLUE: 2&gt;, &lt;Color.GREEN: 3&gt;]
-</code></pre>
-<p>Methods can be added to enumerations, and members can have their own
-attributes &ndash; see the documentation for details.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class TaskStatus(Enum):
-    PENDING = &#34;pending&#34;
-    IN_PROGRESS = &#34;in_progress&#34;
-    COMPLETED = &#34;completed&#34;
-    FAILED = &#34;failed&#34;
-    CANCELED = &#34;canceled&#34;</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>enum.Enum</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="frame.src.models.framer.agency.tasks.tasks.TaskStatus.CANCELED"><code class="name">var <span class="ident">CANCELED</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.models.framer.agency.tasks.tasks.TaskStatus.COMPLETED"><code class="name">var <span class="ident">COMPLETED</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.models.framer.agency.tasks.tasks.TaskStatus.FAILED"><code class="name">var <span class="ident">FAILED</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.models.framer.agency.tasks.tasks.TaskStatus.IN_PROGRESS"><code class="name">var <span class="ident">IN_PROGRESS</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.models.framer.agency.tasks.tasks.TaskStatus.PENDING"><code class="name">var <span class="ident">PENDING</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -351,18 +262,9 @@ validated to form a valid model.</p>
 <li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.model_fields" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.model_fields">model_fields</a></code></li>
 <li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.priority" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.priority">priority</a></code></li>
 <li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.status" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.status">status</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.subtasks" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.subtasks">subtasks</a></code></li>
 <li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.updated_at" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.updated_at">updated_at</a></code></li>
 <li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskModel.workflow_id" href="#frame.src.models.framer.agency.tasks.tasks.TaskModel.workflow_id">workflow_id</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskStatus" href="#frame.src.models.framer.agency.tasks.tasks.TaskStatus">TaskStatus</a></code></h4>
-<ul class="">
-<li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskStatus.CANCELED" href="#frame.src.models.framer.agency.tasks.tasks.TaskStatus.CANCELED">CANCELED</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskStatus.COMPLETED" href="#frame.src.models.framer.agency.tasks.tasks.TaskStatus.COMPLETED">COMPLETED</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskStatus.FAILED" href="#frame.src.models.framer.agency.tasks.tasks.TaskStatus.FAILED">FAILED</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskStatus.IN_PROGRESS" href="#frame.src.models.framer.agency.tasks.tasks.TaskStatus.IN_PROGRESS">IN_PROGRESS</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.tasks.tasks.TaskStatus.PENDING" href="#frame.src.models.framer.agency.tasks.tasks.TaskStatus.PENDING">PENDING</a></code></li>
 </ul>
 </li>
 <li>

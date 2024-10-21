@@ -180,7 +180,11 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
         plugins: Optional[Dict[str, Any]] = None,
     ) -&gt; Framer:
         self.plugins = plugins or {}
-        execution_context = ExecutionContext(llm_service=self.llm_service)
+        execution_context = ExecutionContext(
+            llm_service=self.llm_service,
+            soul=None,  # We&#39;ll set this later
+            brain=None,  # We&#39;ll set this later
+        )
         agency = Agency(
             llm_service=self.llm_service,
             execution_context=execution_context,
@@ -189,8 +193,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
         # Initialize the Agency component with default permissions
         self.config.permissions = self.config.permissions or [
             &#34;with_memory&#34;,
-            &#34;with_mem0_search_extract_summarize_plugin&#34;,
-            &#34;with_shared_context&#34;,
+            # &#34;with_shared_context&#34;, # Do not allow shared context by default
         ]
         roles, goals = await self._generate_unique_roles_and_goals(agency, roles, goals)
 
@@ -238,7 +241,6 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
 
         # Set the Framer instance in Brain
         framer.brain.set_framer(framer)
-        framer.brain.action_registry.set_framer(framer)
 
         # Notify observers about the Framer being opened
         for observer in framer.observers:
@@ -292,7 +294,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.framer_factory.FramerFactory.create_framer"><code class="name flex">
-<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.eq_service.EQService" href="../services/eq/eq_service.html#frame.src.services.eq.eq_service.EQService">EQService</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None, plugins: Optional[Dict[str, Any]] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+<span>async def <span class="ident">create_framer</span></span>(<span>self, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None, plugins: Optional[Dict[str, Any]] = None) ‑> <a title="frame.src.framer.framer.Framer" href="framer.html#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>

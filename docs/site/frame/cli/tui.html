@@ -284,7 +284,7 @@ you are using <code>textual run</code> with the <code>dev</code> switch.</dd>
         # Set up the soul seed
         self.framer.soul.seed = self.framer.config.soul_seed
 
-        context = LocalContext()
+        context = ExecutionContext()
         self.framer.agency = Agency(
             llm_service=frame.llm_service,
             context=context,

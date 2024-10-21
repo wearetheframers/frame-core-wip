@@ -60,11 +60,12 @@ memory retrieval process searches across all specified user IDs.</p>
     This class now uses the MemoryService for all memory operations.
     &#34;&#34;&#34;
 
-    def __init__(self, memory_service: Optional[&#39;MemoryService&#39;] = None):
+    def __init__(self, memory_service: Optional[&#34;MemoryService&#34;] = None):
         self.core = None  # Initialize core attribute
         self.mem0 = None  # Initialize mem0 attribute
         if memory_service is None:
             from frame.src.services.memory.main import MemoryService
+
             memory_service = MemoryService()
         self.memory_service = memory_service
         self.user_id = &#34;default&#34;
@@ -261,6 +262,71 @@ memory retrieval process searches across all specified user IDs.</p>
 </dd>
 </dl>
 </dd>
+<dt id="frame.src.framer.brain.memory.memory.MemoryAdapterInterface"><code class="flex name class">
+<span>class <span class="ident">MemoryAdapterInterface</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Helper class that provides a standard way to create an ABC using
+inheritance.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MemoryAdapterInterface(ABC):
+    @abstractmethod
+    def store(self, data: Any, user_id: str = &#34;default&#34;) -&gt; int:
+        pass
+
+    @abstractmethod
+    def retrieve(self, memory_id: int, user_id: str = &#34;default&#34;) -&gt; Optional[Any]:
+        pass
+
+    @abstractmethod
+    def update(self, memory_id: int, data: Any, user_id: str = &#34;default&#34;) -&gt; None:
+        pass
+
+    @abstractmethod
+    def delete(self, memory_id: int, user_id: str = &#34;default&#34;) -&gt; None:
+        pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.brain.memory.memory_adapters.mem0.mem0_adapter.Mem0Adapter" href="memory_adapters/mem0/mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0.mem0_adapter.Mem0Adapter">Mem0Adapter</a></li>
+<li><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter" href="memory_adapters/mem0_adapter/mem0_adapter.html#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter">Mem0Adapter</a></li>
+<li><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter" href="../../../services/memory/memory_adapters/mem0/mem0.html#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter">Mem0Adapter</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.brain.memory.memory.MemoryAdapterInterface.delete"><code class="name flex">
+<span>def <span class="ident">delete</span></span>(<span>self, memory_id: int, user_id: str = 'default') ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.memory.memory.MemoryAdapterInterface.retrieve"><code class="name flex">
+<span>def <span class="ident">retrieve</span></span>(<span>self, memory_id: int, user_id: str = 'default') ‑> Optional[Any]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.memory.memory.MemoryAdapterInterface.store"><code class="name flex">
+<span>def <span class="ident">store</span></span>(<span>self, data: Any, user_id: str = 'default') ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.memory.memory.MemoryAdapterInterface.update"><code class="name flex">
+<span>def <span class="ident">update</span></span>(<span>self, memory_id: int, data: Any, user_id: str = 'default') ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 </dl>
 </section>
 </article>
@@ -286,6 +352,15 @@ memory retrieval process searches across all specified user IDs.</p>
 <li><code><a title="frame.src.framer.brain.memory.memory.Memory.retrieve" href="#frame.src.framer.brain.memory.memory.Memory.retrieve">retrieve</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory.Memory.store" href="#frame.src.framer.brain.memory.memory.Memory.store">store</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory.Memory.update" href="#frame.src.framer.brain.memory.memory.Memory.update">update</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.brain.memory.memory.MemoryAdapterInterface" href="#frame.src.framer.brain.memory.memory.MemoryAdapterInterface">MemoryAdapterInterface</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.brain.memory.memory.MemoryAdapterInterface.delete" href="#frame.src.framer.brain.memory.memory.MemoryAdapterInterface.delete">delete</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory.MemoryAdapterInterface.retrieve" href="#frame.src.framer.brain.memory.memory.MemoryAdapterInterface.retrieve">retrieve</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory.MemoryAdapterInterface.store" href="#frame.src.framer.brain.memory.memory.MemoryAdapterInterface.store">store</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory.MemoryAdapterInterface.update" href="#frame.src.framer.brain.memory.memory.MemoryAdapterInterface.update">update</a></code></li>
 </ul>
 </li>
 </ul>

@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.models.framer.brain.decision.decision.Decision"><code class="flex name class">
 <span>class <span class="ident">Decision</span></span>
-<span>(</span><span>**data: Any)</span>
+<span>(</span><span>**data)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
@@ -100,12 +100,16 @@ validated to form a valid model.</p>
     confidence: float = Field(
         default=0.7, ge=0, le=1, description=&#34;Confidence level of the decision&#34;
     )
-    priority: Union[Priority, int] = Field(
-        default=Priority.MEDIUM, description=&#34;Priority of the decision&#34;
+    priority: Union[&#34;Priority&#34;, int] = Field(
+        default=None, description=&#34;Priority of the decision&#34;
     )
-    task_status: TaskStatus = Field(
-        default=TaskStatus.PENDING, description=&#34;Status of the associated task&#34;
+    task_status: Optional[&#34;TaskStatus&#34;] = Field(
+        default=None, description=&#34;Status of the associated task&#34;
     )
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
     result: Optional[Dict[str, Any]] = Field(
         default=None, description=&#34;The result of executing the decision&#34;
     )
@@ -167,7 +171,7 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.brain.decision.decision.Decision.priority"><code class="name">var <span class="ident">priority</span> : Union[<a title="frame.src.framer.agency.priority.Priority" href="../../../../framer/agency/priority.html#frame.src.framer.agency.priority.Priority">Priority</a>, int]</code></dt>
+<dt id="frame.src.models.framer.brain.decision.decision.Decision.priority"><code class="name">var <span class="ident">priority</span> : Union[Priority, int]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -179,7 +183,7 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a></code></dt>
+<dt id="frame.src.models.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : Optional[TaskStatus]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>

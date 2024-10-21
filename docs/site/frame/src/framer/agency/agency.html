@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.agency.Agency"><code class="flex name class">
 <span>class <span class="ident">Agency</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[<a title="frame.src.services.execution_context.ExecutionContext" href="../../services/execution_context.html#frame.src.services.execution_context.ExecutionContext">ExecutionContext</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = [], goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = [], context: Optional[Dict[str, Any]] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = [], goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = [], context: Optional[Dict[str, Any]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Agency class manages task execution, decision-making, and role/goal coordination for a Framer.</p>
@@ -129,7 +129,9 @@ and multi-faceted behavior.</p>
             goals (Optional[List[Goal]]): Initial goals for the Agency. Defaults to None.
         &#34;&#34;&#34;
         self.llm_service = llm_service
-        self.execution_context = execution_context or ExecutionContext()
+        self.execution_context = execution_context or ExecutionContext(
+            llm_service=llm_service
+        )
         self.roles: List[Role] = []
         self.goals: List[Goal] = []
         if roles:
@@ -597,6 +599,7 @@ and multi-faceted behavior.</p>
             framer (Framer): The Framer instance to associate with this Agency.
         &#34;&#34;&#34;
         self.framer = framer
+
     def add_goal(self, goal: Goal) -&gt; None:
         &#34;&#34;&#34;
         Add a new goal to the Agency.

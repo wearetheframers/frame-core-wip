@@ -56,7 +56,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.decision.decision.Decision"><code class="flex name class">
 <span>class <span class="ident">Decision</span></span>
-<span>(</span><span>**data: Any)</span>
+<span>(</span><span>**data)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents a decision made by the Brain component of a Framer.</p>
@@ -113,7 +113,7 @@ validated to form a valid model.</p>
     expected_results: List[Any] = Field(
         default_factory=list, description=&#34;The expected results of the decision&#34;
     )
-    task_status: TaskStatus = Field(
+    task_status: &#34;TaskStatus&#34; = Field(
         default=TaskStatus.PENDING, description=&#34;Status of the associated task&#34;
     )
     related_roles: List[&#34;Role&#34;] = Field(
@@ -140,6 +140,8 @@ validated to form a valid model.</p>
             decision_dict = json.loads(json_data)
 
         # Convert priority from string or integer to Priority enum
+        from frame.src.framer.agency import Priority
+
         decision_dict[&#34;priority&#34;] = Priority.from_value(
             decision_dict.get(&#34;priority&#34;, Priority.MEDIUM)
         )
@@ -180,7 +182,7 @@ validated to form a valid model.</p>
         confidence: float = 0.7,
         priority: int = 5,
         expected_results: Optional[Any] = None,
-        task_status: TaskStatus = TaskStatus.PENDING,
+        task_status: &#34;TaskStatus&#34; = None,
         related_roles: List[&#34;Role&#34;] = None,
         related_goals: List[&#34;Goal&#34;] = None,
     ) -&gt; &#34;Decision&#34;:
@@ -279,15 +281,15 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.framer.brain.decision.decision.Decision.related_goals"><code class="name">var <span class="ident">related_goals</span> : List[<a title="frame.src.framer.agency.goals.Goal" href="../../agency/goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]</code></dt>
+<dt id="frame.src.framer.brain.decision.decision.Decision.related_goals"><code class="name">var <span class="ident">related_goals</span> : List[Goal]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.framer.brain.decision.decision.Decision.related_roles"><code class="name">var <span class="ident">related_roles</span> : List[<a title="frame.src.framer.agency.roles.Role" href="../../agency/roles.html#frame.src.framer.agency.roles.Role">Role</a>]</code></dt>
+<dt id="frame.src.framer.brain.decision.decision.Decision.related_roles"><code class="name">var <span class="ident">related_roles</span> : List[Role]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../../models/framer/agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a></code></dt>
+<dt id="frame.src.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : TaskStatus</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -311,7 +313,7 @@ validated to form a valid model.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.decision.decision.Decision.create"><code class="name flex">
-<span>def <span class="ident">create</span></span>(<span>action: str, parameters: Dict[str, Any], reasoning: str, confidence: float = 0.7, priority: int = 5, expected_results: Optional[Any] = None, task_status: <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../../models/framer/agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a> = TaskStatus.PENDING, related_roles: List[ForwardRef('Role')] = None, related_goals: List[ForwardRef('Goal')] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+<span>def <span class="ident">create</span></span>(<span>action: str, parameters: Dict[str, Any], reasoning: str, confidence: float = 0.7, priority: int = 5, expected_results: Optional[Any] = None, task_status: TaskStatus = None, related_roles: List[ForwardRef('Role')] = None, related_goals: List[ForwardRef('Goal')] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new Decision instance with the given parameters.</p>

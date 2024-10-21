@@ -1,5 +1,5 @@
 ---
-title: Frame
+title: Frame Architecture
 weight: 10
 ---
 
@@ -7,15 +7,17 @@ weight: 10
 
 ## Overview
 
-The Frame component serves as the main interface for creating and managing Framer instances. It acts as the central hub for initializing and orchestrating the various components of the framework.
+The Frame component serves as the main interface for creating and managing Framer instances. It acts as the central hub for initializing and orchestrating the various components of the framework, providing a robust foundation for building advanced AI agents capable of multi-modal perception processing and collaborative work.
 
 ## Key Responsibilities
 
 - Initializing the framework with various API keys and configurations.
-- Creating individual Framers with specific roles and goals.
-- Managing LLM services and model interactions. Note: DSPy does not support streaming mode.
-- Creating Framed groups for multi-agent coordination.
-- Supporting a plugin system for extending functionality, including a marketplace for premium and community plugins.
+- Creating individual Framers with specific roles, goals, and permissions.
+- Managing LLM services and model interactions, including support for local models.
+- Creating Framed groups for multi-agent coordination and collaborative problem-solving.
+- Supporting an extensive plugin system for extending functionality, including a marketplace for premium and community plugins.
+- Handling multi-modal perceptions and integrating them into the decision-making process.
+- Managing layered memory systems for improved context understanding and entity relationships.
 
 ## Related Components
 

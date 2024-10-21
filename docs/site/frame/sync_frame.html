@@ -37,12 +37,10 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.sync_frame.SyncFrame"><code class="flex name class">
 <span>class <span class="ident">SyncFrame</span></span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="src/services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A synchronous wrapper for the asynchronous Frame class.</p>
-<p>This class provides a synchronous interface to the asynchronous operations
-of the Frame class, making it easier to use in synchronous contexts.</p>
-<p>Initialize the SyncFrame with an asynchronous Frame and event loop.</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -206,101 +204,88 @@ of the Frame class, making it easier to use in synchronous contexts.</p>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="frame.sync_frame.SyncFrame.close"><code class="name flex">
-<span>def <span class="ident">close</span></span>(<span>self)</span>
+<dt id="frame.sync_frame.SyncFrame.close_framer"><code class="name flex">
+<span>def <span class="ident">close_framer</span></span>(<span>self, framer: <a title="frame.src.framer.framer.Framer" href="src/framer/framer.html#frame.src.framer.framer.Framer">Framer</a>) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Close the event loop associated with this SyncFrame.</p></div>
+<div class="desc"><p>Close the Framer instance synchronously.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
+<dd>The Framer instance to close.</dd>
+</dl></div>
 </dd>
 <dt id="frame.sync_frame.SyncFrame.create_framer"><code class="name flex">
-<span>async def <span class="ident">create_framer</span></span>(<span>self, **kwargs: Any) ‑> <a title="frame.src.framer.framer.Framer" href="src/framer/framer.html#frame.src.framer.framer.Framer">Framer</a></span>
+<span>def <span class="ident">create_framer</span></span>(<span>self, config: <a title="frame.src.framer.config.FramerConfig" href="src/framer/config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>) ‑> <a title="frame.src.framer.framer.Framer" href="src/framer/framer.html#frame.src.framer.framer.Framer">Framer</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a new Framer instance.</p>
+<div class="desc"><p>Create a Framer instance synchronously.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>**kwargs</code></strong></dt>
-<dd>Keyword arguments to pass to the Frame.create_framer method.</dd>
+<dt><strong><code>config</code></strong> :&ensp;<code>FramerConfig</code></dt>
+<dd>Configuration for the Framer.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>The created Framer instance.</p></div>
+<dl>
+<dt><code>Framer</code></dt>
+<dd>A new Framer instance.</dd>
+</dl></div>
 </dd>
 <dt id="frame.sync_frame.SyncFrame.generate_tasks_from_perception"><code class="name flex">
-<span>def <span class="ident">generate_tasks_from_perception</span></span>(<span>self, framer: Any, perception: Dict[str, Any], max_len: int = 2048, timeout: int = 30) ‑> List[Dict[str, Any]]</span>
+<span>def <span class="ident">generate_tasks_from_perception</span></span>(<span>self, framer: <a title="frame.src.framer.framer.Framer" href="src/framer/framer.html#frame.src.framer.framer.Framer">Framer</a>, perception: dict, max_len: int = None) ‑> list</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Generate tasks from a given perception.</p>
+<div class="desc"><p>Generate tasks from a perception synchronously.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>framer</code></strong></dt>
-<dd>The Framer instance to use.</dd>
-<dt><strong><code>perception</code></strong></dt>
-<dd>The perception to generate tasks from.</dd>
-<dt><strong><code>max_len</code></strong></dt>
-<dd>The maximum length of the generated tasks.</dd>
-<dt><strong><code>timeout</code></strong></dt>
-<dd>The maximum time to wait for task generation.</dd>
+<dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
+<dd>The Framer instance.</dd>
+<dt><strong><code>perception</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The perception details.</dd>
+<dt><strong><code>max_len</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Maximum number of tasks to generate.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>A list of generated tasks or an empty list if timeout occurs.</p></div>
+<dl>
+<dt><code>list</code></dt>
+<dd>A list of generated tasks.</dd>
+</dl></div>
 </dd>
 <dt id="frame.sync_frame.SyncFrame.perform_task"><code class="name flex">
-<span>async def <span class="ident">perform_task</span></span>(<span>self, framer: Any, task: Dict[str, Any]) ‑> Any</span>
+<span>def <span class="ident">perform_task</span></span>(<span>self, framer: <a title="frame.src.framer.framer.Framer" href="src/framer/framer.html#frame.src.framer.framer.Framer">Framer</a>, task: dict) ‑> dict</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Perform a task using the given Framer.</p>
+<div class="desc"><p>Perform a task synchronously.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>framer</code></strong></dt>
-<dd>The Framer instance to use.</dd>
-<dt><strong><code>task</code></strong></dt>
-<dd>The task to perform.</dd>
+<dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
+<dd>The Framer instance.</dd>
+<dt><strong><code>task</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The task details.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>The result of the task.</p></div>
+<dl>
+<dt><code>dict</code></dt>
+<dd>The result of the task execution.</dd>
+</dl></div>
 </dd>
 <dt id="frame.sync_frame.SyncFrame.process_perception"><code class="name flex">
-<span>def <span class="ident">process_perception</span></span>(<span>self, framer: Any, perception: Dict[str, Any]) ‑> Any</span>
+<span>def <span class="ident">process_perception</span></span>(<span>self, framer: <a title="frame.src.framer.framer.Framer" href="src/framer/framer.html#frame.src.framer.framer.Framer">Framer</a>, perception: dict) ‑> dict</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Synchronously process perceptions using the given Framer.</p>
+<div class="desc"><p>Process a perception synchronously.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>framer</code></strong></dt>
-<dd>The Framer instance to use.</dd>
-<dt><strong><code>perception</code></strong></dt>
-<dd>The perception to process.</dd>
+<dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
+<dd>The Framer instance.</dd>
+<dt><strong><code>perception</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The perception details.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>The result of processing the perception.</p></div>
-</dd>
-<dt id="frame.sync_frame.SyncFrame.run_async"><code class="name flex">
-<span>def <span class="ident">run_async</span></span>(<span>self, coroutine: _asyncio.Future) ‑> Any</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Run an asynchronous coroutine in the synchronous context.</p>
-<h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>coroutine</code></strong></dt>
-<dd>The asynchronous coroutine to run.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<p>The result of the coroutine.</p></div>
-</dd>
-<dt id="frame.sync_frame.SyncFrame.sense"><code class="name flex">
-<span>async def <span class="ident">sense</span></span>(<span>self, framer: Any, perceptions: List[Dict[str, Any]]) ‑> Any</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Process perceptions using the given Framer.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>framer</code></strong></dt>
-<dd>The Framer instance to use.</dd>
-<dt><strong><code>perceptions</code></strong></dt>
-<dd>The perceptions to process.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<p>The result of processing the perceptions.</p></div>
+<dt><code>dict</code></dt>
+<dd>The decision made based on the perception.</dd>
+</dl></div>
 </dd>
 </dl>
 </dd>
@@ -322,13 +307,11 @@ of the Frame class, making it easier to use in synchronous contexts.</p>
 <li>
 <h4><code><a title="frame.sync_frame.SyncFrame" href="#frame.sync_frame.SyncFrame">SyncFrame</a></code></h4>
 <ul class="">
-<li><code><a title="frame.sync_frame.SyncFrame.close" href="#frame.sync_frame.SyncFrame.close">close</a></code></li>
+<li><code><a title="frame.sync_frame.SyncFrame.close_framer" href="#frame.sync_frame.SyncFrame.close_framer">close_framer</a></code></li>
 <li><code><a title="frame.sync_frame.SyncFrame.create_framer" href="#frame.sync_frame.SyncFrame.create_framer">create_framer</a></code></li>
 <li><code><a title="frame.sync_frame.SyncFrame.generate_tasks_from_perception" href="#frame.sync_frame.SyncFrame.generate_tasks_from_perception">generate_tasks_from_perception</a></code></li>
 <li><code><a title="frame.sync_frame.SyncFrame.perform_task" href="#frame.sync_frame.SyncFrame.perform_task">perform_task</a></code></li>
 <li><code><a title="frame.sync_frame.SyncFrame.process_perception" href="#frame.sync_frame.SyncFrame.process_perception">process_perception</a></code></li>
-<li><code><a title="frame.sync_frame.SyncFrame.run_async" href="#frame.sync_frame.SyncFrame.run_async">run_async</a></code></li>
-<li><code><a title="frame.sync_frame.SyncFrame.sense" href="#frame.sync_frame.SyncFrame.sense">sense</a></code></li>
 </ul>
 </li>
 </ul>

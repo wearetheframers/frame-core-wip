@@ -3,7 +3,9 @@ title: Home
 weight: -30
 ---
 
-Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are also fully equipped for task automation and for working together collaboratively.
+# Frame: Multi-Modal Multi-Agent Cognitive Framework
+
+Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are fully equipped for task automation and collaborative work, with advanced capabilities in perception processing, decision-making, and memory management.
 
 ## Core Components
 

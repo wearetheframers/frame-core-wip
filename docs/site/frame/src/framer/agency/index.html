@@ -60,6 +60,1516 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.src.framer.agency.Agency"><code class="flex name class">
+<span>class <span class="ident">Agency</span></span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>] = None, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = [], goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = [], context: Optional[Dict[str, Any]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The Agency class manages task execution, decision-making, and role/goal coordination for a Framer.</p>
+<p>It orchestrates complex operations by managing roles, goals, tasks, and workflows. The Agency
+supports concurrent execution of multiple roles, goals, and tasks, enabling sophisticated
+and multi-faceted behavior.</p>
+<p>Key features:
+- Multi-role and multi-goal support
+- Concurrent task execution
+- Dynamic workflow management
+- Decision-making based on context, roles, and goals
+- LLM integration for task execution and decision-making</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
+<dd>Contains necessary services and state.</dd>
+<dt><strong><code>roles</code></strong> :&ensp;<code>List[<a title="frame.src.framer.agency.Role" href="#frame.src.framer.agency.Role">Role</a>]</code></dt>
+<dd>Active roles assigned to the Agency.</dd>
+<dt><strong><code>goals</code></strong> :&ensp;<code>List[<a title="frame.src.framer.agency.Goal" href="#frame.src.framer.agency.Goal">Goal</a>]</code></dt>
+<dd>Active goals for the Agency.</dd>
+<dt><strong><code>workflow_manager</code></strong> :&ensp;<code><a title="frame.src.framer.agency.WorkflowManager" href="#frame.src.framer.agency.WorkflowManager">WorkflowManager</a></code></dt>
+<dd>Manages workflows and tasks.</dd>
+<dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
+<dd>The associated Framer instance.</dd>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>Language model service for text generation.</dd>
+<dt><strong><code>context</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>Additional context information.</dd>
+<dt><strong><code>default_model</code></strong> :&ensp;<code>str</code></dt>
+<dd>Default language model for text generation.</dd>
+</dl>
+<p>Initialize an Agency instance.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>The language model service.</dd>
+<dt><strong><code>context</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code></dt>
+<dd>Additional context for the Agency. Defaults to None.</dd>
+<dt><strong><code>roles</code></strong> :&ensp;<code>Optional[List[<a title="frame.src.framer.agency.Role" href="#frame.src.framer.agency.Role">Role</a>]]</code></dt>
+<dd>Initial roles for the Agency. Defaults to None.</dd>
+<dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[<a title="frame.src.framer.agency.Goal" href="#frame.src.framer.agency.Goal">Goal</a>]]</code></dt>
+<dd>Initial goals for the Agency. Defaults to None.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Agency:
+    &#34;&#34;&#34;
+    The Agency class manages task execution, decision-making, and role/goal coordination for a Framer.
+
+    It orchestrates complex operations by managing roles, goals, tasks, and workflows. The Agency
+    supports concurrent execution of multiple roles, goals, and tasks, enabling sophisticated
+    and multi-faceted behavior.
+
+    Key features:
+    - Multi-role and multi-goal support
+    - Concurrent task execution
+    - Dynamic workflow management
+    - Decision-making based on context, roles, and goals
+    - LLM integration for task execution and decision-making
+
+    Attributes:
+        execution_context (ExecutionContext): Contains necessary services and state.
+        roles (List[Role]): Active roles assigned to the Agency.
+        goals (List[Goal]): Active goals for the Agency.
+        workflow_manager (WorkflowManager): Manages workflows and tasks.
+        framer (Framer): The associated Framer instance.
+        llm_service (LLMService): Language model service for text generation.
+        context (Dict[str, Any]): Additional context information.
+        default_model (str): Default language model for text generation.
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        llm_service: LLMService,
+        execution_context: Optional[ExecutionContext] = None,
+        roles: Optional[List[Role]] = [],
+        goals: Optional[List[Goal]] = [],
+        context: Optional[Dict[str, Any]] = None,
+    ):
+        &#34;&#34;&#34;
+        Initialize an Agency instance.
+
+        Args:
+            llm_service (LLMService): The language model service.
+            context (Optional[Dict[str, Any]]): Additional context for the Agency. Defaults to None.
+            roles (Optional[List[Role]]): Initial roles for the Agency. Defaults to None.
+            goals (Optional[List[Goal]]): Initial goals for the Agency. Defaults to None.
+        &#34;&#34;&#34;
+        self.llm_service = llm_service
+        self.execution_context = execution_context or ExecutionContext(
+            llm_service=llm_service
+        )
+        self.roles: List[Role] = []
+        self.goals: List[Goal] = []
+        if roles:
+            self.set_roles(roles)
+        if goals:
+            self.set_goals(goals)
+        self.workflow_manager = WorkflowManager()
+        self.completion_calls = {}
+        self.default_model = getattr(self.llm_service, &#34;default_model&#34;, DEFAULT_MODEL)
+
+    def set_roles(self, roles: Optional[List[Role]] = None) -&gt; None:
+        self.roles = roles if roles is not None else []
+
+    def set_goals(self, goals: Optional[List[Goal]] = None) -&gt; None:
+        self.goals = goals if goals is not None else []
+
+    def get_roles(self) -&gt; List[Role]:
+        return self.roles
+
+    def get_goals(self) -&gt; List[Goal]:
+        return [goal for goal in self.goals if goal.status == GoalStatus.ACTIVE]
+
+    def create_task(
+        self,
+        description: str,
+        priority: Union[str, Priority] = Priority.MEDIUM,
+        workflow_id: str = &#34;default&#34;,
+    ) -&gt; Task:
+        &#34;&#34;&#34;
+        Create a new task with the given description and priority.
+
+        Args:
+            description (str): The description of the task.
+            priority (Union[str, Priority], optional): The priority of the task. Can be a string or Priority enum. Defaults to Priority.MEDIUM.
+            workflow_id (str, optional): The ID of the workflow this task belongs to. Defaults to &#34;default&#34;.
+
+        Returns:
+            Task: The created Task object.
+        &#34;&#34;&#34;
+        if isinstance(priority, str):
+            priority = Priority.get(priority)
+        elif not isinstance(priority, Priority):
+            raise ValueError(&#34;Priority must be a string or Priority enum&#34;)
+        return Task(description=description, priority=priority, workflow_id=workflow_id)
+
+    def add_task(self, task: Task, workflow_id: str = &#34;default&#34;) -&gt; None:
+        &#34;&#34;&#34;
+        Add a new task to a specified workflow.
+
+        Args:
+            task (Task): The task to add.
+            workflow_id (str, optional): The ID of the workflow to add the task to. Defaults to &#34;default&#34;.
+        &#34;&#34;&#34;
+        # Ensure the workflow exists before adding a task
+        if not self.workflow_manager.get_workflow(workflow_id):
+            self.workflow_manager.create_workflow(workflow_id)
+        self.workflow_manager.add_task(workflow_id, task)
+
+    def get_next_task(self, workflow_id: str = &#34;default&#34;) -&gt; Optional[Task]:
+        &#34;&#34;&#34;
+        Get the next pending task with the highest priority from a specified workflow.
+
+        Args:
+            workflow_id (str, optional): The ID of the workflow to get the task from. Defaults to &#34;default&#34;.
+
+        Returns:
+            Optional[Task]: The next task to be executed, or None if no pending tasks.
+        &#34;&#34;&#34;
+        workflow = self.workflow_manager.get_workflow(workflow_id)
+        if workflow is None:
+            return None
+        pending_tasks = [
+            task for task in workflow.tasks if task.status == TaskStatus.PENDING
+        ]
+        return (
+            max(pending_tasks, key=lambda task: task.priority)
+            if pending_tasks
+            else None
+        )
+
+    def complete_task(self, task: Task, result: Any) -&gt; None:
+        &#34;&#34;&#34;
+        Mark a task as completed and set its result.
+
+        Args:
+            task (Task): The task to be marked as completed.
+            result (Any): The result of the completed task.
+        &#34;&#34;&#34;
+        task.update_status(TaskStatus.COMPLETED)
+        task.set_result(result)
+
+    def fail_task(self, task: Task, reason: str) -&gt; None:
+        &#34;&#34;&#34;
+        Mark a task as failed and set the failure reason.
+
+        Args:
+            task (Task): The task to be marked as failed.
+            reason (str): The reason for the task failure.
+        &#34;&#34;&#34;
+        task.update_status(TaskStatus.FAILED)
+        task.set_result(reason)
+
+    def create_workflow(self, name: str, is_async: bool = False) -&gt; Workflow:
+        &#34;&#34;&#34;
+        Create a new workflow.
+
+        Args:
+            name (str): The name of the workflow.
+            is_async (bool, optional): Whether the workflow is asynchronous. Defaults to False.
+
+        Returns:
+            Workflow: The created Workflow object.
+        &#34;&#34;&#34;
+        return self.workflow_manager.create_workflow(name, is_async)
+
+    def set_final_task_for_workflow(self, workflow_name: str, task: Task) -&gt; None:
+        &#34;&#34;&#34;
+        Set the final task for a specified workflow.
+
+        Args:
+            workflow_name (str): The name of the workflow.
+            task (Task): The task to be set as the final task.
+        &#34;&#34;&#34;
+        self.workflow_manager.set_final_task_for_workflow(workflow_name, task)
+
+    def get_all_tasks(self) -&gt; List[Dict[str, Any]]:
+        &#34;&#34;&#34;
+        Get all tasks from all workflows.
+
+        Returns:
+            List[Dict[str, Any]]: A list of all tasks as dictionaries.
+        &#34;&#34;&#34;
+        all_tasks = []
+        for workflow in self.workflow_manager.workflows.values():
+            all_tasks.extend([task.to_dict() for task in workflow.tasks])
+        return all_tasks
+
+    async def perform_task(self, task: Union[Dict[str, Any], Task]) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Perform a task asynchronously.
+
+        Args:
+            task (Union[Dict[str, Any], Task]): Dictionary containing task details or a Task object.
+
+        Returns:
+            Dict[str, Any]: Result of the task execution.
+        &#34;&#34;&#34;
+        logger.debug(f&#34;perform_task called with task: {task}&#34;)
+        if isinstance(task, Task):
+            task_obj = task
+        else:
+            task_dict = task.copy()
+            if &#34;workflow_id&#34; not in task_dict:
+                task_dict[&#34;workflow_id&#34;] = &#34;default&#34;
+            task_obj = Task(**task_dict)
+        result = await self._perform_task(task_obj)
+        return result if result is not None else {&#34;output&#34;: &#34;No result returned&#34;}
+
+    async def _perform_task(self, task: Task) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Internal method to perform a task asynchronously.
+
+        Args:
+            task (Task): Task object to be performed.
+
+        Returns:
+            Dict[str, Any]: Result of the task execution.
+        &#34;&#34;&#34;
+        logger.debug(f&#34;_perform_task called with task: {task.description}&#34;)
+        start_time = time.time()
+
+        if task.workflow_id not in self.completion_calls:
+            self.completion_calls[task.workflow_id] = {}
+        if task.id not in self.completion_calls[task.workflow_id]:
+            self.completion_calls[task.workflow_id][task.id] = 0
+
+        # Perform the task
+        priority_explanation = &#34;&#34;&#34;
+        Priority levels are defined as follows:
+        1 - LOWEST
+        2 - VERY LOW
+        3 - LOW
+        4 - MEDIUM LOW
+        5 - MEDIUM
+        6 - MEDIUM HIGH
+        7 - HIGH
+        8 - VERY HIGH
+        9 - HIGHEST
+        10 - CRITICAL
+
+        When making decisions, prioritize tasks with higher priority levels, but introduce some variability to avoid always selecting the same task. Consider the context and relevance of each task to determine the best course of action.
+        &#34;&#34;&#34;
+
+        prompt = f&#34;&#34;&#34;
+        Execute the following task: {task.description}
+
+        {priority_explanation}
+
+        Consider the context and relevance of each task, and introduce some variability in your decision-making process.
+        &#34;&#34;&#34;
+        response = await self.llm_service.get_completion(
+            prompt,
+            model=self.default_model,
+            max_tokens=200,
+            temperature=0.7,
+        )
+
+        # Update task status and result
+        task.update_status(TaskStatus.COMPLETED)
+        task.set_result(response)
+
+        # Log task completion
+        end_time = time.time()
+        duration = end_time - start_time
+        logger.debug(f&#34;Task &#39;{task.description}&#39; completed in {duration:.2f} seconds.&#34;)
+        logger.debug(f&#34;Task result: {response}&#34;)
+
+        return {&#34;output&#34;: response}
+
+    async def generate_roles(self) -&gt; List[Role]:
+        &#34;&#34;&#34;
+        Generate roles based on the Framer&#39;s context.
+
+        Returns:
+            List[RoleModel]: A list of generated roles.
+        &#34;&#34;&#34;
+        soul = getattr(self.execution_context, &#34;soul&#34;, {})
+        prompt = f&#34;&#34;&#34;Generate a role that aligns with the Framer&#39;s current context. 
+        The role should be clear, relevant, and directly related to the given information.
+        Avoid creating complex scenarios. Keep it simple and focused.
+        
+        Soul: {json.dumps(soul, indent=2)}
+        
+        Respond with a JSON object containing &#39;id&#39;, &#39;name&#39;, &#39;description&#39;, &#39;permissions&#39;, &#39;priority&#39;, and &#39;status&#39; fields for the role.
+        Ensure the priority is an integer between 1 and 10, where 10 is the highest priority.
+        The status should be one of: &#39;ACTIVE&#39;, &#39;INACTIVE&#39;, or &#39;SUSPENDED&#39;.
+        Consider the importance and urgency of the role when assigning the priority and status.&#34;&#34;&#34;
+        logger.debug(f&#34;Role generation prompt: {prompt}&#34;)
+        try:
+            response = await self.llm_service.get_completion(
+                prompt, model=self.default_model, max_tokens=150, temperature=0.5
+            )
+            logger.debug(f&#34;Role generation response: {response}&#34;)
+            if response is None:
+                logger.warning(
+                    &#34;Received None response while generating role. Using default role.&#34;
+                )
+                return [
+                    Role(
+                        id=&#34;default&#34;,
+                        name=&#34;Task Assistant&#34;,
+                        description=&#34;Assist with the given task or query.&#34;,
+                        priority=5,
+                        status=RoleStatus.ACTIVE,
+                    )
+                ]
+            role_data = json.loads(response)
+            if not role_data:
+                logger.warning(
+                    &#34;Received empty response while generating role. Using default role.&#34;
+                )
+                return [
+                    Role(
+                        id=&#34;default&#34;,
+                        name=&#34;Task Assistant&#34;,
+                        description=&#34;Assist with the given task or query.&#34;,
+                        priority=5,
+                        status=RoleStatus.ACTIVE,
+                    )
+                ]
+
+            if isinstance(role_data, dict):
+                role_data = [role_data]
+
+            roles = []
+            existing_role_names = set()
+            for r in role_data:
+                r[&#34;priority&#34;] = max(1, min(10, int(r.get(&#34;priority&#34;, 5))))
+                r[&#34;status&#34;] = RoleStatus[r.get(&#34;status&#34;, &#34;ACTIVE&#34;)]
+                # Ensure permissions are a list
+                r[&#34;permissions&#34;] = list(r.get(&#34;permissions&#34;, []))
+                if r[&#34;name&#34;] not in existing_role_names:
+                    roles.append(Role(**r))
+                    existing_role_names.add(r[&#34;name&#34;])
+                    logger.info(f&#34;Generated unique role: {r[&#39;name&#39;]}&#34;)
+                else:
+                    logger.warning(
+                        f&#34;Duplicate role name generated: {r[&#39;name&#39;]}. Skipping.&#34;
+                    )
+            return roles
+        except Exception as e:
+            logger.error(f&#34;Error generating role: {str(e)}&#34;, exc_info=True)
+            logger.error(f&#34;Prompt used for role generation: {prompt}&#34;)
+            return [
+                Role(
+                    id=&#34;default&#34;,
+                    name=&#34;Task Assistant&#34;,
+                    description=&#34;Assist with the given task or query.&#34;,
+                    priority=5,
+                    status=RoleStatus.ACTIVE,
+                )
+            ]
+
+    async def generate_goals(self) -&gt; List[Goal]:
+        &#34;&#34;&#34;
+        Generate goals based on the Framer&#39;s context.
+
+        Returns:
+            List[GoalModel]: A list of generated goals.
+        &#34;&#34;&#34;
+        soul = getattr(self.execution_context, &#34;soul&#34;, {})
+        prompt = f&#34;&#34;&#34;Generate a goal that aligns with the Framer&#39;s current context. 
+        The goal should be clear, relevant, and directly related to the given information.
+        Avoid creating complex scenarios. Keep it simple and focused.
+        
+        Soul: {json.dumps(soul, indent=2)}
+        
+        Respond with a JSON object containing &#39;name&#39;, &#39;description&#39;, &#39;priority&#39;, and &#39;status&#39; fields for the goal.
+        Ensure the priority is an integer between 1 and 10, where 10 is the highest priority.
+        The status should be one of: &#39;ACTIVE&#39;, &#39;COMPLETED&#39;, or &#39;ABANDONED&#39;.
+        Consider the importance and urgency of the goal when assigning the priority and status.&#34;&#34;&#34;
+
+        logger.debug(f&#34;Goal generation prompt: {prompt}&#34;)
+        try:
+            response = await self.llm_service.get_completion(
+                prompt, model=self.default_model, max_tokens=150, temperature=0.5
+            )
+            logger.debug(f&#34;Goal generation response: {response}&#34;)
+            if response is None:
+                logger.warning(
+                    &#34;Received None response while generating goal. Using default goal.&#34;
+                )
+                return [
+                    Goal(
+                        name=&#34;Default Goal&#34;,
+                        description=&#34;Assist users based on the given input.&#34;,
+                        priority=5,
+                        status=GoalStatus.ACTIVE,
+                    )
+                ]
+            goal_data = json.loads(response)
+            if not goal_data:
+                logger.warning(
+                    &#34;Received empty response while generating goal. Using default goal.&#34;
+                )
+                return [
+                    Goal(
+                        name=&#34;Default Goal&#34;,
+                        description=&#34;Assist users based on the given input.&#34;,
+                        priority=5,
+                        status=GoalStatus.ACTIVE,
+                    )
+                ]
+
+            if isinstance(goal_data, dict):
+                goal_data = [goal_data]
+
+            goals = []
+            existing_goal_names = set()
+            for g in goal_data:
+                g[&#34;priority&#34;] = max(1, min(10, int(g.get(&#34;priority&#34;, 5))))
+                g[&#34;status&#34;] = GoalStatus[g.get(&#34;status&#34;, &#34;ACTIVE&#34;)]
+                if g[&#34;name&#34;] not in existing_goal_names:
+                    goals.append(Goal(**g))
+                    existing_goal_names.add(g[&#34;name&#34;])
+                    logger.info(f&#34;Generated unique goal: {g[&#39;name&#39;]}&#34;)
+                else:
+                    logger.warning(
+                        f&#34;Duplicate goal name generated: {g[&#39;name&#39;]}. Skipping.&#34;
+                    )
+            return goals
+        except Exception as e:
+            logger.error(f&#34;Error generating goal: {e}&#34;, exc_info=True)
+            logger.error(f&#34;Prompt used for goal generation: {prompt}&#34;)
+            return [
+                Goal(
+                    name=&#34;Default Goal&#34;,
+                    description=&#34;Assist users to the best of my abilities&#34;,
+                    priority=5,
+                    status=GoalStatus.ACTIVE,
+                )
+            ]
+
+    async def generate_roles_and_goals(self) -&gt; Tuple[List[Role], List[Goal]]:
+        &#34;&#34;&#34;
+        Generate roles and goals for the Framer.
+
+        This method generates roles and goals based on the current state:
+        1. If roles are empty, generate new roles.
+        2. If goals are empty, generate new goals.
+        3. If both exist, generate new goals and add them to existing ones.
+
+        Returns:
+            Tuple[List[Role], List[Goal]]: A tuple containing the final roles and goals.
+        &#34;&#34;&#34;
+        new_roles = await self.generate_roles()
+        new_goals = await self.generate_goals()
+        if self.roles is None:
+            roles = new_roles
+        else:
+            roles = self.roles + new_roles
+        if self.goals is None:
+            goals = new_goals
+        else:
+            goals = self.goals + new_goals
+        return roles, goals
+
+    async def execute_task(self, task: Task) -&gt; str:
+        &#34;&#34;&#34;
+        Execute a task using the LLM service.
+
+        Args:
+            task (Task): The task to execute.
+
+        Returns:
+            str: The result of the task execution.
+        &#34;&#34;&#34;
+        prompt = f&#34;Execute the following task: {task.description}&#34;
+        initial_calls = self.llm_service.get_total_calls()
+        initial_cost = self.llm_service.get_total_cost()
+
+        response = await self.llm_service.get_completion(
+            prompt,
+            model=self.default_model,
+            max_tokens=200,
+            temperature=0.7,
+        )
+
+        final_calls = self.llm_service.get_total_calls()
+        final_cost = self.llm_service.get_total_cost()
+
+        task.update_status(TaskStatus.COMPLETED)
+        task.set_result(response)
+
+        calls_made = final_calls - initial_calls
+        cost_incurred = final_cost - initial_cost
+
+        logger.debug(f&#34;Task &#39;{task.description}&#39; completed.&#34;)
+        logger.debug(f&#34;Calls made: {calls_made}&#34;)
+        logger.debug(f&#34;Cost incurred: ${cost_incurred:.4f}&#34;)
+
+        return response
+
+    def update_role_status(self, role_id: str, new_status: RoleStatus) -&gt; None:
+        for role in self.roles:
+            if role.id == role_id:
+                role.status = new_status
+                break
+
+    def update_goal_status(self, goal_name: str, new_status: GoalStatus) -&gt; None:
+        for goal in self.goals:
+            if goal.name == goal_name:
+                goal.status = new_status
+                break
+
+    async def evaluate_roles_and_goals(self) -&gt; None:
+        # Implement role and goal evaluation logic here
+        pass
+
+    def set_framer(self, framer):
+        &#34;&#34;&#34;
+        Set the Framer instance associated with this Agency.
+
+        Args:
+            framer (Framer): The Framer instance to associate with this Agency.
+        &#34;&#34;&#34;
+        self.framer = framer
+
+    def add_goal(self, goal: Goal) -&gt; None:
+        &#34;&#34;&#34;
+        Add a new goal to the Agency.
+
+        Args:
+            goal (Goal): The goal to add.
+        &#34;&#34;&#34;
+        self.goals.append(goal)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.Agency.add_goal"><code class="name flex">
+<span>def <span class="ident">add_goal</span></span>(<span>self, goal: <a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a new goal to the Agency.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>goal</code></strong> :&ensp;<code><a title="frame.src.framer.agency.Goal" href="#frame.src.framer.agency.Goal">Goal</a></code></dt>
+<dd>The goal to add.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.add_task"><code class="name flex">
+<span>def <span class="ident">add_task</span></span>(<span>self, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>, workflow_id: str = 'default') ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a new task to a specified workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong> :&ensp;<code>Task</code></dt>
+<dd>The task to add.</dd>
+<dt><strong><code>workflow_id</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>The ID of the workflow to add the task to. Defaults to "default".</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.complete_task"><code class="name flex">
+<span>def <span class="ident">complete_task</span></span>(<span>self, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>, result: Any) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Mark a task as completed and set its result.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong> :&ensp;<code>Task</code></dt>
+<dd>The task to be marked as completed.</dd>
+<dt><strong><code>result</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The result of the completed task.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.create_task"><code class="name flex">
+<span>def <span class="ident">create_task</span></span>(<span>self, description: str, priority: Union[str, <a title="frame.src.framer.agency.priority.Priority" href="priority.html#frame.src.framer.agency.priority.Priority">Priority</a>] = 5, workflow_id: str = 'default') ‑> <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new task with the given description and priority.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code></dt>
+<dd>The description of the task.</dd>
+<dt><strong><code>priority</code></strong> :&ensp;<code>Union[str, <a title="frame.src.framer.agency.Priority" href="#frame.src.framer.agency.Priority">Priority</a>]</code>, optional</dt>
+<dd>The priority of the task. Can be a string or Priority enum. Defaults to Priority.MEDIUM.</dd>
+<dt><strong><code>workflow_id</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>The ID of the workflow this task belongs to. Defaults to "default".</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Task</code></dt>
+<dd>The created Task object.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.create_workflow"><code class="name flex">
+<span>def <span class="ident">create_workflow</span></span>(<span>self, name: str, is_async: bool = False) ‑> <a title="frame.src.framer.agency.workflow.workflow.Workflow" href="workflow/workflow.html#frame.src.framer.agency.workflow.workflow.Workflow">Workflow</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the workflow.</dd>
+<dt><strong><code>is_async</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether the workflow is asynchronous. Defaults to False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="frame.src.framer.agency.Workflow" href="#frame.src.framer.agency.Workflow">Workflow</a></code></dt>
+<dd>The created Workflow object.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.evaluate_roles_and_goals"><code class="name flex">
+<span>async def <span class="ident">evaluate_roles_and_goals</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.execute_task"><code class="name flex">
+<span>async def <span class="ident">execute_task</span></span>(<span>self, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute a task using the LLM service.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong> :&ensp;<code>Task</code></dt>
+<dd>The task to execute.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The result of the task execution.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.fail_task"><code class="name flex">
+<span>def <span class="ident">fail_task</span></span>(<span>self, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>, reason: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Mark a task as failed and set the failure reason.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong> :&ensp;<code>Task</code></dt>
+<dd>The task to be marked as failed.</dd>
+<dt><strong><code>reason</code></strong> :&ensp;<code>str</code></dt>
+<dd>The reason for the task failure.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.generate_goals"><code class="name flex">
+<span>async def <span class="ident">generate_goals</span></span>(<span>self) ‑> List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate goals based on the Framer's context.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[GoalModel]</code></dt>
+<dd>A list of generated goals.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.generate_roles"><code class="name flex">
+<span>async def <span class="ident">generate_roles</span></span>(<span>self) ‑> List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate roles based on the Framer's context.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[RoleModel]</code></dt>
+<dd>A list of generated roles.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.generate_roles_and_goals"><code class="name flex">
+<span>async def <span class="ident">generate_roles_and_goals</span></span>(<span>self) ‑> Tuple[List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>], List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate roles and goals for the Framer.</p>
+<p>This method generates roles and goals based on the current state:
+1. If roles are empty, generate new roles.
+2. If goals are empty, generate new goals.
+3. If both exist, generate new goals and add them to existing ones.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tuple[List[<a title="frame.src.framer.agency.Role" href="#frame.src.framer.agency.Role">Role</a>], List[<a title="frame.src.framer.agency.Goal" href="#frame.src.framer.agency.Goal">Goal</a>]]</code></dt>
+<dd>A tuple containing the final roles and goals.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.get_all_tasks"><code class="name flex">
+<span>def <span class="ident">get_all_tasks</span></span>(<span>self) ‑> List[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get all tasks from all workflows.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[Dict[str, Any]]</code></dt>
+<dd>A list of all tasks as dictionaries.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.get_goals"><code class="name flex">
+<span>def <span class="ident">get_goals</span></span>(<span>self) ‑> List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.get_next_task"><code class="name flex">
+<span>def <span class="ident">get_next_task</span></span>(<span>self, workflow_id: str = 'default') ‑> Optional[<a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the next pending task with the highest priority from a specified workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>workflow_id</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>The ID of the workflow to get the task from. Defaults to "default".</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Optional[Task]</code></dt>
+<dd>The next task to be executed, or None if no pending tasks.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.get_roles"><code class="name flex">
+<span>def <span class="ident">get_roles</span></span>(<span>self) ‑> List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.perform_task"><code class="name flex">
+<span>async def <span class="ident">perform_task</span></span>(<span>self, task: Union[Dict[str, Any], <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]) ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Perform a task asynchronously.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong> :&ensp;<code>Union[Dict[str, Any], Task]</code></dt>
+<dd>Dictionary containing task details or a Task object.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Dict[str, Any]</code></dt>
+<dd>Result of the task execution.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.set_final_task_for_workflow"><code class="name flex">
+<span>def <span class="ident">set_final_task_for_workflow</span></span>(<span>self, workflow_name: str, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the final task for a specified workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>workflow_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the workflow.</dd>
+<dt><strong><code>task</code></strong> :&ensp;<code>Task</code></dt>
+<dd>The task to be set as the final task.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.set_framer"><code class="name flex">
+<span>def <span class="ident">set_framer</span></span>(<span>self, framer)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the Framer instance associated with this Agency.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>framer</code></strong> :&ensp;<code>Framer</code></dt>
+<dd>The Framer instance to associate with this Agency.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.set_goals"><code class="name flex">
+<span>def <span class="ident">set_goals</span></span>(<span>self, goals: Optional[List[<a title="frame.src.framer.agency.goals.Goal" href="goals.html#frame.src.framer.agency.goals.Goal">Goal</a>]] = None) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.set_roles"><code class="name flex">
+<span>def <span class="ident">set_roles</span></span>(<span>self, roles: Optional[List[<a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a>]] = None) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.update_goal_status"><code class="name flex">
+<span>def <span class="ident">update_goal_status</span></span>(<span>self, goal_name: str, new_status: <a title="frame.src.framer.agency.goals.GoalStatus" href="goals.html#frame.src.framer.agency.goals.GoalStatus">GoalStatus</a>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Agency.update_role_status"><code class="name flex">
+<span>def <span class="ident">update_role_status</span></span>(<span>self, role_id: str, new_status: <a title="frame.src.framer.agency.roles.RoleStatus" href="roles.html#frame.src.framer.agency.roles.RoleStatus">RoleStatus</a>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.agency.Goal"><code class="flex name class">
+<span>class <span class="ident">Goal</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of the class variables defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The synthesized <code>__init__</code> [<code>Signature</code>][inspect.Signature] of the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The core schema of the model.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a [<code>RootModel</code>][pydantic.root_model.RootModel].</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The <code>pydantic-core</code> <code>SchemaSerializer</code> used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The <code>pydantic-core</code> <code>SchemaValidator</code> used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>A dictionary containing extra values, if [<code>extra</code>][pydantic.config.ConfigDict.extra]
+is set to <code>'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>The names of fields explicitly set during instantiation.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Goal(BaseModel):
+    name: str
+    description: Optional[str] = None
+    priority: Priority = Field(default=Priority.MEDIUM)
+    status: GoalStatus = GoalStatus.ACTIVE
+
+    def get(self, key: str, default: Any = None) -&gt; Any:
+        return getattr(self, key, default)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.agency.Goal.description"><code class="name">var <span class="ident">description</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Goal.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Goal.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Goal.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Goal.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Goal.priority"><code class="name">var <span class="ident">priority</span> : <a title="frame.src.framer.agency.priority.Priority" href="priority.html#frame.src.framer.agency.priority.Priority">Priority</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Goal.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.framer.agency.goals.GoalStatus" href="goals.html#frame.src.framer.agency.goals.GoalStatus">GoalStatus</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.Goal.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>self, key: str, default: Any = None) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.agency.GoalStatus"><code class="flex name class">
+<span>class <span class="ident">GoalStatus</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a collection of name/value pairs.</p>
+<p>Example enumeration:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; class Color(Enum):
+...     RED = 1
+...     BLUE = 2
+...     GREEN = 3
+</code></pre>
+<p>Access them by:</p>
+<ul>
+<li>attribute access:</li>
+</ul>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>Color.RED
+<Color.RED: 1></p>
+</blockquote>
+</blockquote>
+</blockquote>
+<ul>
+<li>value lookup:</li>
+</ul>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>Color(1)
+<Color.RED: 1></p>
+</blockquote>
+</blockquote>
+</blockquote>
+<ul>
+<li>name lookup:</li>
+</ul>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>Color['RED']
+<Color.RED: 1></p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>Enumerations can be iterated over, and know how many members they have:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; len(Color)
+3
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; list(Color)
+[&lt;Color.RED: 1&gt;, &lt;Color.BLUE: 2&gt;, &lt;Color.GREEN: 3&gt;]
+</code></pre>
+<p>Methods can be added to enumerations, and members can have their own
+attributes &ndash; see the documentation for details.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class GoalStatus(Enum):
+    ACTIVE = &#34;active&#34;
+    COMPLETED = &#34;completed&#34;
+    ABANDONED = &#34;abandoned&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.agency.GoalStatus.ABANDONED"><code class="name">var <span class="ident">ABANDONED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.GoalStatus.ACTIVE"><code class="name">var <span class="ident">ACTIVE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.GoalStatus.COMPLETED"><code class="name">var <span class="ident">COMPLETED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.agency.Priority"><code class="flex name class">
+<span>class <span class="ident">Priority</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Enum where members are also (and must be) ints</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Priority(IntEnum):
+    LOWEST = 1
+    VERY_LOW = 2
+    LOW = 3
+    MEDIUM_LOW = 4
+    MEDIUM = 5
+    MEDIUM_HIGH = 6
+    HIGH = 7
+    VERY_HIGH = 8
+    HIGHEST = 9
+    CRITICAL = 10
+
+    @classmethod
+    def from_string(cls, value: Union[str, int]) -&gt; &#34;Priority&#34;:
+        if isinstance(value, int):
+            return cls(min(max(value, 1), 10))
+        string_to_priority = {
+            &#34;lowest&#34;: cls.LOWEST,
+            &#34;very low&#34;: cls.VERY_LOW,
+            &#34;low&#34;: cls.LOW,
+            &#34;medium low&#34;: cls.MEDIUM_LOW,
+            &#34;medium&#34;: cls.MEDIUM,
+            &#34;medium high&#34;: cls.MEDIUM_HIGH,
+            &#34;high&#34;: cls.HIGH,
+            &#34;very high&#34;: cls.VERY_HIGH,
+            &#34;highest&#34;: cls.HIGHEST,
+            &#34;critical&#34;: cls.CRITICAL,
+        }
+        return string_to_priority.get(value.lower(), cls.MEDIUM)
+
+    @classmethod
+    def from_value(cls, value: Union[int, str, &#34;Priority&#34;]) -&gt; &#34;Priority&#34;:
+        if isinstance(value, cls):
+            return value
+        elif isinstance(value, int):
+            return cls(min(max(value, 1), 10))
+        elif isinstance(value, str):
+            return cls.from_string(value)
+        else:
+            raise ValueError(
+                &#34;Priority must be an integer, string, or Priority instance&#34;
+            )
+
+    @classmethod
+    def get(cls, value: Union[int, str, &#34;Priority&#34;]) -&gt; &#34;Priority&#34;:
+        return cls.from_value(value)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.IntEnum</li>
+<li>builtins.int</li>
+<li>enum.ReprEnum</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.agency.Priority.CRITICAL"><code class="name">var <span class="ident">CRITICAL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Priority.HIGH"><code class="name">var <span class="ident">HIGH</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Priority.HIGHEST"><code class="name">var <span class="ident">HIGHEST</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Priority.LOW"><code class="name">var <span class="ident">LOW</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Priority.LOWEST"><code class="name">var <span class="ident">LOWEST</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Priority.MEDIUM"><code class="name">var <span class="ident">MEDIUM</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Priority.MEDIUM_HIGH"><code class="name">var <span class="ident">MEDIUM_HIGH</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Priority.MEDIUM_LOW"><code class="name">var <span class="ident">MEDIUM_LOW</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Priority.VERY_HIGH"><code class="name">var <span class="ident">VERY_HIGH</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Priority.VERY_LOW"><code class="name">var <span class="ident">VERY_LOW</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.Priority.from_string"><code class="name flex">
+<span>def <span class="ident">from_string</span></span>(<span>value: Union[str, int]) ‑> <a title="frame.src.framer.agency.priority.Priority" href="priority.html#frame.src.framer.agency.priority.Priority">Priority</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Priority.from_value"><code class="name flex">
+<span>def <span class="ident">from_value</span></span>(<span>value: Union[int, str, ForwardRef('<a title="frame.src.framer.agency.Priority" href="#frame.src.framer.agency.Priority">Priority</a>')]) ‑> <a title="frame.src.framer.agency.priority.Priority" href="priority.html#frame.src.framer.agency.priority.Priority">Priority</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Priority.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>value: Union[int, str, ForwardRef('<a title="frame.src.framer.agency.Priority" href="#frame.src.framer.agency.Priority">Priority</a>')]) ‑> <a title="frame.src.framer.agency.priority.Priority" href="priority.html#frame.src.framer.agency.priority.Priority">Priority</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.agency.Role"><code class="flex name class">
+<span>class <span class="ident">Role</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of the class variables defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The synthesized <code>__init__</code> [<code>Signature</code>][inspect.Signature] of the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The core schema of the model.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a [<code>RootModel</code>][pydantic.root_model.RootModel].</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The <code>pydantic-core</code> <code>SchemaSerializer</code> used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The <code>pydantic-core</code> <code>SchemaValidator</code> used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>A dictionary containing extra values, if [<code>extra</code>][pydantic.config.ConfigDict.extra]
+is set to <code>'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>The names of fields explicitly set during instantiation.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Role(BaseModel):
+    id: str
+    name: str
+    description: str
+    permissions: List[str] = []
+    priority: Priority = Field(default=Priority.MEDIUM)
+    status: RoleStatus = RoleStatus.ACTIVE
+
+    def to_dict(self) -&gt; Dict[str, Any]:
+        return {
+            &#34;id&#34;: self.id,
+            &#34;name&#34;: self.name,
+            &#34;description&#34;: self.description,
+            &#34;permissions&#34;: self.permissions,
+            &#34;priority&#34;: self.priority.value,
+            &#34;status&#34;: self.status.value,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -&gt; &#34;Role&#34;:
+        return cls(**data)
+
+    def get(self, key: str, default: Any = None) -&gt; Any:
+        return getattr(self, key, default)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.agency.Role.description"><code class="name">var <span class="ident">description</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.permissions"><code class="name">var <span class="ident">permissions</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.priority"><code class="name">var <span class="ident">priority</span> : <a title="frame.src.framer.agency.priority.Priority" href="priority.html#frame.src.framer.agency.priority.Priority">Priority</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.framer.agency.roles.RoleStatus" href="roles.html#frame.src.framer.agency.roles.RoleStatus">RoleStatus</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.Role.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>data: Dict[str, Any]) ‑> <a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.Role.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>self, key: str, default: Any = None) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self) ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.agency.RoleStatus"><code class="flex name class">
+<span>class <span class="ident">RoleStatus</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a collection of name/value pairs.</p>
+<p>Example enumeration:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; class Color(Enum):
+...     RED = 1
+...     BLUE = 2
+...     GREEN = 3
+</code></pre>
+<p>Access them by:</p>
+<ul>
+<li>attribute access:</li>
+</ul>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>Color.RED
+<Color.RED: 1></p>
+</blockquote>
+</blockquote>
+</blockquote>
+<ul>
+<li>value lookup:</li>
+</ul>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>Color(1)
+<Color.RED: 1></p>
+</blockquote>
+</blockquote>
+</blockquote>
+<ul>
+<li>name lookup:</li>
+</ul>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>Color['RED']
+<Color.RED: 1></p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>Enumerations can be iterated over, and know how many members they have:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; len(Color)
+3
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; list(Color)
+[&lt;Color.RED: 1&gt;, &lt;Color.BLUE: 2&gt;, &lt;Color.GREEN: 3&gt;]
+</code></pre>
+<p>Methods can be added to enumerations, and members can have their own
+attributes &ndash; see the documentation for details.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RoleStatus(Enum):
+    ACTIVE = &#34;active&#34;
+    INACTIVE = &#34;inactive&#34;
+    ABANDONED = &#34;abandoned&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.agency.RoleStatus.ABANDONED"><code class="name">var <span class="ident">ABANDONED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.RoleStatus.ACTIVE"><code class="name">var <span class="ident">ACTIVE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.RoleStatus.INACTIVE"><code class="name">var <span class="ident">INACTIVE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.agency.Workflow"><code class="flex name class">
+<span>class <span class="ident">Workflow</span></span>
+<span>(</span><span>name: str, is_async: bool = False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Workflow:
+    def __init__(self, name: str, is_async: bool = False):
+        self.name = name
+        self.tasks: List[Task] = []
+        self.is_async = is_async
+        self.final_task: Optional[Task] = None
+
+    def add_task(self, task: Task):
+        self.tasks.append(task)
+
+    def set_final_task(self, task: Task):
+        self.final_task = task
+
+    def get_tasks(self) -&gt; List[Task]:
+        return self.tasks
+
+    def __str__(self):
+        return f&#34;Workflow(name={self.name}, tasks={len(self.tasks)}, is_async={self.is_async})&#34;</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.Workflow.add_task"><code class="name flex">
+<span>def <span class="ident">add_task</span></span>(<span>self, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Workflow.get_tasks"><code class="name flex">
+<span>def <span class="ident">get_tasks</span></span>(<span>self) ‑> List[<a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Workflow.set_final_task"><code class="name flex">
+<span>def <span class="ident">set_final_task</span></span>(<span>self, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.agency.WorkflowManager"><code class="flex name class">
+<span>class <span class="ident">WorkflowManager</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class WorkflowManager:
+    def __init__(self):
+        self.workflows: Dict[str, Workflow] = {}
+
+    def create_workflow(self, name: str, is_async: bool = False) -&gt; Workflow:
+        workflow = Workflow(name, is_async)
+        self.workflows[name] = workflow
+        return workflow
+
+    def get_workflow(self, name: str) -&gt; Optional[Workflow]:
+        return self.workflows.get(name)
+
+    def add_task(self, workflow_name: str, task: Task):
+        workflow = self.get_workflow(workflow_name)
+        if workflow:
+            workflow.add_task(task)
+        else:
+            raise ValueError(f&#34;Workflow &#39;{workflow_name}&#39; not found&#34;)
+
+    def set_final_task_for_workflow(self, workflow_name: str, task: Task):
+        workflow = self.get_workflow(workflow_name)
+        if workflow:
+            workflow.set_final_task(task)
+        else:
+            raise ValueError(f&#34;Workflow &#39;{workflow_name}&#39; not found&#34;)
+
+    def get_all_tasks(self) -&gt; List[Task]:
+        all_tasks = []
+        for workflow in self.workflows.values():
+            all_tasks.extend(workflow.get_tasks())
+        return all_tasks
+
+    def __str__(self):
+        return f&#34;WorkflowManager(workflows={len(self.workflows)})&#34;</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.WorkflowManager.add_task"><code class="name flex">
+<span>def <span class="ident">add_task</span></span>(<span>self, workflow_name: str, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.WorkflowManager.create_workflow"><code class="name flex">
+<span>def <span class="ident">create_workflow</span></span>(<span>self, name: str, is_async: bool = False) ‑> <a title="frame.src.framer.agency.workflow.workflow.Workflow" href="workflow/workflow.html#frame.src.framer.agency.workflow.workflow.Workflow">Workflow</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.WorkflowManager.get_all_tasks"><code class="name flex">
+<span>def <span class="ident">get_all_tasks</span></span>(<span>self) ‑> List[<a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.WorkflowManager.get_workflow"><code class="name flex">
+<span>def <span class="ident">get_workflow</span></span>(<span>self, name: str) ‑> Optional[<a title="frame.src.framer.agency.workflow.workflow.Workflow" href="workflow/workflow.html#frame.src.framer.agency.workflow.workflow.Workflow">Workflow</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.WorkflowManager.set_final_task_for_workflow"><code class="name flex">
+<span>def <span class="ident">set_final_task_for_workflow</span></span>(<span>self, workflow_name: str, task: <a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -80,6 +1590,119 @@ hljs.highlightAll();
 <li><code><a title="frame.src.framer.agency.roles" href="roles.html">frame.src.framer.agency.roles</a></code></li>
 <li><code><a title="frame.src.framer.agency.tasks" href="tasks/index.html">frame.src.framer.agency.tasks</a></code></li>
 <li><code><a title="frame.src.framer.agency.workflow" href="workflow/index.html">frame.src.framer.agency.workflow</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.src.framer.agency.Agency" href="#frame.src.framer.agency.Agency">Agency</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.Agency.add_goal" href="#frame.src.framer.agency.Agency.add_goal">add_goal</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.add_task" href="#frame.src.framer.agency.Agency.add_task">add_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.complete_task" href="#frame.src.framer.agency.Agency.complete_task">complete_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.create_task" href="#frame.src.framer.agency.Agency.create_task">create_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.create_workflow" href="#frame.src.framer.agency.Agency.create_workflow">create_workflow</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.evaluate_roles_and_goals" href="#frame.src.framer.agency.Agency.evaluate_roles_and_goals">evaluate_roles_and_goals</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.execute_task" href="#frame.src.framer.agency.Agency.execute_task">execute_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.fail_task" href="#frame.src.framer.agency.Agency.fail_task">fail_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.generate_goals" href="#frame.src.framer.agency.Agency.generate_goals">generate_goals</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.generate_roles" href="#frame.src.framer.agency.Agency.generate_roles">generate_roles</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.generate_roles_and_goals" href="#frame.src.framer.agency.Agency.generate_roles_and_goals">generate_roles_and_goals</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.get_all_tasks" href="#frame.src.framer.agency.Agency.get_all_tasks">get_all_tasks</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.get_goals" href="#frame.src.framer.agency.Agency.get_goals">get_goals</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.get_next_task" href="#frame.src.framer.agency.Agency.get_next_task">get_next_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.get_roles" href="#frame.src.framer.agency.Agency.get_roles">get_roles</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.perform_task" href="#frame.src.framer.agency.Agency.perform_task">perform_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.set_final_task_for_workflow" href="#frame.src.framer.agency.Agency.set_final_task_for_workflow">set_final_task_for_workflow</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.set_framer" href="#frame.src.framer.agency.Agency.set_framer">set_framer</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.set_goals" href="#frame.src.framer.agency.Agency.set_goals">set_goals</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.set_roles" href="#frame.src.framer.agency.Agency.set_roles">set_roles</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.update_goal_status" href="#frame.src.framer.agency.Agency.update_goal_status">update_goal_status</a></code></li>
+<li><code><a title="frame.src.framer.agency.Agency.update_role_status" href="#frame.src.framer.agency.Agency.update_role_status">update_role_status</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.agency.Goal" href="#frame.src.framer.agency.Goal">Goal</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.Goal.description" href="#frame.src.framer.agency.Goal.description">description</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.get" href="#frame.src.framer.agency.Goal.get">get</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.model_computed_fields" href="#frame.src.framer.agency.Goal.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.model_config" href="#frame.src.framer.agency.Goal.model_config">model_config</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.model_fields" href="#frame.src.framer.agency.Goal.model_fields">model_fields</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.name" href="#frame.src.framer.agency.Goal.name">name</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.priority" href="#frame.src.framer.agency.Goal.priority">priority</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.status" href="#frame.src.framer.agency.Goal.status">status</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.agency.GoalStatus" href="#frame.src.framer.agency.GoalStatus">GoalStatus</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.GoalStatus.ABANDONED" href="#frame.src.framer.agency.GoalStatus.ABANDONED">ABANDONED</a></code></li>
+<li><code><a title="frame.src.framer.agency.GoalStatus.ACTIVE" href="#frame.src.framer.agency.GoalStatus.ACTIVE">ACTIVE</a></code></li>
+<li><code><a title="frame.src.framer.agency.GoalStatus.COMPLETED" href="#frame.src.framer.agency.GoalStatus.COMPLETED">COMPLETED</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.agency.Priority" href="#frame.src.framer.agency.Priority">Priority</a></code></h4>
+<ul class="two-column">
+<li><code><a title="frame.src.framer.agency.Priority.CRITICAL" href="#frame.src.framer.agency.Priority.CRITICAL">CRITICAL</a></code></li>
+<li><code><a title="frame.src.framer.agency.Priority.HIGH" href="#frame.src.framer.agency.Priority.HIGH">HIGH</a></code></li>
+<li><code><a title="frame.src.framer.agency.Priority.HIGHEST" href="#frame.src.framer.agency.Priority.HIGHEST">HIGHEST</a></code></li>
+<li><code><a title="frame.src.framer.agency.Priority.LOW" href="#frame.src.framer.agency.Priority.LOW">LOW</a></code></li>
+<li><code><a title="frame.src.framer.agency.Priority.LOWEST" href="#frame.src.framer.agency.Priority.LOWEST">LOWEST</a></code></li>
+<li><code><a title="frame.src.framer.agency.Priority.MEDIUM" href="#frame.src.framer.agency.Priority.MEDIUM">MEDIUM</a></code></li>
+<li><code><a title="frame.src.framer.agency.Priority.MEDIUM_HIGH" href="#frame.src.framer.agency.Priority.MEDIUM_HIGH">MEDIUM_HIGH</a></code></li>
+<li><code><a title="frame.src.framer.agency.Priority.MEDIUM_LOW" href="#frame.src.framer.agency.Priority.MEDIUM_LOW">MEDIUM_LOW</a></code></li>
+<li><code><a title="frame.src.framer.agency.Priority.VERY_HIGH" href="#frame.src.framer.agency.Priority.VERY_HIGH">VERY_HIGH</a></code></li>
+<li><code><a title="frame.src.framer.agency.Priority.VERY_LOW" href="#frame.src.framer.agency.Priority.VERY_LOW">VERY_LOW</a></code></li>
+<li><code><a title="frame.src.framer.agency.Priority.from_string" href="#frame.src.framer.agency.Priority.from_string">from_string</a></code></li>
+<li><code><a title="frame.src.framer.agency.Priority.from_value" href="#frame.src.framer.agency.Priority.from_value">from_value</a></code></li>
+<li><code><a title="frame.src.framer.agency.Priority.get" href="#frame.src.framer.agency.Priority.get">get</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.agency.Role" href="#frame.src.framer.agency.Role">Role</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.Role.description" href="#frame.src.framer.agency.Role.description">description</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.from_dict" href="#frame.src.framer.agency.Role.from_dict">from_dict</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.get" href="#frame.src.framer.agency.Role.get">get</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.id" href="#frame.src.framer.agency.Role.id">id</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.model_computed_fields" href="#frame.src.framer.agency.Role.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.model_config" href="#frame.src.framer.agency.Role.model_config">model_config</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.model_fields" href="#frame.src.framer.agency.Role.model_fields">model_fields</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.name" href="#frame.src.framer.agency.Role.name">name</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.permissions" href="#frame.src.framer.agency.Role.permissions">permissions</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.priority" href="#frame.src.framer.agency.Role.priority">priority</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.status" href="#frame.src.framer.agency.Role.status">status</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.to_dict" href="#frame.src.framer.agency.Role.to_dict">to_dict</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.agency.RoleStatus" href="#frame.src.framer.agency.RoleStatus">RoleStatus</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.RoleStatus.ABANDONED" href="#frame.src.framer.agency.RoleStatus.ABANDONED">ABANDONED</a></code></li>
+<li><code><a title="frame.src.framer.agency.RoleStatus.ACTIVE" href="#frame.src.framer.agency.RoleStatus.ACTIVE">ACTIVE</a></code></li>
+<li><code><a title="frame.src.framer.agency.RoleStatus.INACTIVE" href="#frame.src.framer.agency.RoleStatus.INACTIVE">INACTIVE</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.agency.Workflow" href="#frame.src.framer.agency.Workflow">Workflow</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.Workflow.add_task" href="#frame.src.framer.agency.Workflow.add_task">add_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.Workflow.get_tasks" href="#frame.src.framer.agency.Workflow.get_tasks">get_tasks</a></code></li>
+<li><code><a title="frame.src.framer.agency.Workflow.set_final_task" href="#frame.src.framer.agency.Workflow.set_final_task">set_final_task</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.agency.WorkflowManager" href="#frame.src.framer.agency.WorkflowManager">WorkflowManager</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.agency.WorkflowManager.add_task" href="#frame.src.framer.agency.WorkflowManager.add_task">add_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.WorkflowManager.create_workflow" href="#frame.src.framer.agency.WorkflowManager.create_workflow">create_workflow</a></code></li>
+<li><code><a title="frame.src.framer.agency.WorkflowManager.get_all_tasks" href="#frame.src.framer.agency.WorkflowManager.get_all_tasks">get_all_tasks</a></code></li>
+<li><code><a title="frame.src.framer.agency.WorkflowManager.get_workflow" href="#frame.src.framer.agency.WorkflowManager.get_workflow">get_workflow</a></code></li>
+<li><code><a title="frame.src.framer.agency.WorkflowManager.set_final_task_for_workflow" href="#frame.src.framer.agency.WorkflowManager.set_final_task_for_workflow">set_final_task_for_workflow</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

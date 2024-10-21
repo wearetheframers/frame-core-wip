@@ -40,36 +40,40 @@ ContextService to manage shared roles and goals across multiple Framers.</p>
 <dl>
 <dt id="frame.src.services.context.shared_context_service.SharedContext"><code class="flex name class">
 <span>class <span class="ident">SharedContext</span></span>
-<span>(</span><span>soul: Optional[Any] = None, **kwargs)</span>
+<span>(</span><span>llm_service: "'LLMService'", memory_service: "Optional['MemoryService']" = None, eq_service: "Optional['EQService']" = None, soul: "Optional['Soul']" = None, brain: "Optional['Brain']" = None, state: Dict[str, Any] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Local Context Service Module</p>
-<p>This module provides the LocalContext class, which manages local context
-for agent components, allowing them to share information with each other.
-It serves as a base class for more specialized local contexts.</p>
-<p>Initialize the Context.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Any]</code></dt>
-<dd>The soul attribute for the context.</dd>
-</dl></div>
+<div class="desc"><p>ExecutionContext provides a centralized container for various services, state, and functions
+that actions and components might need during execution. It ensures consistent access to resources
+across all actions and facilitates easier testing, modular design, and state management.</p>
+<p>The ExecutionContext serves as a bridge between different components of the Framer,
+allowing them to share resources and functionality without tight coupling.</p>
+<p>Key features:
+- Centralized service access: Provides access to core services like LLM, memory, and EQ.
+- State management: Maintains and updates the current state of the execution.
+- Goal tracking: Manages the current goals of the Framer.
+- Action registry: Stores and manages available actions.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class SharedContext(LocalContext):
+<pre><code class="python">class SharedContext(ExecutionContext):
     pass</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="frame.src.services.context.local_context_service.LocalContext" href="local_context_service.html#frame.src.services.context.local_context_service.LocalContext">LocalContext</a></li>
+<li><a title="frame.src.services.context.execution_context_service.ExecutionContext" href="execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a></li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="frame.src.services.context.local_context_service.LocalContext" href="local_context_service.html#frame.src.services.context.local_context_service.LocalContext">LocalContext</a></b></code>:
+<li><code><b><a title="frame.src.services.context.execution_context_service.ExecutionContext" href="execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a></b></code>:
 <ul class="hlist">
-<li><code><a title="frame.src.services.context.local_context_service.LocalContext.add_to_history" href="local_context_service.html#frame.src.services.context.local_context_service.LocalContext.add_to_history">add_to_history</a></code></li>
-<li><code><a title="frame.src.services.context.local_context_service.LocalContext.set_soul" href="local_context_service.html#frame.src.services.context.local_context_service.LocalContext.set_soul">set_soul</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.generate_goals" href="execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext.generate_goals">generate_goals</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_goals" href="execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext.get_goals">get_goals</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.get_roles" href="execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext.get_roles">get_roles</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.perform_task" href="execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext.perform_task">perform_task</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.set_goals" href="execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext.set_goals">set_goals</a></code></li>
+<li><code><a title="frame.src.services.context.execution_context_service.ExecutionContext.set_roles" href="execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext.set_roles">set_roles</a></code></li>
 </ul>
 </li>
 </ul>

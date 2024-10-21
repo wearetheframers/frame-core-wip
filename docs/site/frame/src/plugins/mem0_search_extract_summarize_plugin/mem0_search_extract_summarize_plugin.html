@@ -88,28 +88,33 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         self.mem0_adapter = Mem0Adapter()
 
     async def on_load(self, framer) -&gt; None:
-        # Check for a valid API key before registering the action
-        api_key = os.getenv(&#34;MEM0_API_KEY&#34;, &#34;&#34;).strip()
-        if not api_key:
-            api_key = MEM0_API_KEY
-        if api_key:
-            framer.brain.action_registry.add_action(
-                &#34;respond with memory retrieval&#34;,
-                description=&#34;This action is ideal for responding to personal questions that involve historical or memory-based &#34;
-                &#34;information about the user or the Framer. It leverages the Framer&#39;s memory to retrieve relevant data &#34;
-                &#34;or previously saved texts, providing comprehensive answers or insights based on stored memories. &#34;
-                &#34;When questions reference or relate to past conversations, this action is preferred. It generally &#34;
-                &#34;takes precedence over `think` and `observe` actions, especially for questions. If uncertain whether &#34;
-                &#34;a question can be answered with or without memory, default to this action.&#34;,
-                action_func=self.mem0_search_extract_summarize,
-                priority=8,
-            )
-            self.logger.info(
-                &#34;Mem0SearchExtractSummarizePlugin registered &#39;respond with memory retrieval&#39; action.&#34;
-            )
+        # Check for the correct permission before registering the action
+        if &#34;with_mem0_search_extract_summarize_plugin&#34; in framer.permissions:
+            api_key = os.getenv(&#34;MEM0_API_KEY&#34;, &#34;&#34;).strip()
+            if not api_key:
+                api_key = MEM0_API_KEY
+            if api_key:
+                framer.brain.action_registry.add_action(
+                    &#34;respond with memory retrieval&#34;,
+                    description=&#34;This action is ideal for responding to personal questions that involve historical or memory-based &#34;
+                    &#34;information about the user or the Framer. It leverages the Framer&#39;s memory to retrieve relevant data &#34;
+                    &#34;or previously saved texts, providing comprehensive answers or insights based on stored memories. &#34;
+                    &#34;When questions reference or relate to past conversations, this action is preferred. It generally &#34;
+                    &#34;takes precedence over `think` and `observe` actions, especially for questions. If uncertain whether &#34;
+                    &#34;a question can be answered with or without memory, default to this action.&#34;,
+                    action_func=self.mem0_search_extract_summarize,
+                    priority=8,
+                )
+                self.logger.info(
+                    &#34;Mem0SearchExtractSummarizePlugin registered &#39;respond with memory retrieval&#39; action.&#34;
+                )
+            else:
+                self.logger.warning(
+                    &#34;Mem0 API key not found or is empty. Action &#39;response with memory retrieval&#39; will not be registered.&#34;
+                )
         else:
-            self.logger.warning(
-                &#34;Mem0 API key not found or is empty. Action &#39;response with memory retrieval&#39; will not be registered.&#34;
+            self.logger.info(
+                &#34;Mem0SearchExtractSummarizePlugin not loaded due to missing permission.&#34;
             )
 
     def get_actions(self) -&gt; Dict[str, Any]:
@@ -164,7 +169,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 
     async def mem0_search_extract_summarize(
         self,
-        execution_context,
+        execution_context: ExecutionContext,
         query: str = &#34;&#34;,
         user_id: Optional[str] = None,
         agent_id: Optional[str] = None,
@@ -349,7 +354,7 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
 <div class="desc"><p>Return a dictionary of actions provided by this plugin.</p></div>
 </dd>
 <dt id="frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin.Mem0SearchExtractSummarizePlugin.mem0_search_extract_summarize"><code class="name flex">
-<span>async def <span class="ident">mem0_search_extract_summarize</span></span>(<span>self, execution_context, query: str = '', user_id: Optional[str] = None, agent_id: Optional[str] = None, run_id: Optional[str] = None, filters: Optional[Dict[str, Any]] = None, model_name: str = 'gpt-4o-mini', text_response: Optional[str] = None) ‑> str</span>
+<span>async def <span class="ident">mem0_search_extract_summarize</span></span>(<span>self, execution_context: <a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>, query: str = '', user_id: Optional[str] = None, agent_id: Optional[str] = None, run_id: Optional[str] = None, filters: Optional[Dict[str, Any]] = None, model_name: str = 'gpt-4o-mini', text_response: Optional[str] = None) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"></div>

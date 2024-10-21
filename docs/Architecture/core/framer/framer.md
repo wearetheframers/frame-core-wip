@@ -32,6 +32,8 @@ Framers include several default plugins and services that are automatically avai
 - **Decision Making**: Based on incoming perceptions, roles, goals, available plugins, and permissions, Framers make decisions on what actions to take.
 - **Action Execution**: Framers can perform actions based on their decisions, including creating tasks and workflows.
 - **Plugin Integration**: Framers can use plugins to extend their behavior with new actions. When a plugin action is well-described, the Framer can make reasonable moves to take that action based on context, internal thinking, and the action's priority compared to other possible actions.
+
+Framer's plugins architecture means that when Frame is instantiated, it spends time loading plugins, which could be hundreds or thousands, and take a while to load. Framer has an `acting` property to see if it's ready and whether all plugins have loaded or not, called `plugin_loading_complete` and `plugin_loading_progress`. Because of this, users should be aware before adding too many plugins. However, Framer does queue perceptions/interactions to the agent and processes the queue when it is ready, if requests are made before it is ready. So it is not necessary to handle this in your code, but it could result in delays on startup.
 - **Permission-Based Execution**: Framers consider their permissions when deciding which actions to take, ensuring they only use plugins and services they have access to.
 
 ## Related Components

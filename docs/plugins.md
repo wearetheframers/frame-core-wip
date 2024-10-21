@@ -15,6 +15,8 @@ The plugin system works in conjunction with the Framer's permission system, whic
 
 Frame features a plugin marketplace where premium plugins and community plugins can be developed, given away, or sold. This marketplace fosters a rich ecosystem of extensions and customizations, similar to mod communities in popular games.
 
+When Frame is instantiated, it spends time loading plugins, which could be hundreds or thousands, and take a while to load. Framer has an `acting` property to see if it's ready and whether all plugins have loaded or not, called `plugin_loading_complete` and `plugin_loading_progress`. Because of this, users should be aware before adding too many plugins. However, Framer does queue perceptions/interactions to the agent and processes the queue when it is ready, if requests are made before it is ready. So it is not necessary to handle this in your code, but it could result in delays on startup.
+
 ## Default Plugins and Services
 
 Frame includes several default plugins and services that are automatically available to Framers. These services, such as `LLMService`, `EQService`, `MemoryService`, and `SharedContext`, function as plugins with swappable adapters. This means the underlying implementation of the service can be changed while maintaining the same high-level interface. For instance, instead of using `Mem0`, a `LlamaIndex` adapter could be used. While `LLMService` is passed to the Framer by default, you must specify permissions like `with-eq`, `with-memory`, or `with-shared-context` in the `FramerConfig` to access these services. However, all Framers inherently have permission to access these services without needing explicit permission settings.

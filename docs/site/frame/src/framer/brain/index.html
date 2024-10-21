@@ -68,6 +68,2338 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="frame.src.framer.brain.ActionRegistry"><code class="flex name class">
+<span>class <span class="ident">ActionRegistry</span></span>
+<span>(</span><span>execution_context: Optional[ForwardRef('ExecutionContext')] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ActionRegistry:
+    def __init__(self, execution_context: Optional[&#34;ExecutionContext&#34;] = None):
+        self.actions: Dict[str, Dict[str, Any]] = {}
+        self.execution_context = execution_context
+        if not self.execution_context or not hasattr(
+            self.execution_context, &#34;llm_service&#34;
+        ):
+            raise ValueError(&#34;ExecutionContext must have an llm_service set.&#34;)
+
+        # Ensure llm_service is set in the execution context
+        if not self.execution_context.llm_service:
+            raise ValueError(&#34;ExecutionContext must have an llm_service set.&#34;)
+        self.valid_actions = []
+        self._register_default_actions()
+
+    def set_framer(self, framer):
+        self.framer = framer
+
+    def _register_default_actions(self):
+        default_actions = [
+            CreateNewAgentAction(),
+            GenerateRolesAndGoalsAction(),
+            ObserveAction(),
+            RespondAction(),
+            ThinkAction(),
+            ResearchAction(),
+            ErrorAction(),
+        ]
+        for action in default_actions:
+            self.add_action(
+                action.name,
+                description=action.description,
+                action_func=action.execute,
+                priority=action.priority,
+            )
+
+    async def error_action(self, execution_context, error_message: str) -&gt; str:
+        &#34;&#34;&#34;
+        Handle errors by apologizing and attempting to continue the conversation.
+
+        Args:
+            execution_context: The execution context of the Framer.
+            error_message (str): The error message to include in the response.
+
+        Returns:
+            str: A response apologizing for the error and attempting to continue the conversation.
+        &#34;&#34;&#34;
+        soul_state = (
+            execution_context.soul.get_current_state()
+            if execution_context and execution_context.soul
+            else &#34;No soul state available.&#34;
+        )
+        recent_thoughts = (
+            execution_context.mind.get_all_thoughts()[-5:]
+            if execution_context and execution_context.mind
+            else []
+        )
+        active_roles = (
+            [role.name for role in execution_context.roles if role.status == &#34;ACTIVE&#34;]
+            if execution_context
+            else []
+        )
+        active_goals = (
+            [goal.name for goal in execution_context.goals if goal.status == &#34;ACTIVE&#34;]
+            if execution_context
+            else []
+        )
+
+        response = (
+            f&#34;I&#39;m sorry, an error occurred: {error_message}. &#34;
+            &#34;Let&#39;s try to continue our conversation.\n\n&#34;
+            &#34;### Current Framer State\n&#34;
+            f&#34;- Soul State: {soul_state}\n&#34;
+            f&#34;- Recent Thoughts: {recent_thoughts}\n&#34;
+            f&#34;- Active Roles: {active_roles}\n&#34;
+            f&#34;- Active Goals: {active_goals}\n&#34;
+        )
+        return response.strip() if isinstance(response, str) else str(response)
+
+    def extend_actions(self, new_actions: Dict[str, Dict[str, Any]]):
+        extend_default_actions(new_actions)
+        self._register_default_actions()
+
+    def add_action(
+        self,
+        action_or_name: Union[BaseAction, str],
+        description: str = &#34;&#34;,
+        action_func: Optional[Callable] = None,
+        priority: int = 5,
+    ):
+        &#34;&#34;&#34;
+        Add a new action to the registry.
+
+        Args:
+            action_or_name (Union[BaseAction, str]): The action object or the name of the action.
+            action_func (Callable, optional): The function to execute for this action. Defaults to None.
+            description (str, optional): A description of the action. Defaults to &#34;&#34;.
+            priority (int, optional): The priority of the action. Defaults to 5.
+        &#34;&#34;&#34;
+        if isinstance(action_or_name, BaseAction):
+            name = action_or_name.name
+            description = action_or_name.description
+            action_func = getattr(action_or_name, &#34;execute&#34;, None)
+            priority = action_or_name.priority
+        else:
+            name = action_or_name
+
+        if priority is not None and not (1 &lt;= priority &lt;= 10):
+            raise ValueError(&#34;Priority must be between 1 and 10&#34;)
+        if action_func is None:
+            # Set action func to a default error handler
+            async def action_func(execution_context, **kwargs):
+                error_message = kwargs.get(&#34;error&#34;, &#34;An error occurred.&#34;)
+                return {&#34;response&#34;: f&#34;Error: {error_message}&#34;}
+
+        self.actions[name] = {
+            &#34;action_func&#34;: action_func,
+            &#34;description&#34;: description,
+            &#34;priority&#34;: priority,
+        }
+        if name not in self.valid_actions:
+            self.valid_actions.append(name)
+            logger.debug(f&#34;Action &#39;{name}&#39; added to registry.&#34;)
+
+    def remove_action(self, name: str):
+        &#34;&#34;&#34;
+        Remove an action from the registry.
+
+        Args:
+            name (str): The name of the action to remove.
+        &#34;&#34;&#34;
+        try:
+            if name in self.actions:
+                del self.actions[name]
+                if name in self.valid_actions:
+                    self.valid_actions.remove(name)
+            else:
+                raise ValueError(f&#34;Action &#39;{name}&#39; not found.&#34;)
+        except Exception as e:
+            logger.error(f&#34;Error removing action &#39;{name}&#39;: {e}&#34;)
+        return self.actions.get(name, {})
+
+    def get_action(self, name: str) -&gt; Optional[Dict[str, Any]]:
+        &#34;&#34;&#34;
+        Retrieve an action from the registry.
+
+        Args:
+            name (str): The name of the action to retrieve.
+
+        Returns:
+            Optional[Dict[str, Any]]: The action details if found, otherwise None.
+        &#34;&#34;&#34;
+        return self.actions.get(name)
+
+    def get_all_actions(self) -&gt; Dict[str, Dict[str, Any]]:
+        &#34;&#34;&#34;
+        Return all actions in the registry that are also in self.valid_actions.
+        &#34;&#34;&#34;
+        return {k: v for k, v in self.actions.items() if k in self.valid_actions}
+
+    async def perform_action(
+        self,
+        name: str,
+        *args,
+        callback: Optional[Callable] = None,
+        callback_args: Optional[tuple] = (),
+        **kwargs,
+    ):
+        action = self.get_action(name)
+        if not action:
+            raise ValueError(f&#34;Action &#39;{name}&#39; not found&#34;)
+        if self.execution_context is None:
+            raise ValueError(&#34;Execution context is not set&#34;)
+        response = await action[&#34;action_func&#34;](*args, **kwargs)
+        role = response if isinstance(response, dict) else response
+        if callback:
+            callback(response, *callback_args)
+        return response
+
+    def get_action(self, name: str) -&gt; Optional[Dict[str, Any]]:
+        &#34;&#34;&#34;
+        Retrieve an action from the registry.
+
+        Args:
+            name (str): The name of the action to retrieve.
+
+        Returns:
+            Optional[Dict[str, Any]]: The action details if found, otherwise None.
+        &#34;&#34;&#34;
+        return self.actions.get(name)
+
+    async def execute_action(self, action_name: str, *args, **kwargs):
+        &#34;&#34;&#34;Execute an action by its name.&#34;&#34;&#34;
+        logger.info(
+            f&#34;Available actions before executing &#39;{action_name}&#39;: {list(self.actions.keys())}&#34;
+        )
+        logger.info(f&#34;Action name: {action_name}&#34;)
+
+        if action_name == &#34;no_action&#34;:
+            logger.info(&#34;No action to execute. Skipping.&#34;)
+            return None
+
+        action = self.get_action(action_name)
+        if not action:
+            error_message = f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;
+            logger.error(error_message)
+            return await self._handle_error(error_message)
+
+        action_func = action[&#34;action_func&#34;]
+        try:
+            result = await action_func(*args, **kwargs)
+            if result is None:
+                return {
+                    &#34;error&#34;: &#34;Action returned None&#34;,
+                    &#34;fallback_response&#34;: &#34;The action didn&#39;t produce a response. Please try again.&#34;,
+                }
+            elif isinstance(result, dict):
+                return result
+            elif isinstance(result, str):
+                return {&#34;response&#34;: result}
+            else:
+                return {&#34;response&#34;: str(result)}
+        except Exception as e:
+            error_message = f&#34;Error executing action &#39;{action_name}&#39;: {str(e)}&#34;
+            logger.error(error_message)
+            return await self._handle_error(error_message)
+
+    def set_execution_context(self, execution_context):
+        self.execution_context = execution_context
+
+    async def _handle_error(self, error_message: str):
+        error_action = self.get_action(&#34;error&#34;)
+        if error_action:
+            return await error_action[&#34;action_func&#34;](
+                self.execution_context, error=error_message
+            )
+        else:
+            return {
+                &#34;error&#34;: error_message,
+                &#34;fallback_response&#34;: &#34;An error occurred while processing your request. Please try again.&#34;,
+            }</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.brain.ActionRegistry.add_action"><code class="name flex">
+<span>def <span class="ident">add_action</span></span>(<span>self, action_or_name: Union[<a title="frame.src.framer.brain.actions.base.BaseAction" href="actions/base.html#frame.src.framer.brain.actions.base.BaseAction">BaseAction</a>, str], description: str = '', action_func: Optional[Callable] = None, priority: int = 5)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a new action to the registry.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>action_or_name</code></strong> :&ensp;<code>Union[BaseAction, str]</code></dt>
+<dd>The action object or the name of the action.</dd>
+<dt><strong><code>action_func</code></strong> :&ensp;<code>Callable</code>, optional</dt>
+<dd>The function to execute for this action. Defaults to None.</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>A description of the action. Defaults to "".</dd>
+<dt><strong><code>priority</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The priority of the action. Defaults to 5.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.ActionRegistry.error_action"><code class="name flex">
+<span>async def <span class="ident">error_action</span></span>(<span>self, execution_context, error_message: str) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Handle errors by apologizing and attempting to continue the conversation.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>execution_context</code></strong></dt>
+<dd>The execution context of the Framer.</dd>
+<dt><strong><code>error_message</code></strong> :&ensp;<code>str</code></dt>
+<dd>The error message to include in the response.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>A response apologizing for the error and attempting to continue the conversation.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.ActionRegistry.execute_action"><code class="name flex">
+<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute an action by its name.</p></div>
+</dd>
+<dt id="frame.src.framer.brain.ActionRegistry.extend_actions"><code class="name flex">
+<span>def <span class="ident">extend_actions</span></span>(<span>self, new_actions: Dict[str, Dict[str, Any]])</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.ActionRegistry.get_action"><code class="name flex">
+<span>def <span class="ident">get_action</span></span>(<span>self, name: str) ‑> Optional[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve an action from the registry.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the action to retrieve.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Optional[Dict[str, Any]]</code></dt>
+<dd>The action details if found, otherwise None.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.ActionRegistry.get_all_actions"><code class="name flex">
+<span>def <span class="ident">get_all_actions</span></span>(<span>self) ‑> Dict[str, Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return all actions in the registry that are also in self.valid_actions.</p></div>
+</dd>
+<dt id="frame.src.framer.brain.ActionRegistry.perform_action"><code class="name flex">
+<span>async def <span class="ident">perform_action</span></span>(<span>self, name: str, *args, callback: Optional[Callable] = None, callback_args: Optional[tuple] = (), **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.ActionRegistry.remove_action"><code class="name flex">
+<span>def <span class="ident">remove_action</span></span>(<span>self, name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Remove an action from the registry.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the action to remove.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.ActionRegistry.set_execution_context"><code class="name flex">
+<span>def <span class="ident">set_execution_context</span></span>(<span>self, execution_context)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.ActionRegistry.set_framer"><code class="name flex">
+<span>def <span class="ident">set_framer</span></span>(<span>self, framer)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.brain.BasePlugin"><code class="flex name class">
+<span>class <span class="ident">BasePlugin</span></span>
+<span>(</span><span>framer)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all Frame plugins.</p>
+<p>This class defines the basic structure and interface that all plugins should follow.
+Plugins provide a way to extend the functionality of Framer instances.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>framer</code></strong></dt>
+<dd>The Framer instance that this plugin is associated with.</dd>
+</dl>
+<p>Initialize the plugin with a Framer instance.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>framer</code></strong></dt>
+<dd>The Framer instance to associate with this plugin.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BasePlugin(ABC):
+    &#34;&#34;&#34;
+    Base class for all Frame plugins.
+
+    This class defines the basic structure and interface that all plugins should follow.
+    Plugins provide a way to extend the functionality of Framer instances.
+
+    Attributes:
+        framer: The Framer instance that this plugin is associated with.
+    &#34;&#34;&#34;
+
+    def __init__(self, framer):
+        &#34;&#34;&#34;
+        Initialize the plugin with a Framer instance.
+
+        Args:
+            framer: The Framer instance to associate with this plugin.
+        &#34;&#34;&#34;
+        self.framer = framer
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.execution_context = getattr(framer, &#34;execution_context&#34;, None)
+        if self.execution_context is None:
+            self.logger.warning(
+                &#34;Plugin warning: Framer does not have an execution_context attribute. Possible unexpected behaviors may occur.&#34;
+            )
+
+    def remove_action(self, name: str):
+        &#34;&#34;&#34;
+        Remove an action from the action registry by its name.
+
+        Args:
+            name (str): The name of the action to remove.
+        &#34;&#34;&#34;
+        if name in self.framer.brain.action_registry.actions:
+            self.framer.brain.action_registry.remove_action(name)
+        else:
+            self.logger.warning(f&#34;Action &#39;{name}&#39; not found in Framer action registry.&#34;)
+
+    @abstractmethod
+    async def on_load(self):
+        &#34;&#34;&#34;
+        Abstract method that is called when the plugin is loaded.
+
+        This method should be implemented by all plugin subclasses to perform
+        any necessary initialization or setup when the plugin is loaded.
+        &#34;&#34;&#34;
+        pass
+
+    def add_action(
+        self,
+        name: str,
+        func: callable,
+        description: str,
+        priority: Priority = Priority.MEDIUM,
+    ):
+        &#34;&#34;&#34;
+        Register an action with the Framer&#39;s action registry.
+
+        This method allows the plugin to add new actions that can be performed by the Framer.
+
+        Args:
+            name (str): The name of the action.
+            func (callable): The function to be called when the action is performed.
+            description (str): A brief description of what the action does.
+        &#34;&#34;&#34;
+        if name not in self.framer.brain.action_registry.actions:
+            self.framer.brain.action_registry.add_action(
+                name, func, description, priority
+            )
+            self.logger.warning(
+                f&#34;Action &#39;{name}&#39; registered in Framer action registry.&#34;
+            )
+        else:
+            self.logger.warning(
+                f&#34;Action &#39;{name}&#39; already exists in Framer action registry.&#34;
+            )
+
+    @abstractmethod
+    async def execute(self, action: str, params: Dict[str, Any]) -&gt; Any:
+        &#34;&#34;&#34;
+        Abstract method to execute a plugin-specific action.
+
+        This method should be implemented by all plugin subclasses to handle
+        plugin-specific actions.
+
+        Args:
+            action (str): The name of the action to execute.
+            params (Dict[str, Any]): Parameters for the action.
+
+        Returns:
+            Any: The result of the action execution.
+        &#34;&#34;&#34;
+        pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="frame.src.framer.brain.plugins.base.ExamplePlugin" href="plugins/base.html#frame.src.framer.brain.plugins.base.ExamplePlugin">ExamplePlugin</a></li>
+<li><a title="frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin.Mem0SearchExtractSummarizePlugin" href="../../plugins/mem0_search_extract_summarize_plugin/mem0_search_extract_summarize_plugin.html#frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin.Mem0SearchExtractSummarizePlugin">Mem0SearchExtractSummarizePlugin</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.brain.BasePlugin.add_action"><code class="name flex">
+<span>def <span class="ident">add_action</span></span>(<span>self, name: str, func: <built-in function callable>, description: str, priority: <a title="frame.src.framer.agency.priority.Priority" href="../agency/priority.html#frame.src.framer.agency.priority.Priority">Priority</a> = 5)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Register an action with the Framer's action registry.</p>
+<p>This method allows the plugin to add new actions that can be performed by the Framer.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the action.</dd>
+<dt><strong><code>func</code></strong> :&ensp;<code>callable</code></dt>
+<dd>The function to be called when the action is performed.</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code></dt>
+<dd>A brief description of what the action does.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.BasePlugin.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, action: str, params: Dict[str, Any]) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Abstract method to execute a plugin-specific action.</p>
+<p>This method should be implemented by all plugin subclasses to handle
+plugin-specific actions.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the action to execute.</dd>
+<dt><strong><code>params</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>Parameters for the action.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Any</code></dt>
+<dd>The result of the action execution.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.BasePlugin.on_load"><code class="name flex">
+<span>async def <span class="ident">on_load</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Abstract method that is called when the plugin is loaded.</p>
+<p>This method should be implemented by all plugin subclasses to perform
+any necessary initialization or setup when the plugin is loaded.</p></div>
+</dd>
+<dt id="frame.src.framer.brain.BasePlugin.remove_action"><code class="name flex">
+<span>def <span class="ident">remove_action</span></span>(<span>self, name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Remove an action from the action registry by its name.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the action to remove.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.brain.Brain"><code class="flex name class">
+<span>class <span class="ident">Brain</span></span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[ForwardRef('ExecutionContext')] = None, memory_service: Optional[ForwardRef('MemoryService')] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], default_model: str = 'gpt-3.5-turbo', soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The Brain class represents the central decision-making and cognitive processing component of the Framer.</p>
+<p>It is responsible for processing perceptions, making decisions, and executing actions based on those decisions.
+The Brain integrates various cognitive functions, including perception processing, decision-making,
+memory management, and action execution.</p>
+<p>Key features:
+- Perception processing: Analyzes and interprets incoming perceptions.
+- Decision-making: Generates decisions based on current context, roles, goals, and perceptions.
+- Action execution: Executes decided actions using the action registry.
+- Memory integration: Utilizes the memory service for storing and retrieving information.
+- LLM integration: Uses language models for generating responses and making decisions.
+- Role and goal management: Considers active roles and goals in the decision-making process.</p>
+<p>The Brain uses a set of valid actions, derived from the ActionRegistry and default actions,
+to determine which actions can be executed. This ensures that all actions are within the
+defined capabilities of the Framer.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>The language model service for text generation and processing.</dd>
+<dt><strong><code>default_model</code></strong> :&ensp;<code>str</code></dt>
+<dd>The default language model to use.</dd>
+<dt><strong><code>roles</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>List of roles for the Brain.</dd>
+<dt><strong><code>goals</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>List of goals for the Brain.</dd>
+<dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Soul]</code></dt>
+<dd>The Soul instance associated with this Brain.</dd>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>Optional[ExecutionContext]</code></dt>
+<dd>The execution context for the Brain.</dd>
+<dt><strong><code>mind</code></strong> :&ensp;<code><a title="frame.src.framer.brain.Mind" href="#frame.src.framer.brain.Mind">Mind</a></code></dt>
+<dd>The Mind instance for cognitive processing.</dd>
+<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
+<dd>The memory service for storing and retrieving information.</dd>
+<dt><strong><code>action_registry</code></strong> :&ensp;<code><a title="frame.src.framer.brain.ActionRegistry" href="#frame.src.framer.brain.ActionRegistry">ActionRegistry</a></code></dt>
+<dd>Registry of available actions.</dd>
+</dl>
+<p>The Brain class serves as the cognitive core of the Framer, coordinating various components
+to enable intelligent decision-making and action execution.</p>
+<p>Initialize the Brain with the necessary components.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
+<dd>The language model service.</dd>
+<dt>execution_context (Optional['ExecutionContext']): The execution context.</dt>
+<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
+<dd>The memory service.</dd>
+<dt><strong><code>roles</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>Initial roles for the Brain.</dd>
+<dt><strong><code>goals</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>Initial goals for the Brain.</dd>
+<dt><strong><code>default_model</code></strong> :&ensp;<code>str</code></dt>
+<dd>The default language model to use.</dd>
+<dt><strong><code>soul</code></strong> :&ensp;<code>Optional[Soul]</code></dt>
+<dd>The Soul instance for the Brain.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Brain:
+    &#34;&#34;&#34;
+    The Brain class represents the central decision-making and cognitive processing component of the Framer.
+
+    It is responsible for processing perceptions, making decisions, and executing actions based on those decisions.
+    The Brain integrates various cognitive functions, including perception processing, decision-making,
+    memory management, and action execution.
+
+    Key features:
+    - Perception processing: Analyzes and interprets incoming perceptions.
+    - Decision-making: Generates decisions based on current context, roles, goals, and perceptions.
+    - Action execution: Executes decided actions using the action registry.
+    - Memory integration: Utilizes the memory service for storing and retrieving information.
+    - LLM integration: Uses language models for generating responses and making decisions.
+    - Role and goal management: Considers active roles and goals in the decision-making process.
+
+    The Brain uses a set of valid actions, derived from the ActionRegistry and default actions,
+    to determine which actions can be executed. This ensures that all actions are within the
+    defined capabilities of the Framer.
+
+    Attributes:
+        llm_service (LLMService): The language model service for text generation and processing.
+        default_model (str): The default language model to use.
+        roles (List[Dict[str, Any]]): List of roles for the Brain.
+        goals (List[Dict[str, Any]]): List of goals for the Brain.
+        soul (Optional[Soul]): The Soul instance associated with this Brain.
+        execution_context (Optional[ExecutionContext]): The execution context for the Brain.
+        mind (Mind): The Mind instance for cognitive processing.
+        memory_service (Optional[MemoryService]): The memory service for storing and retrieving information.
+        action_registry (ActionRegistry): Registry of available actions.
+
+    The Brain class serves as the cognitive core of the Framer, coordinating various components
+    to enable intelligent decision-making and action execution.
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        llm_service: LLMService,
+        execution_context: Optional[&#34;ExecutionContext&#34;] = None,
+        memory_service: Optional[&#34;MemoryService&#34;] = None,
+        roles: List[Dict[str, Any]] = [],
+        goals: List[Dict[str, Any]] = [],
+        default_model: str = &#34;gpt-3.5-turbo&#34;,
+        soul: Optional[Soul] = None,
+    ):
+        &#34;&#34;&#34;
+        Initialize the Brain with the necessary components.
+
+        Args:
+            llm_service (LLMService): The language model service.
+            execution_context (Optional[&#39;ExecutionContext&#39;]): The execution context.
+            memory_service (Optional[MemoryService]): The memory service.
+            roles (List[Dict[str, Any]]): Initial roles for the Brain.
+            goals (List[Dict[str, Any]]): Initial goals for the Brain.
+            default_model (str): The default language model to use.
+            soul (Optional[Soul]): The Soul instance for the Brain.
+        &#34;&#34;&#34;
+        self.logger = logging.getLogger(__name__)
+        self.logger.info(&#34;Initializing Brain&#34;)
+        self.llm_service = llm_service
+        self.execution_context = execution_context or ExecutionContext(
+            llm_service=self.llm_service
+        )
+        self.default_model = default_model
+        self.roles = roles
+        self.goals = goals
+        self.soul = soul
+        self.memory_service = memory_service
+        self.logger.info(f&#34;Memory service received: {self.memory_service}&#34;)
+
+        if self.memory_service:
+            self.logger.info(&#34;Creating Memory object&#34;)
+            self.memory = Memory(self.memory_service)
+            self.logger.info(f&#34;Memory object created: {self.memory}&#34;)
+        else:
+            self.logger.warning(&#34;No memory service provided, Memory object not created&#34;)
+            self.memory = None
+
+        self.mind = Mind(self)
+        # Initialize ActionRegistry
+        self.action_registry = ActionRegistry(execution_context=self.execution_context)
+        if not isinstance(self.execution_context, ExecutionContext):
+            raise TypeError(&#34;execution_context must be an instance of ExecutionContext&#34;)
+
+        self.logger.info(
+            f&#34;Brain initialized with memory service: {self.memory_service}&#34;
+        )
+        self.logger.info(f&#34;Brain memory object: {self.memory}&#34;)
+
+    def set_memory_service(self, memory_service: Optional[&#34;MemoryService&#34;]):
+        &#34;&#34;&#34;
+        Set the memory service for the Brain.
+
+        Args:
+            memory_service (Optional[MemoryService]): The memory service to set.
+        &#34;&#34;&#34;
+        self.memory_service = memory_service
+        if self.memory_service:
+            self.memory = Memory(self.memory_service)
+            logger.info(f&#34;Set memory service: {self.memory_service}&#34;)
+        else:
+            self.memory = None
+            logger.warning(
+                &#34;Memory service is not set. Memory operations will not be available.&#34;
+            )
+
+    def set_framer(self, framer):
+        self.framer = framer
+        self.action_registry.set_execution_context(self.execution_context)
+
+    def get_framer(self):
+        return self.framer
+
+    async def _execute_think_action(self, decision: &#34;Decision&#34;) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Execute the &#39;think&#39; action, which involves pondering on various aspects and potentially creating new tasks.
+
+        Args:
+            decision (Decision): The decision to execute.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the result of the think action, including:
+                - analysis (str): Analysis of the current situation.
+                - new_tasks (List[Dict[str, Any]]): List of new tasks if any.
+                - generate_new_prompt (bool): Whether a new prompt should be generated.
+                - new_prompt (str): The new prompt if generate_new_prompt is True.
+        &#34;&#34;&#34;
+        # Gather context for thinking
+        soul_context = {}
+        if (
+            self.execution_context
+            and hasattr(self.execution_context, &#34;soul&#34;)
+            and self.execution_context.soul
+        ):
+            soul_context = self.execution_context.soul.get_current_state()
+
+        roles_and_goals = {&#34;roles&#34;: self.roles, &#34;goals&#34;: self.goals}
+        recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
+        recent_perceptions = self.mind.get_recent_perceptions(5)
+        execution_state = self.execution_context.state if self.execution_context else {}
+        # Prepare the prompt for the LLM
+        prompt = f&#34;&#34;&#34;
+        Based on the following context, ponder and reflect on the current situation:
+        
+        Soul state: {soul_context}
+        Roles and goals: {roles_and_goals}
+        Recent thoughts: {recent_thoughts}
+        Recent perceptions: {recent_perceptions}
+
+        Current decision: {decision.to_dict()}
+
+        1. Analyze the current situation and provide insights.
+        2. Determine if any new tasks or actions are necessary.
+        3. If new tasks are needed, describe them in detail.
+        4. Decide if a new prompt should be generated for better results.
+
+        Respond with a JSON object containing the following fields:
+        - analysis: Analysis of the current situation.
+        - new_tasks: A list of new tasks if any (each task should have &#39;description&#39; and &#39;priority&#39;).
+        - generate_new_prompt: A boolean indicating whether a new prompt should be generated.
+        - new_prompt: The new prompt to use if generate_new_prompt is True.
+        &#34;&#34;&#34;
+        try:
+            await self.llm_service.get_completion(
+                prompt,
+                model=self.default_model,
+                expected_output=f&#34;&#34;&#34;
+                {{
+                    &#34;analysis&#34;: str,
+                    &#34;new_tasks&#34;: list,
+                    &#34;generate_new_prompt&#34;: bool,
+                    &#34;new_prompt&#34;: str
+                }}
+                &#34;&#34;&#34;,
+            )
+        except Exception as e:
+            logger.error(f&#34;Error in _execute_think_action: {str(e)}&#34;)
+            return {&#34;error&#34;: str(e)}
+
+    def parse_json_response(self, response: Any) -&gt; Any:
+        &#34;&#34;&#34;
+        Parse JSON response and handle potential errors.
+
+        Args:
+            response (Any): The response to parse, which could be a string or a dictionary.
+
+        Returns:
+            Any: The parsed JSON data or an error dictionary.
+        &#34;&#34;&#34;
+        if response is None:
+            logger.error(&#34;Received None response, cannot parse JSON.&#34;)
+            return {
+                &#34;action&#34;: &#34;error&#34;,
+                &#34;parameters&#34;: {
+                    &#34;error&#34;: &#34;Received None response&#34;,
+                    &#34;raw_response&#34;: str(response),
+                },
+                &#34;reasoning&#34;: &#34;Failed to parse the decision data due to None response.&#34;,
+                &#34;confidence&#34;: 0.0,
+                &#34;priority&#34;: 1,
+            }
+
+        if isinstance(response, dict):
+            # If response is already a dictionary, return it as is
+            return response
+
+        try:
+            # If response is a string, try to parse it as JSON
+            if isinstance(response, str):
+                # Remove trailing commas from the response
+                response = re.sub(r&#34;,\s*}&#34;, &#34;}&#34;, response)
+                response = re.sub(r&#34;,\s*]&#34;, &#34;]&#34;, response)
+                decision_data = json.loads(response)
+            else:
+                raise ValueError(f&#34;Unexpected response type: {type(response)}&#34;)
+
+            # Ensure priority is a Priority enum
+            priority_value = decision_data.get(&#34;priority&#34;, Priority.MEDIUM)
+            try:
+                decision_data[&#34;priority&#34;] = Priority.get(priority_value).value
+            except (KeyError, ValueError) as e:
+                logger.error(f&#34;Invalid priority: {priority_value}. Error: {e}&#34;)
+                decision_data[&#34;priority&#34;] = Priority.MEDIUM.value
+            return decision_data
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.error(f&#34;Parsing error: {e}&#34;)
+            logger.error(f&#34;Raw response: {response}&#34;)
+
+            return {
+                &#34;action&#34;: &#34;error&#34;,
+                &#34;parameters&#34;: {
+                    &#34;error&#34;: f&#34;Invalid response: {str(e)}&#34;,
+                    &#34;raw_response&#34;: str(response),
+                },
+                &#34;reasoning&#34;: &#34;Failed to parse the decision data.&#34;,
+                &#34;confidence&#34;: 0.0,
+                &#34;priority&#34;: 1,
+            }
+
+    def set_roles(self, roles: List[&#34;Role&#34;]) -&gt; None:
+        &#34;&#34;&#34;
+        Set the roles for the Agency.
+
+        Args:
+            roles (List[Role]): List of Role objects to set.
+        &#34;&#34;&#34;
+        self.roles = roles
+        self.execution_context.set_roles(roles)
+
+    async def process_perception(
+        self,
+        perception: Union[&#34;Perception&#34;, Dict[str, Any]],
+        goals: Optional[List[&#34;Goal&#34;]] = None,
+    ) -&gt; &#34;Decision&#34;:
+        &#34;&#34;&#34;
+        Process a perception and make a decision based on it.
+
+        Args:
+            perception (Union[&#39;Perception&#39;, Dict[str, Any]]): The perception to process.
+            goals (Optional[List[Goal]]): List of Goal objects to set.
+
+        Returns:
+            Decision: The decision made based on the perception.
+        &#34;&#34;&#34;
+
+        if goals is not None:
+            self.goals = goals
+            self.execution_context.set_goals(goals)
+
+        # Convert perception to Perception object if it is a dictionary
+        if isinstance(perception, dict):
+            perception = Perception.from_dict(perception)
+
+        self.mind.perceptions.append(perception)
+        available_actions = self.action_registry.get_all_actions().keys()
+        self.logger.debug(f&#34;Processing perception: {perception}&#34;)
+        self.logger.debug(f&#34;Avaliable actions: {available_actions}&#34;)
+        decision = await self.make_decision(perception)
+        if hasattr(self, &#34;framer&#34;) and getattr(self.framer, &#34;can_execute&#34;, False):
+            if decision is None:
+                self.logger.warning(&#34;No decision was made for the given perception.&#34;)
+                return None
+            result = await self.execute_decision(decision, perception)
+            return result
+        else:
+            logger.warn(&#34;Framer is not ready to execute decisions. Queuing perception.&#34;)
+            # Code to queue the perception can be added here if needed
+        return decision
+
+    async def make_decision(
+        self, perception: Optional[Perception] = None
+    ) -&gt; &#34;Decision&#34;:
+        from frame.src.framer.brain.decision import Decision
+
+        &#34;&#34;&#34;
+        Make a decision on what action to take next based on the current state and perception.
+
+        Args:
+            perception (Optional[Perception]): The current perception of the environment.
+
+        Returns:
+            Decision: The decision made based on the current state and perception,
+                      including the action to take, parameters, reasoning, confidence,
+                      and priority.
+        &#34;&#34;&#34;
+        logger.info(f&#34;Making decision based on perception: {perception}&#34;)
+        if perception is None:
+            return Decision(
+                action=&#34;no_action&#34;,
+                parameters={},
+                reasoning=&#34;No perception provided&#34;,
+                confidence=0.0,
+                priority=1,
+                related_roles=[],
+                related_goals=[],
+            )
+
+        response = await self._get_decision_prompt(perception)
+
+        if response is None or (isinstance(response, str) and not response.strip()):
+            logger.error(&#34;Received empty or None response from LLM service&#34;)
+            return Decision(
+                action=&#34;error&#34;,
+                parameters={&#34;error&#34;: &#34;Empty or None response from LLM service&#34;},
+                reasoning=&#34;Failed to get a valid response from the language model&#34;,
+                confidence=0.0,
+                priority=1,
+                related_roles=[],
+                related_goals=[],
+            )
+
+        decision_data = self.parse_json_response(response)
+
+        logger.info(f&#34;Decision data received: {decision_data}&#34;)
+
+        if isinstance(decision_data, dict) and &#34;error&#34; in decision_data:
+            logger.error(f&#34;Error in decision making: {decision_data[&#39;error&#39;]}&#34;)
+            return Decision(
+                action=&#34;error&#34;,
+                parameters={&#34;error&#34;: decision_data[&#34;error&#34;]},
+                reasoning=&#34;Error occurred during decision making&#34;,
+                confidence=0.0,
+                priority=1,
+                related_roles=[],
+                related_goals=[],
+            )
+
+        action = decision_data.get(&#34;action&#34;, &#34;respond&#34;).lower()
+        valid_actions = [
+            str(action).lower()
+            for action in self.action_registry.get_all_actions().keys()
+        ]
+
+        # Check if the action is valid
+        if action not in valid_actions:
+            # If the action is not valid, check if it&#39;s related to memory retrieval
+            if any(keyword in action for keyword in [&#34;memory&#34;, &#34;recall&#34;, &#34;retrieve&#34;]):
+                action = &#34;respond with memory retrieval&#34;
+                decision_data[&#34;action&#34;] = action
+                decision_data[&#34;reasoning&#34;] = (
+                    f&#34;Action &#39;{action}&#39; was generated based on the perception. &#34;
+                    f&#34;Using the memory retrieval plugin to process this request.&#34;
+                )
+            else:
+                invalid_action = action
+                action = &#34;respond&#34;
+                logger.warning(
+                    f&#34;Invalid action &#39;{invalid_action}&#39; generated. &#34;
+                    f&#34;Valid actions are: {&#39;, &#39;.join(valid_actions)}&#34;
+                )
+                decision_data[&#34;action&#34;] = action
+                decision_data[&#34;reasoning&#34;] = (
+                    f&#34;Invalid action &#39;{invalid_action}&#39; was generated. Defaulted to &#39;{action}&#39;.&#34;
+                )
+
+        logger.info(f&#34;Decision data generated: {decision_data}&#34;)
+        logger.info(f&#34;Action &#39;{action}&#39; generated: {decision_data}&#34;)
+
+        parameters = decision_data.get(&#34;parameters&#34;, {})
+        if action == &#34;respond with memory retrieval&#34; and &#34;query&#34; not in parameters:
+            parameters[&#34;query&#34;] = perception.data.get(&#34;text&#34;, &#34;&#34;)
+        elif &#34;topic&#34; in parameters:
+            parameters[&#34;research_topic&#34;] = parameters.pop(&#34;topic&#34;)
+        if not isinstance(parameters, dict):
+            parameters = {&#34;value&#34;: parameters}
+
+        reasoning = decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
+
+        # Check if goals are None and generate them if necessary
+        if self.execution_context and not self.execution_context.get_goals():
+            # Assuming the execution_context has a method to generate goals
+            goals = await self.execution_context.generate_goals()
+            self.execution_context.set_goals(goals)
+
+        # Consider role and goal priorities when setting decision priority
+        active_roles = [role for role in self.roles if role.status == RoleStatus.ACTIVE]
+        active_goals = [
+            goal
+            for goal in self.execution_context.get_goals()
+            if goal.status == GoalStatus.ACTIVE
+        ]
+        roles_priority = max(
+            [role.priority for role in active_roles], default=Priority.MEDIUM
+        )
+        goals_priority = max(
+            [goal.priority for goal in active_goals], default=Priority.MEDIUM
+        )
+        priority_value = None
+        priority_int = None
+        # Ensure priority is a Priority enum
+        priority_value = decision_data.get(&#34;priority&#34;, Priority.MEDIUM)
+        try:
+            if isinstance(priority_value, str):
+                priority_enum = Priority[priority_value.upper()]
+            elif isinstance(priority_value, int):
+                priority_enum = Priority(priority_value)
+            elif isinstance(priority_value, Priority):
+                priority_enum = priority_value
+            else:
+                raise ValueError(f&#34;Unexpected priority type: {type(priority_value)}&#34;)
+        except (KeyError, ValueError) as e:
+            logger.error(f&#34;Invalid priority: {priority_value}. Error: {e}&#34;)
+            priority_enum = Priority.MEDIUM
+
+        priority_int = priority_enum.value
+
+        decision = Decision(
+            action=action,
+            parameters=parameters,
+            reasoning=reasoning,
+            confidence=float(decision_data.get(&#34;confidence&#34;, 0.5)),
+            priority=priority_int,
+            related_roles=[
+                role for role in active_roles if role.priority &gt;= priority_int
+            ],
+            related_goals=[
+                goal for goal in active_goals if goal.priority &gt;= priority_int
+            ],
+        )
+        logger.info(f&#34;Final decision object: {decision}&#34;)
+        logger.info(f&#34;Decision made: {decision}&#34;)
+        if hasattr(decision, &#34;reasoning&#34;):
+            decision.reasoning += f&#34; (Aligned with {len(active_goals)} active goals)&#34;
+        else:
+            logger.error(&#34;Decision object does not have a &#39;reasoning&#39; attribute.&#34;)
+        return decision
+
+    async def _get_decision_prompt(self, perception: Optional[Perception]) -&gt; str:
+        &#34;&#34;&#34;
+        Generate a decision prompt based on the current perception and context.
+
+        Args:
+            perception (Optional[Perception]): The current perception.
+
+        Returns:
+            str: The generated decision prompt.
+        &#34;&#34;&#34;
+        valid_actions = self.action_registry.get_all_actions()
+        logger.debug(f&#34;Valid actions: {valid_actions}&#34;)
+
+        active_roles = [
+            f&#34;{role.name} (Priority: {role.priority.name}, Status: {role.status.name})&#34;
+            for role in self.roles
+            if role.status == RoleStatus.ACTIVE
+        ]
+        active_goals = [
+            f&#34;{goal.name} (Priority: {goal.priority.name}, Status: {goal.status.name})&#34;
+            for goal in self.goals
+            if goal.status == GoalStatus.ACTIVE
+        ]
+
+        prompt = f&#34;&#34;&#34;Given the following perception and context, decide on the most appropriate action to take.
+        Perception: {perception}
+        
+        Current active roles:
+        {json.dumps(active_roles, indent=2)}
+        
+        Current active goals:
+        {json.dumps(active_goals, indent=2)}
+
+        Valid actions are:
+        {json.dumps({str(action): f&#34;{self.action_registry.actions[action][&#39;description&#39;]} (Priority: {self.action_registry.actions[action][&#39;priority&#39;]})&#34; for action in self.action_registry.actions}, indent=2)}
+        
+        For each perception, carefully evaluate:
+        - The type and content of the perception
+        - The urgency and importance of the information
+        - The current active goals and roles of the system, considering their priorities and statuses
+        - Whether immediate action, further research, or no action is most appropriate
+
+        Examples of personal/memory questions (ALWAYS use &#39;respond with memory retrieval&#39; for these):
+        - &#34;What is my favorite hobby?&#34;
+        - &#34;When is my next meeting?&#34;
+        - &#34;What did I mention about my travel plans?&#34;
+
+        Examples of general knowledge questions (use &#39;respond&#39; for these):
+        - &#34;What is the largest ocean on Earth?&#34;
+        - &#34;How many planets are in the solar system?&#34;
+        - &#34;What is the freezing point of water in Fahrenheit?&#34;
+
+        IMPORTANT: For ANY question that seems to require personal information or memory, ALWAYS choose the &#39;respond with memory retrieval&#39; action. This includes questions about appointments, preferences, past conversations, or any user-specific information.
+
+        Priority levels and their meanings:
+        from frame.src.framer.agency.priority import Priority
+
+        {json.dumps({p.name: p.value for p in Priority}, indent=2)}
+
+        Respond with a JSON object containing the following fields:
+        - action: The action to take (must be EXACTLY one of the valid action names listed above)
+        - parameters: Any relevant parameters for the action (e.g., new roles, goals, tasks, research topic, or response content)
+        - reasoning: Your reasoning for this decision, including how it aligns with current roles and goals
+        - confidence: A float between 0 and 1 indicating your confidence in this decision
+        - priority: A string representing the priority level (e.g., &#34;LOW&#34;, &#34;MEDIUM&#34;, &#34;HIGH&#34;, &#34;CRITICAL&#34;) or an integer between 1 and 10 based on the urgency and importance of the action
+        - related_roles: A list of role names that are most relevant to this decision
+        - related_goals: A list of goal names that are most relevant to this decision
+
+        Ensure your decision is well-reasoned, aligns with the current active goals and roles (considering their priorities), and uses only the valid actions provided.
+        Use the provided priority levels when assigning priority to your decision, taking into account the priorities of related roles and goals.
+        &#34;&#34;&#34;
+        try:
+            response = await self.llm_service.get_completion(
+                prompt,
+                model=self.default_model,
+                additional_context={&#34;valid_actions&#34;: valid_actions},
+                expected_output=f&#34;&#34;&#34;
+                {{
+                    &#34;action&#34;: str where str in {valid_actions},
+                    &#34;parameters&#34;: dict,
+                    &#34;reasoning&#34;: str,
+                    &#34;confidence&#34;: float where 0 &lt;= float &lt;= 1,
+                    &#34;priority&#34;: str,
+                    &#34;related_roles&#34;: list,
+                    &#34;related_goals&#34;: list
+                }}
+                &#34;&#34;&#34;,
+            )
+            if isinstance(response, dict) and &#34;error&#34; in response:
+                logger.warning(f&#34;Error in LLM response: {response[&#39;error&#39;]}&#34;)
+                return response
+            return response
+        except Exception as e:
+            logger.error(f&#34;Error in _get_decision_prompt: {str(e)}&#34;)
+            return {
+                &#34;error&#34;: str(e),
+                &#34;fallback_response&#34;: &#34;An error occurred while processing your request.&#34;,
+            }
+
+    async def execute_decision(
+        self, decision: &#34;Decision&#34;, perception: Optional[Perception] = None
+    ):
+        from frame.src.framer.brain.decision import Decision
+
+        &#34;&#34;&#34;
+        Execute the decision made by the brain.
+
+        Args:
+            decision (Decision): The decision to execute.
+            perception (Optional[Perception]): The perception that led to this decision.
+        &#34;&#34;&#34;
+        logger.info(
+            f&#34;Executing decision: {decision.action} with params {decision.parameters}&#34;
+        )
+        result = None
+        try:
+            if decision.action not in self.action_registry.get_all_actions():
+                logger.warning(
+                    f&#34;Action &#39;{decision.action}&#39; not found in registry. Defaulting to &#39;process_perception&#39;.&#34;
+                )
+                decision.action = &#34;process_perception&#34;
+                if &#34;perception&#34; not in decision.parameters:
+                    decision.parameters[&#34;perception&#34;] = (
+                        perception.data if perception else None
+                    )
+
+            if decision.action == &#34;respond with memory retrieval&#34;:
+                if (
+                    &#34;query&#34; not in decision.parameters
+                    or not decision.parameters[&#34;query&#34;]
+                ):
+                    decision.parameters[&#34;query&#34;] = (
+                        perception.data.get(&#34;text&#34;, &#34;&#34;) if perception else &#34;&#34;
+                    )
+
+            result = await self.action_registry.execute_action(
+                decision.action, decision.parameters
+            )
+
+            logger.info(
+                f&#34;Action result: {result} with reasoning: {decision.reasoning}.&#34;
+            )
+
+        except Exception as e:
+            logger.error(f&#34;Error executing decision: {e}&#34;)
+            logger.exception(&#34;Detailed traceback:&#34;)
+            result = {&#34;error&#34;: str(e)}
+
+        return result
+
+    async def execute_action(self, action_name: str, parameters: dict):
+        &#34;&#34;&#34;Execute an action by its name using the action registry.&#34;&#34;&#34;
+        return await self.action_registry.execute_action(action_name, parameters)
+
+    async def _execute_decision(self, decision: Decision) -&gt; Any:
+        &#34;&#34;&#34;
+        Execute the decision made by the brain.
+
+        Args:
+            decision (Decision): The decision to execute.
+
+        Returns:
+            Any: The result of executing the decision.
+        &#34;&#34;&#34;
+        logger.debug(f&#34;Executing decision: {decision.action}&#34;)
+        logger.debug(f&#34;Decision parameters: {decision.parameters}&#34;)
+        result = None
+        try:
+            # Pass priorities to the LLM to help prioritize tasks based on relevance
+            for (
+                action_name,
+                action_info,
+            ) in self.action_registry.get_all_actions().items():
+                if action_name == decision.action:
+                    if action_name == &#34;think&#34;:
+                        result = await self._execute_think_action(decision)
+                    elif action_name == &#34;respond&#34;:
+                        result = await self.perform_task(
+                            {
+                                &#34;description&#34;: decision.parameters.get(&#34;content&#34;, &#34;&#34;),
+                                &#34;workflow_id&#34;: &#34;default&#34;,
+                            }
+                        )
+                    else:
+                        print(f&#34;Executing action: {action_name}&#34;)
+                        print(&#34;Action info: &#34;, action_info)
+                        try:
+                            result = await self.action_registry.execute_action(
+                                action_name, decision.parameters
+                            )
+                        except Exception as e:
+                            logger.error(f&#34;Error executing action &#39;{action_name}&#39;: {e}&#34;)
+                            result = {
+                                &#34;error&#34;: str(e),
+                                &#34;fallback_response&#34;: &#34;An error occurred while processing your request. Please try again.&#34;,
+                            }
+                    break
+            else:
+                raise ValueError(f&#34;Action &#39;{decision.action}&#39; not found in registry.&#34;)
+
+            logger.info(f&#34;Executed action: {decision.action}&#34;)
+            logger.debug(f&#34;Action result: {result}&#34;)
+            logger.debug(f&#34;Decision reasoning: {decision.reasoning}&#34;)
+
+        except Exception as e:
+            logger.error(f&#34;Error executing decision: {e}&#34;)
+            logger.exception(&#34;Detailed traceback:&#34;)
+            result = {&#34;error&#34;: str(e)}
+
+        return result
+
+    async def _execute_think_action(self, decision: Decision):
+        &#34;&#34;&#34;
+        Execute the &#39;think&#39; action, which involves pondering on various aspects and potentially creating new tasks.
+
+        Args:
+            decision (Decision): The decision to execute.
+
+        Returns:
+            Any: The result of the think action.
+        &#34;&#34;&#34;
+        # Gather context for thinking
+        soul_context = (
+            self.execution_context.soul.get_current_state()
+            if self.execution_context.soul
+            else {}
+        )
+        roles_and_goals = {&#34;roles&#34;: self.roles, &#34;goals&#34;: self.goals}
+        recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
+        recent_perceptions = self.mind.get_recent_perceptions(
+            5
+        )  # Use a fixed number instead of recent_perceptions_limit
+
+        # Prepare the prompt for the LLM
+        prompt = f&#34;&#34;&#34;
+        Based on the following context, ponder and reflect on the current situation:
+
+        Soul state: {soul_context}
+        Roles and goals: {roles_and_goals}
+        Recent thoughts: {recent_thoughts}
+        Recent perceptions: {recent_perceptions}
+        Execution state: {self.execution_context.state}
+
+        Current decision: {decision.to_dict()}
+
+        1. Analyze the current situation and provide insights.
+        2. Determine if any new tasks or actions are necessary.
+        3. If new tasks are needed, describe them in detail.
+        4. Decide if a new prompt should be generated for better results.
+
+        Respond with a JSON object containing:
+        - analysis: Your analysis of the situation
+        - new_tasks: A list of new tasks if any (each task should have &#39;description&#39; and &#39;priority&#39;)
+        - generate_new_prompt: Boolean indicating if a new prompt should be generated
+        - new_prompt: The new prompt if generate_new_prompt is true
+        &#34;&#34;&#34;
+
+        response = await self.llm_service.get_completion(
+            prompt, model=self.default_model
+        )
+        result = json.loads(response)
+
+        # Process the result
+        self.mind.think(result[&#34;analysis&#34;])
+
+        if result[&#34;new_tasks&#34;]:
+            for task_data in result[&#34;new_tasks&#34;]:
+                new_task = self.agency.create_task(**task_data)
+                self.agency.add_task(new_task)
+
+        if result[&#34;generate_new_prompt&#34;]:
+            new_perception = Perception(
+                type=&#34;thought&#34;, data={&#34;query&#34;: result[&#34;new_prompt&#34;]}
+            )
+            await self.process_perception(new_perception)
+
+        return result
+
+    async def _generate_new_query(self, decision: Decision) -&gt; str:
+        &#34;&#34;&#34;
+        Generate a new query based on the decision.
+
+        Args:
+            decision (Decision): The decision to base the new query on.
+
+        Returns:
+            str: The generated query.
+        &#34;&#34;&#34;
+        prompt = (
+            f&#34;Based on the following decision, generate a new query or thought:\n\n&#34;
+            f&#34;Decision: {decision.to_dict()}\n\nNew query:&#34;
+        )
+        response = await self.llm_service.get_completion(
+            prompt, model=self.default_model
+        )
+        return response.strip()</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.brain.Brain.execute_action"><code class="name flex">
+<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, parameters: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute an action by its name using the action registry.</p></div>
+</dd>
+<dt id="frame.src.framer.brain.Brain.execute_decision"><code class="name flex">
+<span>async def <span class="ident">execute_decision</span></span>(<span>self, decision: <a title="frame.src.framer.brain.Decision" href="#frame.src.framer.brain.Decision">Decision</a>, perception: Optional[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.Brain.get_framer"><code class="name flex">
+<span>def <span class="ident">get_framer</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.Brain.make_decision"><code class="name flex">
+<span>async def <span class="ident">make_decision</span></span>(<span>self, perception: Optional[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>] = None) ‑> <a title="frame.src.models.framer.brain.decision.decision.Decision" href="../../models/framer/brain/decision/decision.html#frame.src.models.framer.brain.decision.decision.Decision">Decision</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.Brain.parse_json_response"><code class="name flex">
+<span>def <span class="ident">parse_json_response</span></span>(<span>self, response: Any) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parse JSON response and handle potential errors.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>response</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The response to parse, which could be a string or a dictionary.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Any</code></dt>
+<dd>The parsed JSON data or an error dictionary.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Brain.process_perception"><code class="name flex">
+<span>async def <span class="ident">process_perception</span></span>(<span>self, perception: Union[ForwardRef('Perception'), Dict[str, Any]], goals: Optional[List[ForwardRef('Goal')]] = None) ‑> <a title="frame.src.models.framer.brain.decision.decision.Decision" href="../../models/framer/brain/decision/decision.html#frame.src.models.framer.brain.decision.decision.Decision">Decision</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Process a perception and make a decision based on it.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>perception (Union['Perception', Dict[str, Any]]): The perception to process.</dt>
+<dt><strong><code>goals</code></strong> :&ensp;<code>Optional[List[Goal]]</code></dt>
+<dd>List of Goal objects to set.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="frame.src.framer.brain.Decision" href="#frame.src.framer.brain.Decision">Decision</a></code></dt>
+<dd>The decision made based on the perception.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Brain.set_framer"><code class="name flex">
+<span>def <span class="ident">set_framer</span></span>(<span>self, framer)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.Brain.set_memory_service"><code class="name flex">
+<span>def <span class="ident">set_memory_service</span></span>(<span>self, memory_service: Optional[ForwardRef('MemoryService')])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the memory service for the Brain.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>memory_service</code></strong> :&ensp;<code>Optional[MemoryService]</code></dt>
+<dd>The memory service to set.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Brain.set_roles"><code class="name flex">
+<span>def <span class="ident">set_roles</span></span>(<span>self, roles: List[ForwardRef('Role')]) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the roles for the Agency.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>roles</code></strong> :&ensp;<code>List[Role]</code></dt>
+<dd>List of Role objects to set.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.brain.Decision"><code class="flex name class">
+<span>class <span class="ident">Decision</span></span>
+<span>(</span><span>**data)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a decision made by the Brain component of a Framer.</p>
+<p>To extend decision-making capabilities, you can add new actions to the
+ActionRegistry and ensure they are recognized in the decision-making process.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
+<dd>The action to be taken.</dd>
+<dt><strong><code>parameters</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>Parameters for the action.</dd>
+<dt><strong><code>reasoning</code></strong> :&ensp;<code>str</code></dt>
+<dd>The reasoning behind the decision.</dd>
+<dt><strong><code>confidence</code></strong> :&ensp;<code>float</code></dt>
+<dd>The confidence level of the decision.</dd>
+<dt><strong><code>priority</code></strong> :&ensp;<code>int</code></dt>
+<dd>The priority of the decision.</dd>
+<dt><strong><code>expected_results</code></strong> :&ensp;<code>Optional[Any]</code></dt>
+<dd>The expected results of the decision.</dd>
+<dt><strong><code>task_status</code></strong> :&ensp;<code>TaskStatus</code></dt>
+<dd>The status of the associated task.</dd>
+<dt><strong><code>related_roles</code></strong> :&ensp;<code>List[Role]</code></dt>
+<dd>Roles related to this decision.</dd>
+<dt><strong><code>related_goals</code></strong> :&ensp;<code>List[Goal]</code></dt>
+<dd>Goals related to this decision.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Decision(DecisionModel):
+    &#34;&#34;&#34;
+    Represents a decision made by the Brain component of a Framer.
+
+    To extend decision-making capabilities, you can add new actions to the
+    ActionRegistry and ensure they are recognized in the decision-making process.
+
+    Attributes:
+        action (str): The action to be taken.
+        parameters (Dict[str, Any]): Parameters for the action.
+        reasoning (str): The reasoning behind the decision.
+        confidence (float): The confidence level of the decision.
+        priority (int): The priority of the decision.
+        expected_results (Optional[Any]): The expected results of the decision.
+        task_status (TaskStatus): The status of the associated task.
+        related_roles (List[Role]): Roles related to this decision.
+        related_goals (List[Goal]): Goals related to this decision.
+    &#34;&#34;&#34;
+
+    expected_results: List[Any] = Field(
+        default_factory=list, description=&#34;The expected results of the decision&#34;
+    )
+    task_status: &#34;TaskStatus&#34; = Field(
+        default=TaskStatus.PENDING, description=&#34;Status of the associated task&#34;
+    )
+    related_roles: List[&#34;Role&#34;] = Field(
+        default_factory=list, description=&#34;Roles related to this decision&#34;
+    )
+    related_goals: List[&#34;Goal&#34;] = Field(
+        default_factory=list, description=&#34;Goals related to this decision&#34;
+    )
+
+    @classmethod
+    def from_json(cls, json_data: Union[str, Dict[str, Any]]) -&gt; &#34;Decision&#34;:
+        &#34;&#34;&#34;
+        Create a Decision instance from a JSON string or dictionary.
+
+        Args:
+            json_str (str or dict): JSON string or dictionary representing a Decision.
+
+        Returns:
+            Decision: An instance of the Decision class.
+        &#34;&#34;&#34;
+        if isinstance(json_data, dict):
+            decision_dict = json_data
+        else:
+            decision_dict = json.loads(json_data)
+
+        # Convert priority from string or integer to Priority enum
+        from frame.src.framer.agency import Priority
+
+        decision_dict[&#34;priority&#34;] = Priority.from_value(
+            decision_dict.get(&#34;priority&#34;, Priority.MEDIUM)
+        )
+
+        return cls(**decision_dict)
+
+    def to_dict(self) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Convert the Decision object to a dictionary.
+
+        Returns:
+            Dict[str, Any]: A dictionary representation of the Decision.
+        &#34;&#34;&#34;
+        return {
+            &#34;action&#34;: self.action,
+            &#34;parameters&#34;: self.parameters,
+            &#34;reasoning&#34;: self.reasoning,
+            &#34;confidence&#34;: self.confidence,
+            &#34;priority&#34;: self.priority,
+            &#34;expected_results&#34;: self.expected_results,
+            &#34;task_status&#34;: self.task_status.value,
+            &#34;related_roles&#34;: [
+                role.to_dict() if hasattr(role, &#34;to_dict&#34;) else str(role)
+                for role in self.related_roles
+            ],
+            &#34;related_goals&#34;: [
+                goal.dict() if hasattr(goal, &#34;dict&#34;) else str(goal)
+                for goal in self.related_goals
+            ],
+        }
+
+    @classmethod
+    def create(
+        cls,
+        action: str,
+        parameters: Dict[str, Any],
+        reasoning: str,
+        confidence: float = 0.7,
+        priority: int = 5,
+        expected_results: Optional[Any] = None,
+        task_status: &#34;TaskStatus&#34; = None,
+        related_roles: List[&#34;Role&#34;] = None,
+        related_goals: List[&#34;Goal&#34;] = None,
+    ) -&gt; &#34;Decision&#34;:
+        &#34;&#34;&#34;
+        Create a new Decision instance with the given parameters.
+
+        Args:
+            action (str): The action to be taken.
+            parameters (Dict[str, Any]): Parameters for the action.
+            reasoning (str): The reasoning behind the decision.
+            confidence (float, optional): The confidence level of the decision. Defaults to 0.7.
+            priority (int, optional): The priority of the decision on a scale from 1 (lowest) to 10 (highest). Defaults to 5.
+            expected_results (Optional[Any], optional): The expected results of the decision. Defaults to None.
+            task_status (TaskStatus, optional): The status of the associated task. Defaults to PENDING.
+            related_roles (List[Role], optional): Roles related to this decision. Defaults to None.
+            related_goals (List[Goal], optional): Goals related to this decision. Defaults to None.
+
+        Returns:
+            Decision: A new Decision instance.
+        &#34;&#34;&#34;
+        return cls(
+            action=action,
+            parameters=parameters,
+            reasoning=reasoning,
+            confidence=confidence,
+            priority=priority,
+            expected_results=expected_results,
+            task_status=task_status,
+            related_roles=related_roles or [],
+            related_goals=related_goals or [],
+        )
+
+    @staticmethod
+    def convert_priority(priority: Union[str, int]) -&gt; int:
+        &#34;&#34;&#34;
+        Convert a priority level from string or integer to an integer value.
+
+        Args:
+            priority (Union[str, int]): The priority level as a string or integer.
+
+        Returns:
+            int: The priority level as an integer.
+        &#34;&#34;&#34;
+        if isinstance(priority, int):
+            return priority
+        if isinstance(priority, str):
+            try:
+                return Priority[priority.upper()].value
+            except KeyError:
+                raise ValueError(f&#34;Invalid priority level: {priority}&#34;)
+        raise ValueError(&#34;Priority must be a string or Priority enum&#34;)
+
+    def __str__(self) -&gt; str:
+        &#34;&#34;&#34;
+        Return a string representation of the Decision.
+
+        Returns:
+            str: A string representation of the Decision.
+        &#34;&#34;&#34;
+        return (
+            f&#34;Decision(action={self.action}, &#34;
+            f&#34;confidence={self.confidence:.2f}, &#34;
+            f&#34;priority={self.priority}, &#34;
+            f&#34;task_status={self.task_status.value}, &#34;
+            f&#34;related_roles={len(self.related_roles)}, &#34;
+            f&#34;related_goals={len(self.related_goals)})&#34;
+        )
+
+    class Config:
+        arbitrary_types_allowed = True</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="frame.src.models.framer.brain.decision.decision.Decision" href="../../models/framer/brain/decision/decision.html#frame.src.models.framer.brain.decision.decision.Decision">Decision</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.brain.Decision.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.Decision.expected_results"><code class="name">var <span class="ident">expected_results</span> : List[Any]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.Decision.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.Decision.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.Decision.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.Decision.related_goals"><code class="name">var <span class="ident">related_goals</span> : List[Goal]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.Decision.related_roles"><code class="name">var <span class="ident">related_roles</span> : List[Role]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : TaskStatus</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="frame.src.framer.brain.Decision.convert_priority"><code class="name flex">
+<span>def <span class="ident">convert_priority</span></span>(<span>priority: Union[str, int]) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert a priority level from string or integer to an integer value.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>priority</code></strong> :&ensp;<code>Union[str, int]</code></dt>
+<dd>The priority level as a string or integer.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>The priority level as an integer.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Decision.create"><code class="name flex">
+<span>def <span class="ident">create</span></span>(<span>action: str, parameters: Dict[str, Any], reasoning: str, confidence: float = 0.7, priority: int = 5, expected_results: Optional[Any] = None, task_status: TaskStatus = None, related_roles: List[ForwardRef('Role')] = None, related_goals: List[ForwardRef('Goal')] = None) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new Decision instance with the given parameters.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
+<dd>The action to be taken.</dd>
+<dt><strong><code>parameters</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>Parameters for the action.</dd>
+<dt><strong><code>reasoning</code></strong> :&ensp;<code>str</code></dt>
+<dd>The reasoning behind the decision.</dd>
+<dt><strong><code>confidence</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The confidence level of the decision. Defaults to 0.7.</dd>
+<dt><strong><code>priority</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The priority of the decision on a scale from 1 (lowest) to 10 (highest). Defaults to 5.</dd>
+<dt><strong><code>expected_results</code></strong> :&ensp;<code>Optional[Any]</code>, optional</dt>
+<dd>The expected results of the decision. Defaults to None.</dd>
+<dt><strong><code>task_status</code></strong> :&ensp;<code>TaskStatus</code>, optional</dt>
+<dd>The status of the associated task. Defaults to PENDING.</dd>
+<dt><strong><code>related_roles</code></strong> :&ensp;<code>List[Role]</code>, optional</dt>
+<dd>Roles related to this decision. Defaults to None.</dd>
+<dt><strong><code>related_goals</code></strong> :&ensp;<code>List[Goal]</code>, optional</dt>
+<dd>Goals related to this decision. Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="frame.src.framer.brain.Decision" href="#frame.src.framer.brain.Decision">Decision</a></code></dt>
+<dd>A new Decision instance.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Decision.from_json"><code class="name flex">
+<span>def <span class="ident">from_json</span></span>(<span>json_data: Union[str, Dict[str, Any]]) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a Decision instance from a JSON string or dictionary.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>json_str</code></strong> :&ensp;<code>str</code> or <code>dict</code></dt>
+<dd>JSON string or dictionary representing a Decision.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="frame.src.framer.brain.Decision" href="#frame.src.framer.brain.Decision">Decision</a></code></dt>
+<dd>An instance of the Decision class.</dd>
+</dl></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.brain.Decision.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self) ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert the Decision object to a dictionary.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Dict[str, Any]</code></dt>
+<dd>A dictionary representation of the Decision.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.brain.Memory"><code class="flex name class">
+<span>class <span class="ident">Memory</span></span>
+<span>(</span><span>memory_service: Optional[ForwardRef('MemoryService')] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The Memory class manages memory storage and retrieval for Framers.</p>
+<p>It supports both global and multi-user memory contexts. When no user ID is provided,
+memories are stored in a global context. When multiple user IDs are provided, the
+memory retrieval process searches across all specified user IDs.</p>
+<p>This class now uses the MemoryService for all memory operations.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Memory:
+    &#34;&#34;&#34;
+    The Memory class manages memory storage and retrieval for Framers.
+
+    It supports both global and multi-user memory contexts. When no user ID is provided,
+    memories are stored in a global context. When multiple user IDs are provided, the
+    memory retrieval process searches across all specified user IDs.
+
+    This class now uses the MemoryService for all memory operations.
+    &#34;&#34;&#34;
+
+    def __init__(self, memory_service: Optional[&#34;MemoryService&#34;] = None):
+        self.core = None  # Initialize core attribute
+        self.mem0 = None  # Initialize mem0 attribute
+        if memory_service is None:
+            from frame.src.services.memory.main import MemoryService
+
+            memory_service = MemoryService()
+        self.memory_service = memory_service
+        self.user_id = &#34;default&#34;
+
+    def store(
+        self,
+        memory: str,
+        user_id: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ):
+        &#34;&#34;&#34;
+        Store a memory using the memory service.
+
+        Args:
+            memory (str): The memory to store.
+            user_id (Optional[str]): The user ID to associate with the memory.
+            metadata (Optional[Dict[str, Any]]): Additional metadata for the memory.
+        &#34;&#34;&#34;
+        if self.memory_service:
+            self.memory_service.add_memory(memory, user_id or self.user_id, metadata)
+        else:
+            logger.warning(&#34;Memory service is not initialized. Unable to store memory.&#34;)
+
+    def retrieve(
+        self, query: str, user_id: Optional[str] = None
+    ) -&gt; List[Dict[str, Any]]:
+        &#34;&#34;&#34;
+        Retrieve memories based on a query.
+
+        Args:
+            query (str): The query to search for in memories.
+            user_id (Optional[str]): The user ID to search memories for.
+
+        Returns:
+            List[Dict[str, Any]]: A list of matching memories.
+        &#34;&#34;&#34;
+        return self.memory_service.search(query, user_id or self.user_id)
+
+    def update(self, memory_id: str, memory: str, user_id: Optional[str] = None):
+        &#34;&#34;&#34;
+        Update an existing memory.
+
+        Args:
+            memory_id (str): The ID of the memory to update.
+            memory (str): The updated memory content.
+            user_id (Optional[str]): The user ID associated with the memory.
+        &#34;&#34;&#34;
+        self.memory_service.update(memory_id, memory, user_id or self.user_id)
+
+    def delete(self, memory_id: str, user_id: Optional[str] = None):
+        &#34;&#34;&#34;
+        Delete a memory.
+
+        Args:
+            memory_id (str): The ID of the memory to delete.
+            user_id (Optional[str]): The user ID associated with the memory.
+        &#34;&#34;&#34;
+        self.memory_service.delete(memory_id, user_id or self.user_id)
+
+    def get_core_memory(self) -&gt; Any:
+        &#34;&#34;&#34;
+        Get the core memory.
+
+        Returns:
+            Any: The core memory object.
+        &#34;&#34;&#34;
+        return self.core
+
+    def add_short_term_memory(self, memory: str, user_id: Optional[str] = None):
+        &#34;&#34;&#34;
+        Add a short-term memory.
+
+        Args:
+            memory (str): The memory to add.
+            user_id (Optional[str]): The user ID to associate with the memory.
+        &#34;&#34;&#34;
+        # Implementation for adding short-term memory
+        pass
+
+    def get_all_memories(self, user_id: Optional[str] = None) -&gt; List[Dict[str, Any]]:
+        &#34;&#34;&#34;
+        Get all memories for a user.
+
+        Args:
+            user_id (Optional[str]): The user ID to get memories for.
+
+        Returns:
+            List[Dict[str, Any]]: A list of all memories for the user.
+        &#34;&#34;&#34;
+        return self.memory_service.get_all(user_id or self.user_id)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.brain.Memory.add_short_term_memory"><code class="name flex">
+<span>def <span class="ident">add_short_term_memory</span></span>(<span>self, memory: str, user_id: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a short-term memory.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>memory</code></strong> :&ensp;<code>str</code></dt>
+<dd>The memory to add.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The user ID to associate with the memory.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Memory.delete"><code class="name flex">
+<span>def <span class="ident">delete</span></span>(<span>self, memory_id: str, user_id: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Delete a memory.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>memory_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ID of the memory to delete.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The user ID associated with the memory.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Memory.get_all_memories"><code class="name flex">
+<span>def <span class="ident">get_all_memories</span></span>(<span>self, user_id: Optional[str] = None) ‑> List[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get all memories for a user.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The user ID to get memories for.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[Dict[str, Any]]</code></dt>
+<dd>A list of all memories for the user.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Memory.get_core_memory"><code class="name flex">
+<span>def <span class="ident">get_core_memory</span></span>(<span>self) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the core memory.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Any</code></dt>
+<dd>The core memory object.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Memory.retrieve"><code class="name flex">
+<span>def <span class="ident">retrieve</span></span>(<span>self, query: str, user_id: Optional[str] = None) ‑> List[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve memories based on a query.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>The query to search for in memories.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The user ID to search memories for.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[Dict[str, Any]]</code></dt>
+<dd>A list of matching memories.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Memory.store"><code class="name flex">
+<span>def <span class="ident">store</span></span>(<span>self, memory: str, user_id: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Store a memory using the memory service.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>memory</code></strong> :&ensp;<code>str</code></dt>
+<dd>The memory to store.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The user ID to associate with the memory.</dd>
+<dt><strong><code>metadata</code></strong> :&ensp;<code>Optional[Dict[str, Any]]</code></dt>
+<dd>Additional metadata for the memory.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Memory.update"><code class="name flex">
+<span>def <span class="ident">update</span></span>(<span>self, memory_id: str, memory: str, user_id: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Update an existing memory.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>memory_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ID of the memory to update.</dd>
+<dt><strong><code>memory</code></strong> :&ensp;<code>str</code></dt>
+<dd>The updated memory content.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>The user ID associated with the memory.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.brain.Mind"><code class="flex name class">
+<span>class <span class="ident">Mind</span></span>
+<span>(</span><span>brain: Any, recent_memories_limit: int = 5)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The Mind class represents the cognitive processes of a Framer.
+It manages thoughts, decision-making processes, perceptions, and interacts with the Brain and Soul components.</p>
+<p>Key features:
+- Thought management: Stores and retrieves thoughts generated during cognitive processes.
+- Perception processing: Handles incoming perceptions and integrates them into the cognitive framework.
+- Decision-making: Generates decisions based on current perceptions, thoughts, and context.
+- Memory management: Maintains a limited number of recent memories for quick access.
+- Interaction with Brain and Soul: Facilitates communication between different Framer components.</p>
+<p>The Mind class serves as a crucial intermediary between raw perceptions and high-level decision-making,
+providing a layer of cognitive processing that enriches the Framer's capabilities.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>brain</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The Brain instance associated with this Mind.</dd>
+<dt><strong><code>thoughts</code></strong> :&ensp;<code>List[Dict[str, Any]]</code></dt>
+<dd>A list of thoughts, each represented as a dictionary.</dd>
+<dt><strong><code>current_thought</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>The most recent thought generated.</dd>
+<dt><strong><code>perceptions</code></strong> :&ensp;<code>List[Perception]</code></dt>
+<dd>A list of recent perceptions.</dd>
+<dt><strong><code>recent_memories_limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>The maximum number of recent memories/perceptions to keep.</dd>
+</dl>
+<p>The Mind class plays a vital role in the Framer's cognitive architecture, enabling sophisticated
+thought processes and decision-making capabilities.</p>
+<p>Initialize the Mind instance.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>brain</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The Brain instance associated with this Mind.</dd>
+<dt><strong><code>recent_memories_limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of recent memories/perceptions to keep. Defaults to 5.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Mind:
+    &#34;&#34;&#34;
+    The Mind class represents the cognitive processes of a Framer.
+    It manages thoughts, decision-making processes, perceptions, and interacts with the Brain and Soul components.
+
+    Key features:
+    - Thought management: Stores and retrieves thoughts generated during cognitive processes.
+    - Perception processing: Handles incoming perceptions and integrates them into the cognitive framework.
+    - Decision-making: Generates decisions based on current perceptions, thoughts, and context.
+    - Memory management: Maintains a limited number of recent memories for quick access.
+    - Interaction with Brain and Soul: Facilitates communication between different Framer components.
+
+    The Mind class serves as a crucial intermediary between raw perceptions and high-level decision-making,
+    providing a layer of cognitive processing that enriches the Framer&#39;s capabilities.
+
+    Attributes:
+        brain (Any): The Brain instance associated with this Mind.
+        thoughts (List[Dict[str, Any]]): A list of thoughts, each represented as a dictionary.
+        current_thought (Dict[str, Any]): The most recent thought generated.
+        perceptions (List[Perception]): A list of recent perceptions.
+        recent_memories_limit (int): The maximum number of recent memories/perceptions to keep.
+
+    The Mind class plays a vital role in the Framer&#39;s cognitive architecture, enabling sophisticated
+    thought processes and decision-making capabilities.
+    &#34;&#34;&#34;
+
+    def __init__(self, brain: Any, recent_memories_limit: int = 5):
+        &#34;&#34;&#34;
+        Initialize the Mind instance.
+
+        Args:
+            brain (Any): The Brain instance associated with this Mind.
+            recent_memories_limit (int): The number of recent memories/perceptions to keep. Defaults to 5.
+        &#34;&#34;&#34;
+        self.brain = brain
+        self.thoughts: List[Dict[str, Any]] = []
+        self.current_thought: Dict[str, Any] = {}
+        self.perceptions: List[Perception] = []
+        self.recent_memories_limit = recent_memories_limit
+
+    def set_recent_memories_limit(self, limit: int):
+        &#34;&#34;&#34;
+        Set the limit for recent memories/perceptions.
+
+        Args:
+            limit (int): The new limit for recent memories/perceptions.
+        &#34;&#34;&#34;
+        self.recent_memories_limit = limit
+
+    async def make_decision(self, perception: Perception) -&gt; Decision:
+        &#34;&#34;&#34;
+        Make a decision based on the current perceptions and thoughts.
+
+        Args:
+            perception (Perception): The perception to base the decision on.
+
+        Returns:
+            Decision: The decision made.
+        &#34;&#34;&#34;
+        # Get the decision prompt from the brain
+        prompt = self.brain._get_decision_prompt(perception)
+
+        # Use the LLM service to get a decision
+        response = await get_completion(
+            self.brain.llm_service, prompt, model=self.brain.default_model
+        )
+        try:
+            if isinstance(response, AsyncMock):
+                # For testing purposes, return a default decision
+                return Decision(
+                    action=&#34;default_action&#34;,
+                    parameters={},
+                    reasoning=&#34;Default decision for testing&#34;,
+                    confidence=0.5,
+                    priority=5,
+                )
+
+            decision_data = json.loads(response) if isinstance(response, str) else {}
+            action = decision_data.get(&#34;action&#34;, &#34;default_action&#34;)
+            if action not in self.brain.action_registry.actions:
+                logger.warning(
+                    f&#34;Invalid action: {action}. Defaulting to &#39;default_action&#39;.&#34;
+                )
+                action = &#34;default_action&#34;
+                reasoning = f&#34;Invalid action &#39;{action}&#39; was generated. Defaulted to &#39;default_action&#39;.&#34;
+            else:
+                reasoning = decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
+
+            decision = Decision(
+                action=action,
+                parameters=decision_data.get(&#34;parameters&#34;, {}),
+                reasoning=decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;),
+                confidence=float(decision_data.get(&#34;confidence&#34;, 0.5)),
+                priority=int(decision_data.get(&#34;priority&#34;, 5)),
+            )
+        except json.JSONDecodeError:
+            logger.error(f&#34;Failed to parse decision response: {response}&#34;)
+            decision = Decision(
+                action=&#34;think&#34;,
+                parameters={&#34;error&#34;: &#34;Failed to parse decision&#34;},
+                reasoning=&#34;The decision response could not be parsed as JSON.&#34;,
+                confidence=0.1,
+                priority=1,
+            )
+
+        logger.debug(f&#34;Decision made: {decision}&#34;)
+        return decision
+
+    def think(self, thought: str) -&gt; None:
+        &#34;&#34;&#34;
+        Add a new thought to the Mind.
+
+        Args:
+            thought (str): The thought to add.
+        &#34;&#34;&#34;
+        new_thought = {&#34;content&#34;: thought, &#34;timestamp&#34;: datetime.now()}
+        self.thoughts.append(new_thought)
+        self.current_thought = new_thought
+        logger.debug(f&#34;New thought: {thought}&#34;)
+
+    def generate_thoughts(self) -&gt; None:
+        &#34;&#34;&#34;
+        Generate new thoughts based on current perceptions and memories.
+        This method should be implemented to interact with the Soul&#39;s memory
+        and the Brain&#39;s decision-making processes.
+        &#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Generate new thoughts based on current perceptions and memories.
+        This method should be implemented to interact with the Soul&#39;s memory
+        and the Brain&#39;s decision-making processes.
+        &#34;&#34;&#34;
+        # TODO: Implement thought generation logic
+        pass
+
+    def get_current_thought(self) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Get the current thought of the Mind.
+
+        Returns:
+            Dict[str, Any]: The current thought with its timestamp.
+        &#34;&#34;&#34;
+        return self.current_thought
+
+    def get_all_thoughts(self) -&gt; List[Dict[str, Any]]:
+        &#34;&#34;&#34;
+        Get all thoughts stored in the Mind.
+
+        Returns:
+            List[Dict[str, Any]]: All thoughts with their timestamps.
+        &#34;&#34;&#34;
+        return sorted(self.thoughts, key=lambda x: x[&#34;timestamp&#34;], reverse=True)
+
+    def clear_thoughts(self) -&gt; None:
+        &#34;&#34;&#34;
+        Clear all thoughts from the Mind.
+        &#34;&#34;&#34;
+        self.thoughts.clear()
+        self.current_thought = {}
+        logger.debug(&#34;Thoughts cleared&#34;)
+
+    async def process_perception(self, perception: Perception) -&gt; Decision:
+        &#34;&#34;&#34;
+        Process a perception and generate thoughts based on it.
+
+        Args:
+            perception (Perception): The perception to process.
+
+        Returns:
+            Decision: The decision made based on the perception.
+        &#34;&#34;&#34;
+        self.perceptions.append(perception)
+        perception_type = perception.type
+        if perception_type:
+            thought = f&#34;Processed perception: {perception_type}&#34;
+        else:
+            thought = &#34;Processed perception without type&#34;
+        self.think(thought)
+        return await self.make_decision(perception)
+
+    def get_recent_perceptions(self, n: int = 5) -&gt; List[Perception]:
+        &#34;&#34;&#34;
+        Get the n most recent perceptions.
+
+        Args:
+            n (int): The number of recent perceptions to retrieve.
+
+        Returns:
+            List[Perception]: The n most recent perceptions.
+        &#34;&#34;&#34;
+        if n &lt;= 0:
+            return []
+        return self.perceptions[-n:]</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.brain.Mind.clear_thoughts"><code class="name flex">
+<span>def <span class="ident">clear_thoughts</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clear all thoughts from the Mind.</p></div>
+</dd>
+<dt id="frame.src.framer.brain.Mind.generate_thoughts"><code class="name flex">
+<span>def <span class="ident">generate_thoughts</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate new thoughts based on current perceptions and memories.
+This method should be implemented to interact with the Soul's memory
+and the Brain's decision-making processes.</p></div>
+</dd>
+<dt id="frame.src.framer.brain.Mind.get_all_thoughts"><code class="name flex">
+<span>def <span class="ident">get_all_thoughts</span></span>(<span>self) ‑> List[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get all thoughts stored in the Mind.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[Dict[str, Any]]</code></dt>
+<dd>All thoughts with their timestamps.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Mind.get_current_thought"><code class="name flex">
+<span>def <span class="ident">get_current_thought</span></span>(<span>self) ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the current thought of the Mind.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Dict[str, Any]</code></dt>
+<dd>The current thought with its timestamp.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Mind.get_recent_perceptions"><code class="name flex">
+<span>def <span class="ident">get_recent_perceptions</span></span>(<span>self, n: int = 5) ‑> List[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the n most recent perceptions.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of recent perceptions to retrieve.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[Perception]</code></dt>
+<dd>The n most recent perceptions.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Mind.make_decision"><code class="name flex">
+<span>async def <span class="ident">make_decision</span></span>(<span>self, perception: <a title="frame.src.framer.brain.mind.perception.perception.Perception" href="mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Make a decision based on the current perceptions and thoughts.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>perception</code></strong> :&ensp;<code>Perception</code></dt>
+<dd>The perception to base the decision on.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="frame.src.framer.brain.Decision" href="#frame.src.framer.brain.Decision">Decision</a></code></dt>
+<dd>The decision made.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Mind.process_perception"><code class="name flex">
+<span>async def <span class="ident">process_perception</span></span>(<span>self, perception: <a title="frame.src.framer.brain.mind.perception.perception.Perception" href="mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>) ‑> <a title="frame.src.framer.brain.decision.decision.Decision" href="decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Process a perception and generate thoughts based on it.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>perception</code></strong> :&ensp;<code>Perception</code></dt>
+<dd>The perception to process.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="frame.src.framer.brain.Decision" href="#frame.src.framer.brain.Decision">Decision</a></code></dt>
+<dd>The decision made based on the perception.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Mind.set_recent_memories_limit"><code class="name flex">
+<span>def <span class="ident">set_recent_memories_limit</span></span>(<span>self, limit: int)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the limit for recent memories/perceptions.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>The new limit for recent memories/perceptions.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.Mind.think"><code class="name flex">
+<span>def <span class="ident">think</span></span>(<span>self, thought: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a new thought to the Mind.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>thought</code></strong> :&ensp;<code>str</code></dt>
+<dd>The thought to add.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -90,6 +2422,91 @@ hljs.highlightAll();
 <li><code><a title="frame.src.framer.brain.memory" href="memory/index.html">frame.src.framer.brain.memory</a></code></li>
 <li><code><a title="frame.src.framer.brain.mind" href="mind/index.html">frame.src.framer.brain.mind</a></code></li>
 <li><code><a title="frame.src.framer.brain.plugins" href="plugins/index.html">frame.src.framer.brain.plugins</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="frame.src.framer.brain.ActionRegistry" href="#frame.src.framer.brain.ActionRegistry">ActionRegistry</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.brain.ActionRegistry.add_action" href="#frame.src.framer.brain.ActionRegistry.add_action">add_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.ActionRegistry.error_action" href="#frame.src.framer.brain.ActionRegistry.error_action">error_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.ActionRegistry.execute_action" href="#frame.src.framer.brain.ActionRegistry.execute_action">execute_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.ActionRegistry.extend_actions" href="#frame.src.framer.brain.ActionRegistry.extend_actions">extend_actions</a></code></li>
+<li><code><a title="frame.src.framer.brain.ActionRegistry.get_action" href="#frame.src.framer.brain.ActionRegistry.get_action">get_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.ActionRegistry.get_all_actions" href="#frame.src.framer.brain.ActionRegistry.get_all_actions">get_all_actions</a></code></li>
+<li><code><a title="frame.src.framer.brain.ActionRegistry.perform_action" href="#frame.src.framer.brain.ActionRegistry.perform_action">perform_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.ActionRegistry.remove_action" href="#frame.src.framer.brain.ActionRegistry.remove_action">remove_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.ActionRegistry.set_execution_context" href="#frame.src.framer.brain.ActionRegistry.set_execution_context">set_execution_context</a></code></li>
+<li><code><a title="frame.src.framer.brain.ActionRegistry.set_framer" href="#frame.src.framer.brain.ActionRegistry.set_framer">set_framer</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.brain.BasePlugin" href="#frame.src.framer.brain.BasePlugin">BasePlugin</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.brain.BasePlugin.add_action" href="#frame.src.framer.brain.BasePlugin.add_action">add_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.BasePlugin.execute" href="#frame.src.framer.brain.BasePlugin.execute">execute</a></code></li>
+<li><code><a title="frame.src.framer.brain.BasePlugin.on_load" href="#frame.src.framer.brain.BasePlugin.on_load">on_load</a></code></li>
+<li><code><a title="frame.src.framer.brain.BasePlugin.remove_action" href="#frame.src.framer.brain.BasePlugin.remove_action">remove_action</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.brain.Brain" href="#frame.src.framer.brain.Brain">Brain</a></code></h4>
+<ul class="two-column">
+<li><code><a title="frame.src.framer.brain.Brain.execute_action" href="#frame.src.framer.brain.Brain.execute_action">execute_action</a></code></li>
+<li><code><a title="frame.src.framer.brain.Brain.execute_decision" href="#frame.src.framer.brain.Brain.execute_decision">execute_decision</a></code></li>
+<li><code><a title="frame.src.framer.brain.Brain.get_framer" href="#frame.src.framer.brain.Brain.get_framer">get_framer</a></code></li>
+<li><code><a title="frame.src.framer.brain.Brain.make_decision" href="#frame.src.framer.brain.Brain.make_decision">make_decision</a></code></li>
+<li><code><a title="frame.src.framer.brain.Brain.parse_json_response" href="#frame.src.framer.brain.Brain.parse_json_response">parse_json_response</a></code></li>
+<li><code><a title="frame.src.framer.brain.Brain.process_perception" href="#frame.src.framer.brain.Brain.process_perception">process_perception</a></code></li>
+<li><code><a title="frame.src.framer.brain.Brain.set_framer" href="#frame.src.framer.brain.Brain.set_framer">set_framer</a></code></li>
+<li><code><a title="frame.src.framer.brain.Brain.set_memory_service" href="#frame.src.framer.brain.Brain.set_memory_service">set_memory_service</a></code></li>
+<li><code><a title="frame.src.framer.brain.Brain.set_roles" href="#frame.src.framer.brain.Brain.set_roles">set_roles</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.brain.Decision" href="#frame.src.framer.brain.Decision">Decision</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.brain.Decision.Config" href="#frame.src.framer.brain.Decision.Config">Config</a></code></li>
+<li><code><a title="frame.src.framer.brain.Decision.convert_priority" href="#frame.src.framer.brain.Decision.convert_priority">convert_priority</a></code></li>
+<li><code><a title="frame.src.framer.brain.Decision.create" href="#frame.src.framer.brain.Decision.create">create</a></code></li>
+<li><code><a title="frame.src.framer.brain.Decision.expected_results" href="#frame.src.framer.brain.Decision.expected_results">expected_results</a></code></li>
+<li><code><a title="frame.src.framer.brain.Decision.from_json" href="#frame.src.framer.brain.Decision.from_json">from_json</a></code></li>
+<li><code><a title="frame.src.framer.brain.Decision.model_computed_fields" href="#frame.src.framer.brain.Decision.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="frame.src.framer.brain.Decision.model_config" href="#frame.src.framer.brain.Decision.model_config">model_config</a></code></li>
+<li><code><a title="frame.src.framer.brain.Decision.model_fields" href="#frame.src.framer.brain.Decision.model_fields">model_fields</a></code></li>
+<li><code><a title="frame.src.framer.brain.Decision.related_goals" href="#frame.src.framer.brain.Decision.related_goals">related_goals</a></code></li>
+<li><code><a title="frame.src.framer.brain.Decision.related_roles" href="#frame.src.framer.brain.Decision.related_roles">related_roles</a></code></li>
+<li><code><a title="frame.src.framer.brain.Decision.task_status" href="#frame.src.framer.brain.Decision.task_status">task_status</a></code></li>
+<li><code><a title="frame.src.framer.brain.Decision.to_dict" href="#frame.src.framer.brain.Decision.to_dict">to_dict</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.brain.Memory" href="#frame.src.framer.brain.Memory">Memory</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.brain.Memory.add_short_term_memory" href="#frame.src.framer.brain.Memory.add_short_term_memory">add_short_term_memory</a></code></li>
+<li><code><a title="frame.src.framer.brain.Memory.delete" href="#frame.src.framer.brain.Memory.delete">delete</a></code></li>
+<li><code><a title="frame.src.framer.brain.Memory.get_all_memories" href="#frame.src.framer.brain.Memory.get_all_memories">get_all_memories</a></code></li>
+<li><code><a title="frame.src.framer.brain.Memory.get_core_memory" href="#frame.src.framer.brain.Memory.get_core_memory">get_core_memory</a></code></li>
+<li><code><a title="frame.src.framer.brain.Memory.retrieve" href="#frame.src.framer.brain.Memory.retrieve">retrieve</a></code></li>
+<li><code><a title="frame.src.framer.brain.Memory.store" href="#frame.src.framer.brain.Memory.store">store</a></code></li>
+<li><code><a title="frame.src.framer.brain.Memory.update" href="#frame.src.framer.brain.Memory.update">update</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.brain.Mind" href="#frame.src.framer.brain.Mind">Mind</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.brain.Mind.clear_thoughts" href="#frame.src.framer.brain.Mind.clear_thoughts">clear_thoughts</a></code></li>
+<li><code><a title="frame.src.framer.brain.Mind.generate_thoughts" href="#frame.src.framer.brain.Mind.generate_thoughts">generate_thoughts</a></code></li>
+<li><code><a title="frame.src.framer.brain.Mind.get_all_thoughts" href="#frame.src.framer.brain.Mind.get_all_thoughts">get_all_thoughts</a></code></li>
+<li><code><a title="frame.src.framer.brain.Mind.get_current_thought" href="#frame.src.framer.brain.Mind.get_current_thought">get_current_thought</a></code></li>
+<li><code><a title="frame.src.framer.brain.Mind.get_recent_perceptions" href="#frame.src.framer.brain.Mind.get_recent_perceptions">get_recent_perceptions</a></code></li>
+<li><code><a title="frame.src.framer.brain.Mind.make_decision" href="#frame.src.framer.brain.Mind.make_decision">make_decision</a></code></li>
+<li><code><a title="frame.src.framer.brain.Mind.process_perception" href="#frame.src.framer.brain.Mind.process_perception">process_perception</a></code></li>
+<li><code><a title="frame.src.framer.brain.Mind.set_recent_memories_limit" href="#frame.src.framer.brain.Mind.set_recent_memories_limit">set_recent_memories_limit</a></code></li>
+<li><code><a title="frame.src.framer.brain.Mind.think" href="#frame.src.framer.brain.Mind.think">think</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

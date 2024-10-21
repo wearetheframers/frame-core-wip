@@ -114,7 +114,13 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
             return self.memories[user_id][memory_id][&#34;memory&#34;]
         return None
 
-    def update(self, memory_id: int, data: Any, user_id: str = &#34;default&#34;, metadata: Optional[Dict[str, Any]] = None) -&gt; None:
+    def update(
+        self,
+        memory_id: int,
+        data: Any,
+        user_id: str = &#34;default&#34;,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -&gt; None:
         &#34;&#34;&#34;
         Update a specific memory entry.
 
