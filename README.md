@@ -1,124 +1,23 @@
 # Frame: Multi-Modal Multi-Agent Cognitive Framework
 
 <div align="center">
+  <!-- Placeholder links with emojis -->
+  <a href="#link1" style="margin: 0 10px;">🔗 Link 1</a>
+  <a href="#link2" style="margin: 0 10px;">📄 Link 2</a>
+  <a href="#link3" style="margin: 0 10px;">📊 Link 3</a>
+  <a href="#link4" style="margin: 0 10px;">📚 Link 4</a>
+  <a href="#link5" style="margin: 0 10px;">🔍 Link 5</a>
+  <br><br>
   <a href="https://frame.dev">
     <img src="docs/frame-logo-transparent.png" alt="Frame Logo" width="320"/>
   </a>
-  <p>Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are fully equipped for task automation and collaborative work.</p>
+  <p></p>
 </div>
 
 ## Overview
 
-### Actions
+Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are fully equipped for task automation and collaborative work.
 
-Actions in Frame are executable tasks that a Framer can perform. They are concrete implementations of tasks that can be executed in response to decisions made by the Framer. Actions are registered in the Framer's action registry and can be invoked directly by the Framer or through plugins. They are designed to perform specific operations, such as interacting with external systems, processing data, or executing workflows.
-
-#### Default Actions
-
-Frame comes with a set of default actions that are available to all Framers. These include:
-
-- **CreateNewAgentAction**: Creates new agents within the framework.
-- **GenerateRolesAndGoalsAction**: Generates roles and goals for the Framer.
-- **ObserveAction**: Processes observations and generates insights or actions.
-- **RespondAction**: Generates a default response based on the current context.
-- **ThinkAction**: Engages in deep thinking to generate new insights or tasks.
-- **ResearchAction**: Conducts research to gather information.
-- **AdaptiveDecisionAction**: Makes decisions using an adaptive strategy based on context.
-- **ResourceAllocationAction**: Allocates resources based on urgency, risk, and available resources.
-- **ResourceAllocationAction**: Allocates resources based on urgency, risk, and available resources.
-
-#### Default Strategies
-
-Frame includes several strategies for decision-making:
-
-- **ConservativeStrategy**: Favors cautious decision-making when risk is low.
-- **AggressiveStrategy**: Favors quick actions when urgency is high.
-- **BalancedStrategy**: Balances multiple factors for a moderate approach.
-- **CollaborativeStrategy**: Focuses on collaboration when stakeholders are involved.
-- **InfluentialStrategy**: Engages stakeholders based on their influence.
-
-#### Default Plugins
-
-Frame provides default plugins to enhance functionality:
-
-- **Mem0SearchExtractSummarizePlugin**: Enables memory retrieval and summarization.
-- **LLMService**: Provides language model services for text generation.
-- **EQService**: Manages emotional intelligence aspects.
-- **MemoryService**: Handles memory storage and retrieval.
-- **SharedContext**: Manages shared context across components.
-
-#### Default Permissions
-
-Frame's default permissions are designed to ensure that Framers have access to essential services while maintaining security and control. These permissions include:
-
-- **with_memory**: Allows access to memory services for storing and retrieving information. While Framer has access to memory by default, if you want it to respond with RAG-like features and automatically determine when to use memory retrieval versus responding without looking into any memories, you need to ensure the `with_mem0_search_extract_summarize` permission is enabled.
-- **with_eq**: Enables emotional intelligence features for more nuanced interactions.
-- **with_shared_context**: Provides access to shared context services for collaboration.
-
-#### Creating New Actions
-
-To create a new action, follow these steps:
-
-1. Define a new class that inherits from `BaseAction`.
-2. Implement the `execute` method with the action's logic.
-3. Register the action with the Framer's action registry.
-
-Example:
-
-```python
-from frame.src.framer.brain.actions.base import BaseAction
-from frame.src.services import ExecutionContext
-
-class MyCustomAction(BaseAction):
-    def __init__(self):
-        super().__init__("my_custom_action", "Description of the action")
-
-    async def execute(self, execution_context: ExecutionContext, **kwargs):
-        # Implement action logic here
-        return {"result": "Action executed successfully"}
-```
-
-#### Execution Context
-
-The `ExecutionContext` provides a centralized container for various services, state, and functions that actions and components might need during execution. It ensures consistent access to resources across all actions and facilitates easier testing, modular design, and state management.
-
-Key features:
-- Centralized service access: Provides access to core services like LLM, memory, and EQ.
-- State management: Maintains and updates the current state of the execution.
-- Goal tracking: Manages the current goals of the Framer.
-- Action registry: Stores and manages available actions.
-
-Example usage:
-
-```python
-execution_context = ExecutionContext(llm_service=llm_service)
-execution_context.set_state("key", "value")
-state_value = execution_context.get_state("key")
-```
-
-### Key Components
-
-- **Frame**: The main interface for creating and managing Framer instances.
-
-### Actions vs. Strategies
-
-#### Actions
-- **Definition**: Actions are executable tasks that a Framer can perform. They are concrete implementations of tasks that can be executed in response to decisions made by the Framer.
-- **Usage**: Actions are registered in the Framer's action registry and can be invoked directly by the Framer or through plugins. They are designed to perform specific operations, such as interacting with external systems, processing data, or executing workflows.
-- **Integration**: Actions are integrated into the Framer through plugins or directly within the Framer's core logic. They are prioritized and selected based on the current context, roles, goals, and perceptions.
-
-#### Strategies
-- **Definition**: Strategies are decision-making algorithms that determine how a Framer should act in a given situation. They encapsulate different approaches to decision-making, allowing the Framer to adapt its behavior based on the context.
-- **Usage**: Strategies are used by the Framer to decide which actions to take. They provide a flexible mechanism for implementing different decision-making paradigms, such as conservative, aggressive, or balanced approaches.
-- **Integration**: Strategies are typically implemented as part of the Framer's brain component. They can be dynamically selected and applied based on the current state and context, enabling the Framer to adapt its decision-making process.
-
-### How Framers Use Actions and Strategies
-
-- **Decision-Making Process**: The Framer uses strategies to evaluate the current context and determine the best course of action. This involves selecting an appropriate strategy based on factors such as urgency, risk, and available resources.
-- **Action Execution**: Once a decision is made, the Framer executes the corresponding action. This involves invoking the action's logic, which may include interacting with external systems, processing data, or updating the Framer's state.
-- **Plugin Interaction**: Plugins can define new actions and strategies, extending the Framer's capabilities. They can register actions with the Framer's action registry and provide custom strategies for decision-making.
-- **Framer**: Represents an individual AI agent with capabilities for task management, decision-making, and interaction with language models. Each Framer operates independently but can collaborate with others.
-- **Framed**: A collection of Framer objects working together to achieve complex tasks.
 
 ### Features
 
@@ -215,9 +114,7 @@ docker build -t frame .
 
 ## Quick Start
 
-### Custom Action Registry
-
-In the autonomous vehicle example, we demonstrate how to replace the default action registry with a custom one. This allows for a more flexible and hackable system where you can replace or extend default behaviors. The `process_perception` function takes precedence over the observe action, showing how you can customize the action registry. You can also remove actions from the Framer behavior in plugins programmatically.
+### Simple
 
 Here's a simple example to get started with Frame using the synchronous wrapper `SyncFrame`:
 
@@ -275,9 +172,6 @@ async def main():
 asyncio.run(main())
 ```
 
-- **Prompt Method**: Directly sends a text prompt to the Framer and receives a response.
-- **Sense Method**: Sends a perception of hearing to the Framer, which processes it and makes a decision to respond.
-
 Both methods allow you to interact with Frame as if it were a chatbot, providing flexibility in how you choose to send input.
 
 ## Memory Retrieval Example
@@ -328,13 +222,67 @@ async def main():
 asyncio.run(main())
 ```
 
-- **Memory Retrieval**: The Framer retrieves personal information like favorite color, appointment details, and vacation plans from memory.
-- **General Knowledge**: For questions like the capital of France, the Framer uses general knowledge without memory retrieval.
-- **Decision Making**: The Framer decides whether to use memory based on the query context.
+## Actions / Plugins
 
-## Plugin System
+Frame features a powerful and flexible plugin system inspired by game mods, allowing developers to extend the functionality of Framers. This system supports a community marketplace where plugins can be shared, sold, or given away, fostering a rich ecosystem of extensions and customizations. Plugins change Framer behaviors by adding or removing actions.
 
-Frame features a powerful and flexible plugin system inspired by game mods, allowing developers to extend the functionality of Framers. This system supports a community marketplace where plugins can be shared, sold, or given away, fostering a rich ecosystem of extensions and customizations.
+Actions in Frame are executable tasks that a Framer can perform. They are concrete implementations of tasks that can be executed in response to decisions made by the Framer. Actions are registered in the Framer's action registry and can be invoked directly by the Framer or automatically in its decision-making as it senses perceptions.
+
+### Default Actions
+
+Frame comes with a set of default actions that are available to all Framers. Actions can potentially lead to the creation of new actions. All default Framer actions can create new actions. 
+
+- **AdaptiveDecisionAction**: Makes decisions using an adaptive strategy based on context.
+
+- **CreateNewAgentAction**: Creates new agents within the framework.
+- **GenerateRolesAndGoalsAction**: Generates roles and goals for the Framer.
+- **ObserveAction**: Processes observations and generates insights or actions.
+- **RespondAction**: Generates a default response based on the current context.
+- **ThinkAction**: Engages in deep thinking to generate new insights or tasks.
+- **ResearchAction**: Conducts research to gather information.
+- **ResourceAllocationAction**: Allocates resources based on urgency, risk, and available resources.
+
+### Default Plugins
+
+- **EQService**: Manages emotional intelligence aspects.
+- **MemoryService**: Handles memory storage and retrieval.
+- **SharedContext**: Manages shared context across components.
+- **Mem0SearchExtractSummarizePlugin**: Enables memory retrieval and summarization.
+
+### Permissions
+
+By default, Framers have **no** access to default or installed plugins unless they are specified.
+
+- **with_memory**: Allows access to memory services for storing and retrieving information. While Framer has access to memory by default, if you want it to respond with RAG-like features and automatically determine when to use memory retrieval versus responding without looking into any memories, you need to ensure the `with_mem0_search_extract_summarize` permission is enabled.
+- **with_eq**: Enables emotional intelligence features for more nuanced interactions.
+- **with_shared_context**: Provides access to shared context services for collaboration.
+
+### Creating New Actions
+
+To create a new action, follow these steps:
+
+1. Define a new class that inherits from `BaseAction`.
+2. Implement the `execute` method with the action's logic.
+3. Register the action with the Framer's action registry.
+
+Example:
+
+```python
+from frame.src.framer.brain.actions.base import BaseAction
+from frame.src.services import ExecutionContext
+
+class MyCustomAction(BaseAction):
+    def __init__(self):
+        # First param is name of action
+        # Second param is description of action which is used for contextualizing when the Framer
+        # should choose the action
+        # Third param is the priority level of the action with 10 being the highest
+        super().__init__("my_custom_action", "Description of the action", 3)
+
+    async def execute(self, execution_context: ExecutionContext, **kwargs):
+        # Implement action logic here
+        return {"result": "Action executed successfully"}
+```
 
 ### Example: Weather Forecast Plugin
 
