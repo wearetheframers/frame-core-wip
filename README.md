@@ -1,10 +1,10 @@
-# Frame
+# Frame: Multi-Modal Multi-Agent Cognitive Framework
 
 <div align="center">
   <a href="https://frame.dev">
     <img src="docs/frame-logo-transparent.png" alt="Frame Logo" width="320"/>
   </a>
-  <p>Frame is a multi-modal multi-agent framework designed to support fully emergent characteristics and efficiently automate tasks, with an extensible plugin architecture inspired by game mods.</p>
+  <p>Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are fully equipped for task automation and collaborative work.</p>
 </div>
 
 ## Overview
@@ -12,20 +12,21 @@
 ### Key Components
 
 - **Frame**: The main interface for creating and managing Framer instances.
-- **Framer**: Represents an individual AI agent equipped with advanced capabilities for task management, decision-making, and interaction with language models.
+- **Framer**: Represents an individual AI agent with capabilities for task management, decision-making, and interaction with language models. Each Framer operates independently but can collaborate with others.
 - **Framed**: A collection of Framer objects working together to achieve complex tasks.
 
 ### Features
 
-- Multi-modal cognitive agents framework
-- Supports dynamic, emergent behaviors
-- Extensible architecture with plugin engine inspired by game mods
-- Integration with popular AI APIs (OpenAI GPT, Mistral, etc.)
-- Streaming text generation support
-- Flexible behavior and decision-making mechanics
-- Emotional intelligence and state (optional)
+- Multi-modal cognitive agents framework capable of processing diverse types of perceptions
+- Supports developing dynamic, emergent behaviors
+- Layered memory understanding entity relationships with Mem0
+- Supports global and multi-user memory storage
+- Extensible architecture with plugin engine
+- Integration with popular AI APIs (OpenAI GPT, Mistral, etc.) as well as local model support
+- Streaming text generation support 
+- Flexible behavior and decision-making mechanics that can be based off of emotions and memories
+- Comprehensive priority system for roles, goals, and tasks, enabling dynamic and context-aware behavior
 - Monitoring and metrics; built-in LLM API usage / costs tracking
-- Synchronous wrapper provided around async functions
 
 ### Component Hierarchy and Interactions
 
@@ -113,25 +114,28 @@ docker build -t frame .
 
 In the autonomous vehicle example, we demonstrate how to replace the default action registry with a custom one. This allows for a more flexible and hackable system where you can replace or extend default behaviors. The `process_perception` function takes precedence over the observe action, showing how you can customize the action registry. You can also remove actions from the Framer behavior in plugins programmatically.
 
-Here's a simple example to get started with Frame:
+Here's a simple example to get started with Frame using the synchronous wrapper `SyncFrame`:
 
 ```python
-from frame import Frame, FramerConfig
+from frame.sync_frame import SyncFrame
+from frame.src.framer.config import FramerConfig
+from frame.src.services.llm.main import LLMService
 
-# Initialize Frame
-frame = Frame()
+# Initialize SyncFrame with an LLMService
+llm_service = LLMService(api_key="your_api_key")
+sync_frame = SyncFrame(llm_service=llm_service)
 
 # Create a Framer instance
 config = FramerConfig(name="Example Framer", default_model="gpt-4o-mini")
-framer = await frame.create_framer(config)
+framer = sync_frame.create_framer(config)
 
 # Define a task
-task = {"name": "Engage", "description": "Engage in a deep conversation"}
-result = await framer.perform_task(task)
+task = {"description": "Engage in a deep conversation"}
+result = sync_frame.perform_task(framer, task)
 print(f"Task result: {result}")
 
 # Clean up
-await framer.close()
+sync_frame.close_framer(framer)
 ```
 
 ## Chatbot Interaction Example
