@@ -2,6 +2,7 @@ import asyncio
 import logging
 import time
 import json
+from frame.src.utils.decorators import log_execution, validate_input, measure_performance
 from collections import deque
 from typing import List, Dict, Any, Optional, Callable, Union, Tuple, Deque
 
@@ -119,6 +120,8 @@ class Framer:
 
         self.execution_context = execution_context or ExecutionContext(
             llm_service=self.llm_service,
+            soul=soul,
+            brain=brain
         )
         self.execution_context.soul = soul
         self.execution_context.brain = brain
@@ -186,6 +189,8 @@ class Framer:
         if not self.roles or not self.goals:
             asyncio.create_task(self._generate_initial_roles_and_goals())
 
+    @log_execution
+    @measure_performance
     async def _generate_initial_roles_and_goals(self):
         if not self.roles or not self.goals:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()

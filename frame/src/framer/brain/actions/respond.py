@@ -2,6 +2,7 @@ from typing import Dict, Any
 from frame.src.services import ExecutionContext
 from frame.src.framer.brain.actions import BaseAction
 from frame.src.framer.agency.priority import Priority
+from frame.src.utils.decorators import log_execution, measure_performance
 
 
 class RespondAction(BaseAction):
@@ -12,6 +13,8 @@ class RespondAction(BaseAction):
             2,
         )
 
+    @log_execution
+    @measure_performance
     async def execute(
         self, execution_context: ExecutionContext, **kwargs
     ) -> Dict[str, Any]:

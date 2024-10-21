@@ -133,7 +133,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
 
     async def mem0_search_extract_summarize(
         self,
-        execution_context: ExecutionContext,
+        execution_context: Optional[ExecutionContext] = None,
         query: str = "",
         user_id: Optional[str] = None,
         agent_id: Optional[str] = None,
@@ -145,54 +145,14 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         self.logger.info(f"mem0_search_extract_summarize called with query: {query}")
         if not query:
             self.logger.warning("Query is empty. Returning default response.")
-            # Gather Framer state information
-            if not isinstance(execution_context, ExecutionContext):
-                self.logger.error("Execution context is not properly initialized.")
-                return Decision(
-                    action="error",
-                    parameters={
-                        "error": "Execution context is not properly initialized."
-                    },
-                    reasoning="Execution context is not properly initialized.",
-                    confidence=0.0,
-                    priority=1,
-                    related_roles=[],
-                    related_goals=[],
-                )
-            # Ensure the query is a string
-            if not isinstance(query, str):
-                query = str(query)
+            query = "default query"  # Set a default query if none is provided
 
-            soul_state = (
-                execution_context.soul.get_current_state()
-                if execution_context.soul
-                else "No soul state available."
-            )
-            recent_thoughts = execution_context.mind.get_all_thoughts()[
-                -5:
-            ]  # Get last 5 thoughts
-            active_roles = [
-                role.name
-                for role in execution_context.roles
-                if role.status == RoleStatus.ACTIVE
-            ]
-            active_goals = [
-                goal.name
-                for goal in execution_context.goals
-                if goal.status == GoalStatus.ACTIVE
-            ]
+        if execution_context is None:
+            execution_context = self.framer.execution_context
 
-            # Formulate a comprehensive response
-            response = (
-                "I'm sorry, but I don't have any specific information about that. "
-                "Could you please provide more context or ask a different question?\n\n"
-                "### Framer State Information\n"
-                f"- Soul State: {soul_state}\n"
-                f"- Recent Thoughts: {recent_thoughts}\n"
-                f"- Active Roles: {active_roles}\n"
-                f"- Active Goals: {active_goals}\n"
-            )
-            return response
+        if not isinstance(execution_context, ExecutionContext):
+            self.logger.error("Execution context is not properly initialized.")
+            return "Execution context is not properly initialized."
 
         # Ensure the query is a string
         if not isinstance(query, str):

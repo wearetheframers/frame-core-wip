@@ -13,6 +13,7 @@ from frame.src.framer.agency.goals import Goal, GoalStatus
 from frame.src.framer.agency.priority import Priority
 
 from typing import TYPE_CHECKING
+from frame.src.utils.decorators import log_execution, measure_performance
 
 if TYPE_CHECKING:
     from frame.src.services import MemoryService
@@ -278,6 +279,8 @@ class Brain:
         self.roles = roles
         self.execution_context.set_roles(roles)
 
+    @log_execution
+    @measure_performance
     async def process_perception(
         self,
         perception: Union["Perception", Dict[str, Any]],
