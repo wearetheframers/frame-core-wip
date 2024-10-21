@@ -32,4 +32,4 @@ mind.process_perception(perception)
 
 ## API Documentation
 
-::: frame.src.framer.brain.perception.Perception
+::: frame.src.framer.brain.mind.perception.Perception
