@@ -72,8 +72,6 @@ nav:
     - Creating Custom Plugins: plugins/creating_custom_plugins.md
   - CLI: CLI.md
   - Glossary: glossary.md
-  - Utils:
-    - Plugin Loader: utils/plugin_loader.md
 docs_dir: ./docs
 site_dir: ../site
 theme:
