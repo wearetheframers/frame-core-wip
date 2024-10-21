@@ -22,7 +22,7 @@ from autonomous_vehicle_plugin import (
     AutonomousVehiclePlugin,
 )
 from frame.src.framer.brain.actions import BaseAction
-from frame.src.services.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 from frame.src.framer.brain.decision import Decision
 from frame.src.framer.brain.action_registry import ActionRegistry
@@ -40,6 +40,9 @@ logger.addHandler(handler)
 
 # Define a custom action to process perceptions and make decisions
 class ProcessPerceptionAction(BaseAction):
+    # Note: The process_perception function is separate from the plugin to demonstrate flexibility,
+    # in how you can add actions to a plugin or from outside a plugin.
+
     def __init__(self, action_registry: ActionRegistry):
         super().__init__(
             "process_perception",
@@ -188,35 +191,39 @@ async def main():
     else:
         logger.warning("AutonomousVehiclePlugin not found. Vehicle not started.")
 
-    # Initialize the ActionRegistry to manage available actions
+    # Initialize a new ActionRegistry to manage available actions
     action_registry = ActionRegistry()
+    
+    # For this example demo, we will show how you can create an entirely new and custom action registry
+    # in a plugin, and register it within a Framer to completely replace its behavior (not just default behavior)
+    # but its behavior in other plugins.
+
+    # By default plugins are loaded alphabetically, but you can specify which plugins to load first / last and in
+    # what order to have greater control.
+
     # This is how you can do a custom action registry replacement to clear default actions
-    # action_registry = framer.brain.action_registry
     action_registry.actions = {}
     action_registry.valid_actions = []
 
+    # Set it to the same LLM service the Framer is using
     execution_context = ExecutionContext(llm_service=framer.llm_service)
+    # Set the execution context's registry to the new action registry
     execution_context.action_registry = action_registry
+    # Set the execution context agency to the framer's agency
     execution_context.agency = framer.agency
 
     vehicle_plugin = AutonomousVehiclePlugin(framer)
-    stop_vehicle_action = StopVehicleAction(vehicle_plugin)
-    slow_down_vehicle_action = SlowDownVehicleAction(vehicle_plugin)
-    speed_up_vehicle_action = SpeedUpVehicleAction(vehicle_plugin)
-    change_lane_action = ChangeLaneAction(vehicle_plugin)
-    start_driving_action = StartDrivingAction(vehicle_plugin)
-    no_action_action = NoActionAction(vehicle_plugin)
-    brake_vehicle_action = BrakeVehicleAction(vehicle_plugin)
     process_perception_action = ProcessPerceptionAction(action_registry)
 
-    action_registry.add_action(stop_vehicle_action)
-    action_registry.add_action(slow_down_vehicle_action)
-    action_registry.add_action(speed_up_vehicle_action)
-    action_registry.add_action(change_lane_action)
-    action_registry.add_action(start_driving_action)
-    action_registry.add_action(no_action_action)
-    action_registry.add_action(brake_vehicle_action)
-    action_registry.add_action(process_perception_action)
+    # Register our actions in the new registry
+    action_registry.add_action(StopVehicleAction)
+    action_registry.add_action(SlowDownVehicleAction)
+    action_registry.add_action(SpeedUpVehicleAction)
+    action_registry.add_action(ChangeLaneAction)
+    action_registry.add_action(StartDrivingAction)
+    action_registry.add_action(NoActionAction)
+    action_registry.add_action(BrakeVehicleAction)
+    action_registry.add_action(ProcessPerceptionAction)
 
     # Replace the default action registry with the custom one defined above
     framer.brain.action_registry = action_registry
@@ -281,16 +288,6 @@ async def main():
 
     # Close the Framer instance after processing all perceptions
     await framer.close()
-
-    # Note: The process_perception function is separate from the plugin to demonstrate flexibility.
-    # It takes precedence over the observe action, showing how you can customize the action registry.
-    # This allows for a more hackable and flexible system where you can replace or extend default behaviors.
-    # You can also remove actions from the Framer behavior in plugins programmatically.
-
-    # Note: The process_perception function is separate from the plugin to demonstrate flexibility.
-    # It takes precedence over the observe action, showing how you can customize the action registry.
-    # This allows for a more hackable and flexible system where you can replace or extend default behaviors.
-    # You can also remove actions from the Framer behavior in plugins programmatically.
 
 
 if __name__ == "__main__":
