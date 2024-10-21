@@ -6,6 +6,11 @@ class DecisionStrategy(ABC):
     async def decide(self, context: Dict[str, Any]) -> Dict[str, Any]:
         pass
 
+class BalancedStrategy(DecisionStrategy):
+    async def decide(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        # Balanced decision-making logic
+        return {"action": "balance", "reasoning": "Taking a balanced approach."}
+
 class ConservativeStrategy(DecisionStrategy):
     async def decide(self, context: Dict[str, Any]) -> Dict[str, Any]:
         # Conservative decision-making logic
