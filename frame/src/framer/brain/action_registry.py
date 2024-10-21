@@ -229,6 +229,7 @@ class ActionRegistry:
             return None
 
         action = self.get_action(action_name)
+        print("Found action: ", action)
         if not action:
             error_message = f"Action '{action_name}' not found in the registry."
             logger.error(error_message)

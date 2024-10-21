@@ -109,6 +109,9 @@ class Framer:
         plugin_loading_progress: Optional[Callable[[int], None]] = None,
         execution_context: Optional[ExecutionContext] = None,
     ):
+        self.llm_service = llm_service
+        self.memory_service = memory_service
+        self.eq_service = eq_service
         self.plugin_loading_progress = plugin_loading_progress
         self.config = config
         self.permissions = config.permissions or [

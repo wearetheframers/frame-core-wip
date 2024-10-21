@@ -38,6 +38,8 @@ nav:
                     - Action Registry: API/frame/framer/brain/action_registry.md
                     - Default Actions: API/frame/framer/brain/default_actions.md
                     - Actions:
+                      - Adaptive Decision Action: API/frame/framer/brain/actions/adaptive_decision_action.md
+                      - Decision Strategies: API/frame/framer/brain/strategies/decision_strategy.md
                       - Base Action: API/frame/framer/brain/actions/base.md
                 - Soul: API/frame/framer/soul/soul.md
                 - Config: API/frame/framer/config.md

@@ -5,6 +5,8 @@ from .research import ResearchAction
 from .respond import RespondAction
 from .think import ThinkAction
 from .observe import ObserveAction
+from .error_action import ErrorAction
+from .adaptive_decision_action import AdaptiveDecisionAction
 
 __all__ = [
     "BaseAction",
@@ -14,4 +16,6 @@ __all__ = [
     "RespondAction",
     "ThinkAction",
     "ObserveAction",
+    "ErrorAction",
+    "AdaptiveDecisionAction",
 ]

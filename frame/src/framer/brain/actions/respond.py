@@ -28,8 +28,11 @@ class RespondAction(BaseAction):
         Returns:
             Dict[str, Any]: A dictionary containing the generated response.
         """
-        llm_service = execution_context.llm_service
-        soul = execution_context.soul
+        if isinstance(execution_context, ExecutionContext):
+            llm_service = execution_context.llm_service
+            soul = execution_context.soul
+        else:
+            raise TypeError("execution_context must be an instance of ExecutionContext")
 
         # Get the most recent perception
         recent_perception = execution_context.get_state(

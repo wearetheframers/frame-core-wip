@@ -1,5 +1,13 @@
 from typing import Dict, Any, Callable
-from frame.src.framer.brain.actions import CreateNewAgentAction
+"""
+Default Actions
+
+This module defines the default actions available in the Frame framework. It includes high-level actions like
+AdaptiveDecisionAction and CreateNewAgentAction, which are designed to manage complex tasks by leveraging
+multiple strategies or sub-actions.
+"""
+
+from frame.src.framer.brain.actions import CreateNewAgentAction, AdaptiveDecisionAction
 from frame.src.framer.brain.actions import GenerateRolesAndGoalsAction
 from frame.src.framer.brain.actions import ResearchAction
 from frame.src.framer.brain.actions import RespondAction
@@ -15,6 +23,7 @@ DEFAULT_ACTIONS = [
     RespondAction,
     ThinkAction,
     ResearchAction,
+    AdaptiveDecisionAction,
 ]
 
 

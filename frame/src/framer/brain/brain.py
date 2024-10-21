@@ -385,8 +385,16 @@ class Brain:
             for action in self.action_registry.get_all_actions().keys()
         ]
 
-        # Check if the action is valid
-        if action not in valid_actions:
+        # Retrieve context from the execution context
+        context = self.execution_context.get_full_state()
+        # Determine the best action based on context
+        if context.get("urgency", 0) > 7 and context.get("risk", 0) > 5:
+            action = "adaptive_decision"
+            decision_data["action"] = action
+            decision_data["reasoning"] = (
+                f"High urgency and risk detected. Using '{action}' to adaptively decide the best course of action."
+            )
+        elif action not in valid_actions:
             # If the action is not valid, check if it's related to memory retrieval
             if any(keyword in action for keyword in ["memory", "recall", "retrieve"]):
                 action = "respond with memory retrieval"
