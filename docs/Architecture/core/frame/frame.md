@@ -19,6 +19,10 @@ The Frame component serves as the main interface for creating and managing Frame
 
 ## Related Components
 
+### Custom Action Registry
+
+In the autonomous vehicle example, we demonstrate how to replace the default action registry with a custom one. This allows for a more flexible and hackable system where you can replace or extend default behaviors. The `process_perception` function takes precedence over the observe action, showing how you can customize the action registry. You can also remove actions from the Framer behavior in plugins programmatically.
+
 Frame includes several default plugins and services that are automatically available to Framers. These include:
 
 - **Services**: `memory`, `eq`, and `shared_context` are special plugins called services. They function like plugins but do not require explicit permissions to be accessed. They are always available to Framers, enhancing their capabilities by providing essential functionalities without the need for additional permissions.

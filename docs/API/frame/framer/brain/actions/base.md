@@ -4,7 +4,7 @@ The Base Action module provides the foundation for all actions in the Frame syst
 
 ## BaseAction
 
-::: frame.src.framer.agency.actions.base.BaseAction
+::: frame.src.framer.brain.actions.base.BaseAction
     options:
       show_root_heading: false
       show_source: false

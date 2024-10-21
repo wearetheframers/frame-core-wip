@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.action_registry.ActionRegistry"><code class="flex name class">
 <span>class <span class="ident">ActionRegistry</span></span>
-<span>(</span><span>execution_context=None)</span>
+<span>(</span><span>execution_context: Optional[ForwardRef('ExecutionContext')] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -46,9 +46,15 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ActionRegistry:
-    def __init__(self, execution_context=None):
+    def __init__(self, execution_context: Optional[&#39;ExecutionContext&#39;] = None):
         self.actions: Dict[str, Dict[str, Any]] = {}
         self.execution_context = execution_context
+        if not self.execution_context or not hasattr(self.execution_context, &#39;llm_service&#39;):
+            raise ValueError(&#34;ExecutionContext must have an llm_service set.&#34;)
+
+        # Ensure llm_service is set in the execution context
+        if not self.execution_context.llm_service:
+            raise ValueError(&#34;ExecutionContext must have an llm_service set.&#34;)
         self.valid_actions = []
         self._register_default_actions()
 

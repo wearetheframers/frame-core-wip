@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.services.memory.main.MemoryService"><code class="flex name class">
 <span>class <span class="ident">MemoryService</span></span>
-<span>(</span><span>adapter)</span>
+<span>(</span><span>adapter: MemoryAdapterInterface)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -46,10 +46,10 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class MemoryService:
-    def __init__(self, adapter):
+    def __init__(self, adapter: &#39;MemoryAdapterInterface&#39;):
         self.adapter = adapter
 
-    def store(
+    def add_memory(
         self, memory: str, user_id: str = &#34;default&#34;, metadata: Dict[str, Any] = None
     ) -&gt; int:
         return self.adapter.store(memory, user_id, metadata)
@@ -86,6 +86,12 @@ hljs.highlightAll();
 </details>
 <h3>Methods</h3>
 <dl>
+<dt id="frame.src.services.memory.main.MemoryService.add_memory"><code class="name flex">
+<span>def <span class="ident">add_memory</span></span>(<span>self, memory: str, user_id: str = 'default', metadata: Dict[str, Any] = None) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.services.memory.main.MemoryService.clear_all_memories"><code class="name flex">
 <span>def <span class="ident">clear_all_memories</span></span>(<span>self, user_id: str = 'default') ‑> bool</span>
 </code></dt>
@@ -128,12 +134,6 @@ hljs.highlightAll();
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.services.memory.main.MemoryService.store"><code class="name flex">
-<span>def <span class="ident">store</span></span>(<span>self, memory: str, user_id: str = 'default', metadata: Dict[str, Any] = None) ‑> int</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="frame.src.services.memory.main.MemoryService.update_memory"><code class="name flex">
 <span>def <span class="ident">update_memory</span></span>(<span>self, memory_id: int, data: str, user_id: str = 'default') ‑> bool</span>
 </code></dt>
@@ -160,6 +160,7 @@ hljs.highlightAll();
 <li>
 <h4><code><a title="frame.src.services.memory.main.MemoryService" href="#frame.src.services.memory.main.MemoryService">MemoryService</a></code></h4>
 <ul class="two-column">
+<li><code><a title="frame.src.services.memory.main.MemoryService.add_memory" href="#frame.src.services.memory.main.MemoryService.add_memory">add_memory</a></code></li>
 <li><code><a title="frame.src.services.memory.main.MemoryService.clear_all_memories" href="#frame.src.services.memory.main.MemoryService.clear_all_memories">clear_all_memories</a></code></li>
 <li><code><a title="frame.src.services.memory.main.MemoryService.delete_memory" href="#frame.src.services.memory.main.MemoryService.delete_memory">delete_memory</a></code></li>
 <li><code><a title="frame.src.services.memory.main.MemoryService.get_all_memories" href="#frame.src.services.memory.main.MemoryService.get_all_memories">get_all_memories</a></code></li>
@@ -167,7 +168,6 @@ hljs.highlightAll();
 <li><code><a title="frame.src.services.memory.main.MemoryService.get_memory_history" href="#frame.src.services.memory.main.MemoryService.get_memory_history">get_memory_history</a></code></li>
 <li><code><a title="frame.src.services.memory.main.MemoryService.retrieve_memory" href="#frame.src.services.memory.main.MemoryService.retrieve_memory">retrieve_memory</a></code></li>
 <li><code><a title="frame.src.services.memory.main.MemoryService.search_memories" href="#frame.src.services.memory.main.MemoryService.search_memories">search_memories</a></code></li>
-<li><code><a title="frame.src.services.memory.main.MemoryService.store" href="#frame.src.services.memory.main.MemoryService.store">store</a></code></li>
 <li><code><a title="frame.src.services.memory.main.MemoryService.update_memory" href="#frame.src.services.memory.main.MemoryService.update_memory">update_memory</a></code></li>
 </ul>
 </li>

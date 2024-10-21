@@ -1,6 +1,6 @@
 # ActionRegistry
 
-::: frame.src.framer.agency.action_registry.ActionRegistry
+::: frame.src.framer.brain.action_registry.ActionRegistry
     options:
       show_root_heading: false
       show_source: false

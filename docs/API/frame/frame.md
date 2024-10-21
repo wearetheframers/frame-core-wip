@@ -74,6 +74,10 @@ This example demonstrates how to initialize a Frame instance, create a Framer wi
 
 ## Additional Features
 
+### Custom Action Registry
+
+In the autonomous vehicle example, we demonstrate how to replace the default action registry with a custom one. This allows for a more flexible and hackable system where you can replace or extend default behaviors. The `process_perception` function takes precedence over the observe action, showing how you can customize the action registry. You can also remove actions from the Framer behavior in plugins programmatically.
+
 ### Multi-modal Support
 
 Frame supports multi-modal cognitive agents, allowing for processing of various input types such as text, images, and potentially other modalities. This feature enables the creation of versatile AI agents capable of understanding and responding to diverse forms of information. Note: DSPy does not support streaming mode.

@@ -293,7 +293,7 @@ allowing them to share resources and functionality without tight coupling.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.services.ExecutionContext.get_llm_service"><code class="name flex">
-<span>def <span class="ident">get_llm_service</span></span>(<span>self)</span>
+<span>def <span class="ident">get_llm_service</span></span>(<span>self) ‑> <a title="frame.src.services.llm.main.LLMService" href="llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -914,7 +914,7 @@ It serves as a base class for more specialized local contexts.</p>
 </dd>
 <dt id="frame.src.services.MemoryService"><code class="flex name class">
 <span>class <span class="ident">MemoryService</span></span>
-<span>(</span><span>adapter)</span>
+<span>(</span><span>adapter: MemoryAdapterInterface)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -923,10 +923,10 @@ It serves as a base class for more specialized local contexts.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class MemoryService:
-    def __init__(self, adapter):
+    def __init__(self, adapter: &#39;MemoryAdapterInterface&#39;):
         self.adapter = adapter
 
-    def store(
+    def add_memory(
         self, memory: str, user_id: str = &#34;default&#34;, metadata: Dict[str, Any] = None
     ) -&gt; int:
         return self.adapter.store(memory, user_id, metadata)
@@ -963,6 +963,12 @@ It serves as a base class for more specialized local contexts.</p>
 </details>
 <h3>Methods</h3>
 <dl>
+<dt id="frame.src.services.MemoryService.add_memory"><code class="name flex">
+<span>def <span class="ident">add_memory</span></span>(<span>self, memory: str, user_id: str = 'default', metadata: Dict[str, Any] = None) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.services.MemoryService.clear_all_memories"><code class="name flex">
 <span>def <span class="ident">clear_all_memories</span></span>(<span>self, user_id: str = 'default') ‑> bool</span>
 </code></dt>
@@ -1001,12 +1007,6 @@ It serves as a base class for more specialized local contexts.</p>
 </dd>
 <dt id="frame.src.services.MemoryService.search_memories"><code class="name flex">
 <span>def <span class="ident">search_memories</span></span>(<span>self, query: str, user_id: str = 'default') ‑> List[Dict[str, Any]]</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.services.MemoryService.store"><code class="name flex">
-<span>def <span class="ident">store</span></span>(<span>self, memory: str, user_id: str = 'default', metadata: Dict[str, Any] = None) ‑> int</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1130,6 +1130,7 @@ It serves as a base class for more specialized local contexts.</p>
 <li>
 <h4><code><a title="frame.src.services.MemoryService" href="#frame.src.services.MemoryService">MemoryService</a></code></h4>
 <ul class="two-column">
+<li><code><a title="frame.src.services.MemoryService.add_memory" href="#frame.src.services.MemoryService.add_memory">add_memory</a></code></li>
 <li><code><a title="frame.src.services.MemoryService.clear_all_memories" href="#frame.src.services.MemoryService.clear_all_memories">clear_all_memories</a></code></li>
 <li><code><a title="frame.src.services.MemoryService.delete_memory" href="#frame.src.services.MemoryService.delete_memory">delete_memory</a></code></li>
 <li><code><a title="frame.src.services.MemoryService.get_all_memories" href="#frame.src.services.MemoryService.get_all_memories">get_all_memories</a></code></li>
@@ -1137,7 +1138,6 @@ It serves as a base class for more specialized local contexts.</p>
 <li><code><a title="frame.src.services.MemoryService.get_memory_history" href="#frame.src.services.MemoryService.get_memory_history">get_memory_history</a></code></li>
 <li><code><a title="frame.src.services.MemoryService.retrieve_memory" href="#frame.src.services.MemoryService.retrieve_memory">retrieve_memory</a></code></li>
 <li><code><a title="frame.src.services.MemoryService.search_memories" href="#frame.src.services.MemoryService.search_memories">search_memories</a></code></li>
-<li><code><a title="frame.src.services.MemoryService.store" href="#frame.src.services.MemoryService.store">store</a></code></li>
 <li><code><a title="frame.src.services.MemoryService.update_memory" href="#frame.src.services.MemoryService.update_memory">update_memory</a></code></li>
 </ul>
 </li>

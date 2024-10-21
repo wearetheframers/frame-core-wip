@@ -612,10 +612,14 @@ to enable intelligent decision-making and action execution.</p>
         result = None
         try:
             if decision.action not in self.action_registry.get_all_actions():
-                logger.warning(f&#34;Action &#39;{decision.action}&#39; not found in registry. Defaulting to &#39;process_perception&#39;.&#34;)
+                logger.warning(
+                    f&#34;Action &#39;{decision.action}&#39; not found in registry. Defaulting to &#39;process_perception&#39;.&#34;
+                )
                 decision.action = &#34;process_perception&#34;
                 if &#34;perception&#34; not in decision.parameters:
-                    decision.parameters[&#34;perception&#34;] = perception.data if perception else None
+                    decision.parameters[&#34;perception&#34;] = (
+                        perception.data if perception else None
+                    )
 
             if decision.action == &#34;respond with memory retrieval&#34;:
                 if (

@@ -269,7 +269,7 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
         &#34;&#34;&#34;
         return self.client.get(memory_id)
 
-    def update(self, memory_id: str, new_content: str) -&gt; Dict[str, Any]:
+    def update(self, memory_id: str, new_content: str, user_id: Optional[str] = None) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Update a specific memory with new content.
 
@@ -282,7 +282,7 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
         &#34;&#34;&#34;
         return self.client.update(memory_id, new_content)
 
-    def get_history(self, memory_id: str) -&gt; List[Dict[str, Any]]:
+    def history(self, memory_id: str, user_id: Optional[str] = None) -&gt; List[Dict[str, Any]]:
         &#34;&#34;&#34;
         Get the history of how a memory has changed over time.
 
@@ -400,22 +400,6 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
 <dd>A list of all memories for the specified parameters.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_history"><code class="name flex">
-<span>def <span class="ident">get_history</span></span>(<span>self, memory_id: str) ‑> List[Dict[str, Any]]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get the history of how a memory has changed over time.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>memory_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>The ID of the memory to get history for.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>List[Dict[str, Any]]</code></dt>
-<dd>A list of historical versions of the memory.</dd>
-</dl></div>
-</dd>
 <dt id="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_memory"><code class="name flex">
 <span>def <span class="ident">get_memory</span></span>(<span>self, memory_id: str) ‑> Dict[str, Any]</span>
 </code></dt>
@@ -441,6 +425,22 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
 <dl>
 <dt><code>List[Dict[str, Any]]</code></dt>
 <dd>A list of users, agents, and runs.</dd>
+</dl></div>
+</dd>
+<dt id="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.history"><code class="name flex">
+<span>def <span class="ident">history</span></span>(<span>self, memory_id: str, user_id: Optional[str] = None) ‑> List[Dict[str, Any]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the history of how a memory has changed over time.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>memory_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ID of the memory to get history for.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[Dict[str, Any]]</code></dt>
+<dd>A list of historical versions of the memory.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.reset"><code class="name flex">
@@ -521,7 +521,7 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.update"><code class="name flex">
-<span>def <span class="ident">update</span></span>(<span>self, memory_id: str, new_content: str) ‑> Dict[str, Any]</span>
+<span>def <span class="ident">update</span></span>(<span>self, memory_id: str, new_content: str, user_id: Optional[str] = None) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Update a specific memory with new content.</p>
@@ -562,9 +562,9 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.delete" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.delete">delete</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.delete_all" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.delete_all">delete_all</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_all" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_all">get_all</a></code></li>
-<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_history" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_history">get_history</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_memory" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_memory">get_memory</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_users" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.get_users">get_users</a></code></li>
+<li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.history" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.history">history</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.reset" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.reset">reset</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.retrieve" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.retrieve">retrieve</a></code></li>
 <li><code><a title="frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.search" href="#frame.src.framer.brain.memory.memory_adapters.mem0_adapter.mem0_adapter.Mem0Adapter.search">search</a></code></li>

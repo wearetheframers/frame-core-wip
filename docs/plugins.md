@@ -48,6 +48,10 @@ This configuration gives the Framer access to the Memory service, EQ service, an
 
 ## Base Plugin
 
+### Custom Action Registry
+
+In the autonomous vehicle example, we demonstrate how to replace the default action registry with a custom one. This allows for a more flexible and hackable system where you can replace or extend default behaviors. The `process_perception` function takes precedence over the observe action, showing how you can customize the action registry. You can also remove actions from the Framer behavior in plugins programmatically.
+
 All plugins in Frame should inherit from the `BasePlugin` class. This base class provides a common interface and some utility methods for all plugins. Here's an overview of the `BasePlugin` class:
 
 ```python

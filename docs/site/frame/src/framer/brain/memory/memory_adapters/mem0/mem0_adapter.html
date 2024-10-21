@@ -114,7 +114,7 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
             return self.memories[user_id][memory_id][&#34;memory&#34;]
         return None
 
-    def update(self, memory_id: int, data: Any, user_id: str = &#34;default&#34;) -&gt; None:
+    def update(self, memory_id: int, data: Any, user_id: str = &#34;default&#34;, metadata: Optional[Dict[str, Any]] = None) -&gt; None:
         &#34;&#34;&#34;
         Update a specific memory entry.
 
@@ -315,7 +315,7 @@ It provides methods to store, retrieve, and manage memory data.</p></div>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.memory.memory_adapters.mem0.mem0_adapter.Mem0Adapter.update"><code class="name flex">
-<span>def <span class="ident">update</span></span>(<span>self, memory_id: int, data: Any, user_id: str = 'default') ‑> None</span>
+<span>def <span class="ident">update</span></span>(<span>self, memory_id: int, data: Any, user_id: str = 'default', metadata: Optional[Dict[str, Any]] = None) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Update a specific memory entry.</p>

@@ -100,8 +100,11 @@ validated to form a valid model.</p>
             updated_at=updated_at,
             completed_at=completed_at,
         )
+        self.subtasks: List[Task] = []
         self.result = None
+        self.created_at = datetime.now()
         self.updated_at = datetime.now()
+        self.actual_duration: Optional[float] = None
         self.completed_at = completed_at
         logger.debug(
             f&#34;Created new task with ID: {self.id} and expected results: {self.expected_results}&#34;

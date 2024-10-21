@@ -109,8 +109,14 @@ hljs.highlightAll();
         ]
         self.llm_service = llm_service
 
-        self.execution_context = execution_context or ExecutionContext(llm_service=self.llm_service)
-        self.plugin_loading_progress = plugin_loading_progress
+        self.execution_context = execution_context or ExecutionContext(
+            llm_service=self.llm_service,
+            soul=soul,
+            mind=brain,
+            roles=roles,
+            goals=goals
+        )
+        self.brain.action_registry.set_execution_context(self.execution_context)
 
         # Initialize services and plugins based on permissions
         if &#34;with_memory&#34; in self.permissions:
@@ -155,13 +161,17 @@ hljs.highlightAll();
             soul=soul,
         )
         logger.info(f&#34;Brain created with memory service: {self.brain.memory_service}&#34;)
+        self.brain.action_registry.set_execution_context(self.execution_context)
 
         self._dynamic_model_choice = False
         self.observers: List[Observer] = []
         self.can_execute = True
         self.acting = False
         # Load plugins asynchronously
-        asyncio.create_task(self.load_plugins())
+        if asyncio.get_event_loop().is_running():
+            asyncio.create_task(self.load_plugins())
+        else:
+            logger.warning(&#34;No running event loop. Plugins will not be loaded immediately.&#34;)
 
         # Generate roles and goals if not provided
         if not self.roles or not self.goals:
