@@ -108,7 +108,10 @@ inheritance.</p></div>
 <pre><code class="python">class CollaborativeStrategy(DecisionStrategy):
     async def decide(self, context: Dict[str, Any]) -&gt; Dict[str, Any]:
         # Collaborative decision-making logic
-        return {&#34;action&#34;: &#34;collaborate&#34;, &#34;reasoning&#34;: &#34;Collaborating with stakeholders for a joint decision.&#34;}</code></pre>
+        return {
+            &#34;action&#34;: &#34;collaborate&#34;,
+            &#34;reasoning&#34;: &#34;Collaborating with stakeholders for a joint decision.&#34;,
+        }</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -205,7 +208,10 @@ inheritance.</p></div>
 <pre><code class="python">class InfluentialStrategy(DecisionStrategy):
     async def decide(self, context: Dict[str, Any]) -&gt; Dict[str, Any]:
         # Influential decision-making logic
-        return {&#34;action&#34;: &#34;influence&#34;, &#34;reasoning&#34;: &#34;Using influence to guide stakeholders towards a decision.&#34;}</code></pre>
+        return {
+            &#34;action&#34;: &#34;influence&#34;,
+            &#34;reasoning&#34;: &#34;Using influence to guide stakeholders towards a decision.&#34;,
+        }</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

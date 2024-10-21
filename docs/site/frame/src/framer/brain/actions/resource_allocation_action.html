@@ -73,7 +73,9 @@ hljs.highlightAll();
         else:
             return &#34;balanced&#34;
 
-    async def execute(self, execution_context: ExecutionContext, **kwargs: Any) -&gt; Dict[str, Any]:
+    async def execute(
+        self, execution_context: ExecutionContext, **kwargs: Any
+    ) -&gt; Dict[str, Any]:
         context = execution_context.get_full_state()
         strategy_name = self.choose_strategy(context)
         strategy = self.strategies[strategy_name]
@@ -138,7 +140,9 @@ hljs.highlightAll();
             &#34;balanced&#34;: BalancedStrategy(),
         }
 
-    async def execute(self, execution_context: ExecutionContext, **kwargs: Any) -&gt; Dict[str, Any]:
+    async def execute(
+        self, execution_context: ExecutionContext, **kwargs: Any
+    ) -&gt; Dict[str, Any]:
         context = execution_context.get_full_state()
         strategy_name = self.choose_strategy(context)
         strategy = self.strategies[strategy_name]

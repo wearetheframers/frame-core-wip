@@ -1928,9 +1928,7 @@ validated to form a valid model.</p>
         self.llm_service = llm_service
 
         self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service,
-            soul=soul,
-            brain=brain
+            llm_service=self.llm_service, soul=soul, brain=brain
         )
         self.execution_context.soul = soul
         self.execution_context.brain = brain
