@@ -19,7 +19,11 @@ def mock_async_frame():
 
 @pytest.fixture(autouse=True)
 def cleanup():
+    llm_service = Mock()
+    sync_frame = SyncFrame(llm_service=llm_service)
     yield
+    if hasattr(sync_frame, "close"):
+        sync_frame.close()
     if hasattr(sync_frame, "close"):
         sync_frame.close()
 
@@ -89,6 +93,8 @@ def test_close_framer(mock_async_frame):
     sync_frame.close_framer(mock_framer)
 
     mock_framer.close.assert_called_once()
+
+
 async def test_create_framer(mock_async_frame):
     llm_service = Mock()
     sync_frame = SyncFrame(llm_service=llm_service)
@@ -159,4 +165,6 @@ async def test_sense(mock_async_frame):
 
 
 def test_sync_frame_singleton():
+    llm_service = Mock()
+    sync_frame = SyncFrame(llm_service=llm_service)
     assert isinstance(sync_frame, SyncFrame)

@@ -7,7 +7,7 @@ Actions are fundamental components within the Frame framework, representing task
 ## Key Features
 
 - **Functionality**: Actions are linked to specific functions that define their behavior.
-- **Description and Priority**: Each action can have a description and priority level, influencing its execution order.
+- **Description and Priority**: Each action can have a description and prioriaction_ty level, influencing its execution order.
 - **Output Format**: Actions can specify expected output formats to ensure consistency.
 
 ## Usage
@@ -28,4 +28,4 @@ action_registry.register_action(
 
 ## API Documentation
 
-::: frame.src.framer.agency.action_registry.ActionRegistry
+::: frame.src.framer.brain.action_registry.ActionRegistry
