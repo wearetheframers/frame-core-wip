@@ -2,7 +2,7 @@ import pytest
 import asyncio
 import logging
 from unittest.mock import Mock, patch, AsyncMock
-from frame.sync_frame import SyncFrame, sync_frame
+from frame.sync_frame import SyncFrame
 from frame.frame import Frame
 from frame.src.services import ExecutionContext
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def mock_async_frame():
-    with patch("frame.sync_frame.Frame") as mock_frame:
+    with patch("frame.sync_frame.SyncFrame") as mock_frame:
         mock_frame.return_value = AsyncMock()
         yield mock_frame.return_value
 
@@ -32,13 +32,66 @@ def debug_test(request):
 
 
 def test_sync_frame_initialization():
-    sync_frame = SyncFrame()
+    llm_service = Mock()
+    sync_frame = SyncFrame(llm_service=llm_service)
     assert isinstance(sync_frame.async_frame, Frame)
 
 
 @pytest.mark.asyncio
+async def test_create_framer_with_config(mock_async_frame):
+    llm_service = Mock()
+    sync_frame = SyncFrame(llm_service=llm_service)
+    config = {"name": "test_framer", "default_model": "gpt-4o-mini"}
+
+    mock_async_frame.create_framer.return_value = "mocked_framer"
+
+    result = await sync_frame.create_framer(config=config)
+
+    mock_async_frame.create_framer.assert_called_once_with(config=config)
+    assert result == "mocked_framer"
+
+
+@pytest.mark.asyncio
+async def test_perform_task_with_result(mock_async_frame):
+    llm_service = Mock()
+    sync_frame = SyncFrame(llm_service=llm_service)
+    mock_framer = AsyncMock()
+    task = {"description": "test_task"}
+
+    mock_framer.perform_task.return_value = {"output": "task_result"}
+
+    result = await sync_frame.perform_task(mock_framer, task)
+
+    mock_framer.perform_task.assert_called_once_with(task)
+    assert result == {"output": "task_result"}
+
+
+@pytest.mark.asyncio
+async def test_process_perception(mock_async_frame):
+    llm_service = Mock()
+    sync_frame = SyncFrame(llm_service=llm_service)
+    mock_framer = AsyncMock()
+    perception = {"type": "hearing", "data": {"text": "Hello"}}
+
+    mock_framer.sense.return_value = "decision_result"
+
+    result = await sync_frame.process_perception(mock_framer, perception)
+
+    mock_framer.sense.assert_called_once_with(perception)
+    assert result == "decision_result"
+
+
+def test_close_framer(mock_async_frame):
+    llm_service = Mock()
+    sync_frame = SyncFrame(llm_service=llm_service)
+    mock_framer = Mock()
+
+    sync_frame.close_framer(mock_framer)
+
+    mock_framer.close.assert_called_once()
 async def test_create_framer(mock_async_frame):
-    sync_frame = SyncFrame()
+    llm_service = Mock()
+    sync_frame = SyncFrame(llm_service=llm_service)
     kwargs = {"config": {"name": "test_framer"}}
 
     mock_async_frame.create_framer.return_value = "mocked_framer"
@@ -51,7 +104,8 @@ async def test_create_framer(mock_async_frame):
 
 @pytest.mark.asyncio
 async def test_perform_task(mock_async_frame):
-    sync_frame = SyncFrame()
+    llm_service = Mock()
+    sync_frame = SyncFrame(llm_service=llm_service)
     mock_framer = AsyncMock()
     task = {"task": "test_task"}
 
@@ -65,7 +119,8 @@ async def test_perform_task(mock_async_frame):
 
 def test_generate_tasks_from_perception(mock_async_frame):
     logger.info("Starting test_generate_tasks_from_perception")
-    sync_frame = SyncFrame()
+    llm_service = Mock()
+    sync_frame = SyncFrame(llm_service=llm_service)
     mock_framer = AsyncMock()
     perception = {"perception": "test_perception"}
 

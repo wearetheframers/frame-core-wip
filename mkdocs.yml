@@ -35,7 +35,7 @@ nav:
                     - Memory:
                       - Memory: API/frame/framer/brain/memory/memory.md
                       - Memory Adapter: API/frame/framer/brain/memory/memory_adapters/mem0/mem0_adapter.md
-                    - Action Registry: API/frame/framer/brain /action_registry.md
+                    - Action Registry: API/frame/framer/brain/action_registry.md
                     - Default Actions: API/frame/framer/brain/default_actions.md
                     - Actions:
                       - Base Action: API/frame/framer/brain/actions/base.md

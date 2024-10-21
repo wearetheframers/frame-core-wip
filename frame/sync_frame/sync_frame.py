@@ -11,6 +11,7 @@ from frame.src.framer.framer_factory import FramerFactory
 
 logger = logging.getLogger(__name__)
 
+
 class SyncFrame:
     def __init__(self, llm_service: LLMService):
         self.llm_service = llm_service
