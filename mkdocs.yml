@@ -65,11 +65,7 @@ nav:
     - Basic: Usage/basic/basic_usage.md
     - Testing: Usage/testing/testing.md
     - Advanced: Usage/advanced/advanced_usage.md
-  - Plugins: 
-    - Overview: plugins/overview.md
-    - Plugin Base: plugins/plugin_base.md
-    - Search Extract Summarize Plugin: plugins/search_extract_summarize_plugin.md
-    - Creating Custom Plugins: plugins/creating_custom_plugins.md
+  - Plugins: plugins.md
   - CLI: CLI.md
   - Glossary: glossary.md
 docs_dir: ./docs

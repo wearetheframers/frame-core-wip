@@ -3,7 +3,7 @@ from unittest.mock import Mock, AsyncMock
 from frame.src.framer.brain.actions.generate_roles_and_goals import (
     GenerateRolesAndGoalsAction,
 )
-from frame.src.services.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 
 
 @pytest.fixture
