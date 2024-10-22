@@ -146,6 +146,8 @@ class ActionRegistry:
             "description": description,
             "priority": priority,
         }
+        if not callable(action_func):
+            raise ValueError(f"Action function for '{name}' must be callable.")
         if name not in self.valid_actions:
             self.valid_actions.append(name)
             logger.debug(f"Action '{name}' added to registry.")

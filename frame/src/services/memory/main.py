@@ -14,7 +14,7 @@ class MemoryService:
     def add_memory(
         self, memory: str, user_id: str = "default", metadata: Dict[str, Any] = None
     ) -> int:
-        return self.adapter.store(memory, user_id, metadata)
+        return self.adapter.add(memory, user_id, metadata)
 
     def retrieve_memory(
         self, memory_id: int, user_id: str = "default"

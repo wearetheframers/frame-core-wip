@@ -9,4 +9,7 @@ from .execution_context_service import ExecutionContext
 
 
 class SharedContext(ExecutionContext):
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.shared_state = kwargs
+        self.llm_service = kwargs.get('llm_service', None)

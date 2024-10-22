@@ -98,6 +98,9 @@ class LLMService:
         )
         self.metrics = metrics or llm_metrics
         self._adapters = {}
+        self.huggingface_adapter = HuggingFaceAdapter(huggingface_api_key=self.huggingface_api_key)
+        self.dspy_wrapper = DSPyAdapter(openai_api_key=self.openai_api_key)
+        self.lmql_wrapper = LMQLAdapter(openai_api_key=self.openai_api_key)
 
     def get_adapter(self, model_name: str):
         if model_name not in self._adapters:

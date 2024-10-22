@@ -191,8 +191,9 @@ async def main():
     else:
         logger.warning("AutonomousVehiclePlugin not found. Vehicle not started.")
 
-    # Initialize a new ActionRegistry to manage available actions
-    action_registry = ActionRegistry()
+    # Set the execution context with the LLM service from the framer
+    execution_context = ExecutionContext(llm_service=framer.llm_service)
+    action_registry = ActionRegistry(execution_context=execution_context)
 
     # For this example demo, we will show how you can create an entirely new and custom action registry
     # in a plugin, and register it within a Framer to completely replace its behavior (not just default behavior)
@@ -216,14 +217,14 @@ async def main():
     process_perception_action = ProcessPerceptionAction(action_registry)
 
     # Register our actions in the new registry
-    action_registry.add_action(StopVehicleAction)
-    action_registry.add_action(SlowDownVehicleAction)
-    action_registry.add_action(SpeedUpVehicleAction)
-    action_registry.add_action(ChangeLaneAction)
-    action_registry.add_action(StartDrivingAction)
-    action_registry.add_action(NoActionAction)
-    action_registry.add_action(BrakeVehicleAction)
-    action_registry.add_action(ProcessPerceptionAction)
+    action_registry.add_action(StopVehicleAction(vehicle_plugin))
+    action_registry.add_action(SlowDownVehicleAction(vehicle_plugin))
+    action_registry.add_action(SpeedUpVehicleAction(vehicle_plugin))
+    action_registry.add_action(ChangeLaneAction(vehicle_plugin))
+    action_registry.add_action(StartDrivingAction(vehicle_plugin))
+    action_registry.add_action(NoActionAction(vehicle_plugin))
+    action_registry.add_action(BrakeVehicleAction(vehicle_plugin))
+    action_registry.add_action(process_perception_action)
 
     # Replace the default action registry with the custom one defined above
     framer.brain.action_registry = action_registry

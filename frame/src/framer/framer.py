@@ -183,12 +183,13 @@ class Framer:
         self.can_execute = True
         self.acting = False
         # Load plugins asynchronously
-        if asyncio.get_event_loop().is_running():
-            asyncio.create_task(self.load_plugins())
-        else:
-            logger.warning(
-                "No running event loop. Plugins will not be loaded immediately."
-            )
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        loop.create_task(self.load_plugins())
 
         # Generate roles and goals if not provided
         if not self.roles or not self.goals:
