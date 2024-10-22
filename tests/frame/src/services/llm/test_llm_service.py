@@ -63,7 +63,7 @@ async def test_get_completion_with_expected_output(llm_service):
     with patch.object(
         llm_service.lmql_wrapper, "get_completion", new_callable=AsyncMock
     ) as mock_lmql:
-        mock_lmql.return_value = "LMQL completion with expected output"
+        mock_lmql.return_value = mock_stream()
         result = await llm_service.get_completion(
             "Test prompt", expected_output="Expected format"
         )

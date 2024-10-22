@@ -35,7 +35,7 @@ def test_load_plugins(mock_plugin_dir):
         "frame.src.utils.plugin_loader.load_plugin_config"
     ) as mock_load_config:
         mock_module = MagicMock()
-        mock_module.MockPlugin = MockPlugin
+        mock_module.MockPlugin = MagicMock(spec=MockPlugin)
         mock_import.return_value = mock_module
         mock_listdir.return_value = ["mock_plugin"]
         mock_isdir.return_value = True

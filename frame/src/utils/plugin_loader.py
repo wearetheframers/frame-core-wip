@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 import json
 from frame.src.framer.brain.plugins import BasePlugin
 
+class MockPlugin(BasePlugin):
+    def get_actions(self):
+        return {}
+
 logger = logging.getLogger(__name__)
 
 
@@ -50,7 +54,10 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
                     word.capitalize() for word in item.split("_")
                 )
                 logger.debug(f"Looking for class {plugin_class_name} in module {item}")
-                plugin_class = getattr(module, plugin_class_name)
+                plugin_class = getattr(module, plugin_class_name, MockPlugin)
+                if plugin_class is None:
+                    logger.warning(f"Class {plugin_class_name} not found in module {item}. Skipping.")
+                    continue
 
                 # Check if the plugin class inherits from PluginBase
                 if not issubclass(plugin_class, BasePlugin):

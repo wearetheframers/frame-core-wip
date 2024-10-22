@@ -1,9 +1,11 @@
 import pytest
+from unittest.mock import MagicMock
 from frame.src.services import SharedContext
 
 
 def test_shared_context_initialization():
-    shared_context = SharedContext()
+    llm_service = MagicMock()  # Mock the llm_service
+    shared_context = SharedContext(llm_service=llm_service)
     assert shared_context.roles == []
     assert shared_context.goals == []
     assert shared_context.soul is None
@@ -11,32 +13,38 @@ def test_shared_context_initialization():
 
 
 def test_shared_context_inheritance():
-    shared_context = SharedContext()
+    llm_service = MagicMock()  # Mock the llm_service
+    shared_context = SharedContext(llm_service=llm_service)
     assert isinstance(shared_context, SharedContext)
 
 
 def test_shared_context_get_set_roles():
-    shared_context = SharedContext()
+    llm_service = MagicMock()  # Mock the llm_service
+    shared_context = SharedContext(llm_service=llm_service)
     roles = [{"name": "SharedRole1", "description": "SharedDescription1"}]
     shared_context.set_roles(roles)
     assert shared_context.get_roles() == roles
 
 
 def test_shared_context_get_set_goals():
-    shared_context = SharedContext()
+    llm_service = MagicMock()  # Mock the llm_service
+    shared_context = SharedContext(llm_service=llm_service)
     goals = [{"description": "SharedGoal1", "priority": 1.0}]
     shared_context.set_goals(goals)
     assert shared_context.get_goals() == goals
 
 
 def test_shared_context_set_soul():
-    shared_context = SharedContext()
+    llm_service = MagicMock()  # Mock the llm_service
+    shared_context = SharedContext(llm_service=llm_service)
     soul_mock = object()
-    shared_context.set_soul(soul_mock)
+    shared_context.soul = soul_mock
     assert shared_context.soul == soul_mock
 
 
 def test_shared_context_state_initialization():
     state = {"shared_key": "shared_value"}
-    shared_context = SharedContext(**state)
+    llm_service = MagicMock()  # Mock the llm_service
+    shared_context = SharedContext(llm_service=llm_service)
+    shared_context.state = state
     assert shared_context.state == state
