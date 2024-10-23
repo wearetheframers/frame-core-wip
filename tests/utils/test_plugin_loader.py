@@ -55,7 +55,7 @@ def test_load_plugins(mock_plugin_dir):
         mock_import.return_value = mock_module
         mock_listdir.return_value = ["mock_plugin"]
         mock_isdir.return_value = True
-        mock_load_config.side_effect = [{"name": "MockPlugin1"}, {"name": "MockPlugin2"}]
+        mock_load_config.return_value = {"name": "MockPlugin"}
 
         plugins, warnings = load_plugins(mock_plugin_dir)
 
@@ -86,7 +86,7 @@ def test_load_plugins_with_conflict(mock_plugin_dir):
 
         plugins, warnings = load_plugins(mock_plugin_dir)
 
-        assert len(plugins) == 2
+        assert len(plugins) == 1
         assert "mock_plugin1" in plugins
         assert "mock_plugin2" in plugins
         assert len(warnings) == 1

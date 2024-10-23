@@ -346,6 +346,7 @@ class Agency:
             roles = []
             existing_role_names = set()
             for r in role_data:
+                r["id"] = str(r.get("id", "default"))
                 r["priority"] = max(1, min(10, int(r.get("priority", 5))))
                 r["status"] = RoleStatus[r.get("status", "ACTIVE")]
                 # Ensure permissions are a list

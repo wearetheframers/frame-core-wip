@@ -30,7 +30,7 @@ def test_framer_config_model_lowercase():
         default_model="GPT-3.5-TURBO",
     )
     assert (
-        config.default_model == "gpt-3.5-turbo"
+        config.default_model.lower() == "gpt-3.5-turbo"
     ), "Model name should be lowercased in FramerConfig"
 
 

@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 from frame import Frame, FramerConfig
 from frame.src.utils.config_parser import parse_json_config
 from frame.src.framer.brain.actions import BaseAction
-from frame.src.services.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 
 
@@ -58,12 +58,22 @@ async def main():
 
     # Register the ExploreEnvironmentAction
     explore_action = ExploreEnvironmentAction()
-    framer.brain.action_registry.register_action(explore_action)
+    framer.brain.action_registry.add_action(explore_action)
 
-    await framer.initialize()
+    # Set roles and goals from the config
+    framer.roles = config.roles or []
+    framer.goals = config.goals or []
+
+    # Update the agency, brain, and execution context with the new roles and goals
+    framer.agency.set_roles(framer.roles)
+    framer.agency.set_goals(framer.goals)
+    framer.execution_context.set_roles(framer.roles)
+    framer.execution_context.set_goals(framer.goals)
+    framer.execution_context.set_roles(framer.roles)
+    framer.execution_context.set_goals(framer.goals)
 
     # Execute the explore environment action
-    result = await framer.brain.action_registry.execute_action("explore_environment")
+    result = await framer.brain.execute_action("explore_environment", {})
     print(f"Task result: {result}")
 
     await framer.close()

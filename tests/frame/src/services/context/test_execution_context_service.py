@@ -2,6 +2,7 @@ import pytest
 from frame.src.services import ExecutionContext
 from frame.src.services import LLMService
 from frame.src.framer.soul import Soul
+from frame.src.framer.config import FramerConfig
 
 
 @pytest.fixture

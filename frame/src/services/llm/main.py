@@ -3,6 +3,7 @@ from frame.src.services.llm.llm_adapters.lmql.lmql_interface import LMQLInterfac
 from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import DSPyAdapter
 import json
 import functools
+from unittest.mock import AsyncMock
 import logging
 from typing import List, Dict, Any, Optional
 
@@ -241,7 +242,10 @@ class LLMService:
 
         except Exception as e:
             self.logger.error(f"Error in get_completion: {str(e)}")
-            return f"I encountered an error while processing your request: {str(e)}. Could you please try again?"
+            return json.dumps({
+                "error": str(e),
+                "fallback_response": "I encountered an error while processing your request. Could you please try again?"
+            })
         """
         Generate a completion using the specified model or the default model.
 

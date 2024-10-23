@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional
 from frame.src.framer.agency.tasks.task import Task
+from frame.src.framer.agency.tasks.status import TaskStatus
 from frame.src.framer.agency.workflow.workflow import Workflow
 
 
@@ -35,5 +36,11 @@ class WorkflowManager:
             all_tasks.extend(workflow.tasks)
         return all_tasks
 
-    def __str__(self):
+    def cancel_task(self, task_id: str) -> None:
+        for workflow in self.workflows.values():
+            for task in workflow.tasks:
+                if task.id == task_id:
+                    task.update_status(TaskStatus.CANCELED)
+                    return
+        raise ValueError(f"Task with id '{task_id}' not found in any workflow.")
         return f"WorkflowManager(workflows={len(self.workflows)})"

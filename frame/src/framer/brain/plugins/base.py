@@ -123,3 +123,27 @@ class ExamplePlugin(BasePlugin):
 
 # Note: This is just an example. Don't instantiate plugins here.
 # Plugins should be instantiated and registered by the Framer.
+class BasePlugin:
+    def __init__(self, framer):
+        self.framer = framer
+        self.actions = {}
+
+    def get_actions(self):
+        """
+        Return the actions registered by this plugin.
+        """
+        return self.actions
+
+    def add_action(self, name, action_func, description=""):
+        """
+        Add an action to the plugin's action registry.
+
+        Args:
+            name (str): The name of the action.
+            action_func (callable): The function to execute for this action.
+            description (str): A description of the action.
+        """
+        self.actions[name] = {
+            "action_func": action_func,
+            "description": description,
+        }

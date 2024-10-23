@@ -12,7 +12,7 @@ from .src.framed.framed_factory import FramedBuilder
 from .src.framer.config import FramerConfig
 from .src.services.llm.main import LLMService
 from .src.utils.llm_utils import LLMMetrics, llm_metrics, track_llm_usage
-from frame.src.utils.llm_utils import track_llm_usage
+from .src.utils.plugin_loader import load_plugins
 from .src.services.context.execution_context_service import ExecutionContext
 from .src.utils.plugin_loader import load_plugins
 
@@ -74,13 +74,13 @@ class Frame:
             default_model=self._default_model,
         )
         self.plugins_dir = plugins_dir or os.path.join(
-            os.path.dirname(__file__), "src", "plugins"
+            os.path.dirname(__file__), "..", "plugins"
         )
         self.plugins = {}
         self.is_loading_plugins = True
         self.plugins, _ = load_plugins(self.plugins_dir)
         self.framer_factory = FramerFactory(
-            FramerConfig(name="DefaultFramer"), self.llm_service, plugins=self.plugins
+            FramerConfig(name="DefaultFramer", default_model=self._default_model), self.llm_service, plugins=self.plugins
         )
         self.is_loading_plugins = False
 
@@ -246,3 +246,89 @@ class Frame:
         #     self.llm_service.close()
 
         logger.info("Frame has been shut down.")
+import os
+import importlib
+from typing import Dict, Any, Tuple, List
+from dotenv import load_dotenv
+from frame.src.utils.plugin_loader import load_plugin_config
+from frame.src.framer.brain.plugins.base import BasePlugin
+import logging
+
+logger = logging.getLogger(__name__)
+
+def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
+    """
+    Load all plugins from the specified directory.
+
+    This function scans the given directory for plugin modules, loads them,
+    and returns a dictionary of plugin names and their corresponding classes.
+    It also checks for conflicting action names across plugins and handles them.
+
+    Args:
+        plugins_dir (str): The directory containing the plugins.
+
+    Returns:
+        Tuple[Dict[str, Any], List[str]]: A tuple containing:
+            - A dictionary of loaded plugins, where the key is the plugin name
+              and the value is the plugin class.
+            - A list of warning messages for conflicting actions.
+    """
+    # Load environment variables from .env file
+    load_dotenv()
+
+    plugins = {}
+    loaded_actions = {}
+    conflict_warnings = []
+
+    for item in os.listdir(plugins_dir):
+        plugin_dir = os.path.join(plugins_dir, item)
+        if os.path.isdir(plugin_dir) and not item.startswith("_"):
+            try:
+                # Load plugin-specific configuration
+                config = load_plugin_config(plugin_dir)
+
+                # Import the plugin module
+                logger.debug(f"Attempting to import module for plugin: {item}")
+                module = importlib.import_module(f"plugins.{item}.{item}")
+                logger.debug(f"Module imported successfully for plugin: {item}")
+
+                # Construct the plugin class name by converting the directory name to CamelCase
+                plugin_class_name = "".join(
+                    word.capitalize() for word in item.split("_")
+                )
+                logger.debug(f"Looking for class {plugin_class_name} in module {item}")
+                plugin_class = getattr(module, plugin_class_name, None)
+                if plugin_class is None:
+                    logger.warning(f"Class {plugin_class_name} not found in module {item}. Skipping.")
+                    continue
+
+                # Check if the plugin class inherits from PluginBase
+                if not issubclass(plugin_class, BasePlugin):
+                    logger.warning(
+                        f"Plugin {item} does not inherit from PluginBase. Skipping."
+                    )
+                    continue
+
+                # Initialize the plugin with its configuration
+                logger.debug(f"Initializing plugin {item} with configuration")
+                plugin_instance = plugin_class(config)
+
+                # Check for conflicting actions
+                plugin_actions = plugin_instance.get_actions()
+                for action_name, action_func in plugin_actions.items():
+                    if action_name in loaded_actions:
+                        conflict_warnings.append(
+                            f"Action '{action_name}' in plugin '{item}' conflicts with an existing action. Skipping."
+                        )
+                    else:
+                        loaded_actions[action_name] = action_func
+
+                # Add the plugin to the plugins dictionary
+                plugins[item] = plugin_instance
+                logger.info(f"Loaded plugin: {item}")
+            except (ImportError, AttributeError) as e:
+                logger.error(f"Failed to load plugin {item}: {str(e)}", exc_info=True)
+
+    for warning in conflict_warnings:
+        logger.warning(warning)
+    return plugins, conflict_warnings

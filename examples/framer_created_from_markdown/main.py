@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 from frame import Frame, FramerConfig
 from frame.src.utils.config_parser import parse_markdown_config
 from frame.src.framer.brain.actions import BaseAction
-from frame.src.services.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 
 

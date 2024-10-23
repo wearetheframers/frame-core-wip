@@ -1,1 +1,1 @@
-from .main import AudioTranscriptionPlugin
+from .audio_transcription_plugin import AudioTranscriptionPlugin

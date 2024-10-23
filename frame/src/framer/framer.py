@@ -126,7 +126,7 @@ class Framer:
         self.llm_service = llm_service
 
         self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service, soul=soul, brain=brain
+            llm_service=self.llm_service, soul=soul
         )
         self.execution_context.soul = soul
         self.execution_context.brain = brain
@@ -163,6 +163,7 @@ class Framer:
         self.goals = goals or []
         self.plugins = plugins or {}
         self.plugin_loading_complete = False
+        self.plugin_loading_complete = False
         self._streamed_response = {"status": "pending", "result": ""}
 
         logger.info("Creating Brain")
@@ -182,14 +183,24 @@ class Framer:
         self.observers: List[Observer] = []
         self.can_execute = True
         self.acting = False
-        # Load plugins asynchronously
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-        loop.create_task(self.load_plugins())
+    async def load_plugins(self):
+        """
+        Load all plugins by calling their on_load method.
+        """
+        for plugin_name, plugin_instance in self.plugins.items():
+            if hasattr(plugin_instance, "on_load"):
+                await plugin_instance.on_load()
+                # Register plugin actions in the brain's action_registry
+                for action_name, action_func in plugin_instance.get_actions().items():
+                    self.brain.action_registry.add_action(
+                        action_name,
+                        action_func=action_func,
+                        description=f"Action from {plugin_name} plugin",
+                        priority=5,  # Default priority, adjust as needed
+                    )
+        self.plugin_loading_complete = True
+        self.act()
+        await self.process_queued_perceptions()
 
         # Generate roles and goals if not provided
         if not self.roles or not self.goals:
@@ -202,11 +213,11 @@ class Framer:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
 
         # Ensure uniqueness
-        self.roles = list({role.name: role for role in self.roles}.values())
-        self.goals = list({goal.name: goal for goal in self.goals}.values())
+        self.roles = list({role['name']: role for role in self.roles}.values())
+        self.goals = list({goal['description']: goal for goal in self.goals}.values())
 
-        logger.info(f"Generated initial roles: {[role.name for role in self.roles]}")
-        logger.info(f"Generated initial goals: {[goal.name for goal in self.goals]}")
+        logger.info(f"Generated initial roles: {[role['name'] for role in self.roles]}")
+        logger.info(f"Generated initial goals: {[goal['description'] for goal in self.goals]}")
 
         if hasattr(self.brain, "set_roles"):
             self.brain.set_roles(self.roles)
@@ -224,7 +235,28 @@ class Framer:
         """
         self.acting = True
 
-    async def load_plugins(self):
+    def add_plugin(self, plugin_name: str, plugin_instance: Any):
+        """
+        Add a plugin to the Framer.
+
+        Args:
+            plugin_name (str): The name of the plugin.
+            plugin_instance (Any): The plugin instance to add.
+        """
+        self.plugins[plugin_name] = plugin_instance
+        if hasattr(plugin_instance, "on_load"):
+            asyncio.create_task(plugin_instance.on_load())
+
+    async def remove_plugin(self, plugin_name: str):
+        """
+        Remove a plugin from the Framer.
+
+        Args:
+            plugin_name (str): The name of the plugin to remove.
+        """
+        plugin_instance = self.plugins.pop(plugin_name, None)
+        if plugin_instance and hasattr(plugin_instance, "on_remove"):
+            asyncio.create_task(plugin_instance.on_remove())
         """
         Load all plugins by calling their on_load method.
         """
@@ -469,8 +501,7 @@ class Framer:
             self.notify_observers(decision)
         else:
             logger.warning("No decision was made for the given perception.")
-
-        decision = Decision(**decision_data)
+            return None
         return decision
 
     async def prompt(self, text: str) -> Decision:

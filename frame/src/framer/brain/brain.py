@@ -68,7 +68,7 @@ class Brain:
     def __init__(
         self,
         llm_service: LLMService,
-        execution_context: Optional["ExecutionContext"] = None,
+        execution_context: Optional[ExecutionContext] = None,
         memory_service: Optional["MemoryService"] = None,
         roles: List[Dict[str, Any]] = [],
         goals: List[Dict[str, Any]] = [],
@@ -91,7 +91,7 @@ class Brain:
         self.logger.info("Initializing Brain")
         self.llm_service = llm_service
         self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service
+            llm_service=self.llm_service, config=None
         )
         self.default_model = default_model
         self.roles = roles

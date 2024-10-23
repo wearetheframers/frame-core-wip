@@ -312,6 +312,9 @@ async def test_cancel_task():
     llm_service = Mock(spec=LLMService)
     framer = await Framer.create(config=config, llm_service=llm_service)
 
+    # Create the default workflow
+    framer.workflow_manager.create_workflow("default")
+
     # Create a task
     task = Task(description="Test task", workflow_id="default")
     framer.workflow_manager.add_task("default", task)

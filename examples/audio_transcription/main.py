@@ -10,7 +10,7 @@ from plugins.audio_transcription_plugin import AudioTranscriptionPlugin
 
 async def main():
     frame = Frame()
-    config = FramerConfig(name="AudioTranscriptionFramer")
+    config = FramerConfig(name="AudioTranscriptionFramer", default_model="gpt-3.5-turbo")
     framer = await frame.create_framer(config)
 
     roles = [
@@ -34,10 +34,6 @@ async def main():
         },
     ]
 
-    # Set roles and goals
-    framer.roles = roles
-    framer.goals = goals
-
     # Update the agency, brain, and execution context with the new roles and goals
     framer.agency.set_roles(roles)
     framer.agency.set_goals(goals)
@@ -59,7 +55,7 @@ async def main():
         transcription = await framer.brain.action_registry.execute_action(
             "record_and_transcribe"
         )
-        print(f"Transc ription: {transcription}")
+        print(f"Transcription: {transcription}")
 
         notes = await framer.brain.action_registry.execute_action(
             "analyze_transcription", transcription=transcription

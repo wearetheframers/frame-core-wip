@@ -42,7 +42,7 @@ class Task(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        orm_mode = True
+        from_attributes = True
         json_encoders = {datetime: lambda v: v.isoformat()}
 
     def __init__(self, **data):

@@ -26,8 +26,10 @@ def parse_markdown_config(file_path: str) -> FramerConfig:
             config_data[key] = [
                 trait.strip() for trait in value.strip().split("-") if trait.strip()
             ]
-        elif key == "soul_seed":
-            config_data[key] = {"text": value.strip()}
+        elif key in ["roles", "goals"]:
+            config_data[key] = [
+                item.strip() for item in value.strip().split("\n") if item.strip()
+            ]
         else:
             config_data[key] = value.strip()
 
