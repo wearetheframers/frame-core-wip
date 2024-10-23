@@ -159,6 +159,7 @@ and multi-faceted behavior.</p>
         self.execution_context = execution_context or ExecutionContext(
             llm_service=llm_service
         )
+        self.context = context
         self.roles: List[Role] = []
         self.goals: List[Goal] = []
         if roles:
@@ -1452,6 +1453,7 @@ attributes &ndash; see the documentation for details.</p></div>
 </summary>
 <pre><code class="python">class Workflow:
     def __init__(self, name: str, is_async: bool = False, stakeholders: Optional[List[Dict[str, Any]]] = None):
+        self.id = generate_id()
         self.stakeholders = stakeholders or []
         for stakeholder in self.stakeholders:
             stakeholder[&#39;id&#39;] = stakeholder.get(&#39;id&#39;, generate_id())
@@ -1526,14 +1528,14 @@ attributes &ndash; see the documentation for details.</p></div>
     def set_final_task_for_workflow(self, workflow_name: str, task: Task):
         workflow = self.get_workflow(workflow_name)
         if workflow:
-            workflow.set_final_task(task)
+            workflow.final_task = task
         else:
             raise ValueError(f&#34;Workflow &#39;{workflow_name}&#39; not found&#34;)
 
     def get_all_tasks(self) -&gt; List[Task]:
         all_tasks = []
         for workflow in self.workflows.values():
-            all_tasks.extend(workflow.get_tasks())
+            all_tasks.extend(workflow.tasks)
         return all_tasks
 
     def __str__(self):

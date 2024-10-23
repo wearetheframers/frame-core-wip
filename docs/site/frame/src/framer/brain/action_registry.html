@@ -47,6 +47,7 @@ hljs.highlightAll();
 </summary>
 <pre><code class="python">class ActionRegistry:
     def __init__(self, execution_context: Optional[&#34;ExecutionContext&#34;] = None):
+        self.valid_actions = []
         self.actions: Dict[str, Dict[str, Any]] = {}
         self.execution_context = execution_context
         if not self.execution_context or not hasattr(
@@ -146,9 +147,9 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         if isinstance(action_or_name, BaseAction):
             name = action_or_name.name
-            description = action_or_name.description
-            action_func = getattr(action_or_name, &#34;execute&#34;, None)
-            priority = action_or_name.priority
+            description = description or action_or_name.description
+            action_func = action_func or getattr(action_or_name, &#34;execute&#34;, None)
+            priority = priority or action_or_name.priority
         else:
             name = action_or_name
 
@@ -165,6 +166,8 @@ hljs.highlightAll();
             &#34;description&#34;: description,
             &#34;priority&#34;: priority,
         }
+        if not callable(action_func):
+            raise ValueError(f&#34;Action function for &#39;{name}&#39; must be callable.&#34;)
         if name not in self.valid_actions:
             self.valid_actions.append(name)
             logger.debug(f&#34;Action &#39;{name}&#39; added to registry.&#34;)
@@ -218,7 +221,7 @@ hljs.highlightAll();
             raise ValueError(f&#34;Action &#39;{name}&#39; not found&#34;)
         if self.execution_context is None:
             raise ValueError(&#34;Execution context is not set&#34;)
-        response = await action[&#34;action_func&#34;](*args, **kwargs)
+        response = await action[&#34;action_func&#34;](self.execution_context, *args, **kwargs)
         role = response if isinstance(response, dict) else response
         if callback:
             callback(response, *callback_args)
@@ -256,7 +259,7 @@ hljs.highlightAll();
 
         action_func = action[&#34;action_func&#34;]
         try:
-            result = await action_func(*args, **kwargs)
+            result = await action_func(self.execution_context, **kwargs)  # Pass execution_context
             if result is None:
                 return {
                     &#34;error&#34;: &#34;Action returned None&#34;,

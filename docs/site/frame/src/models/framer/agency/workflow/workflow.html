@@ -35,8 +35,8 @@ hljs.highlightAll();
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="frame.src.models.framer.agency.workflow.workflow.WorkflowModel"><code class="flex name class">
-<span>class <span class="ident">WorkflowModel</span></span>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow"><code class="flex name class">
+<span>class <span class="ident">Workflow</span></span>
 <span>(</span><span>**data: Any)</span>
 </code></dt>
 <dd>
@@ -88,15 +88,21 @@ validated to form a valid model.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class WorkflowModel(BaseModel):
+<pre><code class="python">class Workflow(BaseModel):
     id: str
     name: str
     description: Optional[str] = None
-    tasks: List[str] = Field(default_factory=list)
+    tasks: List[Task] = Field(default_factory=list)
     status: str = &#34;pending&#34;
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
-    completed_at: Optional[datetime] = None</code></pre>
+    completed_at: Optional[datetime] = None
+    is_async: bool = False
+    final_task: Optional[Task] = None
+
+    def add_task(self, task: Task):
+        self.tasks.append(task)
+        self.updated_at = datetime.now()</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -104,47 +110,64 @@ validated to form a valid model.</p>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.completed_at"><code class="name">var <span class="ident">completed_at</span> : Optional[datetime.datetime]</code></dt>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.completed_at"><code class="name">var <span class="ident">completed_at</span> : Optional[datetime.datetime]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.created_at"><code class="name">var <span class="ident">created_at</span> : datetime.datetime</code></dt>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.created_at"><code class="name">var <span class="ident">created_at</span> : datetime.datetime</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.description"><code class="name">var <span class="ident">description</span> : Optional[str]</code></dt>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.description"><code class="name">var <span class="ident">description</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.final_task"><code class="name">var <span class="ident">final_task</span> : Optional[<a title="frame.src.framer.agency.tasks.task.Task" href="../../../../framer/agency/tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.is_async"><code class="name">var <span class="ident">is_async</span> : bool</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.status"><code class="name">var <span class="ident">status</span> : str</code></dt>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.tasks"><code class="name">var <span class="ident">tasks</span> : List[str]</code></dt>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.updated_at"><code class="name">var <span class="ident">updated_at</span> : datetime.datetime</code></dt>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.status"><code class="name">var <span class="ident">status</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.tasks"><code class="name">var <span class="ident">tasks</span> : List[<a title="frame.src.framer.agency.tasks.task.Task" href="../../../../framer/agency/tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.updated_at"><code class="name">var <span class="ident">updated_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.models.framer.agency.workflow.workflow.Workflow.add_task"><code class="name flex">
+<span>def <span class="ident">add_task</span></span>(<span>self, task: <a title="frame.src.framer.agency.tasks.task.Task" href="../../../../framer/agency/tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>)</span>
+</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -166,19 +189,22 @@ validated to form a valid model.</p>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="frame.src.models.framer.agency.workflow.workflow.WorkflowModel" href="#frame.src.models.framer.agency.workflow.workflow.WorkflowModel">WorkflowModel</a></code></h4>
+<h4><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow" href="#frame.src.models.framer.agency.workflow.workflow.Workflow">Workflow</a></code></h4>
 <ul class="">
-<li><code><a title="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.completed_at" href="#frame.src.models.framer.agency.workflow.workflow.WorkflowModel.completed_at">completed_at</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.created_at" href="#frame.src.models.framer.agency.workflow.workflow.WorkflowModel.created_at">created_at</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.description" href="#frame.src.models.framer.agency.workflow.workflow.WorkflowModel.description">description</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.id" href="#frame.src.models.framer.agency.workflow.workflow.WorkflowModel.id">id</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.model_computed_fields" href="#frame.src.models.framer.agency.workflow.workflow.WorkflowModel.model_computed_fields">model_computed_fields</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.model_config" href="#frame.src.models.framer.agency.workflow.workflow.WorkflowModel.model_config">model_config</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.model_fields" href="#frame.src.models.framer.agency.workflow.workflow.WorkflowModel.model_fields">model_fields</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.name" href="#frame.src.models.framer.agency.workflow.workflow.WorkflowModel.name">name</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.status" href="#frame.src.models.framer.agency.workflow.workflow.WorkflowModel.status">status</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.tasks" href="#frame.src.models.framer.agency.workflow.workflow.WorkflowModel.tasks">tasks</a></code></li>
-<li><code><a title="frame.src.models.framer.agency.workflow.workflow.WorkflowModel.updated_at" href="#frame.src.models.framer.agency.workflow.workflow.WorkflowModel.updated_at">updated_at</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.add_task" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.add_task">add_task</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.completed_at" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.completed_at">completed_at</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.created_at" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.created_at">created_at</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.description" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.description">description</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.final_task" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.final_task">final_task</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.id" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.id">id</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.is_async" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.is_async">is_async</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.model_computed_fields" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.model_config" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.model_config">model_config</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.model_fields" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.model_fields">model_fields</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.name" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.name">name</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.status" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.status">status</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.tasks" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.tasks">tasks</a></code></li>
+<li><code><a title="frame.src.models.framer.agency.workflow.workflow.Workflow.updated_at" href="#frame.src.models.framer.agency.workflow.workflow.Workflow.updated_at">updated_at</a></code></li>
 </ul>
 </li>
 </ul>

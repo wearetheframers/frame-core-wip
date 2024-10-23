@@ -382,8 +382,7 @@ to enable intelligent decision-making and action execution.</p>
             if decision is None:
                 self.logger.warning(&#34;No decision was made for the given perception.&#34;)
                 return None
-            result = await self.execute_decision(decision, perception)
-            return result
+            await self.execute_decision(decision, perception)
         else:
             logger.warn(&#34;Framer is not ready to execute decisions. Queuing perception.&#34;)
             # Code to queue the perception can be added here if needed

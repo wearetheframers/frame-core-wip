@@ -47,6 +47,7 @@ hljs.highlightAll();
 </summary>
 <pre><code class="python">class Workflow:
     def __init__(self, name: str, is_async: bool = False, stakeholders: Optional[List[Dict[str, Any]]] = None):
+        self.id = generate_id()
         self.stakeholders = stakeholders or []
         for stakeholder in self.stakeholders:
             stakeholder[&#39;id&#39;] = stakeholder.get(&#39;id&#39;, generate_id())

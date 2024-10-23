@@ -40,7 +40,7 @@ ContextService to manage shared roles and goals across multiple Framers.</p>
 <dl>
 <dt id="frame.src.services.context.shared_context_service.SharedContext"><code class="flex name class">
 <span>class <span class="ident">SharedContext</span></span>
-<span>(</span><span>llm_service: "'LLMService'", memory_service: "Optional['MemoryService']" = None, eq_service: "Optional['EQService']" = None, soul: "Optional['Soul']" = None, brain: "Optional['Brain']" = None, state: Dict[str, Any] = None)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ExecutionContext provides a centralized container for various services, state, and functions
@@ -58,7 +58,10 @@ allowing them to share resources and functionality without tight coupling.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class SharedContext(ExecutionContext):
-    pass</code></pre>
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.shared_state = kwargs
+        self.llm_service = kwargs.get(&#39;llm_service&#39;, None)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

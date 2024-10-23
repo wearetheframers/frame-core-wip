@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.agency.tasks.task.Task"><code class="flex name class">
 <span>class <span class="ident">Task</span></span>
-<span>(</span><span>description: str, workflow_id: str, priority: int = 5, status: <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../../models/framer/agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a> = TaskStatus.PENDING, expected_results: Optional[List[Any]] = None, dependencies: List[str] = None, parent_task_id: Optional[str] = None, assigned_to: Optional[str] = None, estimated_duration: Optional[float] = None, tags: List[str] = None, type: Optional[str] = None, data: Optional[Dict[str, Any]] = None, updated_at: Optional[datetime.datetime] = None, completed_at: Optional[datetime.datetime] = None, stakeholders: Optional[List[Dict[str, Any]]] = None)</span>
+<span>(</span><span>**data)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents a task within the Frame-Core system.</p>
@@ -52,7 +52,7 @@ validated to form a valid model.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Task(TaskModel):
+<pre><code class="python">class Task(BaseModel):
     &#34;&#34;&#34;
     Represents a task within the Frame-Core system.
 
@@ -61,227 +61,98 @@ validated to form a valid model.</p>
     results and metadata.
     &#34;&#34;&#34;
 
-    workflow_metrics: Dict[str, Dict[str, Any]] = {}
-    cancel_callback: Optional[Callable[[], None]] = None
+    id: str = Field(default_factory=generate_id)
+    description: str
+    priority: Priority = Field(default=Priority.MEDIUM)
+    workflow_id: Optional[str] = None
+    status: TaskStatus = TaskStatus.PENDING
+    expected_results: List[Any] = Field(default_factory=list)
+    dependencies: List[str] = Field(default_factory=list)
+    parent_task_id: Optional[str] = None
+    assigned_to: Optional[str] = None
+    estimated_duration: Optional[float] = None
+    tags: List[str] = Field(default_factory=list)
+    type: Optional[str] = None
+    data: Dict[str, Any] = Field(default_factory=dict)
+    result: Optional[Any] = None
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+    completed_at: Optional[datetime] = None
+    subtasks: List[&#34;Task&#34;] = Field(default_factory=list)
 
-    def __init__(
-        self,
-        description: str,
-        workflow_id: str,
-        priority: int = 5,
-        status: TaskStatus = TaskStatus.PENDING,
-        expected_results: Optional[List[Any]] = None,
-        dependencies: List[str] = None,
-        parent_task_id: Optional[str] = None,
-        assigned_to: Optional[str] = None,
-        estimated_duration: Optional[float] = None,
-        tags: List[str] = None,
-        type: Optional[str] = None,
-        data: Optional[Dict[str, Any]] = None,
-        updated_at: Optional[datetime] = None,
-        completed_at: Optional[datetime] = None,
-        stakeholders: Optional[List[Dict[str, Any]]] = None,
-    ):
-        self.stakeholders = stakeholders or []
-        for stakeholder in self.stakeholders:
-            stakeholder[&#39;id&#39;] = stakeholder.get(&#39;id&#39;, generate_id())
-            stakeholder[&#39;roles&#39;] = stakeholder.get(&#39;roles&#39;, [])
-        task_id = generate_id()
-        if not (1 &lt;= priority &lt;= 10):
-            raise ValueError(&#34;Priority must be between 1 and 10&#34;)
-        super().__init__(
-            id=task_id,
-            description=description,
-            priority=priority,
-            workflow_id=workflow_id,
-            expected_results=expected_results or [],
-            dependencies=dependencies or [],
-            parent_task_id=parent_task_id,
-            assigned_to=assigned_to,
-            estimated_duration=estimated_duration,
-            tags=tags or [],
-            type=type,
-            data=data or {},
-            updated_at=updated_at,
-            completed_at=completed_at,
-        )
-        self.subtasks: List[Task] = []
-        self.result = None
+    stakeholders: Optional[List[Dict[str, Any]]] = None
+
+    class Config:
+        arbitrary_types_allowed = True
+        orm_mode = True
+        json_encoders = {datetime: lambda v: v.isoformat()}
+
+    def __init__(self, **data):
+        super().__init__(**data)
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
-        self.actual_duration: Optional[float] = None
-        self.completed_at = completed_at
-        logger.debug(
-            f&#34;Created new task with ID: {self.id} and expected results: {self.expected_results}&#34;
-        )
-        self._execute_callback: Optional[Callable[[], Any]] = None
+        logger.debug(f&#34;Created new task with ID: {self.id}&#34;)
 
     def update_status(self, new_status: TaskStatus) -&gt; None:
-        &#34;&#34;&#34;
-        Update the status of the task.
-
-        Args:
-            new_status (TaskStatus): The new status to set for the task.
-        &#34;&#34;&#34;
         self.status = new_status
         self.updated_at = datetime.now()
         if new_status == TaskStatus.COMPLETED:
             self.completed_at = datetime.now()
 
     def set_result(self, result: Any) -&gt; None:
-        &#34;&#34;&#34;
-        Set the result of the task execution.
-
-        Args:
-            result (Any): The result of the task execution.
-        &#34;&#34;&#34;
         self.result = result
         self.updated_at = datetime.now()
 
     def add_subtask(self, subtask: &#34;Task&#34;) -&gt; None:
-        &#34;&#34;&#34;
-        Add a subtask to this task.
-
-        Args:
-            subtask (Task): The subtask to add.
-        &#34;&#34;&#34;
         self.subtasks.append(subtask)
         subtask.parent_task_id = self.id
 
-    def set_actual_duration(self, duration: float) -&gt; None:
-        &#34;&#34;&#34;
-        Set the actual duration of the task execution.
-
-        Args:
-            duration (float): The actual duration of the task execution.
-        &#34;&#34;&#34;
-        self.actual_duration = duration
-        self.updated_at = datetime.now()
-
-    def set_execute_callback(self, callback: Callable[[], Any]) -&gt; None:
-        &#34;&#34;&#34;
-        Set the execute callback for the task.
-
-        Args:
-            callback (Callable[[], Any]): The callback function to be called when the task is executed.
-        &#34;&#34;&#34;
-        self._execute_callback = callback
-
-    def set_cancel_callback(self, callback: Callable[[], None]) -&gt; None:
-        &#34;&#34;&#34;
-        Set the cancel callback for the task.
-
-        Args:
-            callback (Callable[[], None]): The callback function to be called when the task is cancelled.
-        &#34;&#34;&#34;
-        self.cancel_callback = callback
-
-    async def execute(self) -&gt; Any:
-        &#34;&#34;&#34;
-        Execute the task.
-
-        Returns:
-            Any: The result of the task execution.
-        &#34;&#34;&#34;
-        if self._execute_callback:
-            self.result = await self._execute_callback()
-            self.status = TaskStatus.COMPLETED
-            return self.result
-        else:
-            raise NotImplementedError(&#34;Task execution not implemented&#34;)
-
-    def cancel(self) -&gt; None:
-        &#34;&#34;&#34;
-        Cancel the task.
-        &#34;&#34;&#34;
-        if self.cancel_callback:
-            self.cancel_callback()
-        self.status = TaskStatus.CANCELED
-
-    def log_workflow_metrics(self, workflow_id: str) -&gt; None:
-        &#34;&#34;&#34;
-        Log and save the completion call metrics for a completed workflow.
-
-        Args:
-            workflow_id (str): The ID of the completed workflow.
-        &#34;&#34;&#34;
-        # Placeholder data
-        metrics = {&#34;total_tasks&#34;: 5, &#34;completed_tasks&#34;: 3, &#34;total_time&#34;: 10.5}
-        logger.info(f&#34;Workflow {workflow_id} completed.&#34;)
-        logger.info(f&#34;Workflow metrics: {metrics}&#34;)
-
-        # Save metrics
-        self.workflow_metrics[workflow_id] = metrics
-
-        for task_id, task_metric in metrics.get(&#34;tasks&#34;, {}).items():
-            logger.info(f&#34;  Task {task_id}: {task_metric}&#34;)
-
-    def get_workflow(self, workflow_id: str):
-        &#34;&#34;&#34;
-        Placeholder method to get a workflow. In a real implementation, this would
-        retrieve the workflow from some storage or management system.
-        &#34;&#34;&#34;
-        return None
-
-    def get_workflow_metrics(self, workflow_id: str) -&gt; Optional[Dict[str, Any]]:
-        &#34;&#34;&#34;
-        Retrieve the metrics for a completed workflow.
-
-        Args:
-            workflow_id (str): The ID of the completed workflow.
-
-        Returns:
-            Optional[Dict[str, Any]]: The metrics for the workflow, or None if not found.
-        &#34;&#34;&#34;
-        return self.workflow_metrics.get(workflow_id)
-
-    def get_all_workflow_metrics(self) -&gt; Dict[str, Dict[str, Any]]:
-        &#34;&#34;&#34;
-        Retrieve metrics for all completed workflows.
-
-        Returns:
-            Dict[str, Dict[str, Any]]: A dictionary of all workflow metrics.
-        &#34;&#34;&#34;
-        return self.workflow_metrics
-
     def to_dict(self) -&gt; Dict[str, Any]:
-        &#34;&#34;&#34;
-        Convert the Task object to a dictionary representation.
-
-        Returns:
-            Dict[str, Any]: A dictionary representation of the Task.
-        &#34;&#34;&#34;
-        return {
-            &#34;id&#34;: self.id,
-            &#34;description&#34;: self.description,
-            &#34;workflow_id&#34;: self.workflow_id,
-            &#34;priority&#34;: self.priority,
-            &#34;status&#34;: self.status.value,
-            &#34;result&#34;: self.result,
-            &#34;expected_results&#34;: self.expected_results,
-            &#34;created_at&#34;: self.created_at.isoformat(),
-            &#34;updated_at&#34;: self.updated_at.isoformat(),
-            &#34;completed_at&#34;: (
-                self.completed_at.isoformat() if self.completed_at else None
-            ),
-            &#34;metadata&#34;: self.metadata,
-            &#34;dependencies&#34;: self.dependencies,
-            &#34;subtasks&#34;: [subtask.to_dict() for subtask in self.subtasks],
-            &#34;parent_task_id&#34;: self.parent_task_id,
-            &#34;assigned_to&#34;: self.assigned_to,
-            &#34;estimated_duration&#34;: self.estimated_duration,
-            &#34;actual_duration&#34;: self.actual_duration,
-            &#34;tags&#34;: self.tags,
-        }</code></pre>
+        return self.dict()</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="frame.src.framer.agency.tasks.task.TaskModel" href="#frame.src.framer.agency.tasks.task.TaskModel">TaskModel</a></li>
 <li>pydantic.main.BaseModel</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="frame.src.framer.agency.tasks.task.Task.cancel_callback"><code class="name">var <span class="ident">cancel_callback</span> : Optional[Callable[[], None]]</code></dt>
+<dt id="frame.src.framer.agency.tasks.task.Task.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.assigned_to"><code class="name">var <span class="ident">assigned_to</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.completed_at"><code class="name">var <span class="ident">completed_at</span> : Optional[datetime.datetime]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.created_at"><code class="name">var <span class="ident">created_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.data"><code class="name">var <span class="ident">data</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.dependencies"><code class="name">var <span class="ident">dependencies</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.description"><code class="name">var <span class="ident">description</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.estimated_duration"><code class="name">var <span class="ident">estimated_duration</span> : Optional[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.expected_results"><code class="name">var <span class="ident">expected_results</span> : List[Any]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -297,7 +168,43 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.framer.agency.tasks.task.Task.workflow_metrics"><code class="name">var <span class="ident">workflow_metrics</span> : Dict[str, Dict[str, Any]]</code></dt>
+<dt id="frame.src.framer.agency.tasks.task.Task.parent_task_id"><code class="name">var <span class="ident">parent_task_id</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.priority"><code class="name">var <span class="ident">priority</span> : <a title="frame.src.framer.agency.priority.Priority" href="../priority.html#frame.src.framer.agency.priority.Priority">Priority</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.result"><code class="name">var <span class="ident">result</span> : Optional[Any]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.stakeholders"><code class="name">var <span class="ident">stakeholders</span> : Optional[List[Dict[str, Any]]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.framer.agency.tasks.status.TaskStatus" href="status.html#frame.src.framer.agency.tasks.status.TaskStatus">TaskStatus</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.subtasks"><code class="name">var <span class="ident">subtasks</span> : List[<a title="frame.src.framer.agency.tasks.task.Task" href="#frame.src.framer.agency.tasks.task.Task">Task</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.tags"><code class="name">var <span class="ident">tags</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.type"><code class="name">var <span class="ident">type</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.updated_at"><code class="name">var <span class="ident">updated_at</span> : datetime.datetime</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.tasks.task.Task.workflow_id"><code class="name">var <span class="ident">workflow_id</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -308,297 +215,23 @@ validated to form a valid model.</p>
 <span>def <span class="ident">add_subtask</span></span>(<span>self, subtask: <a title="frame.src.framer.agency.tasks.task.Task" href="#frame.src.framer.agency.tasks.task.Task">Task</a>) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Add a subtask to this task.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>subtask</code></strong> :&ensp;<code><a title="frame.src.framer.agency.tasks.task.Task" href="#frame.src.framer.agency.tasks.task.Task">Task</a></code></dt>
-<dd>The subtask to add.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.Task.cancel"><code class="name flex">
-<span>def <span class="ident">cancel</span></span>(<span>self) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Cancel the task.</p></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.Task.execute"><code class="name flex">
-<span>async def <span class="ident">execute</span></span>(<span>self) ‑> Any</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Execute the task.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Any</code></dt>
-<dd>The result of the task execution.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.Task.get_all_workflow_metrics"><code class="name flex">
-<span>def <span class="ident">get_all_workflow_metrics</span></span>(<span>self) ‑> Dict[str, Dict[str, Any]]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Retrieve metrics for all completed workflows.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Dict[str, Dict[str, Any]]</code></dt>
-<dd>A dictionary of all workflow metrics.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.Task.get_workflow"><code class="name flex">
-<span>def <span class="ident">get_workflow</span></span>(<span>self, workflow_id: str)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Placeholder method to get a workflow. In a real implementation, this would
-retrieve the workflow from some storage or management system.</p></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.Task.get_workflow_metrics"><code class="name flex">
-<span>def <span class="ident">get_workflow_metrics</span></span>(<span>self, workflow_id: str) ‑> Optional[Dict[str, Any]]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Retrieve the metrics for a completed workflow.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>workflow_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>The ID of the completed workflow.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Optional[Dict[str, Any]]</code></dt>
-<dd>The metrics for the workflow, or None if not found.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.Task.log_workflow_metrics"><code class="name flex">
-<span>def <span class="ident">log_workflow_metrics</span></span>(<span>self, workflow_id: str) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Log and save the completion call metrics for a completed workflow.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>workflow_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>The ID of the completed workflow.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.Task.set_actual_duration"><code class="name flex">
-<span>def <span class="ident">set_actual_duration</span></span>(<span>self, duration: float) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the actual duration of the task execution.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>duration</code></strong> :&ensp;<code>float</code></dt>
-<dd>The actual duration of the task execution.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.Task.set_cancel_callback"><code class="name flex">
-<span>def <span class="ident">set_cancel_callback</span></span>(<span>self, callback: Callable[[], None]) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the cancel callback for the task.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>callback</code></strong> :&ensp;<code>Callable[[], None]</code></dt>
-<dd>The callback function to be called when the task is cancelled.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.Task.set_execute_callback"><code class="name flex">
-<span>def <span class="ident">set_execute_callback</span></span>(<span>self, callback: Callable[[], Any]) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the execute callback for the task.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>callback</code></strong> :&ensp;<code>Callable[[], Any]</code></dt>
-<dd>The callback function to be called when the task is executed.</dd>
-</dl></div>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.tasks.task.Task.set_result"><code class="name flex">
 <span>def <span class="ident">set_result</span></span>(<span>self, result: Any) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Set the result of the task execution.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>result</code></strong> :&ensp;<code>Any</code></dt>
-<dd>The result of the task execution.</dd>
-</dl></div>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.tasks.task.Task.to_dict"><code class="name flex">
 <span>def <span class="ident">to_dict</span></span>(<span>self) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Convert the Task object to a dictionary representation.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Dict[str, Any]</code></dt>
-<dd>A dictionary representation of the Task.</dd>
-</dl></div>
+<div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.tasks.task.Task.update_status"><code class="name flex">
-<span>def <span class="ident">update_status</span></span>(<span>self, new_status: <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../../models/framer/agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a>) ‑> None</span>
+<span>def <span class="ident">update_status</span></span>(<span>self, new_status: <a title="frame.src.framer.agency.tasks.status.TaskStatus" href="status.html#frame.src.framer.agency.tasks.status.TaskStatus">TaskStatus</a>) ‑> None</span>
 </code></dt>
-<dd>
-<div class="desc"><p>Update the status of the task.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>new_status</code></strong> :&ensp;<code>TaskStatus</code></dt>
-<dd>The new status to set for the task.</dd>
-</dl></div>
-</dd>
-</dl>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel"><code class="flex name class">
-<span>class <span class="ident">TaskModel</span></span>
-<span>(</span><span>**data: Any)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
-<p>A base class for creating Pydantic models.</p>
-<h2 id="attributes">Attributes</h2>
-<dl>
-<dt><strong><code>__class_vars__</code></strong></dt>
-<dd>The names of the class variables defined on the model.</dd>
-<dt><strong><code>__private_attributes__</code></strong></dt>
-<dd>Metadata about the private attributes of the model.</dd>
-<dt><strong><code>__signature__</code></strong></dt>
-<dd>The synthesized <code>__init__</code> [<code>Signature</code>][inspect.Signature] of the model.</dd>
-<dt><strong><code>__pydantic_complete__</code></strong></dt>
-<dd>Whether model building is completed, or if there are still undefined fields.</dd>
-<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
-<dd>The core schema of the model.</dd>
-<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
-<dd>Whether the model has a custom <code>__init__</code> function.</dd>
-<dt><strong><code>__pydantic_decorators__</code></strong></dt>
-<dd>Metadata containing the decorators defined on the model.
-This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
-<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
-<dd>Metadata for generic models; contains data used for a similar purpose to
-<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
-<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
-<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
-<dt><strong><code>__pydantic_post_init__</code></strong></dt>
-<dd>The name of the post-init method for the model, if defined.</dd>
-<dt><strong><code>__pydantic_root_model__</code></strong></dt>
-<dd>Whether the model is a [<code>RootModel</code>][pydantic.root_model.RootModel].</dd>
-<dt><strong><code>__pydantic_serializer__</code></strong></dt>
-<dd>The <code>pydantic-core</code> <code>SchemaSerializer</code> used to dump instances of the model.</dd>
-<dt><strong><code>__pydantic_validator__</code></strong></dt>
-<dd>The <code>pydantic-core</code> <code>SchemaValidator</code> used to validate instances of the model.</dd>
-<dt><strong><code>__pydantic_extra__</code></strong></dt>
-<dd>A dictionary containing extra values, if [<code>extra</code>][pydantic.config.ConfigDict.extra]
-is set to <code>'allow'</code>.</dd>
-<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
-<dd>The names of fields explicitly set during instantiation.</dd>
-<dt><strong><code>__pydantic_private__</code></strong></dt>
-<dd>Values of private attributes set on the model instance.</dd>
-</dl>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class TaskModel(BaseModel):
-    id: str
-    description: str
-    priority: int
-    workflow_id: str
-    status: TaskStatus = TaskStatus.PENDING
-    expected_results: List[Any] = Field(default_factory=list)
-    dependencies: List[str] = Field(default_factory=list)
-    parent_task_id: Optional[str] = None
-    assigned_to: Optional[str] = None
-    estimated_duration: Optional[float] = None
-    tags: List[str] = Field(default_factory=list)
-    type: Optional[str] = None
-    data: Dict[str, Any] = Field(default_factory=dict)
-    result: Optional[Any] = None
-    updated_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>pydantic.main.BaseModel</li>
-</ul>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="frame.src.framer.agency.tasks.task.Task" href="#frame.src.framer.agency.tasks.task.Task">Task</a></li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.assigned_to"><code class="name">var <span class="ident">assigned_to</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.completed_at"><code class="name">var <span class="ident">completed_at</span> : Optional[datetime.datetime]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.data"><code class="name">var <span class="ident">data</span> : Dict[str, Any]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.dependencies"><code class="name">var <span class="ident">dependencies</span> : List[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.description"><code class="name">var <span class="ident">description</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.estimated_duration"><code class="name">var <span class="ident">estimated_duration</span> : Optional[float]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.expected_results"><code class="name">var <span class="ident">expected_results</span> : List[Any]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.parent_task_id"><code class="name">var <span class="ident">parent_task_id</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.priority"><code class="name">var <span class="ident">priority</span> : int</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.result"><code class="name">var <span class="ident">result</span> : Optional[Any]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.models.framer.agency.tasks.task_status.TaskStatus" href="../../../models/framer/agency/tasks/task_status.html#frame.src.models.framer.agency.tasks.task_status.TaskStatus">TaskStatus</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.tags"><code class="name">var <span class="ident">tags</span> : List[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.type"><code class="name">var <span class="ident">type</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.updated_at"><code class="name">var <span class="ident">updated_at</span> : Optional[datetime.datetime]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.tasks.task.TaskModel.workflow_id"><code class="name">var <span class="ident">workflow_id</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -622,48 +255,33 @@ validated to form a valid model.</p>
 <li>
 <h4><code><a title="frame.src.framer.agency.tasks.task.Task" href="#frame.src.framer.agency.tasks.task.Task">Task</a></code></h4>
 <ul class="">
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.Config" href="#frame.src.framer.agency.tasks.task.Task.Config">Config</a></code></li>
 <li><code><a title="frame.src.framer.agency.tasks.task.Task.add_subtask" href="#frame.src.framer.agency.tasks.task.Task.add_subtask">add_subtask</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.Task.cancel" href="#frame.src.framer.agency.tasks.task.Task.cancel">cancel</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.Task.cancel_callback" href="#frame.src.framer.agency.tasks.task.Task.cancel_callback">cancel_callback</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.Task.execute" href="#frame.src.framer.agency.tasks.task.Task.execute">execute</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.Task.get_all_workflow_metrics" href="#frame.src.framer.agency.tasks.task.Task.get_all_workflow_metrics">get_all_workflow_metrics</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.Task.get_workflow" href="#frame.src.framer.agency.tasks.task.Task.get_workflow">get_workflow</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.Task.get_workflow_metrics" href="#frame.src.framer.agency.tasks.task.Task.get_workflow_metrics">get_workflow_metrics</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.Task.log_workflow_metrics" href="#frame.src.framer.agency.tasks.task.Task.log_workflow_metrics">log_workflow_metrics</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.assigned_to" href="#frame.src.framer.agency.tasks.task.Task.assigned_to">assigned_to</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.completed_at" href="#frame.src.framer.agency.tasks.task.Task.completed_at">completed_at</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.created_at" href="#frame.src.framer.agency.tasks.task.Task.created_at">created_at</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.data" href="#frame.src.framer.agency.tasks.task.Task.data">data</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.dependencies" href="#frame.src.framer.agency.tasks.task.Task.dependencies">dependencies</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.description" href="#frame.src.framer.agency.tasks.task.Task.description">description</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.estimated_duration" href="#frame.src.framer.agency.tasks.task.Task.estimated_duration">estimated_duration</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.expected_results" href="#frame.src.framer.agency.tasks.task.Task.expected_results">expected_results</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.id" href="#frame.src.framer.agency.tasks.task.Task.id">id</a></code></li>
 <li><code><a title="frame.src.framer.agency.tasks.task.Task.model_computed_fields" href="#frame.src.framer.agency.tasks.task.Task.model_computed_fields">model_computed_fields</a></code></li>
 <li><code><a title="frame.src.framer.agency.tasks.task.Task.model_config" href="#frame.src.framer.agency.tasks.task.Task.model_config">model_config</a></code></li>
 <li><code><a title="frame.src.framer.agency.tasks.task.Task.model_fields" href="#frame.src.framer.agency.tasks.task.Task.model_fields">model_fields</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.Task.set_actual_duration" href="#frame.src.framer.agency.tasks.task.Task.set_actual_duration">set_actual_duration</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.Task.set_cancel_callback" href="#frame.src.framer.agency.tasks.task.Task.set_cancel_callback">set_cancel_callback</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.Task.set_execute_callback" href="#frame.src.framer.agency.tasks.task.Task.set_execute_callback">set_execute_callback</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.parent_task_id" href="#frame.src.framer.agency.tasks.task.Task.parent_task_id">parent_task_id</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.priority" href="#frame.src.framer.agency.tasks.task.Task.priority">priority</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.result" href="#frame.src.framer.agency.tasks.task.Task.result">result</a></code></li>
 <li><code><a title="frame.src.framer.agency.tasks.task.Task.set_result" href="#frame.src.framer.agency.tasks.task.Task.set_result">set_result</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.stakeholders" href="#frame.src.framer.agency.tasks.task.Task.stakeholders">stakeholders</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.status" href="#frame.src.framer.agency.tasks.task.Task.status">status</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.subtasks" href="#frame.src.framer.agency.tasks.task.Task.subtasks">subtasks</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.tags" href="#frame.src.framer.agency.tasks.task.Task.tags">tags</a></code></li>
 <li><code><a title="frame.src.framer.agency.tasks.task.Task.to_dict" href="#frame.src.framer.agency.tasks.task.Task.to_dict">to_dict</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.type" href="#frame.src.framer.agency.tasks.task.Task.type">type</a></code></li>
 <li><code><a title="frame.src.framer.agency.tasks.task.Task.update_status" href="#frame.src.framer.agency.tasks.task.Task.update_status">update_status</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.Task.workflow_metrics" href="#frame.src.framer.agency.tasks.task.Task.workflow_metrics">workflow_metrics</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="frame.src.framer.agency.tasks.task.TaskModel" href="#frame.src.framer.agency.tasks.task.TaskModel">TaskModel</a></code></h4>
-<ul class="">
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.assigned_to" href="#frame.src.framer.agency.tasks.task.TaskModel.assigned_to">assigned_to</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.completed_at" href="#frame.src.framer.agency.tasks.task.TaskModel.completed_at">completed_at</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.data" href="#frame.src.framer.agency.tasks.task.TaskModel.data">data</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.dependencies" href="#frame.src.framer.agency.tasks.task.TaskModel.dependencies">dependencies</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.description" href="#frame.src.framer.agency.tasks.task.TaskModel.description">description</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.estimated_duration" href="#frame.src.framer.agency.tasks.task.TaskModel.estimated_duration">estimated_duration</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.expected_results" href="#frame.src.framer.agency.tasks.task.TaskModel.expected_results">expected_results</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.id" href="#frame.src.framer.agency.tasks.task.TaskModel.id">id</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.model_computed_fields" href="#frame.src.framer.agency.tasks.task.TaskModel.model_computed_fields">model_computed_fields</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.model_config" href="#frame.src.framer.agency.tasks.task.TaskModel.model_config">model_config</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.model_fields" href="#frame.src.framer.agency.tasks.task.TaskModel.model_fields">model_fields</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.parent_task_id" href="#frame.src.framer.agency.tasks.task.TaskModel.parent_task_id">parent_task_id</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.priority" href="#frame.src.framer.agency.tasks.task.TaskModel.priority">priority</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.result" href="#frame.src.framer.agency.tasks.task.TaskModel.result">result</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.status" href="#frame.src.framer.agency.tasks.task.TaskModel.status">status</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.tags" href="#frame.src.framer.agency.tasks.task.TaskModel.tags">tags</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.type" href="#frame.src.framer.agency.tasks.task.TaskModel.type">type</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.updated_at" href="#frame.src.framer.agency.tasks.task.TaskModel.updated_at">updated_at</a></code></li>
-<li><code><a title="frame.src.framer.agency.tasks.task.TaskModel.workflow_id" href="#frame.src.framer.agency.tasks.task.TaskModel.workflow_id">workflow_id</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.updated_at" href="#frame.src.framer.agency.tasks.task.Task.updated_at">updated_at</a></code></li>
+<li><code><a title="frame.src.framer.agency.tasks.task.Task.workflow_id" href="#frame.src.framer.agency.tasks.task.Task.workflow_id">workflow_id</a></code></li>
 </ul>
 </li>
 </ul>

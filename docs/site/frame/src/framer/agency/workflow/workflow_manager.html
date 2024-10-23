@@ -66,14 +66,14 @@ hljs.highlightAll();
     def set_final_task_for_workflow(self, workflow_name: str, task: Task):
         workflow = self.get_workflow(workflow_name)
         if workflow:
-            workflow.set_final_task(task)
+            workflow.final_task = task
         else:
             raise ValueError(f&#34;Workflow &#39;{workflow_name}&#39; not found&#34;)
 
     def get_all_tasks(self) -&gt; List[Task]:
         all_tasks = []
         for workflow in self.workflows.values():
-            all_tasks.extend(workflow.get_tasks())
+            all_tasks.extend(workflow.tasks)
         return all_tasks
 
     def __str__(self):

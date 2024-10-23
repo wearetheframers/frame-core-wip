@@ -132,6 +132,7 @@ and multi-faceted behavior.</p>
         self.execution_context = execution_context or ExecutionContext(
             llm_service=llm_service
         )
+        self.context = context
         self.roles: List[Role] = []
         self.goals: List[Goal] = []
         if roles:

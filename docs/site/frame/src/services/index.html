@@ -448,6 +448,9 @@ the specified or default model.</p>
         )
         self.metrics = metrics or llm_metrics
         self._adapters = {}
+        self.huggingface_adapter = HuggingFaceAdapter(huggingface_api_key=self.huggingface_api_key)
+        self.dspy_wrapper = DSPyAdapter(openai_api_key=self.openai_api_key)
+        self.lmql_wrapper = LMQLAdapter(openai_api_key=self.openai_api_key)
 
     def get_adapter(self, model_name: str):
         if model_name not in self._adapters:
@@ -463,7 +466,10 @@ the specified or default model.</p>
                 self._adapters[model_name] = HuggingFaceAdapter(
                     huggingface_api_key=self.huggingface_api_key
                 )
-            else:
+            elif &#34;dspy&#34; in model_name.lower():
+                self._adapters[model_name] = DSPyAdapter(
+                    openai_api_key=self.openai_api_key
+                )
                 raise ValueError(f&#34;Unsupported model: {model_name}&#34;)
         return self._adapters[model_name]
 
@@ -559,9 +565,11 @@ the specified or default model.</p>
             adapter = self.get_adapter(model)
             config = adapter.get_config(max_tokens=max_tokens, temperature=temperature)
             formatted_prompt = adapter.format_prompt(full_prompt)
-            result = await adapter.get_completion(
-                formatted_prompt, config, additional_context
-            )
+            if stream:
+                result = adapter.get_completion(formatted_prompt, config, additional_context, stream=True)
+                return result  # Return the async generator
+            else:
+                result = await adapter.get_completion(formatted_prompt, config, additional_context)
 
             end_time = time.time()
             execution_time = end_time - start_time
@@ -797,7 +805,7 @@ the specified or default model.</p>
     def add_memory(
         self, memory: str, user_id: str = &#34;default&#34;, metadata: Dict[str, Any] = None
     ) -&gt; int:
-        return self.adapter.store(memory, user_id, metadata)
+        return self.adapter.add(memory, user_id, metadata)
 
     def retrieve_memory(
         self, memory_id: int, user_id: str = &#34;default&#34;
@@ -889,7 +897,7 @@ the specified or default model.</p>
 </dd>
 <dt id="frame.src.services.SharedContext"><code class="flex name class">
 <span>class <span class="ident">SharedContext</span></span>
-<span>(</span><span>llm_service: "'<a title="frame.src.services.LLMService" href="#frame.src.services.LLMService">LLMService</a>'", memory_service: "Optional['<a title="frame.src.services.MemoryService" href="#frame.src.services.MemoryService">MemoryService</a>']" = None, eq_service: "Optional['<a title="frame.src.services.EQService" href="#frame.src.services.EQService">EQService</a>']" = None, soul: "Optional['Soul']" = None, brain: "Optional['Brain']" = None, state: Dict[str, Any] = None)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ExecutionContext provides a centralized container for various services, state, and functions
@@ -907,7 +915,10 @@ allowing them to share resources and functionality without tight coupling.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class SharedContext(ExecutionContext):
-    pass</code></pre>
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.shared_state = kwargs
+        self.llm_service = kwargs.get(&#39;llm_service&#39;, None)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
