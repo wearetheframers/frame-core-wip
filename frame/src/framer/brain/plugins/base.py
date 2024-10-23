@@ -117,6 +117,9 @@ class ExamplePlugin(BasePlugin):
     async def on_unload(self):
         self.logger.info("Example plugin unloaded")
 
+    def get_actions(self):
+        return {}
+
     async def on_decision_made(self, decision):
         self.logger.info(f"Decision made: {decision}")
 
