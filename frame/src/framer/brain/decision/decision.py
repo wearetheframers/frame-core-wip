@@ -1,5 +1,5 @@
 import json
-from pydantic import Field, BaseModel
+from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional, Union, List
 from frame.src.models.framer.brain.decision import Decision as DecisionModel
 from frame.src.framer.agency.priority import Priority

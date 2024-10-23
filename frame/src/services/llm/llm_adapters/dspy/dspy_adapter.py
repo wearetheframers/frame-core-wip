@@ -26,7 +26,8 @@ class TokenBucket:
     def _fill(self):
         now = time.time()
         delta = now - self.last_fill
-        self.tokens = min(self.capacity, self.tokens + delta * self.fill_rate)
+        tokens_to_add = delta * self.fill_rate
+        self.tokens = min(self.capacity, self.tokens + tokens_to_add)
         self.last_fill = now
 
     def consume(self, tokens: int) -> bool:

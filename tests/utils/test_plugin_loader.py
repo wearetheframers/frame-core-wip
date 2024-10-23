@@ -10,11 +10,24 @@ class MockPlugin(BasePlugin):
         super().__init__(config)
         self.actions = {"test_action": self.test_action}
 
-    def test_action(self):
-        return "Test action executed"
+    def action1(self):
+        return "Action1 from MockPlugin1"
 
-    def get_actions(self):
-        return self.actions
+class MockPlugin1(BasePlugin):
+    def __init__(self, config):
+        super().__init__(config)
+        self.actions = {"action1": self.action1}
+
+    def action1(self):
+        return "Action1 from MockPlugin1"
+
+class MockPlugin2(BasePlugin):
+    def __init__(self, config):
+        super().__init__(config)
+        self.actions = {"action1": self.action1}
+
+    def action1(self):
+        return "Action1 from MockPlugin2"
 
 
 @pytest.fixture
@@ -35,11 +48,14 @@ def test_load_plugins(mock_plugin_dir):
         "frame.src.utils.plugin_loader.load_plugin_config"
     ) as mock_load_config:
         mock_module = MagicMock()
-        mock_module.MockPlugin = MagicMock(spec=MockPlugin)
+        mock_plugin_class = MockPlugin  # Use the MockPlugin class
+        mock_module.Plugin = mock_plugin_class
+        mock_module.Plugin.__name__ = "Plugin"
+        mock_module.Plugin = MockPlugin
         mock_import.return_value = mock_module
         mock_listdir.return_value = ["mock_plugin"]
         mock_isdir.return_value = True
-        mock_load_config.return_value = {}
+        mock_load_config.side_effect = [{"name": "MockPlugin1"}, {"name": "MockPlugin2"}]
 
         plugins, warnings = load_plugins(mock_plugin_dir)
 
@@ -60,9 +76,9 @@ def test_load_plugins_with_conflict(mock_plugin_dir):
         "frame.src.utils.plugin_loader.load_plugin_config"
     ) as mock_load_config:
         mock_module1 = MagicMock()
-        mock_module1.MockPlugin1 = MockPlugin
+        mock_module1.Plugin = MockPlugin1
         mock_module2 = MagicMock()
-        mock_module2.MockPlugin2 = MockPlugin
+        mock_module2.Plugin = MockPlugin2
         mock_import.side_effect = [mock_module1, mock_module2]
         mock_listdir.return_value = ["mock_plugin1", "mock_plugin2"]
         mock_isdir.return_value = True

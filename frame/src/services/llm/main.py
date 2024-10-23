@@ -116,7 +116,10 @@ class LLMService:
                 self._adapters[model_name] = HuggingFaceAdapter(
                     huggingface_api_key=self.huggingface_api_key
                 )
-            else:
+            elif "dspy" in model_name.lower():
+                self._adapters[model_name] = DSPyAdapter(
+                    openai_api_key=self.openai_api_key
+                )
                 raise ValueError(f"Unsupported model: {model_name}")
         return self._adapters[model_name]
 
@@ -212,9 +215,11 @@ class LLMService:
             adapter = self.get_adapter(model)
             config = adapter.get_config(max_tokens=max_tokens, temperature=temperature)
             formatted_prompt = adapter.format_prompt(full_prompt)
-            result = await adapter.get_completion(
-                formatted_prompt, config, additional_context
-            )
+            if stream:
+                result = adapter.get_completion(formatted_prompt, config, additional_context, stream=True)
+                return result  # Return the async generator
+            else:
+                result = await adapter.get_completion(formatted_prompt, config, additional_context)
 
             end_time = time.time()
             execution_time = end_time - start_time

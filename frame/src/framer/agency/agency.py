@@ -4,10 +4,11 @@ import logging
 import time
 
 from frame.src.constants.models import DEFAULT_MODEL
-from frame.src.framer.agency.tasks import Task, TaskStatus
+from frame.src.framer.agency.tasks.task import Task
 from frame.src.framer.agency.priority import Priority
 from frame.src.framer.agency.roles import Role, RoleStatus
 from frame.src.framer.agency.workflow import WorkflowManager, Workflow
+from frame.src.framer.agency.tasks.status import TaskStatus
 from frame.src.framer.agency.goals import Goal, GoalStatus
 from frame.src.services.llm.main import LLMService
 from frame.src.services.context.execution_context_service import ExecutionContext
@@ -67,6 +68,7 @@ class Agency:
         self.execution_context = execution_context or ExecutionContext(
             llm_service=llm_service
         )
+        self.context = context
         self.roles: List[Role] = []
         self.goals: List[Goal] = []
         if roles:

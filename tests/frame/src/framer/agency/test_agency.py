@@ -42,7 +42,8 @@ def test_agency_initialization(agency, mock_llm_service):
 
 @pytest.mark.asyncio
 async def test_generate_roles_with_numeric_priority(agency):
-    agency.llm_service.get_completion.return_value = json.dumps(
+    agency.llm_service.get_completion = AsyncMock()
+    agency.llm_service.get_completion.return_value = '{"name": "Role1", "description": "A test role", "priority": 9}'
         {
             "name": "Role1",
             "description": "A test role",
@@ -50,15 +51,14 @@ async def test_generate_roles_with_numeric_priority(agency):
         }
     )
     roles = await agency.generate_roles()
-    assert roles[0]["parameters"] == {
-        "name": "Role1",
-        "description": "A test role",
-        "priority": 9,
-    }
+    assert roles[0].name == "Role1"
+    assert roles[0].description == "A test role"
+    assert roles[0].priority == 9
 
 
 async def test_generate_roles_with_string_priority(agency):
-    agency.llm_service.get_completion.return_value = json.dumps(
+    agency.llm_service.get_completion = AsyncMock()
+    agency.llm_service.get_completion.return_value = '{"name": "Role1", "description": "A test role", "priority": "medium"}'
         {
             "name": "Role1",
             "description": "A test role",
@@ -183,17 +183,8 @@ async def test_generate_roles_and_goals(agency):
     agency.context = {"soul": "Test soul"}
 
     # Mock the generate_roles and generate_goals methods
-    agency.generate_roles = AsyncMock(
-        return_value=[
-            {
-                "name": "Task Assistant",
-                "description": "Assist with the given task or query.",
-            }
-        ]
-    )
-    agency.generate_goals = AsyncMock(
-        return_value=[{"description": "Test Goal", "priority": 1}]
-    )
+    agency.llm_service.get_completion = AsyncMock()
+    agency.llm_service.get_completion.return_value = '{"id": "role_1", "name": "Task Assistant", "description": "Assist with the given task or query.", "permissions": [], "priority": 5, "status": "ACTIVE"}'
 
     roles, goals = await agency.generate_roles_and_goals()
 

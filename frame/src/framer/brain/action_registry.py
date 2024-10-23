@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 class ActionRegistry:
     def __init__(self, execution_context: Optional["ExecutionContext"] = None):
+        self.valid_actions = []
         self.actions: Dict[str, Dict[str, Any]] = {}
         self.execution_context = execution_context
         if not self.execution_context or not hasattr(
@@ -127,9 +128,9 @@ class ActionRegistry:
         """
         if isinstance(action_or_name, BaseAction):
             name = action_or_name.name
-            description = action_or_name.description
-            action_func = getattr(action_or_name, "execute", None)
-            priority = action_or_name.priority
+            description = description or action_or_name.description
+            action_func = action_func or getattr(action_or_name, "execute", None)
+            priority = priority or action_or_name.priority
         else:
             name = action_or_name
 
@@ -201,7 +202,7 @@ class ActionRegistry:
             raise ValueError(f"Action '{name}' not found")
         if self.execution_context is None:
             raise ValueError("Execution context is not set")
-        response = await action["action_func"](*args, **kwargs)
+        response = await action["action_func"](self.execution_context, *args, **kwargs)
         role = response if isinstance(response, dict) else response
         if callback:
             callback(response, *callback_args)
@@ -239,7 +240,7 @@ class ActionRegistry:
 
         action_func = action["action_func"]
         try:
-            result = await action_func(*args, **kwargs)
+            result = await action_func(self.execution_context, **kwargs)  # Pass execution_context
             if result is None:
                 return {
                     "error": "Action returned None",

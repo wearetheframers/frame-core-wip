@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
-from frame.src.framer.agency.tasks import Task
-from frame.src.framer.agency.tasks import TaskStatus
+from frame.src.framer.agency.tasks.task import Task
+from frame.src.framer.agency.tasks.status import TaskStatus
 import json
 from unittest.mock import patch
 
@@ -18,13 +18,6 @@ def sample_task():
         assigned_to="test_user",
         estimated_duration=3.5,
         tags=["test", "sample"],
-    )
-    task.llm_service.get_completion.return_value = json.dumps(
-        {
-            "name": "Role1",
-            "description": "A test role",
-            "priority": 5,
-        }
     )
     return task
 

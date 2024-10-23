@@ -314,8 +314,7 @@ class Brain:
             if decision is None:
                 self.logger.warning("No decision was made for the given perception.")
                 return None
-            result = await self.execute_decision(decision, perception)
-            return result
+            await self.execute_decision(decision, perception)
         else:
             logger.warn("Framer is not ready to execute decisions. Queuing perception.")
             # Code to queue the perception can be added here if needed

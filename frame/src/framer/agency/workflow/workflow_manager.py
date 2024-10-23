@@ -25,14 +25,14 @@ class WorkflowManager:
     def set_final_task_for_workflow(self, workflow_name: str, task: Task):
         workflow = self.get_workflow(workflow_name)
         if workflow:
-            workflow.set_final_task(task)
+            workflow.final_task = task
         else:
             raise ValueError(f"Workflow '{workflow_name}' not found")
 
     def get_all_tasks(self) -> List[Task]:
         all_tasks = []
         for workflow in self.workflows.values():
-            all_tasks.extend(workflow.get_tasks())
+            all_tasks.extend(workflow.tasks)
         return all_tasks
 
     def __str__(self):

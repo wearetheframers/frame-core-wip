@@ -470,6 +470,7 @@ class Framer:
         else:
             logger.warning("No decision was made for the given perception.")
 
+        decision = Decision(**decision_data)
         return decision
 
     async def prompt(self, text: str) -> Decision:

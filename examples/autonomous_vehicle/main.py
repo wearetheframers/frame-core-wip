@@ -78,7 +78,7 @@ class ProcessPerceptionAction(BaseAction):
 
         try:
             result = await self.action_registry.execute_action(
-                action, execution_context=execution_context, **decision
+                action, **decision
             )
             return f"Executed {action}: {result}"
         except Exception as e:
@@ -281,7 +281,6 @@ async def main():
         logger.info(f"Processing perception: {perception}")
         result = await action_registry.execute_action(
             "process_perception",
-            execution_context=execution_context,
             perception=perception,
         )
         logger.info(f"Action result: {result}")

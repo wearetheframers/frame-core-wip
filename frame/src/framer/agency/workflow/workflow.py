@@ -6,6 +6,7 @@ from frame.src.framer.agency.tasks.task import Task
 
 class Workflow:
     def __init__(self, name: str, is_async: bool = False, stakeholders: Optional[List[Dict[str, Any]]] = None):
+        self.id = generate_id()
         self.stakeholders = stakeholders or []
         for stakeholder in self.stakeholders:
             stakeholder['id'] = stakeholder.get('id', generate_id())

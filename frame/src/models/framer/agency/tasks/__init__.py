@@ -1,2 +1,2 @@
 from .task_status import TaskStatus
-from .tasks import TaskModel, TasksModel
+from .tasks import TaskModel
