@@ -7,7 +7,7 @@ import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame.src.framer.brain.actions import BaseAction
-from frame.src.services.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 
 
@@ -52,8 +52,11 @@ class AudioTranscriptionPlugin:
         async def execute(
             self, execution_context: ExecutionContext, transcription: str
         ) -> str:
-            notes = f"Analyzed notes from transcription: {transcription}"
-            print(f"{execution_context.framer.config.name}: Analysis completed")
+            notes = f"Transcription: {transcription}"
+            if hasattr(execution_context, 'framer'):
+                print(f"{execution_context.framer.config.name}: Analysis completed")
+            else:
+                print("Framer not set in execution context: Analysis completed")
             return notes
 
     class ContinuousRecordAndTranscribeAction(BaseAction):
@@ -89,6 +92,6 @@ class AudioTranscriptionPlugin:
             self.ContinuousRecordAndTranscribeAction(self)
         )
 
-        action_registry.register_action(self.record_and_transcribe)
-        action_registry.register_action(self.analyze_transcription)
-        action_registry.register_action(self.continuous_record_and_transcribe)
+        action_registry.add_action(self.record_and_transcribe)
+        action_registry.add_action(self.analyze_transcription)
+        action_registry.add_action(self.continuous_record_and_transcribe)

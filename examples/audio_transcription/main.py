@@ -5,7 +5,7 @@ import asyncio
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame import Frame, FramerConfig
-from audio_transcription_plugin import AudioTranscriptionPlugin
+from plugins.audio_transcription_plugin import AudioTranscriptionPlugin
 
 
 async def main():
@@ -34,7 +34,17 @@ async def main():
         },
     ]
 
-    await framer.initialize(roles=roles, goals=goals)
+    # Set roles and goals
+    framer.roles = roles
+    framer.goals = goals
+
+    # Update the agency, brain, and execution context with the new roles and goals
+    framer.agency.set_roles(roles)
+    framer.agency.set_goals(goals)
+    framer.execution_context.set_roles(roles)
+    framer.execution_context.set_goals(goals)
+    framer.execution_context.set_roles(roles)
+    framer.execution_context.set_goals(goals)
 
     at_plugin = AudioTranscriptionPlugin()
     at_plugin.register_actions(framer.brain.action_registry)
@@ -52,7 +62,7 @@ async def main():
         print(f"Transc ription: {transcription}")
 
         notes = await framer.brain.action_registry.execute_action(
-            "analyze_transcription", {"transcription": transcription}
+            "analyze_transcription", transcription=transcription
         )
         print(f"Actionable Notes: {notes}")
 
