@@ -28,10 +28,7 @@ async def test_get_completion_huggingface(llm_service):
     async def mock_stream():
         yield "Mock streamed data"
 
-
-    with patch.object(
-        llm_service, 'get_adapter'
-    ) as mock_get_adapter:
+    with patch.object(llm_service, "get_adapter") as mock_get_adapter:
         mock_hf_adapter = AsyncMock()
         mock_hf_adapter.get_completion.return_value = "HuggingFace completion"
         mock_get_adapter.return_value = mock_hf_adapter
@@ -44,9 +41,7 @@ async def test_get_completion_huggingface(llm_service):
 
 @pytest.mark.asyncio
 async def test_get_completion_dspy(llm_service):
-    with patch.object(
-        llm_service, 'get_adapter'
-    ) as mock_get_adapter:
+    with patch.object(llm_service, "get_adapter") as mock_get_adapter:
         mock_dspy_adapter = AsyncMock()
         mock_dspy_adapter.get_completion.return_value = "DSPy completion"
         mock_get_adapter.return_value = mock_dspy_adapter
@@ -57,9 +52,7 @@ async def test_get_completion_dspy(llm_service):
 
 @pytest.mark.asyncio
 async def test_get_completion_lmql(llm_service):
-    with patch.object(
-        llm_service, 'get_adapter'
-    ) as mock_get_adapter:
+    with patch.object(llm_service, "get_adapter") as mock_get_adapter:
         mock_lmql_adapter = AsyncMock()
         mock_lmql_adapter.get_completion.return_value = "LMQL completion"
         mock_get_adapter.return_value = mock_lmql_adapter
@@ -70,7 +63,7 @@ async def test_get_completion_lmql(llm_service):
 
 @pytest.mark.asyncio
 async def test_get_completion_with_expected_output(llm_service):
-    @patch.object(LLMService, 'get_adapter')
+    @patch.object(LLMService, "get_adapter")
     async def test_get_completion_with_stream(mock_get_adapter, llm_service):
         async def mock_stream():
             yield "Streamed "

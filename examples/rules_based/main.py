@@ -10,6 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 
 from frame.src.framer.brain.plugins import BasePlugin
 
+
 class WeatherPlugin(BasePlugin):
     """
     A plugin that provides weather-related actions and rules.
@@ -42,6 +43,7 @@ class WeatherPlugin(BasePlugin):
         """
         print("It's raining. Take an umbrella!")
 
+
 async def main():
     # Create a mock Framer instance
     class MockFramer:
@@ -55,16 +57,13 @@ async def main():
     await plugin.on_load()
 
     # Define contexts for different weather conditions
-    contexts = [
-        {"weather": "rain"},
-        {"weather": "sunny"},
-        {"weather": "cloudy"}
-    ]
+    contexts = [{"weather": "rain"}, {"weather": "sunny"}, {"weather": "cloudy"}]
 
     # Evaluate rules for each context
     for context in contexts:
         print(f"Evaluating context: {context}")
         plugin.evaluate_rules(context, "take_umbrella")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

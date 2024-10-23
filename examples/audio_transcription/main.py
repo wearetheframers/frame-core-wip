@@ -10,7 +10,9 @@ from plugins.audio_transcription_plugin import AudioTranscriptionPlugin
 
 async def main():
     frame = Frame()
-    config = FramerConfig(name="AudioTranscriptionFramer", default_model="gpt-3.5-turbo")
+    config = FramerConfig(
+        name="AudioTranscriptionFramer", default_model="gpt-3.5-turbo"
+    )
     framer = await frame.create_framer(config)
 
     roles = [

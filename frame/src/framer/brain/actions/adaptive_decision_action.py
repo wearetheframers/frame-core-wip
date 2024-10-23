@@ -15,9 +15,9 @@ class AdaptiveDecisionAction(BaseAction):
             name="adaptive_decision",
             action_func=self.execute,
             description="A high-level action that uses strategies to make decisions dynamically based on varying levels of urgency and risk. "
-                        "Ideal for environments where conditions change rapidly, requiring a flexible decision-making approach. "
-                        "Examples include financial trading during volatile markets, task prioritization in dynamic project environments, "
-                        "or resource allocation in cloud computing under fluctuating demand.",
+            "Ideal for environments where conditions change rapidly, requiring a flexible decision-making approach. "
+            "Examples include financial trading during volatile markets, task prioritization in dynamic project environments, "
+            "or resource allocation in cloud computing under fluctuating demand.",
             priority=5,
         )
         self.strategies = {

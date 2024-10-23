@@ -10,7 +10,9 @@ from frame.src.utils.log_manager import setup_logging, get_logger
 class FramerConfig(BaseModel):
     name: str = "DefaultFramer"
     model: Optional[str] = DEFAULT_MODEL
-    soul_seed: Optional[Union[str, Dict[str, Any]]] = Field(default="You are a helpful AI assistant.")
+    soul_seed: Optional[Union[str, Dict[str, Any]]] = Field(
+        default="You are a helpful AI assistant."
+    )
     use_local_model: bool = False
     # Default permissions include services like memory, eq, and shared_context.
     # These services do not require explicit permissions to be accessed.
@@ -21,7 +23,9 @@ class FramerConfig(BaseModel):
             "with_shared_context",
         ]
     )
-    mem0_api_key: Optional[str] = Field(default_factory=lambda: os.getenv('MEM0_API_KEY', MEM0_API_KEY))
+    mem0_api_key: Optional[str] = Field(
+        default_factory=lambda: os.getenv("MEM0_API_KEY", MEM0_API_KEY)
+    )
     """
     Configuration class for Framer instances.
 
@@ -82,6 +86,8 @@ class FramerConfig(BaseModel):
             logger.error(
                 "Error: Hugging Face API key is not set, but the Framer is set to use local models. Some features may not work."
             )
+
+
 from typing import Optional, List, Dict, Any, Union
 import os
 from frame.src.constants import DEFAULT_MODEL
@@ -94,7 +100,9 @@ from frame.src.utils.log_manager import setup_logging, get_logger
 class FramerConfig(BaseModel):
     name: str = "DefaultFramer"
     model: Optional[str] = DEFAULT_MODEL
-    soul_seed: Optional[Union[str, Dict[str, Any]]] = Field(default="You are a helpful AI assistant.")
+    soul_seed: Optional[Union[str, Dict[str, Any]]] = Field(
+        default="You are a helpful AI assistant."
+    )
     use_local_model: bool = False
     # Default permissions include services like memory, eq, and shared_context.
     # These services do not require explicit permissions to be accessed.
@@ -105,7 +113,9 @@ class FramerConfig(BaseModel):
             "with_shared_context",
         ]
     )
-    mem0_api_key: Optional[str] = Field(default_factory=lambda: os.getenv('MEM0_API_KEY', MEM0_API_KEY))
+    mem0_api_key: Optional[str] = Field(
+        default_factory=lambda: os.getenv("MEM0_API_KEY", MEM0_API_KEY)
+    )
     """
     Configuration class for Framer instances.
 

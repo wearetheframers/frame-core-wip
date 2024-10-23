@@ -13,6 +13,7 @@ class MockPlugin(BasePlugin):
     def action1(self):
         return "Action1 from MockPlugin1"
 
+
 class MockPlugin1(BasePlugin):
     def __init__(self, config):
         super().__init__(config)
@@ -20,6 +21,7 @@ class MockPlugin1(BasePlugin):
 
     def action1(self):
         return "Action1 from MockPlugin1"
+
 
 class MockPlugin2(BasePlugin):
     def __init__(self, config):

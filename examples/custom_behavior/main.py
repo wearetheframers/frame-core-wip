@@ -14,8 +14,6 @@ import asyncio
 from frame import Frame, FramerConfig
 
 
-
-
 class CustomGreetAction(BaseAction):
     def __init__(self):
         super().__init__(
@@ -28,7 +26,8 @@ class CustomGreetAction(BaseAction):
         custom_message = kwargs.get("custom_message", "Hello")
         name = kwargs.get("name", "User")
         return f"{custom_message} Nice to meet you, {name}!"
-    
+
+
 async def main():
     # Initialize Frame and create a Framer
     frame = Frame()
@@ -55,7 +54,7 @@ async def main():
     decision = await framer.brain.process_perception(perception)
     if decision.action == "custom_greet":
         result = await framer.brain.execute_decision(decision)
-        print(result['response'])  # Adjust based on the structure of the result
+        print(result["response"])  # Adjust based on the structure of the result
 
     # Clean up
     # Perform any necessary cleanup here

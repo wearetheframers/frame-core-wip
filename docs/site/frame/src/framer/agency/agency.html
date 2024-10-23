@@ -410,6 +410,7 @@ and multi-faceted behavior.</p>
             roles = []
             existing_role_names = set()
             for r in role_data:
+                r[&#34;id&#34;] = str(r.get(&#34;id&#34;, &#34;default&#34;))
                 r[&#34;priority&#34;] = max(1, min(10, int(r.get(&#34;priority&#34;, 5))))
                 r[&#34;status&#34;] = RoleStatus[r.get(&#34;status&#34;, &#34;ACTIVE&#34;)]
                 # Ensure permissions are a list

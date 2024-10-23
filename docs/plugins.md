@@ -5,6 +5,25 @@ weight: 50
 
 Frame features a powerful and flexible plugin system inspired by game mods, allowing developers to extend the functionality of Framers. This system supports a community marketplace where plugins can be shared, sold, or given away, fostering a rich ecosystem of extensions and customizations. Plugins change Framer behaviors by adding or removing actions.
 
+## Plugin Naming and Structure
+
+When creating a plugin, it is important to follow a specific naming and directory structure to ensure proper loading and functionality:
+
+1. **Directory Naming**: Each plugin must be stored in its own directory. The directory name should match the plugin name in snake_case format.
+
+2. **Main Plugin File**: Inside the plugin directory, there should be a main plugin file named exactly as the directory, but in snake_case format with a `.py` extension. For example, if your plugin directory is named `audio_transcription_plugin`, the main file should be `audio_transcription_plugin.py`.
+
+3. **Class Naming**: The main class within the plugin file should be named in CamelCase format, derived from the directory name. For example, `AudioTranscriptionPlugin`.
+
+4. **__init__.py File**: Each plugin directory must contain an `__init__.py` file. This file should import the main plugin class to ensure it is accessible when the plugin is loaded. For example:
+   ```python
+   from .audio_transcription_plugin import AudioTranscriptionPlugin
+   ```
+
+5. **Plugin Base Class**: All plugins must inherit from the `BasePlugin` class to ensure they implement the necessary interface for integration with the Frame system.
+
+By adhering to this structure, plugins can be easily discovered and loaded by the Frame system, ensuring a seamless integration process.
+
 ## Actions / Plugins
 
 Actions in Frame are executable tasks that a Framer can perform. They are concrete implementations of tasks that can be executed in response to decisions made by the Framer. Actions are registered in the Framer's action registry and can be invoked directly by the Framer or automatically in its decision-making as it senses perceptions.

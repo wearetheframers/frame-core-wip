@@ -18,6 +18,7 @@ from frame.src.framer.agency.priority import Priority
 
 from frame.src.framer.brain.plugins.base import BasePlugin
 
+
 class AudioTranscriptionPlugin(BasePlugin):
     def __init__(self, config=None):
         super().__init__(framer=None)  # Ensure BasePlugin's init is called
@@ -28,7 +29,9 @@ class AudioTranscriptionPlugin(BasePlugin):
     async def on_load(self, framer):
         self.execution_context = framer.execution_context
         self.framer = framer  # Ensure framer is set
-        self.action_registry = ActionRegistry(execution_context=framer.execution_context)
+        self.action_registry = ActionRegistry(
+            execution_context=framer.execution_context
+        )
         self.register_actions(self.action_registry)
         self.logger.info("AudioTranscriptionPlugin loaded")
 
@@ -44,9 +47,13 @@ class AudioTranscriptionPlugin(BasePlugin):
             return await self.record_and_transcribe.execute(self.execution_context)
         elif action == "analyze_transcription":
             transcription = params.get("transcription", "")
-            return await self.analyze_transcription.execute(self.execution_context, transcription)
+            return await self.analyze_transcription.execute(
+                self.execution_context, transcription
+            )
         elif action == "continuous_record_and_transcribe":
-            return await self.continuous_record_and_transcribe.execute(self.execution_context)
+            return await self.continuous_record_and_transcribe.execute(
+                self.execution_context
+            )
         else:
             raise ValueError(f"Unknown action: {action}")
 
@@ -57,10 +64,20 @@ class AudioTranscriptionPlugin(BasePlugin):
             )
             self.plugin = plugin
 
-        async def execute(self, execution_context: ExecutionContext, duration: int = 5, sample_rate: int = 16000) -> str:
+        async def execute(
+            self,
+            execution_context: ExecutionContext,
+            duration: int = 5,
+            sample_rate: int = 16000,
+        ) -> str:
 
             logger.debug("Recording...")
-            audio = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype="float32")
+            audio = sd.rec(
+                int(duration * sample_rate),
+                samplerate=sample_rate,
+                channels=1,
+                dtype="float32",
+            )
             sd.wait()
             logger.debug("Recording finished.")
 
@@ -81,11 +98,15 @@ class AudioTranscriptionPlugin(BasePlugin):
             self, execution_context: ExecutionContext, transcription: str
         ) -> str:
             notes = f"Transcription: {transcription}"
-            if hasattr(execution_context, 'framer'):
-                logger.info(f"{execution_context.framer.config.name}: Analysis completed")
+            if hasattr(execution_context, "framer"):
+                logger.info(
+                    f"{execution_context.framer.config.name}: Analysis completed"
+                )
             else:
-                if hasattr(execution_context, 'framer'):
-                    logger.info(f"{execution_context.framer.config.name}: Analysis completed")
+                if hasattr(execution_context, "framer"):
+                    logger.info(
+                        f"{execution_context.framer.config.name}: Analysis completed"
+                    )
             return notes
 
     class ContinuousRecordAndTranscribeAction(BaseAction):
@@ -97,7 +118,11 @@ class AudioTranscriptionPlugin(BasePlugin):
             )
             self.plugin = plugin
 
-        async def execute(self, execution_context: ExecutionContext = None, pause_threshold: float = 3.0) -> None:
+        async def execute(
+            self,
+            execution_context: ExecutionContext = None,
+            pause_threshold: float = 3.0,
+        ) -> None:
             if execution_context is None:
                 execution_context = self.plugin.execution_context
             logger.info("Starting continuous recording. Press Ctrl+C to stop.")
@@ -105,7 +130,9 @@ class AudioTranscriptionPlugin(BasePlugin):
             silence_duration = 0  # Initialize silence duration
             try:
                 while True:
-                    audio = sd.rec(int(10 * 16000), samplerate=16000, channels=1, dtype="float32")
+                    audio = sd.rec(
+                        int(10 * 16000), samplerate=16000, channels=1, dtype="float32"
+                    )
                     sd.wait()
                     audio = np.squeeze(audio)
                     logger.debug("Recording...")
@@ -113,17 +140,23 @@ class AudioTranscriptionPlugin(BasePlugin):
 
                     # Check for pause
                     if np.max(np.abs(audio)) < 0.02:  # Adjust threshold as needed
-                        silence_duration += 10  # Increment silence duration by 10 seconds
+                        silence_duration += (
+                            10  # Increment silence duration by 10 seconds
+                        )
                         if silence_duration >= pause_threshold:
-                            logger.info("Silence detected for 3 seconds, stopping recording.")
+                            logger.info(
+                                "Silence detected for 3 seconds, stopping recording."
+                            )
                             break
                     else:
-                        silence_duration = 0  # Reset silence duration if speech is detected
+                        silence_duration = (
+                            0  # Reset silence duration if speech is detected
+                        )
                         transcription = self.plugin.model.transcribe(audio, fp16=False)
                         if transcription and "text" in transcription:
                             logger.info(f"Transcription: {transcription['text']}")
                             notes = await self.plugin.analyze_transcription.execute(
-                                execution_context, transcription['text']
+                                execution_context, transcription["text"]
                             )
                             logger.info(f"Actionable Notes: {notes}")
                         else:

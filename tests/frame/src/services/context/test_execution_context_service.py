@@ -51,7 +51,7 @@ async def test_execution_context_service_in_action_registry():
     action_registry.add_action(
         action_or_name="test_action",
         action_func=test_action,
-        description="Test action description"
+        description="Test action description",
     )
 
     result = await action_registry.execute_action("test_action", param="test_value")

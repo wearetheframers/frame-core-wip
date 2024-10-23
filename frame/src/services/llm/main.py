@@ -99,7 +99,9 @@ class LLMService:
         )
         self.metrics = metrics or llm_metrics
         self._adapters = {}
-        self.huggingface_adapter = HuggingFaceAdapter(huggingface_api_key=self.huggingface_api_key)
+        self.huggingface_adapter = HuggingFaceAdapter(
+            huggingface_api_key=self.huggingface_api_key
+        )
         self.dspy_wrapper = DSPyAdapter(openai_api_key=self.openai_api_key)
         self.lmql_wrapper = LMQLAdapter(openai_api_key=self.openai_api_key)
 
@@ -217,10 +219,14 @@ class LLMService:
             config = adapter.get_config(max_tokens=max_tokens, temperature=temperature)
             formatted_prompt = adapter.format_prompt(full_prompt)
             if stream:
-                result = adapter.get_completion(formatted_prompt, config, additional_context, stream=True)
+                result = adapter.get_completion(
+                    formatted_prompt, config, additional_context, stream=True
+                )
                 return result  # Return the async generator
             else:
-                result = await adapter.get_completion(formatted_prompt, config, additional_context)
+                result = await adapter.get_completion(
+                    formatted_prompt, config, additional_context
+                )
 
             end_time = time.time()
             execution_time = end_time - start_time
@@ -242,10 +248,12 @@ class LLMService:
 
         except Exception as e:
             self.logger.error(f"Error in get_completion: {str(e)}")
-            return json.dumps({
-                "error": str(e),
-                "fallback_response": "I encountered an error while processing your request. Could you please try again?"
-            })
+            return json.dumps(
+                {
+                    "error": str(e),
+                    "fallback_response": "I encountered an error while processing your request. Could you please try again?",
+                }
+            )
         """
         Generate a completion using the specified model or the default model.
 

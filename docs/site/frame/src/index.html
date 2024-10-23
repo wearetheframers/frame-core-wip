@@ -49,10 +49,6 @@ hljs.highlightAll();
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="frame.src.plugins" href="plugins/index.html">frame.src.plugins</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt><code class="name"><a title="frame.src.services" href="services/index.html">frame.src.services</a></code></dt>
 <dd>
 <div class="desc"></div>
@@ -433,20 +429,7 @@ hljs.highlightAll();
 <span>(</span><span>framer)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Base class for all Frame plugins.</p>
-<p>This class defines the basic structure and interface that all plugins should follow.
-Plugins provide a way to extend the functionality of Framer instances.</p>
-<h2 id="attributes">Attributes</h2>
-<dl>
-<dt><strong><code>framer</code></strong></dt>
-<dd>The Framer instance that this plugin is associated with.</dd>
-</dl>
-<p>Initialize the plugin with a Framer instance.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>framer</code></strong></dt>
-<dd>The Framer instance to associate with this plugin.</dd>
-</dl></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -545,78 +528,38 @@ Plugins provide a way to extend the functionality of Framer instances.</p>
         &#34;&#34;&#34;
         pass</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>abc.ABC</li>
-</ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="frame.src.framer.brain.plugins.base.ExamplePlugin" href="framer/brain/plugins/base.html#frame.src.framer.brain.plugins.base.ExamplePlugin">ExamplePlugin</a></li>
-<li><a title="frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin.Mem0SearchExtractSummarizePlugin" href="plugins/mem0_search_extract_summarize_plugin/mem0_search_extract_summarize_plugin.html#frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin.Mem0SearchExtractSummarizePlugin">Mem0SearchExtractSummarizePlugin</a></li>
 <li><a title="frame.src.utils.plugin_loader.MockPlugin" href="utils/plugin_loader.html#frame.src.utils.plugin_loader.MockPlugin">MockPlugin</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.BasePlugin.add_action"><code class="name flex">
-<span>def <span class="ident">add_action</span></span>(<span>self, name: str, func: <built-in function callable>, description: str, priority: <a title="frame.src.framer.agency.priority.Priority" href="framer/agency/priority.html#frame.src.framer.agency.priority.Priority">Priority</a> = 5)</span>
+<span>def <span class="ident">add_action</span></span>(<span>self, name, action_func, description='')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Register an action with the Framer's action registry.</p>
-<p>This method allows the plugin to add new actions that can be performed by the Framer.</p>
+<div class="desc"><p>Add an action to the plugin's action registry.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
 <dd>The name of the action.</dd>
-<dt><strong><code>func</code></strong> :&ensp;<code>callable</code></dt>
-<dd>The function to be called when the action is performed.</dd>
+<dt><strong><code>action_func</code></strong> :&ensp;<code>callable</code></dt>
+<dd>The function to execute for this action.</dd>
 <dt><strong><code>description</code></strong> :&ensp;<code>str</code></dt>
-<dd>A brief description of what the action does.</dd>
+<dd>A description of the action.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.BasePlugin.execute"><code class="name flex">
-<span>async def <span class="ident">execute</span></span>(<span>self, action: str, params: Dict[str, Any]) ‑> Any</span>
+<dt id="frame.src.BasePlugin.get_actions"><code class="name flex">
+<span>def <span class="ident">get_actions</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Abstract method to execute a plugin-specific action.</p>
-<p>This method should be implemented by all plugin subclasses to handle
-plugin-specific actions.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
-<dd>The name of the action to execute.</dd>
-<dt><strong><code>params</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
-<dd>Parameters for the action.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Any</code></dt>
-<dd>The result of the action execution.</dd>
-</dl></div>
-</dd>
-<dt id="frame.src.BasePlugin.on_load"><code class="name flex">
-<span>async def <span class="ident">on_load</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Abstract method that is called when the plugin is loaded.</p>
-<p>This method should be implemented by all plugin subclasses to perform
-any necessary initialization or setup when the plugin is loaded.</p></div>
-</dd>
-<dt id="frame.src.BasePlugin.remove_action"><code class="name flex">
-<span>def <span class="ident">remove_action</span></span>(<span>self, name: str)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Remove an action from the action registry by its name.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>The name of the action to remove.</dd>
-</dl></div>
+<div class="desc"><p>Return the actions registered by this plugin.</p></div>
 </dd>
 </dl>
 </dd>
 <dt id="frame.src.Brain"><code class="flex name class">
 <span>class <span class="ident">Brain</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[ForwardRef('ExecutionContext')] = None, memory_service: Optional[ForwardRef('MemoryService')] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], default_model: str = 'gpt-3.5-turbo', soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="framer/soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>] = None, memory_service: Optional[ForwardRef('MemoryService')] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], default_model: str = 'gpt-3.5-turbo', soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="framer/soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Brain class represents the central decision-making and cognitive processing component of the Framer.</p>
@@ -715,7 +658,7 @@ to enable intelligent decision-making and action execution.</p>
     def __init__(
         self,
         llm_service: LLMService,
-        execution_context: Optional[&#34;ExecutionContext&#34;] = None,
+        execution_context: Optional[ExecutionContext] = None,
         memory_service: Optional[&#34;MemoryService&#34;] = None,
         roles: List[Dict[str, Any]] = [],
         goals: List[Dict[str, Any]] = [],
@@ -738,7 +681,7 @@ to enable intelligent decision-making and action execution.</p>
         self.logger.info(&#34;Initializing Brain&#34;)
         self.llm_service = llm_service
         self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service
+            llm_service=self.llm_service, config=None
         )
         self.default_model = default_model
         self.roles = roles
@@ -1931,7 +1874,7 @@ validated to form a valid model.</p>
         self.llm_service = llm_service
 
         self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service, soul=soul, brain=brain
+            llm_service=self.llm_service, soul=soul
         )
         self.execution_context.soul = soul
         self.execution_context.brain = brain
@@ -1968,6 +1911,7 @@ validated to form a valid model.</p>
         self.goals = goals or []
         self.plugins = plugins or {}
         self.plugin_loading_complete = False
+        self.plugin_loading_complete = False
         self._streamed_response = {&#34;status&#34;: &#34;pending&#34;, &#34;result&#34;: &#34;&#34;}
 
         logger.info(&#34;Creating Brain&#34;)
@@ -1987,14 +1931,24 @@ validated to form a valid model.</p>
         self.observers: List[Observer] = []
         self.can_execute = True
         self.acting = False
-        # Load plugins asynchronously
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-        loop.create_task(self.load_plugins())
+    async def load_plugins(self):
+        &#34;&#34;&#34;
+        Load all plugins by calling their on_load method.
+        &#34;&#34;&#34;
+        for plugin_name, plugin_instance in self.plugins.items():
+            if hasattr(plugin_instance, &#34;on_load&#34;):
+                await plugin_instance.on_load()
+                # Register plugin actions in the brain&#39;s action_registry
+                for action_name, action_func in plugin_instance.get_actions().items():
+                    self.brain.action_registry.add_action(
+                        action_name,
+                        action_func=action_func,
+                        description=f&#34;Action from {plugin_name} plugin&#34;,
+                        priority=5,  # Default priority, adjust as needed
+                    )
+        self.plugin_loading_complete = True
+        self.act()
+        await self.process_queued_perceptions()
 
         # Generate roles and goals if not provided
         if not self.roles or not self.goals:
@@ -2007,11 +1961,11 @@ validated to form a valid model.</p>
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
 
         # Ensure uniqueness
-        self.roles = list({role.name: role for role in self.roles}.values())
-        self.goals = list({goal.name: goal for goal in self.goals}.values())
+        self.roles = list({role[&#39;name&#39;]: role for role in self.roles}.values())
+        self.goals = list({goal[&#39;description&#39;]: goal for goal in self.goals}.values())
 
-        logger.info(f&#34;Generated initial roles: {[role.name for role in self.roles]}&#34;)
-        logger.info(f&#34;Generated initial goals: {[goal.name for goal in self.goals]}&#34;)
+        logger.info(f&#34;Generated initial roles: {[role[&#39;name&#39;] for role in self.roles]}&#34;)
+        logger.info(f&#34;Generated initial goals: {[goal[&#39;description&#39;] for goal in self.goals]}&#34;)
 
         if hasattr(self.brain, &#34;set_roles&#34;):
             self.brain.set_roles(self.roles)
@@ -2029,7 +1983,28 @@ validated to form a valid model.</p>
         &#34;&#34;&#34;
         self.acting = True
 
-    async def load_plugins(self):
+    def add_plugin(self, plugin_name: str, plugin_instance: Any):
+        &#34;&#34;&#34;
+        Add a plugin to the Framer.
+
+        Args:
+            plugin_name (str): The name of the plugin.
+            plugin_instance (Any): The plugin instance to add.
+        &#34;&#34;&#34;
+        self.plugins[plugin_name] = plugin_instance
+        if hasattr(plugin_instance, &#34;on_load&#34;):
+            asyncio.create_task(plugin_instance.on_load())
+
+    async def remove_plugin(self, plugin_name: str):
+        &#34;&#34;&#34;
+        Remove a plugin from the Framer.
+
+        Args:
+            plugin_name (str): The name of the plugin to remove.
+        &#34;&#34;&#34;
+        plugin_instance = self.plugins.pop(plugin_name, None)
+        if plugin_instance and hasattr(plugin_instance, &#34;on_remove&#34;):
+            asyncio.create_task(plugin_instance.on_remove())
         &#34;&#34;&#34;
         Load all plugins by calling their on_load method.
         &#34;&#34;&#34;
@@ -2274,8 +2249,7 @@ validated to form a valid model.</p>
             self.notify_observers(decision)
         else:
             logger.warning(&#34;No decision was made for the given perception.&#34;)
-
-        decision = Decision(**decision_data)
+            return None
         return decision
 
     async def prompt(self, text: str) -&gt; Decision:
@@ -2510,6 +2484,19 @@ ensuring continuity and consistency across different sessions or environments.</
 <dd>The observer function to add.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.Framer.add_plugin"><code class="name flex">
+<span>def <span class="ident">add_plugin</span></span>(<span>self, plugin_name: str, plugin_instance: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a plugin to the Framer.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>plugin_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the plugin.</dd>
+<dt><strong><code>plugin_instance</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The plugin instance to add.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.Framer.close"><code class="name flex">
 <span>async def <span class="ident">close</span></span>(<span>self) ‑> None</span>
 </code></dt>
@@ -2652,6 +2639,17 @@ systems, facilitating interoperability and reuse.</p>
 <dd>The observer function to remove.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.Framer.remove_plugin"><code class="name flex">
+<span>async def <span class="ident">remove_plugin</span></span>(<span>self, plugin_name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Remove a plugin from the Framer.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>plugin_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the plugin to remove.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.Framer.sense"><code class="name flex">
 <span>async def <span class="ident">sense</span></span>(<span>self, perception: Union[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="framer/brain/mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>, Dict[str, Any]]) ‑> Optional[<a title="frame.src.framer.brain.decision.decision.Decision" href="framer/brain/decision/decision.html#frame.src.framer.brain.decision.decision.Decision">Decision</a>]</span>
 </code></dt>
@@ -2744,9 +2742,9 @@ validated to form a valid model.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FramerConfig(BaseModel):
-    name: str
-    model: Optional[str] = None
-    soul_seed: Optional[Union[str, Dict[str, Any]]] = &#34;You are a helpful AI assistant.&#34;
+    name: str = &#34;DefaultFramer&#34;
+    model: Optional[str] = DEFAULT_MODEL
+    soul_seed: Optional[Union[str, Dict[str, Any]]] = Field(default=&#34;You are a helpful AI assistant.&#34;)
     use_local_model: bool = False
     # Default permissions include services like memory, eq, and shared_context.
     # These services do not require explicit permissions to be accessed.
@@ -2757,7 +2755,7 @@ validated to form a valid model.</p>
             &#34;with_shared_context&#34;,
         ]
     )
-    mem0_api_key: Optional[str] = MEM0_API_KEY
+    mem0_api_key: Optional[str] = Field(default_factory=lambda: os.getenv(&#39;MEM0_API_KEY&#39;, MEM0_API_KEY))
     &#34;&#34;&#34;
     Configuration class for Framer instances.
 
@@ -3565,7 +3563,6 @@ and the Brain's decision-making processes.</p></div>
 <li><code><a title="frame.src.framer" href="framer/index.html">frame.src.framer</a></code></li>
 <li><code><a title="frame.src.mixins" href="mixins/index.html">frame.src.mixins</a></code></li>
 <li><code><a title="frame.src.models" href="models/index.html">frame.src.models</a></code></li>
-<li><code><a title="frame.src.plugins" href="plugins/index.html">frame.src.plugins</a></code></li>
 <li><code><a title="frame.src.services" href="services/index.html">frame.src.services</a></code></li>
 <li><code><a title="frame.src.utils" href="utils/index.html">frame.src.utils</a></code></li>
 </ul>
@@ -3591,9 +3588,7 @@ and the Brain's decision-making processes.</p></div>
 <h4><code><a title="frame.src.BasePlugin" href="#frame.src.BasePlugin">BasePlugin</a></code></h4>
 <ul class="">
 <li><code><a title="frame.src.BasePlugin.add_action" href="#frame.src.BasePlugin.add_action">add_action</a></code></li>
-<li><code><a title="frame.src.BasePlugin.execute" href="#frame.src.BasePlugin.execute">execute</a></code></li>
-<li><code><a title="frame.src.BasePlugin.on_load" href="#frame.src.BasePlugin.on_load">on_load</a></code></li>
-<li><code><a title="frame.src.BasePlugin.remove_action" href="#frame.src.BasePlugin.remove_action">remove_action</a></code></li>
+<li><code><a title="frame.src.BasePlugin.get_actions" href="#frame.src.BasePlugin.get_actions">get_actions</a></code></li>
 </ul>
 </li>
 <li>
@@ -3632,6 +3627,7 @@ and the Brain's decision-making processes.</p></div>
 <ul class="">
 <li><code><a title="frame.src.Framer.act" href="#frame.src.Framer.act">act</a></code></li>
 <li><code><a title="frame.src.Framer.add_observer" href="#frame.src.Framer.add_observer">add_observer</a></code></li>
+<li><code><a title="frame.src.Framer.add_plugin" href="#frame.src.Framer.add_plugin">add_plugin</a></code></li>
 <li><code><a title="frame.src.Framer.close" href="#frame.src.Framer.close">close</a></code></li>
 <li><code><a title="frame.src.Framer.create" href="#frame.src.Framer.create">create</a></code></li>
 <li><code><a title="frame.src.Framer.export_to_file" href="#frame.src.Framer.export_to_file">export_to_file</a></code></li>
@@ -3647,6 +3643,7 @@ and the Brain's decision-making processes.</p></div>
 <li><code><a title="frame.src.Framer.process_queued_perceptions" href="#frame.src.Framer.process_queued_perceptions">process_queued_perceptions</a></code></li>
 <li><code><a title="frame.src.Framer.prompt" href="#frame.src.Framer.prompt">prompt</a></code></li>
 <li><code><a title="frame.src.Framer.remove_observer" href="#frame.src.Framer.remove_observer">remove_observer</a></code></li>
+<li><code><a title="frame.src.Framer.remove_plugin" href="#frame.src.Framer.remove_plugin">remove_plugin</a></code></li>
 <li><code><a title="frame.src.Framer.sense" href="#frame.src.Framer.sense">sense</a></code></li>
 <li><code><a title="frame.src.Framer.use_plugin_action" href="#frame.src.Framer.use_plugin_action">use_plugin_action</a></code></li>
 </ul>

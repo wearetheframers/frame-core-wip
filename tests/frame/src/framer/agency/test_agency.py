@@ -43,7 +43,9 @@ def test_agency_initialization(agency, mock_llm_service):
 @pytest.mark.asyncio
 async def test_generate_roles_with_numeric_priority(agency):
     agency.llm_service.get_completion = AsyncMock()
-    agency.llm_service.get_completion.return_value = '{"name": "Role1", "description": "A test role", "priority": 9}'
+    agency.llm_service.get_completion.return_value = (
+        '{"name": "Role1", "description": "A test role", "priority": 9}'
+    )
     roles = await agency.generate_roles()
     assert roles[0].name == "Role1"
     assert roles[0].description == "A test role"
@@ -52,7 +54,9 @@ async def test_generate_roles_with_numeric_priority(agency):
 
 async def test_generate_roles_with_string_priority(agency):
     agency.llm_service.get_completion = AsyncMock()
-    agency.llm_service.get_completion.return_value = '{"name": "Role1", "description": "A test role", "priority": "medium"}'
+    agency.llm_service.get_completion.return_value = (
+        '{"name": "Role1", "description": "A test role", "priority": "medium"}'
+    )
     roles = await agency.generate_roles()
     assert roles[0]["parameters"] == {
         "name": "Role1",

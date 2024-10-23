@@ -10,6 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class Task(BaseModel):
     """
     Represents a task within the Frame-Core system.

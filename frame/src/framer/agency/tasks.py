@@ -3,10 +3,12 @@ from pydantic import BaseModel, Field
 from frame.src.framer.agency.priority import Priority
 from enum import Enum
 
+
 class TaskStatus(str, Enum):
     PENDING = "PENDING"
     IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
+
 
 class Task(BaseModel):
     id: Optional[str] = None
@@ -25,4 +27,5 @@ class Task(BaseModel):
 
     def to_dict(self):
         return self.dict()
+
     stakeholders: Optional[List[str]] = None  # Add this field

@@ -80,7 +80,9 @@ class Frame:
         self.is_loading_plugins = True
         self.plugins, _ = load_plugins(self.plugins_dir)
         self.framer_factory = FramerFactory(
-            FramerConfig(name="DefaultFramer", default_model=self._default_model), self.llm_service, plugins=self.plugins
+            FramerConfig(name="DefaultFramer", default_model=self._default_model),
+            self.llm_service,
+            plugins=self.plugins,
         )
         self.is_loading_plugins = False
 
@@ -246,6 +248,8 @@ class Frame:
         #     self.llm_service.close()
 
         logger.info("Frame has been shut down.")
+
+
 import os
 import importlib
 from typing import Dict, Any, Tuple, List
@@ -255,6 +259,7 @@ from frame.src.framer.brain.plugins.base import BasePlugin
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
     """
@@ -299,7 +304,9 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
                 logger.debug(f"Looking for class {plugin_class_name} in module {item}")
                 plugin_class = getattr(module, plugin_class_name, None)
                 if plugin_class is None:
-                    logger.warning(f"Class {plugin_class_name} not found in module {item}. Skipping.")
+                    logger.warning(
+                        f"Class {plugin_class_name} not found in module {item}. Skipping."
+                    )
                     continue
 
                 # Check if the plugin class inherits from PluginBase

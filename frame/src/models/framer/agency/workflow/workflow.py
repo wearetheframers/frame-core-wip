@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from frame.src.framer.agency.tasks.task import Task
 from frame.src.framer.agency.tasks.status import TaskStatus
 
+
 class Workflow(BaseModel):
     id: str
     name: str

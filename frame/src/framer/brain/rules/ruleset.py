@@ -1,7 +1,12 @@
 from typing import Callable, List, Dict, Any
 
+
 class Rule:
-    def __init__(self, condition: Callable[[Dict[str, Any]], bool], action: Callable[[Dict[str, Any]], None]):
+    def __init__(
+        self,
+        condition: Callable[[Dict[str, Any]], bool],
+        action: Callable[[Dict[str, Any]], None],
+    ):
         self.condition = condition
         self.action = action
 
@@ -11,6 +16,7 @@ class Rule:
     def execute(self, context: Dict[str, Any]) -> None:
         if self.evaluate(context):
             self.action(context)
+
 
 class Ruleset:
     def __init__(self):

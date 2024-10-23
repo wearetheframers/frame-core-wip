@@ -240,7 +240,9 @@ class ActionRegistry:
 
         action_func = action["action_func"]
         try:
-            result = await action_func(self.execution_context, **kwargs)  # Pass execution_context
+            result = await action_func(
+                self.execution_context, **kwargs
+            )  # Pass execution_context
             if result is None:
                 return {
                     "error": "Action returned None",

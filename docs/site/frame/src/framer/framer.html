@@ -201,11 +201,11 @@ hljs.highlightAll();
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
 
         # Ensure uniqueness
-        self.roles = list({role.name: role for role in self.roles}.values())
-        self.goals = list({goal.name: goal for goal in self.goals}.values())
+        self.roles = list({role[&#39;name&#39;]: role for role in self.roles}.values())
+        self.goals = list({goal[&#39;description&#39;]: goal for goal in self.goals}.values())
 
-        logger.info(f&#34;Generated initial roles: {[role.name for role in self.roles]}&#34;)
-        logger.info(f&#34;Generated initial goals: {[goal.name for goal in self.goals]}&#34;)
+        logger.info(f&#34;Generated initial roles: {[role[&#39;name&#39;] for role in self.roles]}&#34;)
+        logger.info(f&#34;Generated initial goals: {[goal[&#39;description&#39;] for goal in self.goals]}&#34;)
 
         if hasattr(self.brain, &#34;set_roles&#34;):
             self.brain.set_roles(self.roles)
@@ -468,8 +468,7 @@ hljs.highlightAll();
             self.notify_observers(decision)
         else:
             logger.warning(&#34;No decision was made for the given perception.&#34;)
-
-        decision = Decision(**decision_data)
+            return None
         return decision
 
     async def prompt(self, text: str) -&gt; Decision:

@@ -12,4 +12,4 @@ class SharedContext(ExecutionContext):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.shared_state = kwargs
-        self.llm_service = kwargs.get('llm_service', None)
+        self.llm_service = kwargs.get("llm_service", None)

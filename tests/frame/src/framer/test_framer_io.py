@@ -13,12 +13,21 @@ class TestFramerIO(IsolatedAsyncioTestCase):
         framer = Framer.load_from_file("dummy_path", MagicMock())
         self.assertIsInstance(framer, Framer)
 
-    @patch("frame.src.framer.framer.Framer._generate_initial_roles_and_goals", new_callable=AsyncMock)
+    @patch(
+        "frame.src.framer.framer.Framer._generate_initial_roles_and_goals",
+        new_callable=AsyncMock,
+    )
     @patch("json.dump")
     @patch("builtins.open", new_callable=mock.mock_open)
-    @patch("frame.src.services.llm.main.LLMService.get_completion", new_callable=AsyncMock)
-    async def test_export_to_json(self, mock_get_completion, mock_open, mock_json_dump, mock_generate_roles):
-        mock_get_completion.return_value = '{"roles": [], "goals": []}'  # Return a valid JSON string
+    @patch(
+        "frame.src.services.llm.main.LLMService.get_completion", new_callable=AsyncMock
+    )
+    async def test_export_to_json(
+        self, mock_get_completion, mock_open, mock_json_dump, mock_generate_roles
+    ):
+        mock_get_completion.return_value = (
+            '{"roles": [], "goals": []}'  # Return a valid JSON string
+        )
         agency_mock = AsyncMock()
         agency_mock.roles = []
         agency_mock.goals = []
@@ -34,10 +43,15 @@ class TestFramerIO(IsolatedAsyncioTestCase):
         mock_open.assert_called_once_with("dummy_path", "w")
         mock_json_dump.assert_called_once()
 
-    @patch("frame.src.framer.framer.Framer._generate_initial_roles_and_goals", new_callable=AsyncMock)
+    @patch(
+        "frame.src.framer.framer.Framer._generate_initial_roles_and_goals",
+        new_callable=AsyncMock,
+    )
     @patch("builtins.open", new_callable=mock.mock_open)
     @patch("frame.src.utils.config_parser.export_config_to_markdown")
-    async def test_export_to_markdown(self, mock_export_config, mock_open, mock_generate_roles):
+    async def test_export_to_markdown(
+        self, mock_export_config, mock_open, mock_generate_roles
+    ):
         framer = await Framer(
             config=MagicMock(),
             llm_service=MagicMock(),
@@ -54,4 +68,5 @@ class TestFramerIO(IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     import unittest
+
     unittest.main()

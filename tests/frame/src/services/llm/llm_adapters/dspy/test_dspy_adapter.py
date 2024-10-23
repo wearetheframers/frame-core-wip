@@ -2,7 +2,11 @@ import pytest
 import time
 import asyncio
 from unittest.mock import AsyncMock, patch, call
-from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import DSPyAdapter, TokenBucket, DSPyConfig
+from frame.src.services.llm.llm_adapters.dspy.dspy_adapter import (
+    DSPyAdapter,
+    TokenBucket,
+    DSPyConfig,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -133,14 +137,18 @@ async def test_get_completion_rate_limit(dspy_adapter):
         task = asyncio.create_task(dspy_adapter.get_completion("Test prompt 2", config))
 
         # Allow time for tokens to replenish
-        await asyncio.sleep(2.5)  # Wait longer than the time needed to replenish a token
+        await asyncio.sleep(
+            2.5
+        )  # Wait longer than the time needed to replenish a token
 
         result2 = await task
         end_time = time.time()
 
         assert result2 == "Test completion"
         elapsed_time = end_time - start_time
-        assert elapsed_time >= 2.0, f"Rate limiting didn't cause expected delay, elapsed: {elapsed_time}"
+        assert (
+            elapsed_time >= 2.0
+        ), f"Rate limiting didn't cause expected delay, elapsed: {elapsed_time}"
 
         # Ensure that the token bucket was replenished
         assert dspy_adapter.token_bucket.tokens <= dspy_adapter.token_bucket.capacity

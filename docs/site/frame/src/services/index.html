@@ -591,7 +591,10 @@ the specified or default model.</p>
 
         except Exception as e:
             self.logger.error(f&#34;Error in get_completion: {str(e)}&#34;)
-            return f&#34;I encountered an error while processing your request: {str(e)}. Could you please try again?&#34;
+            return json.dumps({
+                &#34;error&#34;: str(e),
+                &#34;fallback_response&#34;: &#34;I encountered an error while processing your request. Could you please try again?&#34;
+            })
         &#34;&#34;&#34;
         Generate a completion using the specified model or the default model.
 

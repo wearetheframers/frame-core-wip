@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.brain.brain.Brain"><code class="flex name class">
 <span>class <span class="ident">Brain</span></span>
-<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[ForwardRef('ExecutionContext')] = None, memory_service: Optional[ForwardRef('MemoryService')] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], default_model: str = 'gpt-3.5-turbo', soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
+<span>(</span><span>llm_service: <a title="frame.src.services.llm.main.LLMService" href="../../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>] = None, memory_service: Optional[ForwardRef('MemoryService')] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], default_model: str = 'gpt-3.5-turbo', soul: Optional[<a title="frame.src.framer.soul.soul.Soul" href="../soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Brain class represents the central decision-making and cognitive processing component of the Framer.</p>
@@ -136,7 +136,7 @@ to enable intelligent decision-making and action execution.</p>
     def __init__(
         self,
         llm_service: LLMService,
-        execution_context: Optional[&#34;ExecutionContext&#34;] = None,
+        execution_context: Optional[ExecutionContext] = None,
         memory_service: Optional[&#34;MemoryService&#34;] = None,
         roles: List[Dict[str, Any]] = [],
         goals: List[Dict[str, Any]] = [],
@@ -159,7 +159,7 @@ to enable intelligent decision-making and action execution.</p>
         self.logger.info(&#34;Initializing Brain&#34;)
         self.llm_service = llm_service
         self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service
+            llm_service=self.llm_service, config=None
         )
         self.default_model = default_model
         self.roles = roles

@@ -31,6 +31,31 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="frame.frame.load_plugins"><code class="name flex">
+<span>def <span class="ident">load_plugins</span></span>(<span>plugins_dir: str) ‑> Tuple[Dict[str, Any], List[str]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load all plugins from the specified directory.</p>
+<p>This function scans the given directory for plugin modules, loads them,
+and returns a dictionary of plugin names and their corresponding classes.
+It also checks for conflicting action names across plugins and handles them.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>plugins_dir</code></strong> :&ensp;<code>str</code></dt>
+<dd>The directory containing the plugins.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tuple[Dict[str, Any], List[str]]</code></dt>
+<dd>A tuple containing:
+- A dictionary of loaded plugins, where the key is the plugin name
+and the value is the plugin class.
+- A list of warning messages for conflicting actions.</dd>
+</dl></div>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -139,13 +164,13 @@ model to be used for completions and loads plugins.</p>
             default_model=self._default_model,
         )
         self.plugins_dir = plugins_dir or os.path.join(
-            os.path.dirname(__file__), &#34;src&#34;, &#34;plugins&#34;
+            os.path.dirname(__file__), &#34;..&#34;, &#34;plugins&#34;
         )
         self.plugins = {}
         self.is_loading_plugins = True
         self.plugins, _ = load_plugins(self.plugins_dir)
         self.framer_factory = FramerFactory(
-            FramerConfig(name=&#34;DefaultFramer&#34;), self.llm_service, plugins=self.plugins
+            FramerConfig(name=&#34;DefaultFramer&#34;, default_model=self._default_model), self.llm_service, plugins=self.plugins
         )
         self.is_loading_plugins = False
 
@@ -484,6 +509,11 @@ Defaults to True.</dd>
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="frame" href="index.html">frame</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="frame.frame.load_plugins" href="#frame.frame.load_plugins">load_plugins</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

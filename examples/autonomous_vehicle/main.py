@@ -77,9 +77,7 @@ class ProcessPerceptionAction(BaseAction):
             return f"No action taken: {decision.get('reason')}"
 
         try:
-            result = await self.action_registry.execute_action(
-                action, **decision
-            )
+            result = await self.action_registry.execute_action(action, **decision)
             return f"Executed {action}: {result}"
         except Exception as e:
             return f"Error executing action {action}: {str(e)}"

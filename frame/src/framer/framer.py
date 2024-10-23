@@ -183,6 +183,7 @@ class Framer:
         self.observers: List[Observer] = []
         self.can_execute = True
         self.acting = False
+
     async def load_plugins(self):
         """
         Load all plugins by calling their on_load method.
@@ -213,11 +214,13 @@ class Framer:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
 
         # Ensure uniqueness
-        self.roles = list({role['name']: role for role in self.roles}.values())
-        self.goals = list({goal['description']: goal for goal in self.goals}.values())
+        self.roles = list({role["name"]: role for role in self.roles}.values())
+        self.goals = list({goal["description"]: goal for goal in self.goals}.values())
 
         logger.info(f"Generated initial roles: {[role['name'] for role in self.roles]}")
-        logger.info(f"Generated initial goals: {[goal['description'] for goal in self.goals]}")
+        logger.info(
+            f"Generated initial goals: {[goal['description'] for goal in self.goals]}"
+        )
 
         if hasattr(self.brain, "set_roles"):
             self.brain.set_roles(self.roles)
