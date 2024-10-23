@@ -159,6 +159,7 @@ class LLMService:
         prompt: str,
         include_frame_context: bool,
         recent_memories: Optional[List[Dict[str, Any]]],
+        framer: Optional[Any] = None,
     ) -> str:
         full_prompt = prompt
 
@@ -203,6 +204,7 @@ class LLMService:
         use_local: bool = False,
         stream: bool = False,
         include_frame_context: bool = False,
+        framer: Optional[Any] = None,
         recent_memories: Optional[List[Dict[str, Any]]] = None,
     ) -> str:
         model = model or self.default_model
@@ -219,10 +221,10 @@ class LLMService:
             config = adapter.get_config(max_tokens=max_tokens, temperature=temperature)
             formatted_prompt = adapter.format_prompt(full_prompt)
             if stream:
-                result = adapter.get_completion(
-                    formatted_prompt, config, additional_context, stream=True
+                result = await adapter.get_completion(
+                    formatted_prompt, config, additional_context, stream=stream, framer=framer
                 )
-                return result  # Return the async generator
+                return result  # This should be an async generator
             else:
                 result = await adapter.get_completion(
                     formatted_prompt, config, additional_context
@@ -254,137 +256,3 @@ class LLMService:
                     "fallback_response": "I encountered an error while processing your request. Could you please try again?",
                 }
             )
-        """
-        Generate a completion using the specified model or the default model.
-
-        Args:
-            prompt (str): The input prompt for the model.
-            model (str, optional): The model to use.
-            max_tokens (int, optional): Maximum number of tokens to generate.
-            temperature (float, optional): Sampling temperature.
-            additional_context (Dict[str, Any], optional): Additional context for the model.
-            expected_output (str, optional): Expected output format.
-            use_local (bool, optional): Whether to use a local model.
-            stream (bool, optional): Whether to stream the output.
-            include_frame_context (bool, optional): Whether to include context about Frame and Framers.
-            recent_memories (List[Dict[str, Any]], optional): List of recent memories/perceptions.
-
-        Returns:
-            Union[str, Dict[str, Any]]: The generated completion.
-        """
-        model = model or self.default_model
-        self.logger.debug(f"Using model: {model}")
-
-        start_time = time.time()
-
-        # Prepare the full prompt with additional context if required
-        full_prompt = self._prepare_full_prompt(
-            prompt, include_frame_context, recent_memories
-        )
-
-        result = None  # Initialize result to avoid UnboundLocalError
-
-        try:
-            if stream:
-                # ... (streaming code remains unchanged)
-                pass
-            else:
-                if use_local or (
-                    self.huggingface_adapter.api_key and "huggingface" in model.lower()
-                ):
-                    self.logger.debug("Using Hugging Face adapter")
-                    config = HuggingFaceConfig(
-                        model=model, max_tokens=max_tokens, temperature=temperature
-                    )
-                    formatted_prompt = format_huggingface_prompt(full_prompt)
-                    result = await self.huggingface_adapter.get_completion(
-                        formatted_prompt, config, additional_context
-                    )
-                elif "dspy" in model.lower():
-                    self.logger.debug("Using DSPy adapter")
-                    config = DSPyConfig(
-                        model=model, max_tokens=max_tokens, temperature=temperature
-                    )
-                    formatted_prompt = format_dspy_prompt(full_prompt)
-                    result = await self.dspy_wrapper.get_completion(
-                        formatted_prompt, config, additional_context
-                    )
-                else:
-                    self.logger.debug("Using LMQL adapter")
-                    config = LMQLConfig(
-                        model=model, max_tokens=max_tokens, temperature=temperature
-                    )
-                    constraints = (
-                        [f"EXPECTED_OUTPUT in [{expected_output}]"]
-                        if expected_output
-                        else []
-                    )
-                    if "lmql" in model.lower():
-                        result = await self.lmql_interface.generate(
-                            full_prompt, max_tokens=max_tokens, constraints=constraints
-                        )
-                    elif "dspy" in model.lower():
-                        config = DSPyConfig(
-                            model=model, max_tokens=max_tokens, temperature=temperature
-                        )
-                        formatted_prompt = format_dspy_prompt(full_prompt)
-                        result = await self.dspy_wrapper.get_completion(
-                            formatted_prompt, config, additional_context
-                        )
-
-            end_time = time.time()
-            execution_time = end_time - start_time
-
-            # Calculate tokens used (this is a simple estimation)
-            if isinstance(result, str):
-                tokens_used = len(prompt.split()) + len(result.split())
-            else:
-                tokens_used = len(
-                    prompt.split()
-                )  # We can't estimate tokens for streaming result
-
-            # Track LLM usage
-            track_llm_usage(model, tokens_used)
-
-            self.logger.debug(f"Completion generated in {execution_time:.2f} seconds")
-            self.logger.debug(f"Tokens used: {tokens_used}")
-
-            if (
-                result is None
-                or (isinstance(result, str) and not result.strip())
-                or (isinstance(result, dict) and "error" in result)
-            ):
-                self.logger.warning(f"Received invalid response from model: {model}")
-                return {
-                    "error": f"Invalid response from model: {model}",
-                    "fallback_response": "I apologize, but I couldn't generate a response at this time. Could you please rephrase your question or provide more context?",
-                }
-
-            if isinstance(result, dict):
-                return result
-            elif isinstance(result, str):
-                try:
-                    return json.loads(result)
-                except json.JSONDecodeError:
-                    return {"response": result}
-
-            # Check if ```json is in the response and remove it if present
-            if (
-                isinstance(result, str)
-                and result.startswith("```json")
-                and result.endswith("```")
-            ):
-                try:
-                    cleaned_response = "\n".join(result.split("\n")[1:-1])
-                    return json.loads(cleaned_response)
-                except json.JSONDecodeError:
-                    return result
-
-            return result
-
-        except Exception as e:
-            self.logger.error(f"Error in get_completion: {str(e)}")
-            return {
-                "error": str(e),
-                "fallback_response": "I encountered an error while processing your request. Could you please try again?",
-            }

@@ -10,6 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 from frame import Frame, FramerConfig
 from frame.src.utils.config_parser import parse_json_config
 from frame.src.framer.brain.actions import BaseAction
+import logging
 from frame.src.services import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 
@@ -17,7 +18,7 @@ from frame.src.framer.agency.priority import Priority
 class ExploreEnvironmentAction(BaseAction):
     def __init__(self):
         super().__init__(
-            "explore_environment", "Explore the environment", Priority.MEDIUM
+            "explore_environment", "Explore the environment", Priority.LOW
         )
 
     async def execute(self, execution_context: ExecutionContext) -> str:
@@ -27,6 +28,7 @@ class ExploreEnvironmentAction(BaseAction):
 
 
 async def main():
+    logger = logging.getLogger(__name__)
     possible_paths = [
         os.path.join(os.path.dirname(__file__), "framer.json"),
         os.path.join(
@@ -56,9 +58,29 @@ async def main():
     config_dict = config.__dict__ if isinstance(config, FramerConfig) else config
     framer = await frame.create_framer(FramerConfig(**config_dict))
 
-    # Register the ExploreEnvironmentAction
-    explore_action = ExploreEnvironmentAction()
-    framer.brain.action_registry.add_action(explore_action)
+    # Register actions from the config
+    if hasattr(config, "actions"):
+        for action_info in config.actions:
+            action_name = action_info["name"]
+            description = action_info["description"]
+            priority_str = action_info["priority"]
+            priority = getattr(Priority, priority_str, Priority.MEDIUM)
+
+            # Dynamically create an action class
+            def create_action_class(name, desc, prio):
+                class DynamicAction(BaseAction):
+                    def __init__(self):
+                        super().__init__(name, desc, prio)
+
+                    async def execute(self, execution_context: ExecutionContext) -> str:
+                        prompt = desc
+                        response = await execution_context.llm_service.get_completion(prompt)
+                        return f"{name} executed: {response}"
+
+                return DynamicAction()
+
+            action_instance = create_action_class(action_name, description, priority)
+            framer.brain.action_registry.add_action(action_instance)
 
     # Set roles and goals from the config
     framer.roles = config.roles or []
@@ -69,12 +91,24 @@ async def main():
     framer.agency.set_goals(framer.goals)
     framer.execution_context.set_roles(framer.roles)
     framer.execution_context.set_goals(framer.goals)
-    framer.execution_context.set_roles(framer.roles)
-    framer.execution_context.set_goals(framer.goals)
 
-    # Execute the explore environment action
-    result = await framer.brain.execute_action("explore_environment", {})
-    print(f"Task result: {result}")
+    # Execute the actions one by one
+    # Ensure that the config has actions or handle it appropriately
+    if hasattr(config, 'actions'):
+        for action in config.actions:
+            # Process actions if they exist
+            pass
+    if hasattr(config, 'actions') and config.actions:
+        for action in config.actions:
+            action_name = action["name"]
+            prompt_text = action["description"]  # Use the description as the prompt
+            if action_name == "streaming_response":
+                result = await framer.brain.action_registry.execute_action(action_name, prompt=prompt_text)
+            else:
+                result = await framer.brain.action_registry.execute_action(action_name)
+            print(f"Task result for '{action_name}': {result}")
+    else:
+        logger.warning("No actions found in the configuration.")
 
     await framer.close()
 

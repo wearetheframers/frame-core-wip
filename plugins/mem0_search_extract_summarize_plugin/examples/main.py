@@ -14,6 +14,7 @@ from frame.src.framer.config import FramerConfig
 from frame.src.framer.brain.memory.memory_adapters.mem0_adapter.concrete_mem0_adapter import (
     ConcreteMem0Adapter,
 )
+from plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin import Mem0SearchExtractSummarizePlugin
 
 
 async def main():
@@ -34,7 +35,15 @@ async def main():
     mem0_adapter = ConcreteMem0Adapter(api_key=api_key)
     framer = await frame.create_framer(config, memory_adapter=mem0_adapter)
 
-    # Get the query from command line arguments
+    # Initialize the plugin
+    mem0_plugin = Mem0SearchExtractSummarizePlugin(framer)
+
+    # Ensure the execution context is correctly set
+    execution_context = framer.execution_context
+
+    # Execute the action
+    result = await mem0_plugin.execute("respond with memory retrieval", {"memory_question": "What is my favorite color?", "execution_context": execution_context})
+    print(result)
     if len(sys.argv) < 2:
         print("Please provide a search query as a command line argument.")
         sys.exit(1)

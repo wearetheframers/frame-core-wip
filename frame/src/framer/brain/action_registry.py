@@ -220,7 +220,7 @@ class ActionRegistry:
         """
         return self.actions.get(name)
 
-    async def execute_action(self, action_name: str, *args, **kwargs):
+    async def execute_action(self, action_name: str, **kwargs):
         """Execute an action by its name."""
         logger.info(
             f"Available actions before executing '{action_name}': {list(self.actions.keys())}"
@@ -232,32 +232,41 @@ class ActionRegistry:
             return None
 
         action = self.get_action(action_name)
-        print("Found action: ", action)
         if not action:
             error_message = f"Action '{action_name}' not found in the registry."
             logger.error(error_message)
             return await self._handle_error(error_message)
 
         action_func = action["action_func"]
+        result = {}
         try:
-            result = await action_func(
+            _result = await action_func(
                 self.execution_context, **kwargs
             )  # Pass execution_context
-            if result is None:
+            print(f"Action result: {_result}")
+            if _result is None:
                 return {
                     "error": "Action returned None",
                     "fallback_response": "The action didn't produce a response. Please try again.",
                 }
-            elif isinstance(result, dict):
-                return result
-            elif isinstance(result, str):
-                return {"response": result}
+            elif isinstance(_result, dict):
+                result['response'] = _result
+            elif isinstance(_result, str):
+                result["response"] = _result
+            elif isinstance(_result, list):
+                result["response"] = _result
             else:
-                return {"response": str(result)}
+                result["response"] = _result
+            # Get reasoning or default empty string
+            if 'reasoning' in _result:
+                result['reasoning'] = _result['reasoning']
+            else:
+                result['reasoning'] = "No reasoning provided."
         except Exception as e:
             error_message = f"Error executing action '{action_name}': {str(e)}"
             logger.error(error_message)
             return await self._handle_error(error_message)
+        return result
 
     def set_execution_context(self, execution_context):
         self.execution_context = execution_context

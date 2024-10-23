@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Dict, List, Optional, Union, Callable, TYPE_CHECKING
 
 logger = logging.getLogger(__name__)
 
@@ -94,8 +94,8 @@ class Brain:
             llm_service=self.llm_service, config=None
         )
         self.default_model = default_model
-        self.roles = roles
-        self.goals = goals
+        self.roles = [Role(**role) if isinstance(role, dict) else role for role in roles]
+        self.goals = [Goal(**goal) if isinstance(goal, dict) else goal for goal in goals]
         self.soul = soul
         self.memory_service = memory_service
         self.logger.info(f"Memory service received: {self.memory_service}")
@@ -111,6 +111,8 @@ class Brain:
         self.mind = Mind(self)
         # Initialize ActionRegistry
         self.action_registry = ActionRegistry(execution_context=self.execution_context)
+        if not isinstance(self.execution_context, ExecutionContext):
+            raise TypeError("execution_context must be an instance of ExecutionContext")
         if not isinstance(self.execution_context, ExecutionContext):
             raise TypeError("execution_context must be an instance of ExecutionContext")
 
@@ -221,7 +223,7 @@ class Brain:
         """
         if response is None:
             logger.error("Received None response, cannot parse JSON.")
-            return {
+            result = {
                 "action": "error",
                 "parameters": {
                     "error": "Received None response",
@@ -304,6 +306,8 @@ class Brain:
         # Convert perception to Perception object if it is a dictionary
         if isinstance(perception, dict):
             perception = Perception.from_dict(perception)
+        elif not isinstance(perception, Perception):
+            raise TypeError("Perception must be a Perception object or a dictionary.")
 
         self.mind.perceptions.append(perception)
         available_actions = self.action_registry.get_all_actions().keys()
@@ -314,6 +318,8 @@ class Brain:
             if decision is None:
                 self.logger.warning("No decision was made for the given perception.")
                 return None
+            if not decision.reasoning:
+                decision.reasoning = "Reasoning not provided. Encourage detailed reasoning."
             await self.execute_decision(decision, perception)
         else:
             logger.warn("Framer is not ready to execute decisions. Queuing perception.")
@@ -323,6 +329,17 @@ class Brain:
     async def make_decision(
         self, perception: Optional[Perception] = None
     ) -> "Decision":
+        """
+        Make a decision on what action to take next based on the current state and perception.
+
+        Args:
+            perception (Optional[Perception]): The current perception of the environment.
+
+        Returns:
+            Decision: The decision made based on the current state and perception,
+                      including the action to take, parameters, reasoning, confidence,
+                      and priority.
+        """
         from frame.src.framer.brain.decision import Decision
 
         """
@@ -337,6 +354,7 @@ class Brain:
                       and priority.
         """
         logger.info(f"Making decision based on perception: {perception}")
+        # If no perception is provided, return a default decision with no action
         if perception is None:
             return Decision(
                 action="no_action",
@@ -348,6 +366,7 @@ class Brain:
                 related_goals=[],
             )
 
+        # Get a decision prompt based on the current perception
         response = await self._get_decision_prompt(perception)
 
         if response is None or (isinstance(response, str) and not response.strip()):
@@ -362,9 +381,10 @@ class Brain:
                 related_goals=[],
             )
 
+        # Parse the response from the LLM service to extract decision data
         decision_data = self.parse_json_response(response)
 
-        logger.info(f"Decision data received: {decision_data}")
+        logger.debug(f"Decision data received: {decision_data}")
 
         if isinstance(decision_data, dict) and "error" in decision_data:
             logger.error(f"Error in decision making: {decision_data['error']}")
@@ -377,14 +397,19 @@ class Brain:
                 related_roles=[],
                 related_goals=[],
             )
-
-        action = decision_data.get("action", "respond").lower()
+        
+        # Use default action 'respond' if no action is provided
+        try:
+            action = decision_data.get("action", "respond")
+        except:
+            action = "no_action"
         valid_actions = [
             str(action).lower()
             for action in self.action_registry.get_all_actions().keys()
         ]
 
         # Retrieve context from the execution context
+        # If the context indicates high urgency and risk, choose an adaptive decision
         context = self.execution_context.get_full_state()
         # Determine the best action based on context
         if context.get("urgency", 0) > 7 and context.get("risk", 0) > 5:
@@ -393,47 +418,25 @@ class Brain:
             decision_data["reasoning"] = (
                 f"High urgency and risk detected. Using '{action}' to adaptively decide the best course of action."
             )
-        elif action not in valid_actions:
-            # If the action is not valid, check if it's related to memory retrieval
-            if any(keyword in action for keyword in ["memory", "recall", "retrieve"]):
-                action = "respond with memory retrieval"
-                decision_data["action"] = action
-                decision_data["reasoning"] = (
-                    f"Action '{action}' was generated based on the perception. "
-                    f"Using the memory retrieval plugin to process this request."
-                )
-            else:
-                invalid_action = action
-                action = "respond"
-                logger.warning(
-                    f"Invalid action '{invalid_action}' generated. "
-                    f"Valid actions are: {', '.join(valid_actions)}"
-                )
-                decision_data["action"] = action
-                decision_data["reasoning"] = (
-                    f"Invalid action '{invalid_action}' was generated. Defaulted to '{action}'."
-                )
+    
+        logger.info(f"Decision data: {decision_data}")
 
-        logger.info(f"Decision data generated: {decision_data}")
-        logger.info(f"Action '{action}' generated: {decision_data}")
-
-        parameters = decision_data.get("parameters", {})
-        if action == "respond with memory retrieval" and "query" not in parameters:
-            parameters["query"] = perception.data.get("text", "")
-        elif "topic" in parameters:
-            parameters["research_topic"] = parameters.pop("topic")
-        if not isinstance(parameters, dict):
-            parameters = {"value": parameters}
+        parameters = decision_data.get("parameters") or {}
 
         reasoning = decision_data.get("reasoning", "No reasoning provided.")
 
+        print("Parameters: ", parameters)
+        print("Reasoning: ", reasoning)
+
         # Check if goals are None and generate them if necessary
+        # This ensures that the decision-making process has relevant goals to consider
         if self.execution_context and not self.execution_context.get_goals():
             # Assuming the execution_context has a method to generate goals
             goals = await self.execution_context.generate_goals()
             self.execution_context.set_goals(goals)
 
         # Consider role and goal priorities when setting decision priority
+        # This helps in aligning the decision with the most critical roles and goals
         active_roles = [role for role in self.roles if role.status == RoleStatus.ACTIVE]
         active_goals = [
             goal
@@ -449,6 +452,7 @@ class Brain:
         priority_value = None
         priority_int = None
         # Ensure priority is a Priority enum
+        # Return the final decision object with all necessary attributes
         priority_value = decision_data.get("priority", Priority.MEDIUM)
         try:
             if isinstance(priority_value, str):
@@ -484,7 +488,24 @@ class Brain:
             decision.reasoning += f" (Aligned with {len(active_goals)} active goals)"
         else:
             logger.error("Decision object does not have a 'reasoning' attribute.")
-        return decision
+        print("Final decision object: ", decision)
+        # Convert related_roles and related_goals to Role and Goal instances
+        related_roles = [
+            role for role in active_roles if role.name in decision_data.get("related_roles", [])
+        ]
+        related_goals = [
+            goal for goal in active_goals if goal.name in decision_data.get("related_goals", [])
+        ]
+
+        return Decision(
+            action=decision_data.get("action", "respond"),
+            parameters=decision_data.get("parameters", {}),
+            reasoning=decision_data.get("reasoning", "No reasoning provided."),
+            confidence=float(decision_data.get("confidence", 0.5)),
+            priority=decision_data.get("priority", Priority.MEDIUM),
+            related_roles=related_roles,
+            related_goals=related_goals,
+        )
 
     async def _get_decision_prompt(self, perception: Optional[Perception]) -> str:
         """
@@ -500,12 +521,12 @@ class Brain:
         logger.debug(f"Valid actions: {valid_actions}")
 
         active_roles = [
-            f"{role.name} (Priority: {role.priority.name}, Status: {role.status.name})"
+            f"{role.name} (Priority: {role.priority}, Status: {role.status.name})"
             for role in self.roles
             if role.status == RoleStatus.ACTIVE
         ]
         active_goals = [
-            f"{goal.name} (Priority: {goal.priority.name}, Status: {goal.status.name})"
+            f"{goal.name} (Priority: {goal.priority}, Status: {goal.status.name})"
             for goal in self.goals
             if goal.status == GoalStatus.ACTIVE
         ]
@@ -600,6 +621,8 @@ class Brain:
         logger.info(
             f"Executing decision: {decision.action} with params {decision.parameters}"
         )
+        logger.debug(f"Decision object: {decision}")
+        logger.debug(f"Perception object: {perception}")
         result = None
         try:
             if decision.action not in self.action_registry.get_all_actions():
@@ -612,22 +635,35 @@ class Brain:
                         perception.data if perception else None
                     )
 
-            if decision.action == "respond with memory retrieval":
-                if (
-                    "query" not in decision.parameters
-                    or not decision.parameters["query"]
-                ):
-                    decision.parameters["query"] = (
-                        perception.data.get("text", "") if perception else ""
-                    )
-
-            result = await self.action_registry.execute_action(
-                decision.action, decision.parameters
-            )
-
-            logger.info(
-                f"Action result: {result} with reasoning: {decision.reasoning}."
-            )
+            try:
+                result = await self.action_registry.execute_action(decision.action, **decision.parameters)
+            except Exception as e:
+                logger.error(f"Error executing action '{decision.action}': {e}")
+                logger.exception("Detailed traceback:")
+                result = {"error": str(e)}
+            if isinstance(result, dict):
+                result.setdefault("reasoning", decision.reasoning or "")
+                result.setdefault("confidence", decision.confidence or 0.5)
+                result.setdefault("priority", decision.priority or 1)
+                result.setdefault("related_roles", decision.related_roles or [])
+                result.setdefault("related_goals", decision.related_goals or [])
+            else:
+                result = {
+                    "response": result,
+                    "reasoning": decision.reasoning or "",
+                    "confidence": decision.confidence or 0.5,
+                    "priority": decision.priority or 1,
+                    "related_roles": decision.related_roles or [],
+                    "related_goals": decision.related_goals or [],
+                }
+            if "error" in result:
+                logger.error(f"Error executing action '{decision.action}': {result['error']}")
+                result = {
+                    "error": f"Error executing action '{decision.action}': {result['error']}",
+                    "fallback_response": "An error occurred while processing your request. Please try again.",
+                }
+            logger.info(f"Action result: {result}")
+            logger.debug(f"Decision reasoning: {decision.reasoning}")
 
         except Exception as e:
             logger.error(f"Error executing decision: {e}")
@@ -636,9 +672,27 @@ class Brain:
 
         return result
 
-    async def execute_action(self, action_name: str, parameters: dict):
+    async def execute_action(self, action_name: str, parameters: Optional[dict] = None) -> Dict[str, Any]:
         """Execute an action by its name using the action registry."""
-        return await self.action_registry.execute_action(action_name, parameters)
+        if parameters is None:
+            parameters = {}
+        result = await self.action_registry.execute_action(action_name, **parameters)
+        if isinstance(result, dict):
+            result.setdefault("reasoning", "No reasoning provided.")
+            result.setdefault("confidence", 0.5)
+            result.setdefault("priority", 1)
+            result.setdefault("related_roles", [])
+            result.setdefault("related_goals", [])
+            return result
+        else:
+            return {
+                "response": result,
+                "reasoning": "No reasoning provided.",
+                "confidence": 0.5,
+                "priority": 1,
+                "related_roles": [],
+                "related_goals": [],
+            }
 
     async def _execute_decision(self, decision: Decision) -> Any:
         """
@@ -686,7 +740,7 @@ class Brain:
             else:
                 raise ValueError(f"Action '{decision.action}' not found in registry.")
 
-            logger.info(f"Executed action: {decision.action}")
+            logger.debug(f"Executed action: {decision.action}")
             logger.debug(f"Action result: {result}")
             logger.debug(f"Decision reasoning: {decision.reasoning}")
 

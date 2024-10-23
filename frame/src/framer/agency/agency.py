@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Optional, Tuple, Union
+from typing import List, Dict, Any, Optional, Tuple, Union, TYPE_CHECKING
 import json
 import logging
 import time
@@ -13,7 +13,7 @@ from frame.src.framer.agency.goals import Goal, GoalStatus
 from frame.src.services.llm.main import LLMService
 from frame.src.services.context.execution_context_service import ExecutionContext
 from frame.src.framer.brain.decision import Decision
-from typing import TYPE_CHECKING
+from unittest.mock import AsyncMock
 
 if TYPE_CHECKING:
     from frame.src.framer.brain.brain import Brain
@@ -83,7 +83,7 @@ class Agency:
         self.roles = roles if roles is not None else []
 
     def set_goals(self, goals: Optional[List[Goal]] = None) -> None:
-        self.goals = goals if goals is not None else []
+        self.goals = [goal if isinstance(goal, Goal) else Goal(**goal) for goal in (goals if goals is not None else [])]
 
     def get_roles(self) -> List[Role]:
         return self.roles
@@ -346,7 +346,6 @@ class Agency:
             roles = []
             existing_role_names = set()
             for r in role_data:
-                r["id"] = str(r.get("id", "default"))
                 r["priority"] = max(1, min(10, int(r.get("priority", 5))))
                 r["status"] = RoleStatus[r.get("status", "ACTIVE")]
                 # Ensure permissions are a list

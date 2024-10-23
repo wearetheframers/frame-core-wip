@@ -98,9 +98,12 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         Returns:
             Any: The result of the action execution.
         """
+        self.logger.info(f"Executing action: {action_name} with parameters: {parameters}")
         if action_name == "respond with memory retrieval":
-            print("PARAMS: ", parameters)
-            return await self.mem0_search_extract_summarize(**parameters)
+            self.logger.info("Executing 'respond with memory retrieval' action.")
+            query = parameters.get('memory_question', '')
+            execution_context = parameters.get('execution_context', self.framer.execution_context)
+            return await self.mem0_search_extract_summarize(query=query, execution_context=execution_context, **parameters)
         else:
             raise ValueError(f"Action {action_name} not found in plugin.")
 
@@ -133,15 +136,18 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
 
     async def mem0_search_extract_summarize(
         self,
+        query: str,
         execution_context: Optional[ExecutionContext] = None,
-        query: str = "",
         user_id: Optional[str] = None,
         agent_id: Optional[str] = None,
         run_id: Optional[str] = None,
         filters: Optional[Dict[str, Any]] = None,
         model_name: str = "gpt-4o-mini",
         text_response: Optional[str] = None,
+        **kwargs: Any,
     ) -> str:
+        print("execution_context: ", execution_context)
+        exit()
         self.logger.info(f"mem0_search_extract_summarize called with query: {query}")
         if not query:
             self.logger.warning("Query is empty. Returning default response.")
@@ -150,9 +156,13 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         if execution_context is None:
             execution_context = self.framer.execution_context
 
+
         if not isinstance(execution_context, ExecutionContext):
             self.logger.error("Execution context is not properly initialized.")
-            return "Execution context is not properly initialized."
+            return {
+                "error": "Execution context is not properly initialized.",
+                "fallback_response": "An error occurred while processing your request. Please try again.",
+            }
 
         # Ensure the query is a string
         if not isinstance(query, str):
@@ -173,17 +183,17 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         self.logger.debug(f"Search results: {search_results}")
 
         if not search_results:
-            return Decision(
-                action="respond",
-                parameters={
+            return {
+                "action": "respond",
+                "parameters": {
                     "response": "I don't have any specific information about that in my memory. Is there anything else I can help you with?"
                 },
-                reasoning="No relevant information found in memory.",
-                confidence=0.5,
-                priority=1,
-                related_roles=[],
-                related_goals=[],
-            )
+                "reasoning": "No relevant information found in memory.",
+                "confidence": 0.5,
+                "priority": 1,
+                "related_roles": [],
+                "related_goals": [],
+            }
 
         # Filter search results by memory text (remove same text results)
         search_results = self.filter_search_results(search_results)

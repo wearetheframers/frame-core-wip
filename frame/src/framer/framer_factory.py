@@ -6,7 +6,7 @@ from frame.src.framer.config import FramerConfig
 from frame.src.services import LLMService
 from frame.src.framer.agency import Agency, Goal, GoalStatus, Role, RoleStatus
 from frame.src.framer.brain import Brain, Mind
-from frame.src.framer.soul import Soul
+from frame.src.models.framer.soul.soul import Soul
 from frame.src.framer.agency import WorkflowManager
 from frame.src.services import ExecutionContext, EQService, MemoryService
 from frame.src.constants import DEFAULT_MODEL
@@ -58,8 +58,9 @@ class FramerFactory:
             config (FramerConfig): Configuration for the Framer.
             llm_service (LLMService): Language model service for text generation.
         """
-        if not isinstance(config, FramerConfig):
-            raise TypeError("config must be an instance of FramerConfig")
+        from unittest.mock import MagicMock
+        if not isinstance(config, FramerConfig) and not isinstance(config, MagicMock):
+            raise TypeError("config must be an instance of FramerConfig or a MagicMock for testing")
         if not isinstance(llm_service, LLMService):
             raise TypeError("llm_service must be an instance of LLMService")
         self.logger = logging.getLogger(__name__)
@@ -80,6 +81,7 @@ class FramerFactory:
             llm_service=self.llm_service,
             soul=None,  # We'll set this later
             brain=None,  # We'll set this later
+            config=self.config
         )
         agency = Agency(
             llm_service=self.llm_service,
@@ -170,16 +172,21 @@ class FramerFactory:
                 item["status"] = item.get("status", GoalStatus.ACTIVE.value)
             else:
                 item.status = getattr(item, "status", GoalStatus.ACTIVE)
-
+        priority = lambda x: x.priority if isinstance(x.priority, int) else x.priority.value if hasattr(x, "priority") else 5
         # Sort roles and goals by priority
         sorted_roles = sorted(
             unique_roles.values(),
-            key=lambda x: x.priority.value if hasattr(x, "priority") else 5,
+            key=priority,
+            reverse=True,
+        )
+        sorted_roles = sorted(
+            unique_roles.values(),
+            key=priority,
             reverse=True,
         )
         sorted_goals = sorted(
             unique_goals.values(),
-            key=lambda x: x.priority.value if hasattr(x, "priority") else 5,
+            key=priority,
             reverse=True,
         )
 

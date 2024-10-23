@@ -26,7 +26,7 @@ Frame is a multi-modal, multi-agent cognitive framework designed to support full
 - Supports developing dynamic, emergent behaviors
 - Layered memory understanding entity relationships with Mem0
 - Supports global and multi-user memory storage
-- Extensible architecture with plugin engine
+- Extensible architecture with plugin engine allowing for limitless modifications
 - Integration with popular AI APIs (OpenAI GPT, Mistral, etc.) as well as local model support
 - Streaming text generation support 
 - Flexible behavior and decision-making mechanics that can be based off of emotions and memories

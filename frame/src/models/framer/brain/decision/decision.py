@@ -25,8 +25,13 @@ class Decision(BaseModel):
         default=None, description="Status of the associated task"
     )
 
-    def __init__(self, **data):
-        super().__init__(**data)
+    def __str__(self):
+        return (
+            f"Decision(action={self.action}, confidence={self.confidence}, "
+            f"priority={self.priority}, task_status={self.task_status}, "
+            f"reasoning={self.reasoning}, related_roles={len(self.related_roles)}, "
+            f"related_goals={len(self.related_goals)})"
+        )
 
     result: Optional[Dict[str, Any]] = Field(
         default=None, description="The result of executing the decision"

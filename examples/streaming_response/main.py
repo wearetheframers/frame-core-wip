@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 
 from frame import Frame, FramerConfig
 from frame.src.framer.brain.actions import BaseAction
-from frame.src.services.execution_context import ExecutionContext
+from frame.src.services import ExecutionContext
 from frame.src.framer.agency.priority import Priority
 
 
@@ -20,14 +20,23 @@ class StreamingResponseAction(BaseAction):
         )
 
     async def execute(self, execution_context: ExecutionContext, prompt: str) -> str:
-        result = await execution_context.llm_service.get_completion(prompt, stream=True)
-        streamed_response = ""
+        framer = execution_context.framer
+        framer._streamed_response = {"status": "pending", "result": ""}
+        await execution_context.llm_service.get_completion(prompt, stream=True, framer=framer)
+        
         print("Streamed Response:")
-        async for chunk in result:
-            print(chunk, end="", flush=True)
-            streamed_response += chunk
-        print("\n")
-        return streamed_response
+        while framer._streamed_response["status"] == "pending":
+            await asyncio.sleep(0.1)  # Check for new data every 100ms
+            if framer._streamed_response["result"]:
+                print(framer._streamed_response["result"], end="", flush=True)
+                framer._streamed_response["result"] = ""  # Clear after printing
+
+        if framer._streamed_response["status"] == "completed":
+            print("\nStreaming completed.")
+        elif framer._streamed_response["status"] == "error":
+            print(f"\nAn error occurred: {framer._streamed_response['result']}")
+        
+        return framer._streamed_response["result"]
 
 
 async def main():
@@ -37,13 +46,13 @@ async def main():
 
     # Register the StreamingResponseAction
     streaming_action = StreamingResponseAction()
-    framer.brain.action_registry.register_action(streaming_action)
+    framer.brain.action_registry.add_action(streaming_action)
 
     prompt = "Write a short story about an AI learning to understand human emotions."
 
     # Execute the streaming response action
     result = await framer.brain.action_registry.execute_action(
-        "streaming_response", {"prompt": prompt}
+        "streaming_response", prompt=prompt
     )
 
     print("Final Streamed Response Result:", result)

@@ -1,7 +1,24 @@
 {
     "name": "ExplorerFramer",
     "roles": [
-        {"name": "Explorer", "description": "Explore new environments"}
+        {"name": "Explorer", "description": "Explore new environments", "priority": 1}
+    ],
+    "actions": [
+        {
+            "name": "engage_conversation",
+            "description": "Engage in a deep conversation",
+            "priority": "HIGH"
+        },
+        {
+            "name": "tell_story",
+            "description": "Craft and narrate a captivating story",
+            "priority": "MEDIUM"
+        },
+        {
+            "name": "inspire_creativity",
+            "description": "Inspire creativity through storytelling",
+            "priority": "HIGH"
+        }
     ],
     "goals": [
         {"description": "Discover new places", "priority": 1}

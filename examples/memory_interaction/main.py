@@ -16,7 +16,7 @@ from frame.src.framer.brain.memory.memory_adapters.mem0_adapter import Mem0Adapt
 from frame.src.services.memory.main import MemoryService
 from frame.src.framer.brain.memory.memory import Memory
 
-from frame.src.plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin import (
+from plugins.mem0_search_extract_summarize_plugin.mem0_search_extract_summarize_plugin import (
     Mem0SearchExtractSummarizePlugin,
 )
 
@@ -62,6 +62,7 @@ async def main():
     logger.info(f"Permissions: {config.permissions}")
 
     framer = await frame.framer_factory.create_framer(plugins=frame.plugins)
+    await framer.initialize()  # Ensure the Framer is initialized
     framer.brain.set_memory_service(MemoryService(adapter=memory_adapter))
     logger.info(f"Framer created: {framer}")
     logger.info(f"Framer brain: {framer.brain}")
@@ -78,13 +79,13 @@ async def main():
 
     logger.info("Adding memories...")
     if framer.brain and framer.brain.memory:
-        framer.brain.memory.store("My favorite color is blue.", user_id="user1")
-        framer.brain.memory.store(
-            "I have a dentist appointment on October 20th.", user_id="user1"
-        )
-        framer.brain.memory.store(
-            "I plan to visit Hawaii for my vacation.", user_id="user1"
-        )
+        # framer.brain.memory.store("My favorite color is blue.", user_id="user1")
+        # framer.brain.memory.store(
+        #     "I have a dentist appointment on October 20th.", user_id="user1"
+        # )
+        # framer.brain.memory.store(
+        #     "I plan to visit Hawaii for my vacation.", user_id="user1"
+        # )
         logger.info("All memories added.")
     else:
         logger.error(

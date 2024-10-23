@@ -11,13 +11,14 @@ from collections import deque
 from typing import List, Dict, Any, Optional, Callable, Union, Tuple, Deque
 
 from frame.src.framer.config import FramerConfig
-from frame.src.framer.agency import Agency
+from frame.src.framer.agency import Agency, Role
 from frame.src.framer.agency.workflow import WorkflowManager
 from frame.src.framer.agency.tasks import Task, TaskStatus
 from frame.src.framer.agency.goals import Goal, GoalStatus
 from frame.src.framer.brain import Brain, Decision
+from frame.src.models.framer.soul.soul import Soul
 from frame.src.framer.brain.mind.perception import Perception
-from frame.src.framer.soul import Soul
+from frame.src.models.framer.soul.soul import Soul
 
 from frame.src.services.context.execution_context_service import ExecutionContext
 from frame.src.services.eq.main import EQService
@@ -126,7 +127,7 @@ class Framer:
         self.llm_service = llm_service
 
         self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service, soul=soul
+            llm_service=self.llm_service, soul=soul, config=config
         )
         self.execution_context.soul = soul
         self.execution_context.brain = brain
@@ -165,6 +166,7 @@ class Framer:
         self.plugin_loading_complete = False
         self.plugin_loading_complete = False
         self._streamed_response = {"status": "pending", "result": ""}
+        self._streaming_task = None
 
         logger.info("Creating Brain")
         self.brain = Brain(
@@ -184,13 +186,55 @@ class Framer:
         self.can_execute = True
         self.acting = False
 
+    async def initialize(self):
+        """
+        Initialize the Framer by generating initial roles and goals if not provided.
+        """
+        if not self.roles or not self.goals:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+
+        # Ensure uniqueness
+        self.roles = list({role.name if isinstance(role, Role) else role['name']: role if isinstance(role, Role) else Role(name=role) for role in self.roles}.values())
+        self.goals = list({goal.description if isinstance(goal, Goal) else goal['description']: goal if isinstance(goal, Goal) else Goal(name=goal) for goal in self.goals}.values())
+
+        logger.info(
+            f"Generated initial roles: {[role.name if isinstance(role, Role) else role['name'] for role in self.roles]}"
+        )
+        logger.info(
+            f"Generated initial goals: {[goal['description'] if isinstance(goal, dict) else goal.description for goal in self.goals]}"
+        )
+
+        if hasattr(self.brain, "set_roles"):
+            self.brain.set_roles(self.roles)
+        if hasattr(self.brain, "set_goals"):
+            self.brain.set_goals(self.goals)
+
+        if hasattr(self.execution_context, "set_roles"):
+            self.execution_context.set_roles(self.roles)
+        if hasattr(self.execution_context, "set_goals"):
+            self.execution_context.set_goals(self.goals)
+        await self.load_plugins()
+
     async def load_plugins(self):
         """
         Load all plugins by calling their on_load method.
         """
+        logger.info(f"Loading plugins for Framer with config: {self.config}")
+        loaded_plugins = set()
         for plugin_name, plugin_instance in self.plugins.items():
+            if (
+                plugin_name in loaded_plugins
+                or any(
+                    isinstance(existing_plugin, type(plugin_instance))
+                    for existing_plugin in loaded_plugins
+                )
+                or plugin_instance in loaded_plugins
+            ):
+                logger.info(f"Plugin {plugin_name} already loaded. Skipping.")
+                continue
+
             if hasattr(plugin_instance, "on_load"):
-                await plugin_instance.on_load()
+                await plugin_instance.on_load(self)
                 # Register plugin actions in the brain's action_registry
                 for action_name, action_func in plugin_instance.get_actions().items():
                     self.brain.action_registry.add_action(
@@ -199,6 +243,8 @@ class Framer:
                         description=f"Action from {plugin_name} plugin",
                         priority=5,  # Default priority, adjust as needed
                     )
+                loaded_plugins.add(plugin_name)
+                loaded_plugins.add(plugin_instance)
         self.plugin_loading_complete = True
         self.act()
         await self.process_queued_perceptions()
@@ -214,12 +260,12 @@ class Framer:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
 
         # Ensure uniqueness
-        self.roles = list({role["name"]: role for role in self.roles}.values())
-        self.goals = list({goal["description"]: goal for goal in self.goals}.values())
+        self.roles = list({role['name'] if isinstance(role, dict) else role.name: role for role in self.roles}.values())
+        self.goals = list({goal['description'] if isinstance(goal, dict) else goal.description: goal for goal in self.goals}.values())
 
-        logger.info(f"Generated initial roles: {[role['name'] for role in self.roles]}")
+        logger.info(f"Generated initial roles: {[role['name'] if isinstance(role, dict) else role.name for role in self.roles]}")
         logger.info(
-            f"Generated initial goals: {[goal['description'] for goal in self.goals]}"
+            f"Generated initial goals: {[goal['description'] if isinstance(goal, dict) else goal.description for goal in self.goals]}"
         )
 
         if hasattr(self.brain, "set_roles"):
@@ -260,23 +306,6 @@ class Framer:
         plugin_instance = self.plugins.pop(plugin_name, None)
         if plugin_instance and hasattr(plugin_instance, "on_remove"):
             asyncio.create_task(plugin_instance.on_remove())
-        """
-        Load all plugins by calling their on_load method.
-        """
-        for plugin_name, plugin_instance in self.plugins.items():
-            if hasattr(plugin_instance, "on_load"):
-                await plugin_instance.on_load(self)
-                # Register plugin actions in the brain's action_registry
-                for action_name, action_func in plugin_instance.get_actions().items():
-                    self.brain.action_registry.add_action(
-                        action_name,
-                        action_func=action_func,
-                        description=f"Action from {plugin_name} plugin",
-                        priority=5,  # Default priority, adjust as needed
-                    )
-        self.plugin_loading_complete = True
-        self.act()
-        await self.process_queued_perceptions()
 
     async def process_queued_perceptions(self):
         """
@@ -300,8 +329,8 @@ class Framer:
                 _, self.goals = await self.agency.generate_roles_and_goals()
 
             # Sort roles and goals by priority
-            self.roles.sort(key=lambda x: x.get("priority", 5), reverse=True)
-            self.goals.sort(key=lambda x: x.get("priority", 5), reverse=True)
+            self.roles.sort(key=lambda x: x.priority if isinstance(x, Role) else x.get("priority", 5), reverse=True)
+            self.goals.sort(key=lambda x: x.priority if isinstance(x, Goal) else x.get("priority", 5), reverse=True)
 
             self.agency.set_roles(self.roles)
             self.agency.set_goals(self.goals)
@@ -310,8 +339,8 @@ class Framer:
             logger.info(f"Queued perception: {perception}")
 
         # Sort roles and goals by priority
-        self.roles.sort(key=lambda x: x.get("priority", 5), reverse=True)
-        self.goals.sort(key=lambda x: x.get("priority", 5), reverse=True)
+        self.roles.sort(key=lambda x: x.priority if isinstance(x, Role) else x.get("priority", 5), reverse=True)
+        self.goals.sort(key=lambda x: x.priority if isinstance(x, Goal) else x.get("priority", 5), reverse=True)
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
@@ -381,7 +410,7 @@ class Framer:
             goals=config.goals if config.goals is not None else [],
         )
 
-    def export_to_markdown(self, file_path: str) -> None:
+    async def export_to_markdown(self, file_path: str) -> None:
         """
         Export the Framer configuration to a Markdown file.
 
@@ -395,7 +424,7 @@ class Framer:
         """
         from frame.src.utils.config_parser import export_config_to_markdown
 
-        export_config_to_markdown(self.config, file_path)
+        await export_config_to_markdown(self.config, file_path)
 
     async def use_plugin_action(
         self, plugin_name: str, action_name: str, parameters: Dict[str, Any]
@@ -484,8 +513,8 @@ class Framer:
                     action=decision.get("action", "respond"),
                     parameters=decision.get("parameters", {}),
                     reasoning=decision.get("reasoning", "No reasoning provided."),
-                    confidence=decision.get("confidence", 0.5),
-                    priority=decision.get("priority", 1),
+                    confidence=float(decision.get("confidence", 0.5)),
+                    priority=int(decision.get("priority", 1)),
                     related_roles=decision.get("related_roles", []),
                     related_goals=decision.get("related_goals", []),
                 )
@@ -499,13 +528,37 @@ class Framer:
                 )
 
             if hasattr(self, "can_execute") and self.can_execute:
-                await self.brain.execute_decision(decision)
+                if decision.action == "streaming_response":
+                    self._streaming_task = asyncio.create_task(
+                        self._handle_streaming_response(decision.parameters)
+                    )
+                else:
+                    await self.brain.execute_decision(decision)
             logger.debug(f"Processed perception: {perception}, Decision: {decision}")
             self.notify_observers(decision)
         else:
             logger.warning("No decision was made for the given perception.")
             return None
         return decision
+
+    async def _handle_streaming_response(self, parameters: Dict[str, Any]):
+        """
+        Handle streaming response by updating the _streamed_response attribute.
+
+        Args:
+            parameters (Dict[str, Any]): Parameters for the streaming response.
+        """
+        prompt = parameters.get("prompt", "")
+        result = await self.execution_context.llm_service.get_completion(prompt, stream=True)
+        self._streamed_response["status"] = "streaming"
+        try:
+            async for chunk in result:
+                self._streamed_response["result"] += chunk
+        except Exception as e:
+            self._streamed_response["status"] = "error"
+            self._streamed_response["result"] = f"An error occurred: {e}"
+        else:
+            self._streamed_response["status"] = "completed"
 
     async def prompt(self, text: str) -> Decision:
         """

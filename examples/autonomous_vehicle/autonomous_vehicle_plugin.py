@@ -61,54 +61,69 @@ class AutonomousVehiclePlugin(BasePlugin):
             "brake_vehicle", self.brake_vehicle, "Apply brakes to the vehicle"
         )
 
-    async def execute(self, action: str, params: Dict[str, Any]) -> str:
-        if action == "stop_vehicle":
-            return await self.stop_vehicle()
-        elif action == "slow_down_vehicle":
-            return await self.slow_down_vehicle()
-        elif action == "speed_up_vehicle":
-            return await self.speed_up_vehicle()
-        elif action == "change_lane":
-            return await self.change_lane()
-        elif action == "start_driving":
-            return await self.start_driving()
-        elif action == "no_action":
-            return await self.no_action()
-        elif action == "brake_vehicle":
-            return await self.brake_vehicle()
-        else:
-            raise ValueError(f"Unknown action: {action}")
+    async def execute(self, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        action_methods = {
+            "stop_vehicle": self.stop_vehicle,
+            "slow_down_vehicle": self.slow_down_vehicle,
+            "speed_up_vehicle": self.speed_up_vehicle,
+            "change_lane": self.change_lane,
+            "start_driving": self.start_driving,
+            "no_action": self.no_action,
+            "brake_vehicle": self.brake_vehicle,
+        }
 
-    async def stop_vehicle(self) -> str:
+        if action in action_methods:
+            result = await action_methods[action]()
+            result = {
+                "response": result,
+                "reasoning": f"Executed action '{action}' with parameters {params}.",
+                "confidence": 0.9,
+                "priority": 1,
+                "task_status": "COMPLETED",
+                "related_roles": [],
+                "related_goals": [],
+            }
+        else:
+            result = {
+                "response": f"Unknown action: {action}",
+                "reasoning": "No reasoning provided.",
+                "confidence": 0.0,
+                "priority": 1,
+                "related_roles": [],
+                "related_goals": [],
+            }
+        return result
+
+    async def stop_vehicle(self) -> Dict[str, Any]:
         self.speed = 0
         self.is_driving = False
-        return f"Vehicle stopped. Speed: {self.speed} km/h, Lane: {self.lane}"
+        return {"speed": self.speed, "lane": self.lane, "result": "Vehicle stopped"}
 
-    async def slow_down_vehicle(self) -> str:
+    async def slow_down_vehicle(self) -> Dict[str, Any]:
         self.speed = max(0, self.speed - 10)
-        return f"Vehicle slowing down. Speed: {self.speed} km/h, Lane: {self.lane}"
+        return {"speed": self.speed, "lane": self.lane, "result": "Vehicle slowing down"}
 
-    async def speed_up_vehicle(self) -> str:
+    async def speed_up_vehicle(self) -> Dict[str, Any]:
         self.speed = min(self.max_speed, self.speed + 10)
-        return f"Vehicle speeding up. Speed: {self.speed} km/h, Lane: {self.lane}"
+        return {"speed": self.speed, "lane": self.lane, "result": "Vehicle speeding up"}
 
-    async def change_lane(self) -> str:
+    async def change_lane(self) -> Dict[str, Any]:
         self.lane = 3 - self.lane  # Toggle between lane 1 and 2
-        return f"Vehicle changing to lane {self.lane}. Speed: {self.speed} km/h"
+        return {"speed": self.speed, "lane": self.lane, "result": f"Vehicle changing to lane {self.lane}"}
 
-    async def start_driving(self) -> str:
+    async def start_driving(self) -> Dict[str, Any]:
         self.is_driving = True
         self.speed = 60  # Start at 60 km/h
-        return f"Vehicle started driving. Speed: {self.speed} km/h, Lane: {self.lane}"
+        return {"speed": self.speed, "lane": self.lane, "result": "Vehicle started driving"}
 
-    async def no_action(self) -> str:
+    async def no_action(self) -> Dict[str, Any]:
         if self.is_driving:
             self.update_speed()
-        return f"Vehicle continuing current action. Speed: {self.speed:.2f} km/h, Lane: {self.lane}"
+        return {"speed": self.speed, "lane": self.lane, "result": "Vehicle continuing current action"}
 
-    async def brake_vehicle(self) -> str:
+    async def brake_vehicle(self) -> Dict[str, Any]:
         self.speed = max(0, self.speed - 20)
-        return f"Vehicle braking. Speed: {self.speed} km/h, Lane: {self.lane}"
+        return {"speed": self.speed, "lane": self.lane, "result": "Vehicle braking"}
 
 
 class StopVehicleAction(BaseAction):
@@ -124,7 +139,7 @@ class StopVehicleAction(BaseAction):
         result = await self.vehicle_plugin.stop_vehicle()
         print(f"Vehicle: {result}")
         await asyncio.sleep(0.1)
-        return result
+        return {"response": result}
 
 
 class SlowDownVehicleAction(BaseAction):
@@ -140,7 +155,7 @@ class SlowDownVehicleAction(BaseAction):
         result = await self.vehicle_plugin.slow_down_vehicle()
         print(f"Vehicle: {result}")
         await asyncio.sleep(0.1)
-        return result
+        return {"response": result}
 
 
 class SpeedUpVehicleAction(BaseAction):

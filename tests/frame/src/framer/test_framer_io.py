@@ -3,14 +3,19 @@ from unittest import IsolatedAsyncioTestCase, mock
 from unittest.mock import MagicMock, patch, AsyncMock
 from frame.src.framer.framer import Framer
 from frame.src.utils.config_parser import parse_json_config, parse_markdown_config
+from frame.src.framer.framer_factory import FramerFactory
 
 
 class TestFramerIO(IsolatedAsyncioTestCase):
 
     @patch("frame.src.framer.framer.Framer.load_from_file")
-    def test_load_framer_from_file(self, mock_load):
+    async def test_load_framer_from_file(self, mock_load):
         mock_load.return_value = MagicMock(spec=Framer)
-        framer = Framer.load_from_file("dummy_path", MagicMock())
+        framer_factory = FramerFactory(MagicMock(), MagicMock())
+        framer = await framer_factory.create_framer(
+            memory_service=None,
+            eq_service=None,
+        )
         self.assertIsInstance(framer, Framer)
 
     @patch(
@@ -31,7 +36,7 @@ class TestFramerIO(IsolatedAsyncioTestCase):
         agency_mock = AsyncMock()
         agency_mock.roles = []
         agency_mock.goals = []
-        framer = await Framer(
+        framer = Framer(
             config=MagicMock(),
             llm_service=MagicMock(),
             agency=agency_mock,
@@ -52,7 +57,7 @@ class TestFramerIO(IsolatedAsyncioTestCase):
     async def test_export_to_markdown(
         self, mock_export_config, mock_open, mock_generate_roles
     ):
-        framer = await Framer(
+        framer = Framer(
             config=MagicMock(),
             llm_service=MagicMock(),
             agency=MagicMock(),
