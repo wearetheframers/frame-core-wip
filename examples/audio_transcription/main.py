@@ -48,6 +48,9 @@ async def main():
     at_plugin = AudioTranscriptionPlugin()
     await at_plugin.on_load(framer)
 
+    # Register actions with the main action registry of the Framer
+    at_plugin.register_actions(framer.brain.action_registry)
+
     # List available audio devices
     devices = at_plugin.list_audio_devices()
     print("Available audio devices:")
