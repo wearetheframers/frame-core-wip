@@ -46,6 +46,11 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class BasePlugin(ABC):
+    def __init__(self, framer):
+        self.framer = framer
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.execution_context = getattr(framer, &#34;execution_context&#34;, None)
+        self.ruleset = Ruleset()
     &#34;&#34;&#34;
     Base class for all Frame plugins.
 
@@ -95,7 +100,7 @@ hljs.highlightAll();
     def add_action(
         self,
         name: str,
-        func: callable,
+        action_func: callable,
         description: str,
         priority: Priority = Priority.MEDIUM,
     ):
@@ -111,7 +116,7 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         if name not in self.framer.brain.action_registry.actions:
             self.framer.brain.action_registry.add_action(
-                name, func, description, priority
+                name, action_func, description, priority
             )
             self.logger.warning(
                 f&#34;Action &#39;{name}&#39; registered in Framer action registry.&#34;

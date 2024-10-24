@@ -158,6 +158,7 @@ allowing them to share resources and functionality without tight coupling.</p>
         self.goals: List[Any] = []
         self.roles: List[Any] = []
         self.action_registry = None
+        self._streaming_response = {&#34;status&#34;: &#34;pending&#34;, &#34;result&#34;: &#34;&#34;}
 
     def set_roles(self, roles: List[Any]):
         self.roles = roles

@@ -167,7 +167,8 @@ setting the default model and generating completions with retry logic.</p>
         )  # 60 requests per minute
 
     def format_prompt(
-        self, prompt: str, additional_context: Optional[Dict[str, Any]] = None
+        self, prompt: str, additional_context: Optional[Dict[str, Any]] = None,
+        stream: Optional[bool] = False,
     ) -&gt; str:
         &#34;&#34;&#34;
         Format the prompt for LMQL.

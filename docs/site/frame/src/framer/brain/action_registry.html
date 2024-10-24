@@ -113,6 +113,11 @@ hljs.highlightAll();
             if execution_context
             else []
         )
+        # Check for streaming response in execution_context
+        if hasattr(execution_context, &#34;_streaming_response&#34;):
+            streaming_response = execution_context._streaming_response
+        else:
+            streaming_response = &#34;No streaming response available.&#34;
 
         response = (
             f&#34;I&#39;m sorry, an error occurred: {error_message}. &#34;
@@ -230,7 +235,10 @@ hljs.highlightAll();
             raise ValueError(f&#34;Action &#39;{name}&#39; not found&#34;)
         if self.execution_context is None:
             raise ValueError(&#34;Execution context is not set&#34;)
-        response = await action[&#34;action_func&#34;](self.execution_context, *args, **kwargs)
+        if name == &#34;get_weather&#34;:
+            response = await action[&#34;action_func&#34;](self.execution_context, city=kwargs.get(&#34;city&#34;))
+        else:
+            response = await action[&#34;action_func&#34;](self.execution_context, *args, **kwargs)
         role = response if isinstance(response, dict) else response
         if callback:
             callback(response, *callback_args)

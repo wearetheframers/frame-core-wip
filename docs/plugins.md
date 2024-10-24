@@ -24,6 +24,23 @@ When creating a plugin, it is important to follow a specific naming and director
 
 By adhering to this structure, plugins can be easily discovered and loaded by the Frame system, ensuring a seamless integration process.
 
+When creating a plugin, it is important to follow a specific naming and directory structure to ensure proper loading and functionality:
+
+1. **Directory Naming**: Each plugin must be stored in its own directory. The directory name should match the plugin name in snake_case format.
+
+2. **Main Plugin File**: Inside the plugin directory, there should be a main plugin file named exactly as the directory, but in snake_case format with a `.py` extension. For example, if your plugin directory is named `audio_transcription_plugin`, the main file should be `audio_transcription_plugin.py`.
+
+3. **Class Naming**: The main class within the plugin file should be named in CamelCase format, derived from the directory name. For example, `AudioTranscriptionPlugin`.
+
+4. **__init__.py File**: Each plugin directory must contain an `__init__.py` file. This file should import the main plugin class to ensure it is accessible when the plugin is loaded. For example:
+   ```python
+   from .audio_transcription_plugin import AudioTranscriptionPlugin
+   ```
+
+5. **Plugin Base Class**: All plugins must inherit from the `BasePlugin` class to ensure they implement the necessary interface for integration with the Frame system.
+
+By adhering to this structure, plugins can be easily discovered and loaded by the Frame system, ensuring a seamless integration process.
+
 ## Actions / Plugins
 
 Actions in Frame are executable tasks that a Framer can perform. They are concrete implementations of tasks that can be executed in response to decisions made by the Framer. Actions are registered in the Framer's action registry and can be invoked directly by the Framer or automatically in its decision-making as it senses perceptions.
@@ -55,6 +72,10 @@ By default, Framers have **no** access to default or installed plugins unless th
 - **with_memory**: Allows access to memory services for storing and retrieving information. While Framer has access to memory by default, if you want it to respond with RAG-like features and automatically determine when to use memory retrieval versus responding without looking into any memories, you need to ensure the `with_mem0_search_extract_summarize` permission is enabled.
 - **with_eq**: Enables emotional intelligence features for more nuanced interactions.
 - **with_shared_context**: Provides access to shared context services for collaboration.
+
+### Permissions
+
+To grant all permissions for all plugins (which is considered unsafe), you can pass `'all'` to the permissions list in the `FramerConfig`. This will enable all available plugins and services without restriction.
 
 ### Creating New Actions
 

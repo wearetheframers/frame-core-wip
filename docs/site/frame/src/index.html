@@ -144,6 +144,11 @@ hljs.highlightAll();
             if execution_context
             else []
         )
+        # Check for streaming response in execution_context
+        if hasattr(execution_context, &#34;_streaming_response&#34;):
+            streaming_response = execution_context._streaming_response
+        else:
+            streaming_response = &#34;No streaming response available.&#34;
 
         response = (
             f&#34;I&#39;m sorry, an error occurred: {error_message}. &#34;
@@ -261,7 +266,10 @@ hljs.highlightAll();
             raise ValueError(f&#34;Action &#39;{name}&#39; not found&#34;)
         if self.execution_context is None:
             raise ValueError(&#34;Execution context is not set&#34;)
-        response = await action[&#34;action_func&#34;](self.execution_context, *args, **kwargs)
+        if name == &#34;get_weather&#34;:
+            response = await action[&#34;action_func&#34;](self.execution_context, city=kwargs.get(&#34;city&#34;))
+        else:
+            response = await action[&#34;action_func&#34;](self.execution_context, *args, **kwargs)
         role = response if isinstance(response, dict) else response
         if callback:
             callback(response, *callback_args)
@@ -464,6 +472,11 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class BasePlugin(ABC):
+    def __init__(self, framer):
+        self.framer = framer
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.execution_context = getattr(framer, &#34;execution_context&#34;, None)
+        self.ruleset = Ruleset()
     &#34;&#34;&#34;
     Base class for all Frame plugins.
 
@@ -513,7 +526,7 @@ hljs.highlightAll();
     def add_action(
         self,
         name: str,
-        func: callable,
+        action_func: callable,
         description: str,
         priority: Priority = Priority.MEDIUM,
     ):
@@ -529,7 +542,7 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         if name not in self.framer.brain.action_registry.actions:
             self.framer.brain.action_registry.add_action(
-                name, func, description, priority
+                name, action_func, description, priority
             )
             self.logger.warning(
                 f&#34;Action &#39;{name}&#39; registered in Framer action registry.&#34;
@@ -1363,7 +1376,7 @@ Initialize the Brain with the necessary components.</p>
             parameters = {}
         result = await self.action_registry.execute_action(action_name, **parameters)
         if isinstance(result, dict):
-            result.setdefault(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
+            result.setdefault(&#34;reasoning&#34;, None)
             result.setdefault(&#34;confidence&#34;, 0.5)
             result.setdefault(&#34;priority&#34;, 1)
             result.setdefault(&#34;related_roles&#34;, [])
@@ -2246,7 +2259,7 @@ validated to form a valid model.</p>
         &#34;&#34;&#34;
         logger.info(f&#34;Loading plugins for Framer with config: {self.config}&#34;)
         loaded_plugins = set()
-        for plugin_name, plugin_instance in self.plugins.items():
+        def load_plugin(plugin_name, plugin_instance):
             if (
                 plugin_name in loaded_plugins
                 or any(
@@ -2256,20 +2269,43 @@ validated to form a valid model.</p>
                 or plugin_instance in loaded_plugins
             ):
                 logger.info(f&#34;Plugin {plugin_name} already loaded. Skipping.&#34;)
-                continue
+                return
 
             if hasattr(plugin_instance, &#34;on_load&#34;):
-                await plugin_instance.on_load(self)
+                asyncio.run(plugin_instance.on_load(self))
                 # Register plugin actions in the brain&#39;s action_registry
                 for action_name, action_func in plugin_instance.get_actions().items():
-                    self.brain.action_registry.add_action(
-                        action_name,
-                        action_func=action_func,
-                        description=f&#34;Action from {plugin_name} plugin&#34;,
-                        priority=5,  # Default priority, adjust as needed
-                    )
+                    if action_name not in self.brain.action_registry.actions:
+                        self.brain.action_registry.add_action(
+                            action_name,
+                            action_func=action_func,
+                            description=f&#34;Action from {plugin_name} plugin&#34;,
+                            priority=5,  # Default priority, adjust as needed
+                        )
+                    else:
+                        logger.info(f&#34;Action {action_name} already registered. Skipping.&#34;)
                 loaded_plugins.add(plugin_name)
                 loaded_plugins.add(plugin_instance)
+
+        if &#39;all&#39; in self.plugins:
+            for plugin_name, plugin_instance in self.plugins.items():
+                load_plugin(plugin_name, plugin_instance)
+        else:
+            with concurrent.futures.ProcessPoolExecutor() as executor:
+                futures = [
+                    executor.submit(load_plugin, plugin_name, plugin_instance)
+                    for plugin_name, plugin_instance in self.plugins.items()
+                ]
+                for future in concurrent.futures.as_completed(futures):
+                    future.result()
+
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            futures = [
+                executor.submit(load_plugin, plugin_name, plugin_instance)
+                for plugin_name, plugin_instance in self.plugins.items()
+            ]
+            for future in concurrent.futures.as_completed(futures):
+                future.result()
         self.plugin_loading_complete = True
         self.act()
         await self.process_queued_perceptions()
@@ -2333,7 +2369,7 @@ validated to form a valid model.</p>
         &#34;&#34;&#34;
         self.plugins[plugin_name] = plugin_instance
         if hasattr(plugin_instance, &#34;on_load&#34;):
-            asyncio.create_task(plugin_instance.on_load())
+            asyncio.create_task(plugin_instance.on_load(self))
 
     async def remove_plugin(self, plugin_name: str):
         &#34;&#34;&#34;
@@ -2400,7 +2436,7 @@ validated to form a valid model.</p>
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
 
-    async def export_to_file(self, file_path: str, llm) -&gt; None:
+    async def export_to_file(self, file_path: str) -&gt; None:
         &#34;&#34;&#34;
         Export the Framer configuration to a JSON file.
 
@@ -2417,6 +2453,7 @@ validated to form a valid model.</p>
         config.roles = self.roles
         config.goals = self.goals
         config_dict = config.to_dict()
+        config_dict[&#34;execution_context&#34;] = execution_context_to_json(self.execution_context)
         with open(file_path, &#34;w&#34;) as f:
             json.dump(config_dict, f, indent=4)
 
@@ -2446,7 +2483,12 @@ validated to form a valid model.</p>
             Framer: A new Framer instance configured from the file.
         &#34;&#34;&#34;
         config = parse_json_config(file_path)
+        config_data = parse_json_config(file_path)
+        execution_context_data = config_data.pop(&#34;execution_context&#34;, {})
+        execution_context = execution_context_from_json(execution_context_data, ExecutionContext)
+
         return cls(
+            execution_context=execution_context,
             config=config,
             llm_service=llm_service,
             agency=Agency(llm_service=llm_service, context=None),
@@ -2850,7 +2892,7 @@ prevent memory leaks and ensure optimal performance. This method
 should be called to gracefully shut down the Framer.</p></div>
 </dd>
 <dt id="frame.src.Framer.export_to_file"><code class="name flex">
-<span>async def <span class="ident">export_to_file</span></span>(<span>self, file_path: str, llm) ‑> None</span>
+<span>async def <span class="ident">export_to_file</span></span>(<span>self, file_path: str) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Export the Framer configuration to a JSON file.</p>

@@ -168,7 +168,10 @@ model to be used for completions and loads plugins.</p>
         )
         self.plugins = {}
         self.is_loading_plugins = True
-        self.plugins, _ = load_plugins(self.plugins_dir)
+        self.plugins, conflict_warnings = load_plugins(self.plugins_dir)
+        for warning in conflict_warnings:
+            logger.warning(warning)
+        logger.info(f&#34;Loaded plugins: {list(self.plugins.keys())}&#34;)
         self.framer_factory = FramerFactory(
             FramerConfig(name=&#34;DefaultFramer&#34;, default_model=self._default_model),
             self.llm_service,

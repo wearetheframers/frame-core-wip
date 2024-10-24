@@ -152,6 +152,11 @@ hljs.highlightAll();
             if execution_context
             else []
         )
+        # Check for streaming response in execution_context
+        if hasattr(execution_context, &#34;_streaming_response&#34;):
+            streaming_response = execution_context._streaming_response
+        else:
+            streaming_response = &#34;No streaming response available.&#34;
 
         response = (
             f&#34;I&#39;m sorry, an error occurred: {error_message}. &#34;
@@ -269,7 +274,10 @@ hljs.highlightAll();
             raise ValueError(f&#34;Action &#39;{name}&#39; not found&#34;)
         if self.execution_context is None:
             raise ValueError(&#34;Execution context is not set&#34;)
-        response = await action[&#34;action_func&#34;](self.execution_context, *args, **kwargs)
+        if name == &#34;get_weather&#34;:
+            response = await action[&#34;action_func&#34;](self.execution_context, city=kwargs.get(&#34;city&#34;))
+        else:
+            response = await action[&#34;action_func&#34;](self.execution_context, *args, **kwargs)
         role = response if isinstance(response, dict) else response
         if callback:
             callback(response, *callback_args)
@@ -472,6 +480,11 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class BasePlugin(ABC):
+    def __init__(self, framer):
+        self.framer = framer
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.execution_context = getattr(framer, &#34;execution_context&#34;, None)
+        self.ruleset = Ruleset()
     &#34;&#34;&#34;
     Base class for all Frame plugins.
 
@@ -521,7 +534,7 @@ hljs.highlightAll();
     def add_action(
         self,
         name: str,
-        func: callable,
+        action_func: callable,
         description: str,
         priority: Priority = Priority.MEDIUM,
     ):
@@ -537,7 +550,7 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         if name not in self.framer.brain.action_registry.actions:
             self.framer.brain.action_registry.add_action(
-                name, func, description, priority
+                name, action_func, description, priority
             )
             self.logger.warning(
                 f&#34;Action &#39;{name}&#39; registered in Framer action registry.&#34;
@@ -1371,7 +1384,7 @@ Initialize the Brain with the necessary components.</p>
             parameters = {}
         result = await self.action_registry.execute_action(action_name, **parameters)
         if isinstance(result, dict):
-            result.setdefault(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
+            result.setdefault(&#34;reasoning&#34;, None)
             result.setdefault(&#34;confidence&#34;, 0.5)
             result.setdefault(&#34;priority&#34;, 1)
             result.setdefault(&#34;related_roles&#34;, [])

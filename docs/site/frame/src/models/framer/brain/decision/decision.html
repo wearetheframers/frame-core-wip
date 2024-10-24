@@ -131,7 +131,7 @@ validated to form a valid model.</p>
             &#34;action&#34;: self.action,
             &#34;parameters&#34;: self.parameters,
             &#34;expected_results&#34;: self.expected_results,
-            &#34;reasoning&#34;: self.reasoning,
+            &#34;reasoning&#34;: self.reasoning if self.reasoning else None,
             &#34;confidence&#34;: self.confidence,
             &#34;priority&#34;: self.priority,
             &#34;status&#34;: self.status.value,

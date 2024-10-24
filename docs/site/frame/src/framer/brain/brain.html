@@ -813,7 +813,7 @@ Initialize the Brain with the necessary components.</p>
             parameters = {}
         result = await self.action_registry.execute_action(action_name, **parameters)
         if isinstance(result, dict):
-            result.setdefault(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
+            result.setdefault(&#34;reasoning&#34;, None)
             result.setdefault(&#34;confidence&#34;, 0.5)
             result.setdefault(&#34;priority&#34;, 1)
             result.setdefault(&#34;related_roles&#34;, [])

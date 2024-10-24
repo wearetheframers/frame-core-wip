@@ -258,7 +258,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
                 observer.on_framer_opened(framer)
 
         # Call on_load for each plugin
-        for plugin_name, plugin_instance in framer.plugins.items():
+        for plugin_name, plugin_instance in self.plugins.items():
             if hasattr(plugin_instance, &#34;on_load&#34;):
                 self.logger.info(f&#34;Loading plugin: {plugin_name}&#34;)
                 await plugin_instance.on_load(framer)
