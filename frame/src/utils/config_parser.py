@@ -2,8 +2,11 @@ import json
 import re
 import os
 from frame.src.framer.agency.priority import Priority
-from typing import Dict, Any, Union, List
+from typing import Dict, Any, Union, List, Type
 from frame.src.framer.config import FramerConfig
+from frame.src.services.context.execution_context_service import ExecutionContext
+from frame.src.framer.agency.roles import Role
+from frame.src.framer.agency.goals import Goal
 
 
 def parse_json_config(file_path: str) -> Dict[str, Any]:
@@ -80,6 +83,22 @@ def export_config_to_markdown(config: FramerConfig, file_path: str) -> None:
             file.write("\n")
 
 
-def export_config_to_json(config: FramerConfig, file_path: str) -> None:
-    with open(file_path, "w") as file:
-        json.dump(config.to_dict(), file, indent=4)
+def execution_context_to_json(execution_context: ExecutionContext) -> Dict[str, Any]:
+    """
+    Convert an ExecutionContext object to a JSON-serializable dictionary.
+    """
+    return {
+        "roles": [role.to_dict() for role in execution_context.get_roles()],
+        "goals": [goal.to_dict() for goal in execution_context.get_goals()],
+        "state": execution_context.state,
+    }
+
+def execution_context_from_json(data: Dict[str, Any], execution_context_cls: Type[ExecutionContext]) -> ExecutionContext:
+    """
+    Create an ExecutionContext object from a JSON-serializable dictionary.
+    """
+    execution_context = execution_context_cls()
+    execution_context.set_roles([Role(**role) for role in data.get("roles", [])])
+    execution_context.set_goals([Goal(**goal) for goal in data.get("goals", [])])
+    execution_context.state = data.get("state", {})
+    return execution_context
