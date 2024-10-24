@@ -13,7 +13,7 @@ async def main():
     config = FramerConfig(
         name="AudioTranscriptionFramer", default_model="gpt-3.5-turbo"
     )
-    framer = await frame.create_framer(config)
+    framer = await frame.create_framer(config=config)
 
     roles = [
         {
@@ -44,10 +44,24 @@ async def main():
     framer.execution_context.set_roles(roles)
     framer.execution_context.set_goals(goals)
 
+    # Initialize and load the AudioTranscriptionPlugin
     at_plugin = AudioTranscriptionPlugin()
-    at_plugin.register_actions(framer.brain.action_registry)
+    await at_plugin.on_load(framer)
 
-    print("Select mode:")
+    # List available audio devices
+    devices = at_plugin.list_audio_devices()
+    print("Available audio devices:")
+    for i, device in enumerate(devices):
+        print(f"{i}: {device['name']}")
+    device_choice = input(f"Select audio device by number (default is {at_plugin.selected_device}): ")
+    try:
+        selected_device = int(device_choice)
+    except ValueError:
+        selected_device = 0
+    if 0 <= selected_device < len(devices):
+        at_plugin.selected_device = selected_device
+    else:
+        print(f"Invalid selection. Using default device: {devices[at_plugin.selected_device]['name']}")
     print("1. Singular Recording")
     print("2. Continuous Live Recording")
     choice = input("Enter choice (1 or 2): ")

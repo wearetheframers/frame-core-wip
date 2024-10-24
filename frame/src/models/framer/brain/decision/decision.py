@@ -49,7 +49,7 @@ class Decision(BaseModel):
             "action": self.action,
             "parameters": self.parameters,
             "expected_results": self.expected_results,
-            "reasoning": self.reasoning,
+            "reasoning": self.reasoning if self.reasoning else None,
             "confidence": self.confidence,
             "priority": self.priority,
             "status": self.status.value,

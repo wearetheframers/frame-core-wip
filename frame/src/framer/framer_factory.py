@@ -154,7 +154,7 @@ class FramerFactory:
                 observer.on_framer_opened(framer)
 
         # Call on_load for each plugin
-        for plugin_name, plugin_instance in framer.plugins.items():
+        for plugin_name, plugin_instance in self.plugins.items():
             if hasattr(plugin_instance, "on_load"):
                 self.logger.info(f"Loading plugin: {plugin_name}")
                 await plugin_instance.on_load(framer)

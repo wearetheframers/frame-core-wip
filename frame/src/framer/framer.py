@@ -2,6 +2,7 @@ import asyncio
 import logging
 import time
 import json
+import concurrent.futures
 from frame.src.utils.decorators import (
     log_execution,
     validate_input,
@@ -28,6 +29,8 @@ from frame.src.services.memory.main import MemoryService
 from frame.src.services.context.shared_context_service import SharedContext
 
 from frame.src.utils.config_parser import (
+    execution_context_to_json,
+    execution_context_from_json,
     parse_json_config,
     parse_markdown_config,
     export_config_to_markdown,
@@ -243,7 +246,7 @@ class Framer:
         """
         logger.info(f"Loading plugins for Framer with config: {self.config}")
         loaded_plugins = set()
-        for plugin_name, plugin_instance in self.plugins.items():
+        def load_plugin(plugin_name, plugin_instance):
             if (
                 plugin_name in loaded_plugins
                 or any(
@@ -253,20 +256,43 @@ class Framer:
                 or plugin_instance in loaded_plugins
             ):
                 logger.info(f"Plugin {plugin_name} already loaded. Skipping.")
-                continue
+                return
 
             if hasattr(plugin_instance, "on_load"):
-                await plugin_instance.on_load(self)
+                asyncio.run(plugin_instance.on_load(self))
                 # Register plugin actions in the brain's action_registry
                 for action_name, action_func in plugin_instance.get_actions().items():
-                    self.brain.action_registry.add_action(
-                        action_name,
-                        action_func=action_func,
-                        description=f"Action from {plugin_name} plugin",
-                        priority=5,  # Default priority, adjust as needed
-                    )
+                    if action_name not in self.brain.action_registry.actions:
+                        self.brain.action_registry.add_action(
+                            action_name,
+                            action_func=action_func,
+                            description=f"Action from {plugin_name} plugin",
+                            priority=5,  # Default priority, adjust as needed
+                        )
+                    else:
+                        logger.info(f"Action {action_name} already registered. Skipping.")
                 loaded_plugins.add(plugin_name)
                 loaded_plugins.add(plugin_instance)
+
+        if 'all' in self.plugins:
+            for plugin_name, plugin_instance in self.plugins.items():
+                load_plugin(plugin_name, plugin_instance)
+        else:
+            with concurrent.futures.ProcessPoolExecutor() as executor:
+                futures = [
+                    executor.submit(load_plugin, plugin_name, plugin_instance)
+                    for plugin_name, plugin_instance in self.plugins.items()
+                ]
+                for future in concurrent.futures.as_completed(futures):
+                    future.result()
+
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            futures = [
+                executor.submit(load_plugin, plugin_name, plugin_instance)
+                for plugin_name, plugin_instance in self.plugins.items()
+            ]
+            for future in concurrent.futures.as_completed(futures):
+                future.result()
         self.plugin_loading_complete = True
         self.act()
         await self.process_queued_perceptions()
@@ -330,7 +356,7 @@ class Framer:
         """
         self.plugins[plugin_name] = plugin_instance
         if hasattr(plugin_instance, "on_load"):
-            asyncio.create_task(plugin_instance.on_load())
+            asyncio.create_task(plugin_instance.on_load(self))
 
     async def remove_plugin(self, plugin_name: str):
         """
@@ -397,7 +423,7 @@ class Framer:
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
 
-    async def export_to_file(self, file_path: str, llm) -> None:
+    async def export_to_file(self, file_path: str) -> None:
         """
         Export the Framer configuration to a JSON file.
 
@@ -414,6 +440,7 @@ class Framer:
         config.roles = self.roles
         config.goals = self.goals
         config_dict = config.to_dict()
+        config_dict["execution_context"] = execution_context_to_json(self.execution_context)
         with open(file_path, "w") as f:
             json.dump(config_dict, f, indent=4)
 
@@ -443,7 +470,12 @@ class Framer:
             Framer: A new Framer instance configured from the file.
         """
         config = parse_json_config(file_path)
+        config_data = parse_json_config(file_path)
+        execution_context_data = config_data.pop("execution_context", {})
+        execution_context = execution_context_from_json(execution_context_data, ExecutionContext)
+
         return cls(
+            execution_context=execution_context,
             config=config,
             llm_service=llm_service,
             agency=Agency(llm_service=llm_service, context=None),

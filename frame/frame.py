@@ -78,7 +78,10 @@ class Frame:
         )
         self.plugins = {}
         self.is_loading_plugins = True
-        self.plugins, _ = load_plugins(self.plugins_dir)
+        self.plugins, conflict_warnings = load_plugins(self.plugins_dir)
+        for warning in conflict_warnings:
+            logger.warning(warning)
+        logger.info(f"Loaded plugins: {list(self.plugins.keys())}")
         self.framer_factory = FramerFactory(
             FramerConfig(name="DefaultFramer", default_model=self._default_model),
             self.llm_service,

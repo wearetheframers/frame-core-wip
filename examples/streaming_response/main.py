@@ -20,25 +20,24 @@ class StreamingResponseAction(BaseAction):
         )
 
     async def execute(self, execution_context: ExecutionContext, prompt: str) -> str:
-        framer = execution_context.framer
-        framer._streamed_response = {"status": "pending", "result": ""}
+        execution_context._streaming_response = {"status": "pending", "result": ""}
         await execution_context.llm_service.get_completion(
-            prompt, stream=True, framer=framer
+            prompt, stream=True
         )
 
         print("Streamed Response:")
-        while framer._streamed_response["status"] == "pending":
+        while execution_context._streaming_response["status"] == "pending":
             await asyncio.sleep(0.1)  # Check for new data every 100ms
-            if framer._streamed_response["result"]:
-                print(framer._streamed_response["result"], end="", flush=True)
-                framer._streamed_response["result"] = ""  # Clear after printing
+            if execution_context._streaming_response["result"]:
+                print(execution_context._streaming_response["result"], end="", flush=True)
+                execution_context._streaming_response["result"] = ""  # Clear after printing
 
-        if framer._streamed_response["status"] == "completed":
+        if execution_context._streaming_response["status"] == "completed":
             print("\nStreaming completed.")
-        elif framer._streamed_response["status"] == "error":
-            print(f"\nAn error occurred: {framer._streamed_response['result']}")
+        elif execution_context._streaming_response["status"] == "error":
+            print(f"\nAn error occurred: {execution_context._streaming_response['result']}")
 
-        return framer._streamed_response["result"]
+        return execution_context._streaming_response["result"]
 
 
 async def main():

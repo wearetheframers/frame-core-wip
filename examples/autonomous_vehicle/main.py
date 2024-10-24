@@ -1,6 +1,10 @@
 # Import necessary modules and packages
 import sys
 import logging
+import warnings
+
+# Suppress specific FutureWarning from torch.load
+warnings.filterwarnings("ignore", category=FutureWarning, module="whisper")
 import os
 import asyncio
 from typing import Dict, Any

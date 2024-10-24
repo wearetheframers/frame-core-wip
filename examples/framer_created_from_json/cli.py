@@ -1,7 +1,8 @@
 import os
 import asyncio
 import argparse
-from main import export_config, import_config, Frame
+from frame import Frame
+from examples.framer_created_from_json.main import export_config, import_config
 
 async def main(action, filename):
     frame = Frame()

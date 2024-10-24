@@ -1,4 +1,8 @@
 import os, sys
+import warnings
+
+# Suppress specific FutureWarning from torch.load
+warnings.filterwarnings("ignore", category=FutureWarning, module="whisper")
 import asyncio
 import logging
 import json
@@ -60,17 +64,26 @@ async def export_config(framer, filename):
     def default_serializer(obj):
         if isinstance(obj, LLMService):
             return str(obj)  # or any other representation you prefer
+        if isinstance(obj, FramerConfig):
+            return obj.__dict__
         raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
 
+    framer_dict = framer.__dict__.copy()
+    # Remove execution_context and shared_context from export
+    framer_dict.pop('execution_context', None)
+    framer_dict.pop('shared_context', None)
+    # Remove execution_context and shared_context from export
+    framer_dict.pop('execution_context', None)
+    framer_dict.pop('shared_context', None)
     with open(filename, 'w') as f:
-        json.dump(framer.__dict__, f, indent=4, default=default_serializer)
+        json.dump(framer_dict, f, indent=4, default=default_serializer)
     print(f"Configuration exported to {filename}")
 
 async def import_config(filename):
     with open(filename, 'r') as f:
         config_data = json.load(f)
     framer = Frame()  # Create a new Frame instance
-    framer.__dict__.update(config_data)  # Update the instance with the loaded data
+    framer = await frame.create_framer(config=FramerConfig(**config_data))
     return framer
 
 async def main():
@@ -108,7 +121,7 @@ async def main():
     framer_config = FramerConfig(**config_data)
 
     # Now create the framer
-    framer = await frame.create_framer(framer_config)
+    framer = await frame.create_framer(config=framer_config)
 
     # Register actions from the config
     if action_list:

@@ -721,7 +721,7 @@ class Brain:
             parameters = {}
         result = await self.action_registry.execute_action(action_name, **parameters)
         if isinstance(result, dict):
-            result.setdefault("reasoning", "No reasoning provided.")
+            result.setdefault("reasoning", None)
             result.setdefault("confidence", 0.5)
             result.setdefault("priority", 1)
             result.setdefault("related_roles", [])

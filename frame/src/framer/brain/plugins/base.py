@@ -5,7 +5,14 @@ from frame.src.framer.agency.priority import Priority
 from frame.src.framer.brain.rules.ruleset import Rule, Ruleset
 
 
+from frame.src.framer.brain.rules.ruleset import Ruleset
+
 class BasePlugin(ABC):
+    def __init__(self, framer):
+        self.framer = framer
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.execution_context = getattr(framer, "execution_context", None)
+        self.ruleset = Ruleset()
     """
     Base class for all Frame plugins.
 
@@ -55,7 +62,7 @@ class BasePlugin(ABC):
     def add_action(
         self,
         name: str,
-        func: callable,
+        action_func: callable,
         description: str,
         priority: Priority = Priority.MEDIUM,
     ):
@@ -71,7 +78,7 @@ class BasePlugin(ABC):
         """
         if name not in self.framer.brain.action_registry.actions:
             self.framer.brain.action_registry.add_action(
-                name, func, description, priority
+                name, action_func, description, priority
             )
             self.logger.warning(
                 f"Action '{name}' registered in Framer action registry."

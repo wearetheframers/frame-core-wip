@@ -1,7 +1,7 @@
 import os
 import importlib
 import logging
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 from dotenv import load_dotenv
 import json
 from frame.src.framer.brain.plugins import BasePlugin
@@ -15,7 +15,7 @@ class MockPlugin(BasePlugin):
 logger = logging.getLogger(__name__)
 
 
-def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
+def load_plugins(plugins_dir: Optional[str] = None) -> Tuple[Dict[str, Any], List[str]]:
     """
     Load all plugins from the specified directory.
 
@@ -39,24 +39,28 @@ def load_plugins(plugins_dir: str) -> Tuple[Dict[str, Any], List[str]]:
     loaded_actions = {}
     conflict_warnings = []
 
+    if plugins_dir is None:
+        plugins_dir = os.getenv("DEFAULT_PLUGINS_DIR", "plugins")
+
     for item in os.listdir(plugins_dir):
         plugin_dir = os.path.join(plugins_dir, item)
+        print("DA PLUGIN DIR: ", plugin_dir)
         if os.path.isdir(plugin_dir) and not item.startswith("_"):
             try:
                 # Load plugin-specific configuration
                 config = load_plugin_config(plugin_dir)
 
                 # Import the plugin module
-                logger.debug(f"Attempting to import module for plugin: {item}")
-                module = importlib.import_module(f"frame.src.plugins.{item}.{item}")
-                logger.debug(f"Module imported successfully for plugin: {item}")
+                logger.debug(f"Attempting to import module for plugin: plugins.{plugin_dir}")
+                module = importlib.import_module(f"plugins.{item}.{item}")
+                logger.info(f"Module imported successfully for plugin: {plugin_dir}")
 
                 # Construct the plugin class name by converting the directory name to CamelCase
                 plugin_class_name = "".join(
                     word.capitalize() for word in item.split("_")
                 )
                 logger.debug(f"Looking for class {plugin_class_name} in module {item}")
-                plugin_class = getattr(module, plugin_class_name, MockPlugin)
+                plugin_class = getattr(module, plugin_class_name, None)
                 if plugin_class is None:
                     logger.warning(
                         f"Class {plugin_class_name} not found in module {item}. Skipping."

@@ -94,6 +94,11 @@ class ActionRegistry:
             if execution_context
             else []
         )
+        # Check for streaming response in execution_context
+        if hasattr(execution_context, "_streaming_response"):
+            streaming_response = execution_context._streaming_response
+        else:
+            streaming_response = "No streaming response available."
 
         response = (
             f"I'm sorry, an error occurred: {error_message}. "
@@ -211,7 +216,10 @@ class ActionRegistry:
             raise ValueError(f"Action '{name}' not found")
         if self.execution_context is None:
             raise ValueError("Execution context is not set")
-        response = await action["action_func"](self.execution_context, *args, **kwargs)
+        if name == "get_weather":
+            response = await action["action_func"](self.execution_context, city=kwargs.get("city"))
+        else:
+            response = await action["action_func"](self.execution_context, *args, **kwargs)
         role = response if isinstance(response, dict) else response
         if callback:
             callback(response, *callback_args)

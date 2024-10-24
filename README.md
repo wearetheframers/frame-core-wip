@@ -27,8 +27,20 @@ The Strategy Pattern is a key feature of Frame, allowing for dynamic decision-ma
 
 Frame's plugin system supports the development of custom plugins for unique real-world use cases. These plugins can extend the functionality of Framer agents, enabling them to perform specialized tasks in various domains, such as environmental monitoring, personalized education, and adaptive security systems.
 
-Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are fully equipped for task automation and collaborative work.
+Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are fully equipped for task automation and collaborative work. The framework's extensible architecture allows for the integration of custom plugins, enabling developers to tailor the system to specific real-world applications.
 
+### New Feature: Weather Query Handling
+
+The `WeatherReporter` plugin now includes an action to handle weather queries. It accepts a query and a location, retrieves weather data from the OpenWeatherMap API, and generates a response based on the data. This feature allows the Framer to answer questions like "What's the temperature in Tokyo right now?" by parsing the location from the query and using it to fetch relevant weather information.
+
+### New Feature: Intent Understanding
+
+The `AudioTranscriptionPlugin` now includes an action to understand "intents" from transcriptions. This feature allows the Framer to listen for its name (as specified in the `FramerConfig`) and respond by playing a positive sound and starting to listen to the user, similar to how Alexa functions. This demonstrates how plugins can extend default behavior to create a more helpful assistant, and can be disabled or removed if not needed.
+
+
+### Permissions
+
+To grant all permissions for all plugins (which is considered unsafe), you can pass `'all'` to the permissions list in the `FramerConfig`. This will enable all available plugins and services without restriction.
 
 ### Features
 
@@ -256,14 +268,12 @@ This project is dual-licensed under the GNU Affero General Public License versio
 
 To run all tests, navigate to the root directory of the project and execute:
 
-```bash
-pytest
+venv\Scripts\activate && pytest
 ```
 
 *Note*: Testing can take a little while as we have tests for rate limiting / retry logic, so you can exclude those (they are in the `llm_adapter` tests) if it's slow while developing others:
 
-```python
-pytest -k "not (llm_service or llm_adapter)"
+venv\Scripts\activate && pytest -k "not (llm_service or llm_adapter)"
 ```
 
 ### Documentation
@@ -272,16 +282,14 @@ The project uses MkDocs and can also use pdoc3 for documentation. The MkDocs con
 
 To build and serve MkDocs documentation, run:
 
-```bash
-mkdocs serve --config-file ./mkdocs.yml
+venv\Scripts\activate && mkdocs serve --config-file ./mkdocs.yml
 ```
 
 You must run the `roam_links_converter.py` script before to convert linked references to their actual paths. 
 
 To serve both MkDocs and pdoc3 simultaneously, use the following command:
 
-```bash
-python scripts\serve_docs.py
+venv\Scripts\activate && python scripts\serve_docs.py
 ```
 
 This runs MkDocs on port 3010 and pdoc3 on port 3011. This script runs both with live reloading, runs unit tests on initialization and generates a coverage report, and also parses and converts link references automatically. Add `--skip-tests` to skip tests when started.

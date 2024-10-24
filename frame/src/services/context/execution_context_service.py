@@ -47,6 +47,7 @@ class ExecutionContext:
         self.goals: List[Any] = []
         self.roles: List[Any] = []
         self.action_registry = None
+        self._streaming_response = {"status": "pending", "result": ""}
 
     def set_roles(self, roles: List[Any]):
         self.roles = roles

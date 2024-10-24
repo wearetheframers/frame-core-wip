@@ -30,6 +30,10 @@ python main.py
 
 - The example simulates audio input and demonstrates how the Framer processes this input to achieve its goals.
 
+### New Feature: Intent Understanding
+
+The `AudioTranscriptionPlugin` now includes an action to understand "intents" from transcriptions. This feature allows the Framer to listen for its name (as specified in the `FramerConfig`) and respond by playing a positive sound and starting to listen to the user, similar to how Alexa functions. This demonstrates how plugins can extend default behavior to create a more helpful assistant, and can be disabled or removed if not needed.
+
 ## Customization
 
 ### Custom Action Registry
