@@ -48,6 +48,7 @@ class Soul(BaseModel):
             Dict[str, Any]: A shallow copy of the current state of the Soul.
         """
         return self.state.copy()
+
     def from_seed(cls, seed: Union[str, Dict[str, Any]]) -> "Soul":
         """
         Create a Soul instance from a seed.
@@ -62,6 +63,7 @@ class Soul(BaseModel):
             Soul: A new Soul instance initialized with the provided seed.
         """
         return cls(seed=seed)
+
     def get_current_state(self) -> Dict[str, Any]:
         """
         Get a copy of the current state of the Soul.

@@ -50,16 +50,18 @@ async def main():
         "data": {"name": "Alice", "custom_message": "Hello"},
     }
 
-    # Process the perception to get a decision
+    # Process the perception and execute the decision if ready
     decision = await framer.brain.process_perception(perception)
     if decision.action == "custom_greet":
-        result = await framer.brain.execute_decision(decision)
-        print(result["response"])  # Adjust based on the structure of the result
-
-    # Clean up
-    # Perform any necessary cleanup here
-    # For example, if there are resources to release, do it here
-    print("Cleaning up resources...")
+        # Access the action's result from decision.result
+        if decision.result and "response" in decision.result:
+            print("Response: ", decision.result["response"])
+        else:
+            print("No response from the action.")
+    else:
+        print(f"No decision made or action is not 'custom_greet'. Decision: {decision}")
+    # Properly close the framer before exiting
+    await framer.close()
 
 
 if __name__ == "__main__":

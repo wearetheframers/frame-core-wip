@@ -7,21 +7,28 @@
         {
             "name": "engage_conversation",
             "description": "Engage in a deep conversation",
-            "priority": "HIGH"
+            "priority": "HIGH",
+            "action_class": "EngageConversationAction"
         },
         {
             "name": "tell_story",
             "description": "Craft and narrate a captivating story",
-            "priority": "MEDIUM"
+            "priority": "MEDIUM",
+            "action_class": "TellStoryAction"
         },
         {
             "name": "inspire_creativity",
             "description": "Inspire creativity through storytelling",
-            "priority": "HIGH"
+            "priority": "HIGH",
+            "action_class": "InspireCreativityAction"
         }
     ],
     "goals": [
-        {"description": "Discover new places", "priority": 1}
+        {
+            "name": "Discover New Places",
+            "description": "Explore unknown environments to find new locations.",
+            "priority": 1
+        }
     ],
     "default_model": "gpt-3.5-turbo",
     "soul_seed": {"text": "Curiosity drives exploration"}

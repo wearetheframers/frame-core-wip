@@ -98,12 +98,19 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         Returns:
             Any: The result of the action execution.
         """
-        self.logger.info(f"Executing action: {action_name} with parameters: {parameters}")
+        self.logger.debug(
+            f"Executing action: {action_name} with parameters: {parameters}"
+        )
         if action_name == "respond with memory retrieval":
             self.logger.info("Executing 'respond with memory retrieval' action.")
-            query = parameters.get('memory_question', '')
-            execution_context = parameters.get('execution_context', self.framer.execution_context)
-            return await self.mem0_search_extract_summarize(query=query, execution_context=execution_context, **parameters)
+            query = parameters.get("memory_question") or parameters.get("text", "")
+            execution_context = (
+                parameters.get("execution_context", None)
+                or self.framer.execution_context
+            )
+            return await self.mem0_search_extract_summarize(
+                query=query, execution_context=execution_context, **parameters
+            )
         else:
             raise ValueError(f"Action {action_name} not found in plugin.")
 
@@ -136,8 +143,8 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
 
     async def mem0_search_extract_summarize(
         self,
-        query: str,
         execution_context: Optional[ExecutionContext] = None,
+        query: str = "",
         user_id: Optional[str] = None,
         agent_id: Optional[str] = None,
         run_id: Optional[str] = None,
@@ -146,16 +153,29 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         text_response: Optional[str] = None,
         **kwargs: Any,
     ) -> str:
-        print("execution_context: ", execution_context)
-        exit()
-        self.logger.info(f"mem0_search_extract_summarize called with query: {query}")
-        if not query:
-            self.logger.warning("Query is empty. Returning default response.")
-            query = "default query"  # Set a default query if none is provided
+        self.logger.debug(f"mem0_search_extract_summarize called with query: '{query}'")
+        self.logger.debug(f"Parameters received: {kwargs}")
+        self.logger.debug(f"Execution context: {execution_context}")
+        self.logger.debug(f"Query before processing: '{query}'")
+        self.logger.debug(f"Execution context: {execution_context}")
+        if not query or not isinstance(query, str) or query.strip() == "":
+            self.logger.warning(
+                f"Query is empty or invalid: '{query}'. Returning default response."
+            )
+            return {
+                "action": "respond",
+                "parameters": {
+                    "response": "Query is empty. Please provide a valid query to search for relevant information."
+                },
+                "reasoning": "Empty query provided.",
+                "confidence": 0.5,
+                "priority": 1,
+                "related_roles": [],
+                "related_goals": [],
+            }
 
         if execution_context is None:
             execution_context = self.framer.execution_context
-
 
         if not isinstance(execution_context, ExecutionContext):
             self.logger.error("Execution context is not properly initialized.")
@@ -167,19 +187,19 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         # Ensure the query is a string
         if not isinstance(query, str):
             query = str(query)
-        self.logger.info(f"Searching Mem0 for query: {query}")
+        self.logger.debug(f"Searching Mem0 for query: {query}")
 
         # Ensure at least one required filter is provided
         if not any([user_id, agent_id, run_id]):
             user_id = "default"
 
-        self.logger.info(
+        self.logger.debug(
             f"Searching with user_id: {user_id}, agent_id: {agent_id}, run_id: {run_id}"
         )
         search_results = self.mem0_adapter.search(
             query, user_id=user_id, agent_id=agent_id, run_id=run_id, filters=filters
         )
-        self.logger.info(f"Found {len(search_results)} results in Mem0")
+        self.logger.debug(f"Found {len(search_results)} results in Mem0")
         self.logger.debug(f"Search results: {search_results}")
 
         if not search_results:
@@ -197,7 +217,6 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
 
         # Filter search results by memory text (remove same text results)
         search_results = self.filter_search_results(search_results)
-        self.logger.debug(f"Filtered search results: {search_results}")
 
         context = "\n".join(
             [
@@ -217,7 +236,8 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         references = "\n".join(
             [f"[{i+1}] {result['id']}" for i, result in enumerate(search_results)]
         )
-        return f"# Answer\n\n{summary}\n\n# References\n\n{references}"
+        self.logger.info(f"Memory retrieval response: {summary}")
+        return summary
 
     async def summarize(self, query: str, context: str, model_name: str) -> str:
         prompt = f"""

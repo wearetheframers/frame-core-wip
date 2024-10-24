@@ -50,3 +50,35 @@ class Goal:
             "priority": self.priority,
             "status": self.status.value,
         }
+
+
+from enum import Enum
+from typing import Dict, Any
+
+
+class GoalStatus(Enum):
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
+    ABANDONED = "ABANDONED"
+
+
+class Goal:
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        priority: int = 5,
+        status: GoalStatus = GoalStatus.ACTIVE,
+    ):
+        self.name = name
+        self.description = description
+        self.priority = priority
+        self.status = status
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "description": self.description,
+            "priority": self.priority,
+            "status": self.status.value,
+        }

@@ -101,7 +101,11 @@ class AutonomousVehiclePlugin(BasePlugin):
 
     async def slow_down_vehicle(self) -> Dict[str, Any]:
         self.speed = max(0, self.speed - 10)
-        return {"speed": self.speed, "lane": self.lane, "result": "Vehicle slowing down"}
+        return {
+            "speed": self.speed,
+            "lane": self.lane,
+            "result": "Vehicle slowing down",
+        }
 
     async def speed_up_vehicle(self) -> Dict[str, Any]:
         self.speed = min(self.max_speed, self.speed + 10)
@@ -109,17 +113,29 @@ class AutonomousVehiclePlugin(BasePlugin):
 
     async def change_lane(self) -> Dict[str, Any]:
         self.lane = 3 - self.lane  # Toggle between lane 1 and 2
-        return {"speed": self.speed, "lane": self.lane, "result": f"Vehicle changing to lane {self.lane}"}
+        return {
+            "speed": self.speed,
+            "lane": self.lane,
+            "result": f"Vehicle changing to lane {self.lane}",
+        }
 
     async def start_driving(self) -> Dict[str, Any]:
         self.is_driving = True
         self.speed = 60  # Start at 60 km/h
-        return {"speed": self.speed, "lane": self.lane, "result": "Vehicle started driving"}
+        return {
+            "speed": self.speed,
+            "lane": self.lane,
+            "result": "Vehicle started driving",
+        }
 
     async def no_action(self) -> Dict[str, Any]:
         if self.is_driving:
             self.update_speed()
-        return {"speed": self.speed, "lane": self.lane, "result": "Vehicle continuing current action"}
+        return {
+            "speed": self.speed,
+            "lane": self.lane,
+            "result": "Vehicle continuing current action",
+        }
 
     async def brake_vehicle(self) -> Dict[str, Any]:
         self.speed = max(0, self.speed - 20)

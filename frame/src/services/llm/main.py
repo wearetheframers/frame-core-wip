@@ -222,7 +222,11 @@ class LLMService:
             formatted_prompt = adapter.format_prompt(full_prompt)
             if stream:
                 result = await adapter.get_completion(
-                    formatted_prompt, config, additional_context, stream=stream, framer=framer
+                    formatted_prompt,
+                    config,
+                    additional_context,
+                    stream=stream,
+                    framer=framer,
                 )
                 return result  # This should be an async generator
             else:
@@ -234,7 +238,7 @@ class LLMService:
             execution_time = end_time - start_time
             tokens_used = len(full_prompt.split()) + (
                 len(result.split()) if isinstance(result, str) else 0
-            )
+            ) if result is not None else 0
 
             self.metrics.track_usage(model, tokens_used)
 

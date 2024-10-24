@@ -1,4 +1,6 @@
 from frame.src.framer.brain.actions import BaseAction
+from frame.src.framer.agency.roles import Role, RoleStatus
+from frame.src.framer.agency.goals import Goal, GoalStatus
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -26,13 +28,21 @@ class ErrorAction(BaseAction):
             else []
         )
         active_roles = (
-            [role.name for role in execution_context.roles if role.status == "ACTIVE"]
+            [
+                role.name
+                for role in execution_context.roles
+                if isinstance(role, Role) and role.status == RoleStatus.ACTIVE
+            ]
             if execution_context and hasattr(execution_context, "roles")
             else []
         )
         active_goals = (
-            [goal.name for goal in execution_context.goals if goal.status == "ACTIVE"]
-            if execution_context and hasattr(execution_context, "goals")
+            [
+                goal.name
+                for goal in execution_context.get_goals()
+                if isinstance(goal, Goal) and goal.status == GoalStatus.ACTIVE
+            ]
+            if execution_context and hasattr(execution_context, "get_goals")
             else []
         )
 

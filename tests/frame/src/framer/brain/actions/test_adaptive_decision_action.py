@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, Mock
-from frame.src.framer.brain.actions.adaptive_decision_action import (
+from frame.src.framer.brain.actions.adaptive_decision import (
     AdaptiveDecisionAction,
 )
 from frame.src.services.context.execution_context_service import ExecutionContext

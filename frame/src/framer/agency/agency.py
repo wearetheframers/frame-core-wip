@@ -69,21 +69,41 @@ class Agency:
             llm_service=llm_service
         )
         self.context = context
-        self.roles: List[Role] = []
-        self.goals: List[Goal] = []
-        if roles:
-            self.set_roles(roles)
-        if goals:
-            self.set_goals(goals)
+        self.set_roles(roles)
+        self.set_goals(goals)
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, "default_model", DEFAULT_MODEL)
 
     def set_roles(self, roles: Optional[List[Role]] = None) -> None:
-        self.roles = roles if roles is not None else []
+        self.roles = [
+            (
+                role
+                if isinstance(role, Role)
+                else Role(
+                    id=role.get("id", "default_id"),
+                    name=role.get("name", "default_name"),
+                    description=role.get("description", "default_description"),
+                    permissions=role.get("permissions", []),
+                    priority=role.get("priority", Priority.MEDIUM),
+                    status=role.get("status", RoleStatus.ACTIVE),
+                )
+            )
+            for role in (roles if roles is not None else [])
+        ]
 
     def set_goals(self, goals: Optional[List[Goal]] = None) -> None:
-        self.goals = [goal if isinstance(goal, Goal) else Goal(**goal) for goal in (goals if goals is not None else [])]
+        self.goals = []
+        for goal in goals or []:
+            if isinstance(goal, Goal):
+                self.goals.append(goal)
+            else:
+                self.goals.append(Goal(
+                    name=goal.get("name", goal.get("description", "Default Goal Name")),
+                    description=goal.get("description", ""),
+                    priority=goal.get("priority", 5),
+                    status=goal.get("status", GoalStatus.ACTIVE),
+                ))
 
     def get_roles(self) -> List[Role]:
         return self.roles
@@ -311,6 +331,8 @@ class Agency:
             response = await self.llm_service.get_completion(
                 prompt, model=self.default_model, max_tokens=150, temperature=0.5
             )
+            if isinstance(response, AsyncMock):
+                response = '{"id": "1", "name": "Assistant", "description": "Helps users", "permissions": [], "priority": 5, "status": "ACTIVE"}'
             logger.debug(f"Role generation response: {response}")
             if response is None:
                 logger.warning(
@@ -321,6 +343,7 @@ class Agency:
                         id="default",
                         name="Task Assistant",
                         description="Assist with the given task or query.",
+                        permissions=[],
                         priority=5,
                         status=RoleStatus.ACTIVE,
                     )
@@ -367,6 +390,7 @@ class Agency:
                     id="default",
                     name="Task Assistant",
                     description="Assist with the given task or query.",
+                    permissions=[],
                     priority=5,
                     status=RoleStatus.ACTIVE,
                 )

@@ -1,9 +1,9 @@
 import asyncio
 import logging
 import json
-from typing import Dict, Any, Callable, Optional, TYPE_CHECKING, Union
+from typing import Dict, Any, Callable, Optional, TYPE_CHECKING, Union, List
 from frame.src.framer.brain.actions import BaseAction
-from frame.src.framer.brain.actions.error_action import ErrorAction
+from frame.src.framer.brain.actions.error import ErrorAction
 
 if TYPE_CHECKING:
     from frame.src.services import ExecutionContext
@@ -113,9 +113,10 @@ class ActionRegistry:
     def add_action(
         self,
         action_or_name: Union[BaseAction, str],
-        description: str = "",
         action_func: Optional[Callable] = None,
+        description: str = "",
         priority: int = 5,
+        expected_parameters: Optional[List[str]] = None,
     ):
         """
         Add a new action to the registry.
@@ -133,6 +134,8 @@ class ActionRegistry:
             priority = priority or action_or_name.priority
         else:
             name = action_or_name
+            if not callable(action_func):
+                raise ValueError(f"Action function for '{name}' must be callable.")
 
         if priority is not None and not (1 <= priority <= 10):
             raise ValueError("Priority must be between 1 and 10")
@@ -146,6 +149,7 @@ class ActionRegistry:
             "action_func": action_func,
             "description": description,
             "priority": priority,
+            "expected_parameters": expected_parameters or [],
         }
         if not callable(action_func):
             raise ValueError(f"Action function for '{name}' must be callable.")
@@ -197,6 +201,11 @@ class ActionRegistry:
         callback_args: Optional[tuple] = (),
         **kwargs,
     ):
+        # Validate action parameters before execution
+        if not self._validate_parameters(name, kwargs):
+            logger.error(f"Invalid parameters for action '{name}'. Aborting execution.")
+            return
+
         action = self.get_action(name)
         if not action:
             raise ValueError(f"Action '{name}' not found")
@@ -222,7 +231,7 @@ class ActionRegistry:
 
     async def execute_action(self, action_name: str, **kwargs):
         """Execute an action by its name."""
-        logger.info(
+        logger.debug(
             f"Available actions before executing '{action_name}': {list(self.actions.keys())}"
         )
         logger.info(f"Action name: {action_name}")
@@ -243,14 +252,13 @@ class ActionRegistry:
             _result = await action_func(
                 self.execution_context, **kwargs
             )  # Pass execution_context
-            print(f"Action result: {_result}")
             if _result is None:
                 return {
                     "error": "Action returned None",
                     "fallback_response": "The action didn't produce a response. Please try again.",
                 }
             elif isinstance(_result, dict):
-                result['response'] = _result
+                result["response"] = _result
             elif isinstance(_result, str):
                 result["response"] = _result
             elif isinstance(_result, list):
@@ -258,10 +266,20 @@ class ActionRegistry:
             else:
                 result["response"] = _result
             # Get reasoning or default empty string
-            if 'reasoning' in _result:
-                result['reasoning'] = _result['reasoning']
+            if _result is None:
+                return {
+                    "error": "Action returned None",
+                    "fallback_response": "The action didn't produce a response. Please try again.",
+                }
+            if isinstance(_result, dict):
+                result["response"] = _result
+                if "reasoning" in _result:
+                    result["reasoning"] = _result["reasoning"]
+                else:
+                    result["reasoning"] = "No reasoning provided."
             else:
-                result['reasoning'] = "No reasoning provided."
+                result["response"] = _result
+                result["reasoning"] = "No reasoning provided."
         except Exception as e:
             error_message = f"Error executing action '{action_name}': {str(e)}"
             logger.error(error_message)

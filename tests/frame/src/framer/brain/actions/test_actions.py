@@ -13,20 +13,18 @@ from frame.src.services import ExecutionContext
 def action_registry():
     llm_service = Mock(spec=LLMService, default_model="gpt-3.5-turbo")
     llm_service.default_model = "gpt-3.5-turbo"
-    llm_service.get_completion.return_value = json.dumps(
-        {
-            "name": "Role1",
-            "description": "A test role",
-            "priority": "medium",
-        }
-    )
+    llm_service.get_completion = AsyncMock(return_value=json.dumps({
+        "name": "Role1",
+        "description": "A test role",
+        "priority": "medium",
+    }))
     return ActionRegistry(execution_context=ExecutionContext(llm_service=llm_service))
 
 
 @pytest.mark.asyncio
 async def test_register_and_perform_action(action_registry):
     async def test_action(execution_context, arg1, arg2):
-        return f"Test action performed with {arg1} and {arg2}", execution_context
+        return f"Test action performed with {arg1} and {arg2}"
 
     action_registry.register_action(
         "test_action", test_action, "Test action description", 8
@@ -93,7 +91,7 @@ async def test_perform_nonexistent_action(action_registry):
 @pytest.mark.asyncio
 async def test_action_with_callback(action_registry):
     async def test_action(execution_context):
-        return "Action result", execution_context
+        return "Action result"
 
     callback_result = None
 

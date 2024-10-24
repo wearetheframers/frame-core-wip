@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 
 
 from frame import Frame, FramerConfig
-from frame.src.framer.brain.actions.adaptive_decision_action import (
+from frame.src.framer.brain.actions.adaptive_decision import (
     AdaptiveDecisionAction,
 )
 
@@ -26,10 +26,10 @@ class TradingSimulation:
         self.framer = await self.frame.create_framer(self.config)
         adaptive_action = AdaptiveDecisionAction()
         self.framer.brain.action_registry.add_action(
-            adaptive_action.name,
-            adaptive_action.execute,
-            adaptive_action.description,
-            adaptive_action.priority,
+            action_or_name=adaptive_action.name,
+            action_func=adaptive_action.execute,
+            description=adaptive_action.description,
+            priority=adaptive_action.priority,
         )
 
     async def simulate(self):
@@ -70,7 +70,6 @@ class TradingSimulation:
             print(f"\nScenario: {scenario}")
             decision = await self.framer.brain.action_registry.execute_action(
                 "adaptive_decision",
-                execution_context=self.framer.execution_context,
                 context=scenario,
             )
             print(f"Decision: {decision}")

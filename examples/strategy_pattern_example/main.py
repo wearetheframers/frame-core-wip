@@ -7,7 +7,7 @@ import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame import Frame, FramerConfig
-from frame.src.framer.brain.actions.adaptive_decision_action import (
+from frame.src.framer.brain.actions.adaptive_decision import (
     AdaptiveDecisionAction,
 )
 
@@ -23,10 +23,10 @@ async def main():
     # Register the AdaptiveDecisionAction
     adaptive_action = AdaptiveDecisionAction()
     framer.brain.action_registry.add_action(
-        adaptive_action.name,
-        adaptive_action.execute,
-        adaptive_action.description,
-        adaptive_action.priority,
+        action_or_name=adaptive_action.name,
+        action_func=adaptive_action.execute,
+        description=adaptive_action.description,
+        priority=adaptive_action.priority,
     )
 
     # Define a variety of contexts with increasing complexity

@@ -33,7 +33,6 @@ def execute_framer(
         action (str): The action to execute.
         parameters (Optional[Dict[str, Any]]): Parameters for the action.
     """
-    logger.info(f"Executing action '{action}' with parameters: {parameters}")
     # Placeholder for actual execution logic
     # This should be replaced with the actual implementation
     framer.brain.execute_decision(Decision(action=action, parameters=parameters))

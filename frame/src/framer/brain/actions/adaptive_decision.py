@@ -25,16 +25,14 @@ class AdaptiveDecisionAction(BaseAction):
             "balanced": BalancedStrategy(),
         }
 
-    async def execute(
-        self, execution_context: ExecutionContext, **kwargs: Any
-    ) -> Dict[str, Any]:
+    async def execute(self, execution_context: ExecutionContext, context: Dict[str, Any]) -> Dict[str, Any]:
         # Determine the best strategy based on the context
-        context = execution_context.get_full_state()
         context = self.extrapolate_context(context)
         strategy_name = self.choose_strategy(context)
         strategy = self.strategies[strategy_name]
         decision = await strategy.decide(context)
-        return {"decision": decision, "strategy": strategy_name}
+        reasoning = decision.get("reasoning", "No reasoning provided.")
+        return {"decision": decision, "strategy": strategy_name, "reasoning": reasoning}
 
     def extrapolate_context(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """

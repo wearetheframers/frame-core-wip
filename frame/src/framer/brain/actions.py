@@ -2,12 +2,11 @@ from frame.src.framer.brain.actions import BaseAction
 from frame.src.framer.agency.priority import Priority
 from frame.src.services import ExecutionContext
 
+
 class StreamingResponseAction(BaseAction):
     def __init__(self):
         super().__init__(
-            "streaming_response",
-            "Generate a streaming response",
-            Priority.MEDIUM
+            "streaming_response", "Generate a streaming response", Priority.MEDIUM
         )
 
     async def execute(self, execution_context: ExecutionContext, prompt: str) -> str:

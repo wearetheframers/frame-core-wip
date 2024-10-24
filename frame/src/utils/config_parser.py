@@ -6,7 +6,7 @@ from typing import Dict, Any, Union, List
 from frame.src.framer.config import FramerConfig
 
 
-def parse_json_config(file_path: str) -> FramerConfig:
+def parse_json_config(file_path: str) -> Dict[str, Any]:
     with open(file_path, "r") as file:
         config_data = json.load(file)
     # Ensure actions are processed correctly
@@ -17,7 +17,7 @@ def parse_json_config(file_path: str) -> FramerConfig:
     # Ensure priority is correctly parsed
     if "priority" in config_data:
         config_data["priority"] = Priority.get(config_data["priority"]).value
-    return FramerConfig(**config_data)
+    return config_data
 
 
 def parse_markdown_config(file_path: str) -> FramerConfig:
@@ -49,11 +49,13 @@ def parse_markdown_config(file_path: str) -> FramerConfig:
                 re.DOTALL | re.MULTILINE,
             )
             for name, description, priority in action_entries:
-                actions.append({
-                    "name": name.strip(),
-                    "description": description.strip(),
-                    "priority": priority.strip().upper(),
-                })
+                actions.append(
+                    {
+                        "name": name.strip(),
+                        "description": description.strip(),
+                        "priority": priority.strip().upper(),
+                    }
+                )
             config_data[key] = actions
             config_data[key] = value.strip()
     # Ensure priority is correctly parsed
@@ -76,3 +78,8 @@ def export_config_to_markdown(config: FramerConfig, file_path: str) -> None:
             else:
                 file.write(f"{value}\n")
             file.write("\n")
+
+
+def export_config_to_json(config: FramerConfig, file_path: str) -> None:
+    with open(file_path, "w") as file:
+        json.dump(config.to_dict(), file, indent=4)

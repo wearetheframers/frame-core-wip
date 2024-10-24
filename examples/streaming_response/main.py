@@ -22,8 +22,10 @@ class StreamingResponseAction(BaseAction):
     async def execute(self, execution_context: ExecutionContext, prompt: str) -> str:
         framer = execution_context.framer
         framer._streamed_response = {"status": "pending", "result": ""}
-        await execution_context.llm_service.get_completion(prompt, stream=True, framer=framer)
-        
+        await execution_context.llm_service.get_completion(
+            prompt, stream=True, framer=framer
+        )
+
         print("Streamed Response:")
         while framer._streamed_response["status"] == "pending":
             await asyncio.sleep(0.1)  # Check for new data every 100ms
@@ -35,7 +37,7 @@ class StreamingResponseAction(BaseAction):
             print("\nStreaming completed.")
         elif framer._streamed_response["status"] == "error":
             print(f"\nAn error occurred: {framer._streamed_response['result']}")
-        
+
         return framer._streamed_response["result"]
 
 

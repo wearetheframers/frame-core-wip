@@ -59,8 +59,11 @@ class FramerFactory:
             llm_service (LLMService): Language model service for text generation.
         """
         from unittest.mock import MagicMock
+
         if not isinstance(config, FramerConfig) and not isinstance(config, MagicMock):
-            raise TypeError("config must be an instance of FramerConfig or a MagicMock for testing")
+            raise TypeError(
+                "config must be an instance of FramerConfig or a MagicMock for testing"
+            )
         if not isinstance(llm_service, LLMService):
             raise TypeError("llm_service must be an instance of LLMService")
         self.logger = logging.getLogger(__name__)
@@ -81,7 +84,7 @@ class FramerFactory:
             llm_service=self.llm_service,
             soul=None,  # We'll set this later
             brain=None,  # We'll set this later
-            config=self.config
+            config=self.config,
         )
         agency = Agency(
             llm_service=self.llm_service,
@@ -94,12 +97,19 @@ class FramerFactory:
         roles, goals = await self._generate_unique_roles_and_goals(agency, roles, goals)
 
         # Initialize the Soul component with the provided or default seed
-        soul = Soul(seed=self.config.soul_seed)
+        soul = Soul(
+            seed=(
+                self.config.soul_seed
+                if isinstance(self.config.soul_seed, (str, dict, type(None)))
+                else None
+            )
+        )
         # Initialize the WorkflowManager component
         workflow_manager = WorkflowManager()
-        # Set the memory service if provided, otherwise create a new one
-        mem0_adapter = Mem0Adapter(api_key=self.config.mem0_api_key)
-        memory_service = memory_service or MemoryService(adapter=mem0_adapter)
+        # Set the memory service if provided, otherwise create a new one if with_memory permission is present
+        if "with_memory" in self.config.permissions:
+            mem0_adapter = Mem0Adapter(api_key=self.config.mem0_api_key)
+            memory_service = memory_service or MemoryService(adapter=mem0_adapter)
         # Initialize the Brain component with roles, goals, default model
         brain = Brain(
             llm_service=self.llm_service,
@@ -172,7 +182,11 @@ class FramerFactory:
                 item["status"] = item.get("status", GoalStatus.ACTIVE.value)
             else:
                 item.status = getattr(item, "status", GoalStatus.ACTIVE)
-        priority = lambda x: x.priority if isinstance(x.priority, int) else x.priority.value if hasattr(x, "priority") else 5
+        priority = lambda x: (
+            x.priority
+            if isinstance(x.priority, int)
+            else x.priority.value if hasattr(x, "priority") else 5
+        )
         # Sort roles and goals by priority
         sorted_roles = sorted(
             unique_roles.values(),

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional, List, Union, TYPE_CHECKING
-from frame.src.framer.agency.tasks import TaskStatus
+from frame.src.framer.common.enums import ExecutionMode, TaskStatus, DecisionStatus
 
 if TYPE_CHECKING:
     from frame.src.framer.agency.priority import Priority
@@ -21,7 +21,11 @@ class Decision(BaseModel):
     priority: Union["Priority", int] = Field(
         default=None, description="Priority of the decision"
     )
-    task_status: Optional["TaskStatus"] = Field(
+    status: DecisionStatus = Field(
+        default=DecisionStatus.NOT_EXECUTED,
+        description="The execution status of the decision"
+    )
+    task_status: TaskStatus = Field(
         default=None, description="Status of the associated task"
     )
 
@@ -48,6 +52,8 @@ class Decision(BaseModel):
             "reasoning": self.reasoning,
             "confidence": self.confidence,
             "priority": self.priority,
+            "status": self.status.value,
+            "status": self.status.value,
             "task_status": self.task_status.value if self.task_status else None,
             "result": self.result,
         }

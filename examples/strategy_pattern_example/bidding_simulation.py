@@ -8,7 +8,7 @@ import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame import Frame, FramerConfig
-from frame.src.framer.brain.actions.adaptive_decision_action import (
+from frame.src.framer.brain.actions.adaptive_decision import (
     AdaptiveDecisionAction,
 )
 

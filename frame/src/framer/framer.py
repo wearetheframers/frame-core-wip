@@ -11,11 +11,12 @@ from collections import deque
 from typing import List, Dict, Any, Optional, Callable, Union, Tuple, Deque
 
 from frame.src.framer.config import FramerConfig
-from frame.src.framer.agency import Agency, Role
+from frame.src.framer.agency import Agency, Role, RoleStatus
 from frame.src.framer.agency.workflow import WorkflowManager
 from frame.src.framer.agency.tasks import Task, TaskStatus
 from frame.src.framer.agency.goals import Goal, GoalStatus
-from frame.src.framer.brain import Brain, Decision
+from frame.src.framer.brain import Brain
+from frame.src.framer.brain.decision.decision import Decision, ExecutionMode
 from frame.src.models.framer.soul.soul import Soul
 from frame.src.framer.brain.mind.perception import Perception
 from frame.src.models.framer.soul.soul import Soul
@@ -138,17 +139,11 @@ class Framer:
         if "with_memory" in self.permissions:
             self.permissions.append("with_mem0_search_extract_summarize_plugin")
 
-        logger.info(f"Permissions: {self.permissions}")
-        logger.info(f"Memory adapter: {memory_adapter}")
-
-        if "with_memory" in self.permissions and memory_adapter:
-            logger.info("Creating memory service")
+        if "with_memory" in self.permissions:
             self.memory_service = memory_service or MemoryService(
-                adapter=memory_adapter
+                adapter=memory_adapter or Mem0Adapter(api_key=self.config.mem0_api_key)
             )
-            logger.info(f"Memory service created: {self.memory_service}")
         else:
-            logger.info("Memory service not created")
             self.memory_service = None
 
         if "with_eq" in self.permissions:
@@ -184,7 +179,7 @@ class Framer:
         self._dynamic_model_choice = False
         self.observers: List[Observer] = []
         self.can_execute = True
-        self.acting = False
+        self.acting = True
 
     async def initialize(self):
         """
@@ -194,8 +189,35 @@ class Framer:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
 
         # Ensure uniqueness
-        self.roles = list({role.name if isinstance(role, Role) else role['name']: role if isinstance(role, Role) else Role(name=role) for role in self.roles}.values())
-        self.goals = list({goal.description if isinstance(goal, Goal) else goal['description']: goal if isinstance(goal, Goal) else Goal(name=goal) for goal in self.goals}.values())
+        self.roles = list(
+            {
+                (
+                    role.name
+                    if isinstance(role, Role)
+                    else getattr(role, "get", lambda k, d=None: d)("name", "default_name")
+                ): (
+                    role
+                    if isinstance(role, Role)
+                    else {
+                        "id": "default_id",
+                        "name": role,
+                        "description": "default_description",
+                        "permissions": [],
+                        "priority": 5,
+                        "status": RoleStatus.ACTIVE,
+                    }
+                )
+                for role in self.roles
+            }.values()
+        )
+        self.goals = list(
+            {
+                goal.description if isinstance(goal, Goal) else goal["description"]: (
+                    goal if isinstance(goal, Goal) else Goal(name=goal.get("name", "default_name"), description=goal.get("description", "default_description"))
+                )
+                for goal in self.goals
+            }.values()
+        )
 
         logger.info(
             f"Generated initial roles: {[role.name if isinstance(role, Role) else role['name'] for role in self.roles]}"
@@ -260,10 +282,24 @@ class Framer:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
 
         # Ensure uniqueness
-        self.roles = list({role['name'] if isinstance(role, dict) else role.name: role for role in self.roles}.values())
-        self.goals = list({goal['description'] if isinstance(goal, dict) else goal.description: goal for goal in self.goals}.values())
+        self.roles = list(
+            {
+                role["name"] if isinstance(role, dict) else role.name: role
+                for role in self.roles
+            }.values()
+        )
+        self.goals = list(
+            {
+                (
+                    goal["description"] if isinstance(goal, dict) else goal.description
+                ): goal
+                for goal in self.goals
+            }.values()
+        )
 
-        logger.info(f"Generated initial roles: {[role['name'] if isinstance(role, dict) else role.name for role in self.roles]}")
+        logger.info(
+            f"Generated initial roles: {[role['name'] if isinstance(role, dict) else role.name for role in self.roles]}"
+        )
         logger.info(
             f"Generated initial goals: {[goal['description'] if isinstance(goal, dict) else goal.description for goal in self.goals]}"
         )
@@ -329,8 +365,18 @@ class Framer:
                 _, self.goals = await self.agency.generate_roles_and_goals()
 
             # Sort roles and goals by priority
-            self.roles.sort(key=lambda x: x.priority if isinstance(x, Role) else x.get("priority", 5), reverse=True)
-            self.goals.sort(key=lambda x: x.priority if isinstance(x, Goal) else x.get("priority", 5), reverse=True)
+            self.roles.sort(
+                key=lambda x: (
+                    x.priority if isinstance(x, Role) else x.get("priority", 5)
+                ),
+                reverse=True,
+            )
+            self.goals.sort(
+                key=lambda x: (
+                    x.priority if isinstance(x, Goal) else x.get("priority", 5)
+                ),
+                reverse=True,
+            )
 
             self.agency.set_roles(self.roles)
             self.agency.set_goals(self.goals)
@@ -339,8 +385,14 @@ class Framer:
             logger.info(f"Queued perception: {perception}")
 
         # Sort roles and goals by priority
-        self.roles.sort(key=lambda x: x.priority if isinstance(x, Role) else x.get("priority", 5), reverse=True)
-        self.goals.sort(key=lambda x: x.priority if isinstance(x, Goal) else x.get("priority", 5), reverse=True)
+        self.roles.sort(
+            key=lambda x: x.priority if isinstance(x, Role) else x.get("priority", 5),
+            reverse=True,
+        )
+        self.goals.sort(
+            key=lambda x: x.priority if isinstance(x, Goal) else x.get("priority", 5),
+            reverse=True,
+        )
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
@@ -424,7 +476,7 @@ class Framer:
         """
         from frame.src.utils.config_parser import export_config_to_markdown
 
-        await export_config_to_markdown(self.config, file_path)
+        export_config_to_markdown(self.config, file_path)
 
     async def use_plugin_action(
         self, plugin_name: str, action_name: str, parameters: Dict[str, Any]
@@ -508,57 +560,26 @@ class Framer:
         decision = await self.brain.process_perception(perception, current_goals)
 
         if decision:
-            if isinstance(decision, dict):
-                decision = Decision(
-                    action=decision.get("action", "respond"),
-                    parameters=decision.get("parameters", {}),
-                    reasoning=decision.get("reasoning", "No reasoning provided."),
-                    confidence=float(decision.get("confidence", 0.5)),
-                    priority=int(decision.get("priority", 1)),
-                    related_roles=decision.get("related_roles", []),
-                    related_goals=decision.get("related_goals", []),
-                )
-            # Consider goal status in decision-making
-            active_goals = [
-                goal for goal in current_goals if goal.status == GoalStatus.ACTIVE
-            ]
-            if active_goals:
-                decision.reasoning += (
-                    f" (Aligned with {len(active_goals)} active goals)"
-                )
+            # Handle execution based on execution_mode
+            executed_decision = await self.brain.execute_decision(decision)
 
-            if hasattr(self, "can_execute") and self.can_execute:
-                if decision.action == "streaming_response":
-                    self._streaming_task = asyncio.create_task(
-                        self._handle_streaming_response(decision.parameters)
-                    )
-                else:
-                    await self.brain.execute_decision(decision)
-            logger.debug(f"Processed perception: {perception}, Decision: {decision}")
-            self.notify_observers(decision)
+            # Check the status of the executed decision
+            if executed_decision.status == 'pending_approval':
+                # Notify user or system for approval
+                pass
+            elif executed_decision.status == 'deferred':
+                # Schedule for later execution
+                pass
+            elif executed_decision.status == 'executed':
+                # Proceed as normal
+                pass
+
+            # Notify observers with the executed decision
+            self.notify_observers(executed_decision)
         else:
             logger.warning("No decision was made for the given perception.")
             return None
         return decision
-
-    async def _handle_streaming_response(self, parameters: Dict[str, Any]):
-        """
-        Handle streaming response by updating the _streamed_response attribute.
-
-        Args:
-            parameters (Dict[str, Any]): Parameters for the streaming response.
-        """
-        prompt = parameters.get("prompt", "")
-        result = await self.execution_context.llm_service.get_completion(prompt, stream=True)
-        self._streamed_response["status"] = "streaming"
-        try:
-            async for chunk in result:
-                self._streamed_response["result"] += chunk
-        except Exception as e:
-            self._streamed_response["status"] = "error"
-            self._streamed_response["result"] = f"An error occurred: {e}"
-        else:
-            self._streamed_response["status"] = "completed"
 
     async def prompt(self, text: str) -> Decision:
         """
@@ -683,3 +704,12 @@ class Framer:
             for plugin in self.plugins.values():
                 if hasattr(plugin, "on_framer_closed"):
                     plugin.on_framer_closed(self)
+
+        # Ensure plugins are properly shut down
+        for plugin in self.plugins.values():
+            if hasattr(plugin, "on_shutdown"):
+                # Await on_shutdown if it's a coroutine
+                if asyncio.iscoroutinefunction(plugin.on_shutdown):
+                    await plugin.on_shutdown()
+                else:
+                    plugin.on_shutdown()

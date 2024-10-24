@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Callable
 from frame.src.framer.agency.priority import Priority
+from frame.src.framer.brain.rules.ruleset import Rule, Ruleset
 
 
 class BasePlugin(ABC):
@@ -25,22 +26,21 @@ class BasePlugin(ABC):
         self.framer = framer
         self.logger = logging.getLogger(self.__class__.__name__)
         self.execution_context = getattr(framer, "execution_context", None)
-        if self.execution_context is None:
-            self.logger.warning(
-                "Plugin warning: Framer does not have an execution_context attribute. Possible unexpected behaviors may occur."
-            )
+        self.ruleset = Ruleset()
+        self.logger.warning(
+            "Plugin warning: Framer does not have an execution_context attribute. Possible unexpected behaviors may occur."
+        )
 
-    def remove_action(self, name: str):
+    def add_rule(self, condition: Callable[[Dict[str, Any]], bool], action: Callable[[Dict[str, Any]], None]):
         """
-        Remove an action from the action registry by its name.
+        Add a rule to the plugin.
 
         Args:
-            name (str): The name of the action to remove.
+            condition (Callable[[Dict[str, Any]], bool]): The condition function for the rule.
+            action (Callable[[Dict[str, Any]], None]): The action function to execute if the condition is met.
         """
-        if name in self.framer.brain.action_registry.actions:
-            self.framer.brain.action_registry.remove_action(name)
-        else:
-            self.logger.warning(f"Action '{name}' not found in Framer action registry.")
+        rule = Rule(condition, action)
+        self.ruleset.add_rule(rule)
 
     @abstractmethod
     async def on_load(self):

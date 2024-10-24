@@ -32,7 +32,9 @@ class BaseAction:
         """
         reasoning = kwargs.get("reasoning", "No reasoning provided.")
         print(f"Executing action '{self.name}' with reasoning: {reasoning}")
-        raise NotImplementedError(f"Action '{self.name}' must implement the execute method.")
+        raise NotImplementedError(
+            f"Action '{self.name}' must implement the execute method."
+        )
 
     def create_task(
         self, description: str, expected_output_type: Optional[type] = None, **kwargs
@@ -66,5 +68,7 @@ class BaseAction:
             list: A list of active role names.
         """
         return [
-            role.name for role in execution_context.get_roles() if isinstance(role, Role) and role.status == RoleStatus.ACTIVE
+            role.name
+            for role in execution_context.get_roles()
+            if isinstance(role, Role) and role.status == RoleStatus.ACTIVE
         ]

@@ -72,3 +72,41 @@ class Role:
             "status": self.status.value,
             "permissions": self.permissions,
         }
+
+
+from enum import Enum
+from typing import Dict, Any
+
+
+class RoleStatus(Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    SUSPENDED = "SUSPENDED"
+
+
+class Role:
+    def __init__(
+        self,
+        id: str,
+        name: str,
+        description: str,
+        permissions: list,
+        priority: int,
+        status: RoleStatus,
+    ):
+        self.id = id
+        self.name = name
+        self.description = description
+        self.permissions = permissions
+        self.priority = priority
+        self.status = status
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "permissions": self.permissions,
+            "priority": self.priority,
+            "status": self.status.value,
+        }

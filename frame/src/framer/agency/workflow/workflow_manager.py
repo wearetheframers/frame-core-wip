@@ -43,4 +43,3 @@ class WorkflowManager:
                     task.update_status(TaskStatus.CANCELED)
                     return
         raise ValueError(f"Task with id '{task_id}' not found in any workflow.")
-        return f"WorkflowManager(workflows={len(self.workflows)})"

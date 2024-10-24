@@ -17,6 +17,16 @@
 
 ## Overview
 
+Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are fully equipped for task automation and collaborative work. The framework's extensible architecture allows for the integration of custom plugins, enabling developers to tailor the system to specific real-world applications.
+
+### Strategy Pattern and Rules Integration
+
+The Strategy Pattern is a key feature of Frame, allowing for dynamic decision-making based on context. By integrating with rule-based systems, Frame can select the most appropriate strategy for a given situation, enhancing its adaptability and responsiveness.
+
+### Custom Plugins
+
+Frame's plugin system supports the development of custom plugins for unique real-world use cases. These plugins can extend the functionality of Framer agents, enabling them to perform specialized tasks in various domains, such as environmental monitoring, personalized education, and adaptive security systems.
+
 Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are fully equipped for task automation and collaborative work.
 
 
@@ -32,6 +42,7 @@ Frame is a multi-modal, multi-agent cognitive framework designed to support full
 - Flexible behavior and decision-making mechanics that can be based off of emotions and memories
 - Comprehensive priority system for roles, goals, and tasks, enabling dynamic and context-aware behavior
 - Monitoring and metrics; built-in LLM API usage / costs tracking
+- Dynamic validation of variables and parameters in decision-making processes to enhance reliability and prevent execution errors.
 
 ### Component Hierarchy and Interactions
 
@@ -87,6 +98,8 @@ Services
    - The `Mind` generates new thoughts based on perceptions and memories.
 
 3. **Decision Making**
+   - The `Brain` component makes decisions based on current perceptions, memories, and thoughts.
+   - **New:** Variables and parameters are validated during decision-making to ensure actions can be executed properly.
    - The `Brain` component makes decisions based on current perceptions, memories, and thoughts.
    - Decisions can lead to actions, new task generation, or changes in the Framer's state.
 

@@ -39,7 +39,7 @@ async def test_framer_initialization():
     from frame.src.framer.framer_factory import FramerFactory
 
     framer_factory = FramerFactory(config=config, llm_service=llm_service)
-    framer = await framer_factory.create_framed(
+    framer = await framer_factory.create_framer(
         memory_service=None,
         eq_service=None,
     )
@@ -88,8 +88,8 @@ async def test_framer_initialize():
 
     # Test case 1: Both roles and goals are None
     agency.generate_roles_and_goals.return_value = (
-        ["Generated Role"],
-        ["Generated Goal"],
+        [{"name": "Generated Role", "description": "A role description"}],
+        [{"description": "Generated Goal"}],
     )
     framer = Framer(
         config=config,
@@ -109,8 +109,8 @@ async def test_framer_initialize():
     # Test case 2: Both roles and goals are empty lists
     agency.generate_roles_and_goals.reset_mock()
     agency.generate_roles_and_goals.return_value = (
-        ["Generated Role"],
-        ["Generated Goal"],
+        [{"name": "Generated Role", "description": "A role description"}],
+        [{"description": "Generated Goal"}],
     )
     framer = Framer(
         config=config,
@@ -132,8 +132,8 @@ async def test_framer_initialize():
     # Test case 3: Roles are None, goals are empty list
     agency.generate_roles_and_goals.reset_mock()
     agency.generate_roles_and_goals.return_value = (
-        ["Generated Role"],
-        ["Generated Goal"],
+        [{"name": "Generated Role", "description": "A role description"}],
+        [{"description": "Generated Goal"}],
     )
     framer = Framer(
         config=config,
@@ -155,8 +155,8 @@ async def test_framer_initialize():
     # Test case 4: Roles are empty list, goals are None
     agency.generate_roles_and_goals.reset_mock()
     agency.generate_roles_and_goals.return_value = (
-        ["Generated Role"],
-        ["Generated Goal"],
+        [{"name": "Generated Role", "description": "A role description"}],
+        [{"description": "Generated Goal"}],
     )
     framer = Framer(
         config=config,
@@ -320,7 +320,7 @@ async def test_cancel_task():
     framer.workflow_manager.add_task("default", task)
 
     # Cancel the task
-    await framer.workflow_manager.cancel_task(task.id)
+    framer.workflow_manager.cancel_task(task.id)
 
     # Check if the task status is CANCELED
     assert task.status == TaskStatus.CANCELED

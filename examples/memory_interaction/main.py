@@ -44,8 +44,9 @@ async def main():
     frame = Frame()
 
     # Create a memory adapter
+    # It's not necessary but this shows how we can and how Framer creates memory
     memory_adapter = Mem0Adapter(api_key=os.environ.get("MEM0_API_KEY"))
-    logger.info(f"Memory adapter created: {memory_adapter}")
+    # logger.info(f"Memory adapter created: {memory_adapter}")
 
     # Create a Framer instance with the necessary permissions
     config = FramerConfig(
@@ -63,14 +64,13 @@ async def main():
 
     framer = await frame.framer_factory.create_framer(plugins=frame.plugins)
     await framer.initialize()  # Ensure the Framer is initialized
+
+    # Line below is not necessary but shows how we can replace the memory service
     framer.brain.set_memory_service(MemoryService(adapter=memory_adapter))
     logger.info(f"Framer created: {framer}")
     logger.info(f"Framer brain: {framer.brain}")
     logger.info(f"Framer brain memory service: {framer.brain.memory_service}")
     logger.info(f"Framer brain memory: {framer.brain.memory}")
-
-    mem0_plugin = Mem0SearchExtractSummarizePlugin(framer)
-    logger.info(f"Mem0SearchExtractSummarizePlugin created: {mem0_plugin}")
 
     # Wait until the Framer is ready
     while not framer.is_ready():
@@ -105,21 +105,24 @@ async def main():
     for query in queries:
         print(f"\nQuery: {query}")
         perception = {"type": "hearing", "data": {"text": query}}
+        logger.info(f"Sending perception: {perception}")
         decision = await framer.sense(perception)
+        logger.info(f"Decision received from brain: {decision}")
         if decision is not None:
             # Log the reasoning
             logger.info(f"Reasoning: {decision.reasoning}")
-
+            # Ensure parameters is a dictionary
+            if decision.action == "respond with memory retrieval" and not isinstance(decision.parameters, dict):
+                decision.parameters = {}
             # Execute the decision and get the result
             result = await framer.brain.execute_decision(decision)
-
             # Print the result of the decision
             if isinstance(result, dict):
-                if "output" in result:
+                if "output" in result and result['output'] is not None:
                     print(f"Response: {result['output']}\n")
-                elif "error" in result:
+                elif "error" in result and result['error'] is not None:
                     print(f"Error: {result['error']}\n")
-                elif "response" in result:
+                elif "response" in result and result['response'] is not None:
                     print(f"Response: {result['response']}\n")
                 else:
                     print(f"Unexpected result format: {result}\n")

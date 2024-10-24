@@ -1,16 +1,69 @@
 import json
+from enum import Enum
+
+class DecisionStatus(str, Enum):
+    EXECUTED = 'executed'
+    PENDING_APPROVAL = 'pending_approval'
+    DEFERRED = 'deferred'
+    NOT_EXECUTED = 'not_executed'
+from enum import Enum
+from enum import Enum
 from pydantic import BaseModel, Field
+
+class DecisionStatus(str, Enum):
+    EXECUTED = 'executed'
+    PENDING_APPROVAL = 'pending_approval'
+    DEFERRED = 'deferred'
+    NOT_EXECUTED = 'not_executed'
+
+class DecisionStatus(str, Enum):
+    EXECUTED = 'executed'
+    PENDING_APPROVAL = 'pending_approval'
+    DEFERRED = 'deferred'
+    NOT_EXECUTED = 'not_executed'
+
+class ExecutionMode(str, Enum):
+    AUTO = "auto"
+    USER_APPROVAL = "user_approval"
+    DEFERRED = "deferred"
+
 from typing import Dict, Any, Optional, Union, List
 from frame.src.models.framer.brain.decision import Decision as DecisionModel
 from frame.src.framer.agency.priority import Priority
 from frame.src.framer.agency.roles import Role
 from frame.src.framer.agency.goals import Goal
-from frame.src.framer.agency.tasks import TaskStatus
+from frame.src.framer.agency.tasks import TaskStatus, Task
+
 from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from frame.src.framer.agency.roles import Role
+    from frame.src.framer.agency.goals import Goal
+
+
+class ExecutionMode(str, Enum):
+    AUTO = "auto"
+    USER_APPROVAL = "user_approval"
+    DEFERRED = "deferred"
 
 
 class Decision(DecisionModel):
     """
+    Represents a decision made by the Brain component of a Framer.
+
+    Attributes:
+        action (str): The action to be taken.
+        parameters (Dict[str, Any]): Parameters for the action.
+        reasoning (str): The reasoning behind the decision.
+        confidence (float): The confidence level of the decision.
+        priority (int): The priority of the decision.
+        status (DecisionStatus): The execution status of the decision.
+
+    Notes:
+        The Decision class now includes validation of action parameters to ensure
+        that all necessary variables are present and correctly formatted. This
+        validation helps prevent execution errors and enhances the reliability of
+        the decision-making process.
     Represents a decision made by the Brain component of a Framer.
 
     To extend decision-making capabilities, you can add new actions to the
@@ -28,10 +81,38 @@ class Decision(DecisionModel):
         related_goals (List[Goal]): Goals related to this decision.
     """
 
+    is_executable: bool = Field(
+        default=True,
+        description="Indicates if the decision can be executed automatically",
+    )
+    execution_mode: ExecutionMode = Field(
+        default=ExecutionMode.AUTO,
+        description="Defines how the decision should be executed.",
+    )
+    execution_mode: ExecutionMode = Field(
+        default=ExecutionMode.AUTO,
+        description="Defines how the decision should be executed.",
+    )
+    execution_mode: str = Field(
+        default="auto",
+        description="Defines how the decision should be executed. Options: 'auto', 'user_approval', 'deferred'",
+    )
     expected_results: List[Any] = Field(
         default_factory=list, description="The expected results of the decision"
     )
-    task_status: "TaskStatus" = Field(
+    status: DecisionStatus = Field(
+        default=DecisionStatus.NOT_EXECUTED,
+        description='The execution status of the decision'
+    )
+    status: DecisionStatus = Field(
+        default=DecisionStatus.NOT_EXECUTED,
+        description='The execution status of the decision'
+    )
+    status: DecisionStatus = Field(
+        default=DecisionStatus.NOT_EXECUTED,
+        description="The execution status of the decision"
+    )
+    task_status: TaskStatus = Field(
         default=TaskStatus.PENDING, description="Status of the associated task"
     )
     related_roles: List["Role"] = Field(
@@ -66,6 +147,18 @@ class Decision(DecisionModel):
 
         return cls(**decision_dict)
 
+    def to_task(self) -> "Task":
+        """
+        Convert the Decision into a Task.
+        """
+        return Task(
+            description=self.reasoning,
+            priority=self.priority,
+            status=TaskStatus.PENDING,
+            data=self.parameters,
+            type=self.action,
+        )
+
     def to_dict(self) -> Dict[str, Any]:
         """
         Convert the Decision object to a dictionary.
@@ -79,8 +172,10 @@ class Decision(DecisionModel):
             "reasoning": self.reasoning,
             "confidence": self.confidence,
             "priority": self.priority,
+            "execution_mode": self.execution_mode.value,
             "expected_results": self.expected_results,
             "task_status": self.task_status.value,
+            "status": self.status.value,
             "related_roles": [
                 role.to_dict() if hasattr(role, "to_dict") else str(role)
                 for role in self.related_roles
@@ -174,4 +269,3 @@ class Decision(DecisionModel):
 
 
 Decision.update_forward_refs()
-

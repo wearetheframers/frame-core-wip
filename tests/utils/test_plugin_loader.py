@@ -53,7 +53,7 @@ def test_load_plugins(mock_plugin_dir):
         mock_plugin_class = MockPlugin  # Use the MockPlugin class
         mock_module.Plugin = mock_plugin_class
         mock_module.Plugin.__name__ = "Plugin"
-        mock_module.Plugin = MockPlugin
+        mock_module.Plugin = mock_plugin_class
         mock_import.return_value = mock_module
         mock_listdir.return_value = ["mock_plugin"]
         mock_isdir.return_value = True
@@ -61,7 +61,7 @@ def test_load_plugins(mock_plugin_dir):
 
         plugins, warnings = load_plugins(mock_plugin_dir)
 
-        assert len(plugins) == 1
+        assert len(plugins) == 1, f"Expected 1 plugin, got {len(plugins)}"
         assert "mock_plugin" in plugins
         assert isinstance(plugins["mock_plugin"], MockPlugin)
         assert len(warnings) == 0
@@ -84,11 +84,14 @@ def test_load_plugins_with_conflict(mock_plugin_dir):
         mock_import.side_effect = [mock_module1, mock_module2]
         mock_listdir.return_value = ["mock_plugin1", "mock_plugin2"]
         mock_isdir.return_value = True
-        mock_load_config.return_value = {}
+        mock_load_config.side_effect = [
+            {"name": "MockPlugin1"},
+            {"name": "MockPlugin2"},
+        ]
 
         plugins, warnings = load_plugins(mock_plugin_dir)
 
-        assert len(plugins) == 1
+        assert len(plugins) == 2, f"Expected 2 plugins, got {len(plugins)}"
         assert "mock_plugin1" in plugins
         assert "mock_plugin2" in plugins
         assert len(warnings) == 1

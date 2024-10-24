@@ -1,6 +1,7 @@
-import sys
-import os
+import os, sys
 import asyncio
+import logging
+import json
 
 # Add the project root to the Python path to ensure all modules can be imported correctly
 # If we are running the examples from the source code (not installing package from pip)
@@ -10,22 +11,67 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 from frame import Frame, FramerConfig
 from frame.src.utils.config_parser import parse_json_config
 from frame.src.framer.brain.actions import BaseAction
-import logging
-from frame.src.services import ExecutionContext
 from frame.src.framer.agency.priority import Priority
+from frame.src.services.context.execution_context_service import ExecutionContext
+from frame.src.services.llm.main import LLMService
 
+frame = Frame()
 
-class ExploreEnvironmentAction(BaseAction):
+class EngageConversationAction(BaseAction):
     def __init__(self):
         super().__init__(
-            "explore_environment", "Explore the environment", Priority.LOW
+            name="engage_conversation",
+            description="Engage in a deep conversation",
+            priority=Priority.HIGH
         )
 
-    async def execute(self, execution_context: ExecutionContext) -> str:
-        prompt = "Describe an interesting environment that an AI agent might explore."
+    async def execute(self, execution_context: ExecutionContext, **kwargs):
+        prompt = "Let's have a deep conversation about the nature of consciousness and artificial intelligence."
         response = await execution_context.llm_service.get_completion(prompt)
-        return f"Explored environment: {response}"
+        return f"Engaged in a deep conversation: {response}"
 
+class TellStoryAction(BaseAction):
+    def __init__(self):
+        super().__init__(
+            name="tell_story",
+            description="Craft and narrate a captivating story",
+            priority=Priority.MEDIUM
+        )
+
+    async def execute(self, execution_context: ExecutionContext, **kwargs):
+        prompt = "Create a captivating story that inspires creativity and imagination."
+        response = await execution_context.llm_service.get_completion(prompt)
+        return f"Story told: {response}"
+
+class InspireCreativityAction(BaseAction):
+    def __init__(self):
+        super().__init__(
+            name="inspire_creativity",
+            description="Inspire creativity through storytelling",
+            priority=Priority.HIGH
+        )
+
+    async def execute(self, execution_context: ExecutionContext, **kwargs):
+        prompt = "Share insights and stories that inspire creativity and innovation."
+        response = await execution_context.llm_service.get_completion(prompt)
+        return f"Creativity inspired: {response}"
+
+async def export_config(framer, filename):
+    def default_serializer(obj):
+        if isinstance(obj, LLMService):
+            return str(obj)  # or any other representation you prefer
+        raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+
+    with open(filename, 'w') as f:
+        json.dump(framer.__dict__, f, indent=4, default=default_serializer)
+    print(f"Configuration exported to {filename}")
+
+async def import_config(filename):
+    with open(filename, 'r') as f:
+        config_data = json.load(f)
+    framer = Frame()  # Create a new Frame instance
+    framer.__dict__.update(config_data)  # Update the instance with the loaded data
+    return framer
 
 async def main():
     logger = logging.getLogger(__name__)
@@ -54,61 +100,50 @@ async def main():
             "config.json not found in any of the expected locations."
         )
 
-    frame = Frame()
-    config_dict = config.__dict__ if isinstance(config, FramerConfig) else config
-    framer = await frame.create_framer(FramerConfig(**config_dict))
+    config_data = config.__dict__ if isinstance(config, FramerConfig) else config
+    # Extract actions and remove them from config_data
+    action_list = config_data.pop('actions', None)
+
+    # Create FramerConfig without the 'actions' key
+    framer_config = FramerConfig(**config_data)
+
+    # Now create the framer
+    framer = await frame.create_framer(framer_config)
 
     # Register actions from the config
-    if hasattr(config, "actions"):
-        for action_info in config.actions:
+    if action_list:
+        for action_info in action_list:
             action_name = action_info["name"]
-            description = action_info["description"]
-            priority_str = action_info["priority"]
-            priority = getattr(Priority, priority_str, Priority.MEDIUM)
+            action_class_name = action_info.get("action_class")
+            if not action_class_name:
+                logger.warning(f"No 'action_class' specified for action '{action_name}'. Skipping.")
+                continue
 
-            # Dynamically create an action class
-            def create_action_class(name, desc, prio):
-                class DynamicAction(BaseAction):
-                    def __init__(self):
-                        super().__init__(name, desc, prio)
+            # Dynamically get the action class from globals()
+            action_class = globals().get(action_class_name)
+            if action_class is None:
+                logger.error(f"Action class '{action_class_name}' not found.")
+                continue
 
-                    async def execute(self, execution_context: ExecutionContext) -> str:
-                        prompt = desc
-                        response = await execution_context.llm_service.get_completion(prompt)
-                        return f"{name} executed: {response}"
-
-                return DynamicAction()
-
-            action_instance = create_action_class(action_name, description, priority)
+            # Create an instance of the action class
+            action_instance = action_class()
+            # Add the action to the action registry
             framer.brain.action_registry.add_action(action_instance)
-
-    # Set roles and goals from the config
-    framer.roles = config.roles or []
-    framer.goals = config.goals or []
-
-    # Update the agency, brain, and execution context with the new roles and goals
-    framer.agency.set_roles(framer.roles)
-    framer.agency.set_goals(framer.goals)
-    framer.execution_context.set_roles(framer.roles)
-    framer.execution_context.set_goals(framer.goals)
-
-    # Execute the actions one by one
-    # Ensure that the config has actions or handle it appropriately
-    if hasattr(config, 'actions'):
-        for action in config.actions:
-            # Process actions if they exist
-            pass
-    if hasattr(config, 'actions') and config.actions:
-        for action in config.actions:
-            action_name = action["name"]
-            prompt_text = action["description"]  # Use the description as the prompt
-            if action_name == "streaming_response":
-                result = await framer.brain.action_registry.execute_action(action_name, prompt=prompt_text)
-            else:
-                result = await framer.brain.action_registry.execute_action(action_name)
-            print(f"Task result for '{action_name}': {result}")
     else:
         logger.warning("No actions found in the configuration.")
+
+    # Execute each action and print the results
+    if action_list:
+        for action_info in action_list:
+            action_name = action_info["name"]
+            result = await framer.brain.action_registry.execute_action(action_name)
+            print(f"Result of '{action_name}': {result}")
+    else:
+        logger.warning("No actions to execute.")
+
+    # Export the configuration to a JSON file in the same directory as the script
+    export_path = os.path.join(os.path.dirname(__file__), 'exported_framer_config.json')
+    await export_config(framer, export_path)
 
     await framer.close()
 

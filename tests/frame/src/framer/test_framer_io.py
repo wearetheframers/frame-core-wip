@@ -2,6 +2,7 @@ import asyncio
 from unittest import IsolatedAsyncioTestCase, mock
 from unittest.mock import MagicMock, patch, AsyncMock
 from frame.src.framer.framer import Framer
+from frame.src.services.llm.main import LLMService
 from frame.src.utils.config_parser import parse_json_config, parse_markdown_config
 from frame.src.framer.framer_factory import FramerFactory
 
@@ -10,8 +11,8 @@ class TestFramerIO(IsolatedAsyncioTestCase):
 
     @patch("frame.src.framer.framer.Framer.load_from_file")
     async def test_load_framer_from_file(self, mock_load):
-        mock_load.return_value = MagicMock(spec=Framer)
-        framer_factory = FramerFactory(MagicMock(), MagicMock())
+        mock_load.return_value = AsyncMock(spec=Framer)
+        framer_factory = FramerFactory(MagicMock(), MagicMock(spec=LLMService))
         framer = await framer_factory.create_framer(
             memory_service=None,
             eq_service=None,
@@ -23,12 +24,20 @@ class TestFramerIO(IsolatedAsyncioTestCase):
         new_callable=AsyncMock,
     )
     @patch("json.dump")
+    @patch(
+        "frame.src.utils.config_parser.export_config_to_json", new_callable=AsyncMock
+    )
     @patch("builtins.open", new_callable=mock.mock_open)
     @patch(
         "frame.src.services.llm.main.LLMService.get_completion", new_callable=AsyncMock
     )
     async def test_export_to_json(
-        self, mock_get_completion, mock_open, mock_json_dump, mock_generate_roles
+        self,
+        mock_get_completion,
+        mock_open,
+        mock_json_dump,
+        mock_export_config,
+        mock_generate_roles,
     ):
         mock_get_completion.return_value = (
             '{"roles": [], "goals": []}'  # Return a valid JSON string
@@ -46,6 +55,8 @@ class TestFramerIO(IsolatedAsyncioTestCase):
         )
         await framer.export_to_file("dummy_path", llm=MagicMock())
         mock_open.assert_called_once_with("dummy_path", "w")
+        mock_export_config.assert_called_once_with(framer.config, "dummy_path")
+        mock_export_config.assert_called_once_with(framer.config.to_dict(), mock_open(), indent=4)
         mock_json_dump.assert_called_once()
 
     @patch(
