@@ -6,7 +6,8 @@ This plugin provides audio transcription capabilities using the Whisper model. I
 
 - Record and transcribe audio
 - Analyze transcriptions to create notes
-- Continuous recording and transcription
+- Continuous monitoring of audio for sounds above a certain decibel level
+- Optional transcription of detected sounds
 
 ## Installation
 
