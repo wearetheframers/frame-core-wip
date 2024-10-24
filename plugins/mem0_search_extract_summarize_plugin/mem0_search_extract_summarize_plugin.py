@@ -38,7 +38,8 @@ from frame.src.constants import MEM0_API_KEY
 
 
 class Mem0SearchExtractSummarizePlugin(BasePlugin):
-    def __init__(self, framer):
+    def __init__(self, framer=None):
+        print("FLOF U")
         super().__init__(framer)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
