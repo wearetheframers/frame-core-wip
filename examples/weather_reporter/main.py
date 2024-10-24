@@ -66,7 +66,7 @@ async def main():
         if decision:
             # Extract the city/location from the perception data
             city = perception["data"]["content"].split("in")[-1].strip("?").strip()
-            await framer.brain.execute_decision(decision, query=perception["data"]["content"], location=city)
+            await framer.brain.execute_decision(decision)
 
         # Add a small delay to simulate time passing between perceptions
         await asyncio.sleep(1)
