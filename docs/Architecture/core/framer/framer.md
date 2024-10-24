@@ -130,3 +130,16 @@ print(framer_with_no_roles.agency.goals)  # Output: []
 5. **Leverage Plugins**: Extend the Framer's capabilities with plugins for specialized tasks or integrations.
 6. **Balance Autonomy and Control**: Allow Framers to make decisions autonomously while providing appropriate constraints and oversight.
 7. **Optimize Resource Usage**: Be mindful of API calls and computational resources, especially when working with multiple Framers.
+# Framer Component in Framer
+
+The Framer component serves as the central coordinator for all AI agent operations, managing the interplay between various components to create a cohesive and intelligent entity. It processes perceptions, makes decisions, and executes tasks. However, there are scenarios where a decision might not be executed immediately, leading to another decision being made. These scenarios include:
+
+1. **Decision Already Executed**: If a decision has already been executed, the system will skip re-execution to prevent redundant actions. This is typically logged with a message like "Decision already executed, skipping re-execution."
+
+2. **Framer Not Ready**: If the Framer is not in a state to execute decisions (e.g., during initialization or when certain dependencies are not yet loaded), the decision will be queued for later execution.
+
+3. **Invalid Decision**: If the decision is deemed invalid due to missing or incorrect parameters, it may be discarded, prompting the system to make a new decision.
+
+4. **Priority Override**: In some cases, a new perception or context change might lead to a higher-priority decision overriding the current one, causing the system to pivot to the new decision.
+
+These scenarios are crucial for understanding the decision-making process within the Framer component and ensuring that the system operates smoothly and efficiently.

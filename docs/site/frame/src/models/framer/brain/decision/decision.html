@@ -37,7 +37,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.models.framer.brain.decision.decision.Decision"><code class="flex name class">
 <span>class <span class="ident">Decision</span></span>
-<span>(</span><span>**data)</span>
+<span>(</span><span>**data: Any)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
@@ -103,12 +103,21 @@ validated to form a valid model.</p>
     priority: Union[&#34;Priority&#34;, int] = Field(
         default=None, description=&#34;Priority of the decision&#34;
     )
-    task_status: Optional[&#34;TaskStatus&#34;] = Field(
+    status: DecisionStatus = Field(
+        default=DecisionStatus.NOT_EXECUTED,
+        description=&#34;The execution status of the decision&#34;
+    )
+    task_status: TaskStatus = Field(
         default=None, description=&#34;Status of the associated task&#34;
     )
 
-    def __init__(self, **data):
-        super().__init__(**data)
+    def __str__(self):
+        return (
+            f&#34;Decision(action={self.action}, confidence={self.confidence}, &#34;
+            f&#34;priority={self.priority}, task_status={self.task_status}, &#34;
+            f&#34;reasoning={self.reasoning}, related_roles={len(self.related_roles)}, &#34;
+            f&#34;related_goals={len(self.related_goals)})&#34;
+        )
 
     result: Optional[Dict[str, Any]] = Field(
         default=None, description=&#34;The result of executing the decision&#34;
@@ -125,6 +134,8 @@ validated to form a valid model.</p>
             &#34;reasoning&#34;: self.reasoning,
             &#34;confidence&#34;: self.confidence,
             &#34;priority&#34;: self.priority,
+            &#34;status&#34;: self.status.value,
+            &#34;status&#34;: self.status.value,
             &#34;task_status&#34;: self.task_status.value if self.task_status else None,
             &#34;result&#34;: self.result,
         }</code></pre>
@@ -183,7 +194,11 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.models.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : Optional[TaskStatus]</code></dt>
+<dt id="frame.src.models.framer.brain.decision.decision.Decision.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.framer.common.enums.DecisionStatus" href="../../../../framer/common/enums.html#frame.src.framer.common.enums.DecisionStatus">DecisionStatus</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.models.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : <a title="frame.src.framer.common.enums.TaskStatus" href="../../../../framer/common/enums.html#frame.src.framer.common.enums.TaskStatus">TaskStatus</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -227,6 +242,7 @@ validated to form a valid model.</p>
 <li><code><a title="frame.src.models.framer.brain.decision.decision.Decision.priority" href="#frame.src.models.framer.brain.decision.decision.Decision.priority">priority</a></code></li>
 <li><code><a title="frame.src.models.framer.brain.decision.decision.Decision.reasoning" href="#frame.src.models.framer.brain.decision.decision.Decision.reasoning">reasoning</a></code></li>
 <li><code><a title="frame.src.models.framer.brain.decision.decision.Decision.result" href="#frame.src.models.framer.brain.decision.decision.Decision.result">result</a></code></li>
+<li><code><a title="frame.src.models.framer.brain.decision.decision.Decision.status" href="#frame.src.models.framer.brain.decision.decision.Decision.status">status</a></code></li>
 <li><code><a title="frame.src.models.framer.brain.decision.decision.Decision.task_status" href="#frame.src.models.framer.brain.decision.decision.Decision.task_status">task_status</a></code></li>
 <li><code><a title="frame.src.models.framer.brain.decision.decision.Decision.to_dict" href="#frame.src.models.framer.brain.decision.decision.Decision.to_dict">to_dict</a></code></li>
 </ul>

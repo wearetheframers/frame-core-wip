@@ -126,7 +126,15 @@ validated to form a valid model.</p>
         else:
             raise ValueError(&#34;Seed must be either a string, dictionary, or None.&#34;)
 
-    @classmethod
+    def get_current_state(self) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Get a copy of the current state of the Soul.
+
+        Returns:
+            Dict[str, Any]: A shallow copy of the current state of the Soul.
+        &#34;&#34;&#34;
+        return self.state.copy()
+
     def from_seed(cls, seed: Union[str, Dict[str, Any]]) -&gt; &#34;Soul&#34;:
         &#34;&#34;&#34;
         Create a Soul instance from a seed.
@@ -140,7 +148,16 @@ validated to form a valid model.</p>
         Returns:
             Soul: A new Soul instance initialized with the provided seed.
         &#34;&#34;&#34;
-        return cls(seed=seed)</code></pre>
+        return cls(seed=seed)
+
+    def get_current_state(self) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Get a copy of the current state of the Soul.
+
+        Returns:
+            Dict[str, Any]: A shallow copy of the current state of the Soul.
+        &#34;&#34;&#34;
+        return self.state.copy()</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -183,8 +200,17 @@ validated to form a valid model.</p>
 </dl>
 <h3>Static methods</h3>
 <dl>
+<dt id="frame.src.models.framer.soul.soul.Soul.process_seed"><code class="name flex">
+<span>def <span class="ident">process_seed</span></span>(<span>v, values)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
 <dt id="frame.src.models.framer.soul.soul.Soul.from_seed"><code class="name flex">
-<span>def <span class="ident">from_seed</span></span>(<span>seed: Union[str, Dict[str, Any]]) ‑> <a title="frame.src.models.framer.soul.soul.Soul" href="#frame.src.models.framer.soul.soul.Soul">Soul</a></span>
+<span>def <span class="ident">from_seed</span></span>(<span>cls, seed: Union[str, Dict[str, Any]]) ‑> <a title="frame.src.models.framer.soul.soul.Soul" href="#frame.src.models.framer.soul.soul.Soul">Soul</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a Soul instance from a seed.</p>
@@ -202,11 +228,16 @@ Can be either a string or a dictionary:
 <dd>A new Soul instance initialized with the provided seed.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.models.framer.soul.soul.Soul.process_seed"><code class="name flex">
-<span>def <span class="ident">process_seed</span></span>(<span>v, values)</span>
+<dt id="frame.src.models.framer.soul.soul.Soul.get_current_state"><code class="name flex">
+<span>def <span class="ident">get_current_state</span></span>(<span>self) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get a copy of the current state of the Soul.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Dict[str, Any]</code></dt>
+<dd>A shallow copy of the current state of the Soul.</dd>
+</dl></div>
 </dd>
 </dl>
 </dd>
@@ -231,6 +262,7 @@ Can be either a string or a dictionary:
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.Config" href="#frame.src.models.framer.soul.soul.Soul.Config">Config</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.essence" href="#frame.src.models.framer.soul.soul.Soul.essence">essence</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.from_seed" href="#frame.src.models.framer.soul.soul.Soul.from_seed">from_seed</a></code></li>
+<li><code><a title="frame.src.models.framer.soul.soul.Soul.get_current_state" href="#frame.src.models.framer.soul.soul.Soul.get_current_state">get_current_state</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.model_computed_fields" href="#frame.src.models.framer.soul.soul.Soul.model_computed_fields">model_computed_fields</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.model_config" href="#frame.src.models.framer.soul.soul.Soul.model_config">model_config</a></code></li>
 <li><code><a title="frame.src.models.framer.soul.soul.Soul.model_fields" href="#frame.src.models.framer.soul.soul.Soul.model_fields">model_fields</a></code></li>

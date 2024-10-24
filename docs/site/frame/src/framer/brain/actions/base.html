@@ -71,7 +71,11 @@ hljs.highlightAll();
         Returns:
             Any: The result of the action execution, which could be a Task or any other type.
         &#34;&#34;&#34;
-        raise NotImplementedError(&#34;Subclasses must implement this method&#34;)
+        reasoning = kwargs.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
+        print(f&#34;Executing action &#39;{self.name}&#39; with reasoning: {reasoning}&#34;)
+        raise NotImplementedError(
+            f&#34;Action &#39;{self.name}&#39; must implement the execute method.&#34;
+        )
 
     def create_task(
         self, description: str, expected_output_type: Optional[type] = None, **kwargs
@@ -92,14 +96,29 @@ hljs.highlightAll();
         )
 
     def __str__(self):
-        return f&#34;BaseAction(name={self.name}, priority={self.priority})&#34;</code></pre>
+        return f&#34;BaseAction(name={self.name}, priority={self.priority})&#34;
+
+    def get_active_role_names(self, execution_context: ExecutionContext) -&gt; list:
+        &#34;&#34;&#34;
+        Get the names of active roles from the execution context.
+
+        Args:
+            execution_context (ExecutionContext): The execution context containing roles.
+
+        Returns:
+            list: A list of active role names.
+        &#34;&#34;&#34;
+        return [
+            role.name
+            for role in execution_context.get_roles()
+            if isinstance(role, Role) and role.status == RoleStatus.ACTIVE
+        ]</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="frame.src.framer.brain.actions.adaptive_decision.AdaptiveDecisionAction" href="adaptive_decision.html#frame.src.framer.brain.actions.adaptive_decision.AdaptiveDecisionAction">AdaptiveDecisionAction</a></li>
-<li><a title="frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction" href="adaptive_decision_action.html#frame.src.framer.brain.actions.adaptive_decision_action.AdaptiveDecisionAction">AdaptiveDecisionAction</a></li>
 <li><a title="frame.src.framer.brain.actions.create_new_agent.CreateNewAgentAction" href="create_new_agent.html#frame.src.framer.brain.actions.create_new_agent.CreateNewAgentAction">CreateNewAgentAction</a></li>
-<li><a title="frame.src.framer.brain.actions.error_action.ErrorAction" href="error_action.html#frame.src.framer.brain.actions.error_action.ErrorAction">ErrorAction</a></li>
+<li><a title="frame.src.framer.brain.actions.error.ErrorAction" href="error.html#frame.src.framer.brain.actions.error.ErrorAction">ErrorAction</a></li>
 <li><a title="frame.src.framer.brain.actions.generate_roles_and_goals.GenerateRolesAndGoalsAction" href="generate_roles_and_goals.html#frame.src.framer.brain.actions.generate_roles_and_goals.GenerateRolesAndGoalsAction">GenerateRolesAndGoalsAction</a></li>
 <li><a title="frame.src.framer.brain.actions.observe.ObserveAction" href="observe.html#frame.src.framer.brain.actions.observe.ObserveAction">ObserveAction</a></li>
 <li><a title="frame.src.framer.brain.actions.research.ResearchAction" href="research.html#frame.src.framer.brain.actions.research.ResearchAction">ResearchAction</a></li>
@@ -148,6 +167,22 @@ hljs.highlightAll();
 <dd>The result of the action execution, which could be a Task or any other type.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.framer.brain.actions.base.BaseAction.get_active_role_names"><code class="name flex">
+<span>def <span class="ident">get_active_role_names</span></span>(<span>self, execution_context: <a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../../../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>) ‑> list</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the names of active roles from the execution context.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>execution_context</code></strong> :&ensp;<code>ExecutionContext</code></dt>
+<dd>The execution context containing roles.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>A list of active role names.</dd>
+</dl></div>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -170,6 +205,7 @@ hljs.highlightAll();
 <ul class="">
 <li><code><a title="frame.src.framer.brain.actions.base.BaseAction.create_task" href="#frame.src.framer.brain.actions.base.BaseAction.create_task">create_task</a></code></li>
 <li><code><a title="frame.src.framer.brain.actions.base.BaseAction.execute" href="#frame.src.framer.brain.actions.base.BaseAction.execute">execute</a></code></li>
+<li><code><a title="frame.src.framer.brain.actions.base.BaseAction.get_active_role_names" href="#frame.src.framer.brain.actions.base.BaseAction.get_active_role_names">get_active_role_names</a></code></li>
 </ul>
 </li>
 </ul>

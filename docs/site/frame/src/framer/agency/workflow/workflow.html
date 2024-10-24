@@ -46,12 +46,17 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Workflow:
-    def __init__(self, name: str, is_async: bool = False, stakeholders: Optional[List[Dict[str, Any]]] = None):
+    def __init__(
+        self,
+        name: str,
+        is_async: bool = False,
+        stakeholders: Optional[List[Dict[str, Any]]] = None,
+    ):
         self.id = generate_id()
         self.stakeholders = stakeholders or []
         for stakeholder in self.stakeholders:
-            stakeholder[&#39;id&#39;] = stakeholder.get(&#39;id&#39;, generate_id())
-            stakeholder[&#39;roles&#39;] = stakeholder.get(&#39;roles&#39;, [])
+            stakeholder[&#34;id&#34;] = stakeholder.get(&#34;id&#34;, generate_id())
+            stakeholder[&#34;roles&#34;] = stakeholder.get(&#34;roles&#34;, [])
         self.name = name
         self.tasks: List[Task] = []
         self.is_async = is_async
@@ -66,6 +71,16 @@ hljs.highlightAll();
     def get_tasks(self) -&gt; List[Task]:
         return self.tasks
 
+    def cancel_task(self, task_id: str) -&gt; None:
+        &#34;&#34;&#34;
+        Cancel a task by its ID.
+
+        Args:
+            task_id (str): The ID of the task to cancel.
+        &#34;&#34;&#34;
+        # Implementation of cancellation logic
+        print(f&#34;Task {task_id} has been cancelled.&#34;)
+
     def __str__(self):
         return f&#34;Workflow(name={self.name}, tasks={len(self.tasks)}, is_async={self.is_async})&#34;</code></pre>
 </details>
@@ -76,6 +91,17 @@ hljs.highlightAll();
 </code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.workflow.workflow.Workflow.cancel_task"><code class="name flex">
+<span>def <span class="ident">cancel_task</span></span>(<span>self, task_id: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Cancel a task by its ID.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ID of the task to cancel.</dd>
+</dl></div>
 </dd>
 <dt id="frame.src.framer.agency.workflow.workflow.Workflow.get_tasks"><code class="name flex">
 <span>def <span class="ident">get_tasks</span></span>(<span>self) ‑> List[<a title="frame.src.framer.agency.tasks.task.Task" href="../tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]</span>
@@ -110,6 +136,7 @@ hljs.highlightAll();
 <h4><code><a title="frame.src.framer.agency.workflow.workflow.Workflow" href="#frame.src.framer.agency.workflow.workflow.Workflow">Workflow</a></code></h4>
 <ul class="">
 <li><code><a title="frame.src.framer.agency.workflow.workflow.Workflow.add_task" href="#frame.src.framer.agency.workflow.workflow.Workflow.add_task">add_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.workflow.workflow.Workflow.cancel_task" href="#frame.src.framer.agency.workflow.workflow.Workflow.cancel_task">cancel_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.workflow.workflow.Workflow.get_tasks" href="#frame.src.framer.agency.workflow.workflow.Workflow.get_tasks">get_tasks</a></code></li>
 <li><code><a title="frame.src.framer.agency.workflow.workflow.Workflow.set_final_task" href="#frame.src.framer.agency.workflow.workflow.Workflow.set_final_task">set_final_task</a></code></li>
 </ul>

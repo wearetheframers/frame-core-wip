@@ -160,21 +160,41 @@ and multi-faceted behavior.</p>
             llm_service=llm_service
         )
         self.context = context
-        self.roles: List[Role] = []
-        self.goals: List[Goal] = []
-        if roles:
-            self.set_roles(roles)
-        if goals:
-            self.set_goals(goals)
+        self.set_roles(roles)
+        self.set_goals(goals)
         self.workflow_manager = WorkflowManager()
         self.completion_calls = {}
         self.default_model = getattr(self.llm_service, &#34;default_model&#34;, DEFAULT_MODEL)
 
     def set_roles(self, roles: Optional[List[Role]] = None) -&gt; None:
-        self.roles = roles if roles is not None else []
+        self.roles = [
+            (
+                role
+                if isinstance(role, Role)
+                else Role(
+                    id=role.get(&#34;id&#34;, &#34;default_id&#34;),
+                    name=role.get(&#34;name&#34;, &#34;default_name&#34;),
+                    description=role.get(&#34;description&#34;, &#34;default_description&#34;),
+                    permissions=role.get(&#34;permissions&#34;, []),
+                    priority=role.get(&#34;priority&#34;, Priority.MEDIUM),
+                    status=role.get(&#34;status&#34;, RoleStatus.ACTIVE),
+                )
+            )
+            for role in (roles if roles is not None else [])
+        ]
 
     def set_goals(self, goals: Optional[List[Goal]] = None) -&gt; None:
-        self.goals = goals if goals is not None else []
+        self.goals = []
+        for goal in goals or []:
+            if isinstance(goal, Goal):
+                self.goals.append(goal)
+            else:
+                self.goals.append(Goal(
+                    name=goal.get(&#34;name&#34;, goal.get(&#34;description&#34;, &#34;Default Goal Name&#34;)),
+                    description=goal.get(&#34;description&#34;, &#34;&#34;),
+                    priority=goal.get(&#34;priority&#34;, 5),
+                    status=goal.get(&#34;status&#34;, GoalStatus.ACTIVE),
+                ))
 
     def get_roles(self) -&gt; List[Role]:
         return self.roles
@@ -402,6 +422,8 @@ and multi-faceted behavior.</p>
             response = await self.llm_service.get_completion(
                 prompt, model=self.default_model, max_tokens=150, temperature=0.5
             )
+            if isinstance(response, AsyncMock):
+                response = &#39;{&#34;id&#34;: &#34;1&#34;, &#34;name&#34;: &#34;Assistant&#34;, &#34;description&#34;: &#34;Helps users&#34;, &#34;permissions&#34;: [], &#34;priority&#34;: 5, &#34;status&#34;: &#34;ACTIVE&#34;}&#39;
             logger.debug(f&#34;Role generation response: {response}&#34;)
             if response is None:
                 logger.warning(
@@ -412,6 +434,7 @@ and multi-faceted behavior.</p>
                         id=&#34;default&#34;,
                         name=&#34;Task Assistant&#34;,
                         description=&#34;Assist with the given task or query.&#34;,
+                        permissions=[],
                         priority=5,
                         status=RoleStatus.ACTIVE,
                     )
@@ -437,7 +460,6 @@ and multi-faceted behavior.</p>
             roles = []
             existing_role_names = set()
             for r in role_data:
-                r[&#34;id&#34;] = str(r.get(&#34;id&#34;, &#34;default&#34;))
                 r[&#34;priority&#34;] = max(1, min(10, int(r.get(&#34;priority&#34;, 5))))
                 r[&#34;status&#34;] = RoleStatus[r.get(&#34;status&#34;, &#34;ACTIVE&#34;)]
                 # Ensure permissions are a list
@@ -459,6 +481,7 @@ and multi-faceted behavior.</p>
                     id=&#34;default&#34;,
                     name=&#34;Task Assistant&#34;,
                     description=&#34;Assist with the given task or query.&#34;,
+                    permissions=[],
                     priority=5,
                     status=RoleStatus.ACTIVE,
                 )
@@ -894,53 +917,10 @@ and multi-faceted behavior.</p>
 </dd>
 <dt id="frame.src.framer.agency.Goal"><code class="flex name class">
 <span>class <span class="ident">Goal</span></span>
-<span>(</span><span>**data: Any)</span>
+<span>(</span><span>name: str, description: str, priority: int = 5, status: <a title="frame.src.framer.agency.goals.GoalStatus" href="goals.html#frame.src.framer.agency.goals.GoalStatus">GoalStatus</a> = GoalStatus.ACTIVE)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
-<p>A base class for creating Pydantic models.</p>
-<h2 id="attributes">Attributes</h2>
-<dl>
-<dt><strong><code>__class_vars__</code></strong></dt>
-<dd>The names of the class variables defined on the model.</dd>
-<dt><strong><code>__private_attributes__</code></strong></dt>
-<dd>Metadata about the private attributes of the model.</dd>
-<dt><strong><code>__signature__</code></strong></dt>
-<dd>The synthesized <code>__init__</code> [<code>Signature</code>][inspect.Signature] of the model.</dd>
-<dt><strong><code>__pydantic_complete__</code></strong></dt>
-<dd>Whether model building is completed, or if there are still undefined fields.</dd>
-<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
-<dd>The core schema of the model.</dd>
-<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
-<dd>Whether the model has a custom <code>__init__</code> function.</dd>
-<dt><strong><code>__pydantic_decorators__</code></strong></dt>
-<dd>Metadata containing the decorators defined on the model.
-This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
-<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
-<dd>Metadata for generic models; contains data used for a similar purpose to
-<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
-<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
-<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
-<dt><strong><code>__pydantic_post_init__</code></strong></dt>
-<dd>The name of the post-init method for the model, if defined.</dd>
-<dt><strong><code>__pydantic_root_model__</code></strong></dt>
-<dd>Whether the model is a [<code>RootModel</code>][pydantic.root_model.RootModel].</dd>
-<dt><strong><code>__pydantic_serializer__</code></strong></dt>
-<dd>The <code>pydantic-core</code> <code>SchemaSerializer</code> used to dump instances of the model.</dd>
-<dt><strong><code>__pydantic_validator__</code></strong></dt>
-<dd>The <code>pydantic-core</code> <code>SchemaValidator</code> used to validate instances of the model.</dd>
-<dt><strong><code>__pydantic_extra__</code></strong></dt>
-<dd>A dictionary containing extra values, if [<code>extra</code>][pydantic.config.ConfigDict.extra]
-is set to <code>'allow'</code>.</dd>
-<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
-<dd>The names of fields explicitly set during instantiation.</dd>
-<dt><strong><code>__pydantic_private__</code></strong></dt>
-<dd>Values of private attributes set on the model instance.</dd>
-</dl>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -954,45 +934,10 @@ validated to form a valid model.</p>
     def get(self, key: str, default: Any = None) -&gt; Any:
         return getattr(self, key, default)</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>pydantic.main.BaseModel</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="frame.src.framer.agency.Goal.description"><code class="name">var <span class="ident">description</span> : Optional[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Goal.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Goal.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Goal.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Goal.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Goal.priority"><code class="name">var <span class="ident">priority</span> : <a title="frame.src.framer.agency.priority.Priority" href="priority.html#frame.src.framer.agency.priority.Priority">Priority</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Goal.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.framer.agency.goals.GoalStatus" href="goals.html#frame.src.framer.agency.goals.GoalStatus">GoalStatus</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 <h3>Methods</h3>
 <dl>
-<dt id="frame.src.framer.agency.Goal.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, key: str, default: Any = None) ‑> Any</span>
+<dt id="frame.src.framer.agency.Goal.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1214,53 +1159,10 @@ attributes &ndash; see the documentation for details.</p></div>
 </dd>
 <dt id="frame.src.framer.agency.Role"><code class="flex name class">
 <span>class <span class="ident">Role</span></span>
-<span>(</span><span>**data: Any)</span>
+<span>(</span><span>id: str, name: str, description: str, permissions: list, priority: int, status: <a title="frame.src.framer.agency.roles.RoleStatus" href="roles.html#frame.src.framer.agency.roles.RoleStatus">RoleStatus</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
-<p>A base class for creating Pydantic models.</p>
-<h2 id="attributes">Attributes</h2>
-<dl>
-<dt><strong><code>__class_vars__</code></strong></dt>
-<dd>The names of the class variables defined on the model.</dd>
-<dt><strong><code>__private_attributes__</code></strong></dt>
-<dd>Metadata about the private attributes of the model.</dd>
-<dt><strong><code>__signature__</code></strong></dt>
-<dd>The synthesized <code>__init__</code> [<code>Signature</code>][inspect.Signature] of the model.</dd>
-<dt><strong><code>__pydantic_complete__</code></strong></dt>
-<dd>Whether model building is completed, or if there are still undefined fields.</dd>
-<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
-<dd>The core schema of the model.</dd>
-<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
-<dd>Whether the model has a custom <code>__init__</code> function.</dd>
-<dt><strong><code>__pydantic_decorators__</code></strong></dt>
-<dd>Metadata containing the decorators defined on the model.
-This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
-<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
-<dd>Metadata for generic models; contains data used for a similar purpose to
-<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
-<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
-<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
-<dt><strong><code>__pydantic_post_init__</code></strong></dt>
-<dd>The name of the post-init method for the model, if defined.</dd>
-<dt><strong><code>__pydantic_root_model__</code></strong></dt>
-<dd>Whether the model is a [<code>RootModel</code>][pydantic.root_model.RootModel].</dd>
-<dt><strong><code>__pydantic_serializer__</code></strong></dt>
-<dd>The <code>pydantic-core</code> <code>SchemaSerializer</code> used to dump instances of the model.</dd>
-<dt><strong><code>__pydantic_validator__</code></strong></dt>
-<dd>The <code>pydantic-core</code> <code>SchemaValidator</code> used to validate instances of the model.</dd>
-<dt><strong><code>__pydantic_extra__</code></strong></dt>
-<dd>A dictionary containing extra values, if [<code>extra</code>][pydantic.config.ConfigDict.extra]
-is set to <code>'allow'</code>.</dd>
-<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
-<dd>The names of fields explicitly set during instantiation.</dd>
-<dt><strong><code>__pydantic_private__</code></strong></dt>
-<dd>Values of private attributes set on the model instance.</dd>
-</dl>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1290,66 +1192,8 @@ validated to form a valid model.</p>
     def get(self, key: str, default: Any = None) -&gt; Any:
         return getattr(self, key, default)</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>pydantic.main.BaseModel</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="frame.src.framer.agency.Role.description"><code class="name">var <span class="ident">description</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Role.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Role.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Role.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Role.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Role.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Role.permissions"><code class="name">var <span class="ident">permissions</span> : List[str]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Role.priority"><code class="name">var <span class="ident">priority</span> : <a title="frame.src.framer.agency.priority.Priority" href="priority.html#frame.src.framer.agency.priority.Priority">Priority</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.Role.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.framer.agency.roles.RoleStatus" href="roles.html#frame.src.framer.agency.roles.RoleStatus">RoleStatus</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-<h3>Static methods</h3>
-<dl>
-<dt id="frame.src.framer.agency.Role.from_dict"><code class="name flex">
-<span>def <span class="ident">from_dict</span></span>(<span>data: Dict[str, Any]) ‑> <a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a></span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 <h3>Methods</h3>
 <dl>
-<dt id="frame.src.framer.agency.Role.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, key: str, default: Any = None) ‑> Any</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="frame.src.framer.agency.Role.to_dict"><code class="name flex">
 <span>def <span class="ident">to_dict</span></span>(<span>self) ‑> Dict[str, Any]</span>
 </code></dt>
@@ -1428,15 +1272,15 @@ attributes &ndash; see the documentation for details.</p></div>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="frame.src.framer.agency.RoleStatus.ABANDONED"><code class="name">var <span class="ident">ABANDONED</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="frame.src.framer.agency.RoleStatus.ACTIVE"><code class="name">var <span class="ident">ACTIVE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.RoleStatus.INACTIVE"><code class="name">var <span class="ident">INACTIVE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.RoleStatus.SUSPENDED"><code class="name">var <span class="ident">SUSPENDED</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1453,12 +1297,17 @@ attributes &ndash; see the documentation for details.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Workflow:
-    def __init__(self, name: str, is_async: bool = False, stakeholders: Optional[List[Dict[str, Any]]] = None):
+    def __init__(
+        self,
+        name: str,
+        is_async: bool = False,
+        stakeholders: Optional[List[Dict[str, Any]]] = None,
+    ):
         self.id = generate_id()
         self.stakeholders = stakeholders or []
         for stakeholder in self.stakeholders:
-            stakeholder[&#39;id&#39;] = stakeholder.get(&#39;id&#39;, generate_id())
-            stakeholder[&#39;roles&#39;] = stakeholder.get(&#39;roles&#39;, [])
+            stakeholder[&#34;id&#34;] = stakeholder.get(&#34;id&#34;, generate_id())
+            stakeholder[&#34;roles&#34;] = stakeholder.get(&#34;roles&#34;, [])
         self.name = name
         self.tasks: List[Task] = []
         self.is_async = is_async
@@ -1473,6 +1322,16 @@ attributes &ndash; see the documentation for details.</p></div>
     def get_tasks(self) -&gt; List[Task]:
         return self.tasks
 
+    def cancel_task(self, task_id: str) -&gt; None:
+        &#34;&#34;&#34;
+        Cancel a task by its ID.
+
+        Args:
+            task_id (str): The ID of the task to cancel.
+        &#34;&#34;&#34;
+        # Implementation of cancellation logic
+        print(f&#34;Task {task_id} has been cancelled.&#34;)
+
     def __str__(self):
         return f&#34;Workflow(name={self.name}, tasks={len(self.tasks)}, is_async={self.is_async})&#34;</code></pre>
 </details>
@@ -1483,6 +1342,17 @@ attributes &ndash; see the documentation for details.</p></div>
 </code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Workflow.cancel_task"><code class="name flex">
+<span>def <span class="ident">cancel_task</span></span>(<span>self, task_id: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Cancel a task by its ID.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ID of the task to cancel.</dd>
+</dl></div>
 </dd>
 <dt id="frame.src.framer.agency.Workflow.get_tasks"><code class="name flex">
 <span>def <span class="ident">get_tasks</span></span>(<span>self) ‑> List[<a title="frame.src.framer.agency.tasks.task.Task" href="tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a>]</span>
@@ -1545,8 +1415,7 @@ attributes &ndash; see the documentation for details.</p></div>
                 if task.id == task_id:
                     task.update_status(TaskStatus.CANCELED)
                     return
-        raise ValueError(f&#34;Task with id &#39;{task_id}&#39; not found in any workflow.&#34;)
-        return f&#34;WorkflowManager(workflows={len(self.workflows)})&#34;</code></pre>
+        raise ValueError(f&#34;Task with id &#39;{task_id}&#39; not found in any workflow.&#34;)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -1643,14 +1512,7 @@ attributes &ndash; see the documentation for details.</p></div>
 <li>
 <h4><code><a title="frame.src.framer.agency.Goal" href="#frame.src.framer.agency.Goal">Goal</a></code></h4>
 <ul class="">
-<li><code><a title="frame.src.framer.agency.Goal.description" href="#frame.src.framer.agency.Goal.description">description</a></code></li>
-<li><code><a title="frame.src.framer.agency.Goal.get" href="#frame.src.framer.agency.Goal.get">get</a></code></li>
-<li><code><a title="frame.src.framer.agency.Goal.model_computed_fields" href="#frame.src.framer.agency.Goal.model_computed_fields">model_computed_fields</a></code></li>
-<li><code><a title="frame.src.framer.agency.Goal.model_config" href="#frame.src.framer.agency.Goal.model_config">model_config</a></code></li>
-<li><code><a title="frame.src.framer.agency.Goal.model_fields" href="#frame.src.framer.agency.Goal.model_fields">model_fields</a></code></li>
-<li><code><a title="frame.src.framer.agency.Goal.name" href="#frame.src.framer.agency.Goal.name">name</a></code></li>
-<li><code><a title="frame.src.framer.agency.Goal.priority" href="#frame.src.framer.agency.Goal.priority">priority</a></code></li>
-<li><code><a title="frame.src.framer.agency.Goal.status" href="#frame.src.framer.agency.Goal.status">status</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.to_dict" href="#frame.src.framer.agency.Goal.to_dict">to_dict</a></code></li>
 </ul>
 </li>
 <li>
@@ -1682,32 +1544,22 @@ attributes &ndash; see the documentation for details.</p></div>
 <li>
 <h4><code><a title="frame.src.framer.agency.Role" href="#frame.src.framer.agency.Role">Role</a></code></h4>
 <ul class="">
-<li><code><a title="frame.src.framer.agency.Role.description" href="#frame.src.framer.agency.Role.description">description</a></code></li>
-<li><code><a title="frame.src.framer.agency.Role.from_dict" href="#frame.src.framer.agency.Role.from_dict">from_dict</a></code></li>
-<li><code><a title="frame.src.framer.agency.Role.get" href="#frame.src.framer.agency.Role.get">get</a></code></li>
-<li><code><a title="frame.src.framer.agency.Role.id" href="#frame.src.framer.agency.Role.id">id</a></code></li>
-<li><code><a title="frame.src.framer.agency.Role.model_computed_fields" href="#frame.src.framer.agency.Role.model_computed_fields">model_computed_fields</a></code></li>
-<li><code><a title="frame.src.framer.agency.Role.model_config" href="#frame.src.framer.agency.Role.model_config">model_config</a></code></li>
-<li><code><a title="frame.src.framer.agency.Role.model_fields" href="#frame.src.framer.agency.Role.model_fields">model_fields</a></code></li>
-<li><code><a title="frame.src.framer.agency.Role.name" href="#frame.src.framer.agency.Role.name">name</a></code></li>
-<li><code><a title="frame.src.framer.agency.Role.permissions" href="#frame.src.framer.agency.Role.permissions">permissions</a></code></li>
-<li><code><a title="frame.src.framer.agency.Role.priority" href="#frame.src.framer.agency.Role.priority">priority</a></code></li>
-<li><code><a title="frame.src.framer.agency.Role.status" href="#frame.src.framer.agency.Role.status">status</a></code></li>
 <li><code><a title="frame.src.framer.agency.Role.to_dict" href="#frame.src.framer.agency.Role.to_dict">to_dict</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="frame.src.framer.agency.RoleStatus" href="#frame.src.framer.agency.RoleStatus">RoleStatus</a></code></h4>
 <ul class="">
-<li><code><a title="frame.src.framer.agency.RoleStatus.ABANDONED" href="#frame.src.framer.agency.RoleStatus.ABANDONED">ABANDONED</a></code></li>
 <li><code><a title="frame.src.framer.agency.RoleStatus.ACTIVE" href="#frame.src.framer.agency.RoleStatus.ACTIVE">ACTIVE</a></code></li>
 <li><code><a title="frame.src.framer.agency.RoleStatus.INACTIVE" href="#frame.src.framer.agency.RoleStatus.INACTIVE">INACTIVE</a></code></li>
+<li><code><a title="frame.src.framer.agency.RoleStatus.SUSPENDED" href="#frame.src.framer.agency.RoleStatus.SUSPENDED">SUSPENDED</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="frame.src.framer.agency.Workflow" href="#frame.src.framer.agency.Workflow">Workflow</a></code></h4>
 <ul class="">
 <li><code><a title="frame.src.framer.agency.Workflow.add_task" href="#frame.src.framer.agency.Workflow.add_task">add_task</a></code></li>
+<li><code><a title="frame.src.framer.agency.Workflow.cancel_task" href="#frame.src.framer.agency.Workflow.cancel_task">cancel_task</a></code></li>
 <li><code><a title="frame.src.framer.agency.Workflow.get_tasks" href="#frame.src.framer.agency.Workflow.get_tasks">get_tasks</a></code></li>
 <li><code><a title="frame.src.framer.agency.Workflow.set_final_task" href="#frame.src.framer.agency.Workflow.set_final_task">set_final_task</a></code></li>
 </ul>

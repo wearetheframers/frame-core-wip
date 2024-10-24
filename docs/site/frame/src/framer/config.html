@@ -89,9 +89,11 @@ validated to form a valid model.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FramerConfig(BaseModel):
-    name: str
-    model: Optional[str] = None
-    soul_seed: Optional[Union[str, Dict[str, Any]]] = &#34;You are a helpful AI assistant.&#34;
+    name: str = &#34;DefaultFramer&#34;
+    model: Optional[str] = DEFAULT_MODEL
+    soul_seed: Optional[Union[str, Dict[str, Any]]] = Field(
+        default=&#34;You are a helpful AI assistant.&#34;
+    )
     use_local_model: bool = False
     # Default permissions include services like memory, eq, and shared_context.
     # These services do not require explicit permissions to be accessed.
@@ -102,7 +104,9 @@ validated to form a valid model.</p>
             &#34;with_shared_context&#34;,
         ]
     )
-    mem0_api_key: Optional[str] = MEM0_API_KEY
+    mem0_api_key: Optional[str] = Field(
+        default_factory=lambda: os.getenv(&#34;MEM0_API_KEY&#34;, MEM0_API_KEY)
+    )
     &#34;&#34;&#34;
     Configuration class for Framer instances.
 

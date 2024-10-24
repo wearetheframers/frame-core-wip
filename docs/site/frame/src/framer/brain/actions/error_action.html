@@ -66,7 +66,7 @@ hljs.highlightAll();
             else []
         )
         active_roles = (
-            [role.name for role in execution_context.roles if role.status == &#34;ACTIVE&#34;]
+            [role.name for role in execution_context.roles if isinstance(role, Role) and role.status == RoleStatus.ACTIVE]
             if execution_context and hasattr(execution_context, &#34;roles&#34;)
             else []
         )
@@ -97,6 +97,7 @@ hljs.highlightAll();
 <ul class="hlist">
 <li><code><a title="frame.src.framer.brain.actions.base.BaseAction.create_task" href="base.html#frame.src.framer.brain.actions.base.BaseAction.create_task">create_task</a></code></li>
 <li><code><a title="frame.src.framer.brain.actions.base.BaseAction.execute" href="base.html#frame.src.framer.brain.actions.base.BaseAction.execute">execute</a></code></li>
+<li><code><a title="frame.src.framer.brain.actions.base.BaseAction.get_active_role_names" href="base.html#frame.src.framer.brain.actions.base.BaseAction.get_active_role_names">get_active_role_names</a></code></li>
 </ul>
 </li>
 </ul>

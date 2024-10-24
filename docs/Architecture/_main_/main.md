@@ -127,35 +127,6 @@ Services
 │   └── Shared Context
 ```
 
-## Agent Flow
-
-1. **Framer Creation and Initialization**
-   - A `Frame` instance creates one or more `Framer` agents.
-   - Each `Framer` is initialized with a `Soul` (including a seed story) and an `Agency`.
-   - The `Agency` generates roles and goals based on the seed story if not provided.
-
-2. **Perception and Thought Process**
-   - The `Framer` receives perceptions through the `sense()` method.
-   - Perceptions are processed in the `Soul` and stored in short-term memory.
-   - The `Mind` generates new thoughts based on perceptions and memories.
-
-3. **Decision Making**
-   - The `Brain` component makes decisions based on current perceptions, memories, and thoughts.
-   - Decisions can lead to actions, new task generation, or changes in the Framer's state.
-
-4. **Workflow and Task Management**
-   - Based on the Brain's decisions, the `Agency` may create Workflows and Tasks.
-   - The `Agency` manages task prioritization and execution within each Workflow.
-
-5. **Task Execution and Learning**
-   - Tasks are executed, updating the Framer's memory and potentially its emotional state.
-   - Key information and experiences are stored in long-term and core memory for future use.
-
-6. **Framed Interactions**
-   - Multiple Framers can work together in a `Framed` group.
-   - Framed groups can process Workflows and Tasks sequentially or in parallel.
-   - Inter-Framer communication and task delegation are managed within the Framed context.
-
 ## Conclusion
 
 Frame's architecture provides a robust and flexible framework for creating and managing cognitive agents with emergent behaviors. By leveraging the power of language models and modular design, Frame enables the development of AI agents capable of handling complex tasks and interactions, while maintaining a consistent personality and improving over time.

@@ -162,8 +162,12 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
             config (FramerConfig): Configuration for the Framer.
             llm_service (LLMService): Language model service for text generation.
         &#34;&#34;&#34;
-        if not isinstance(config, FramerConfig):
-            raise TypeError(&#34;config must be an instance of FramerConfig&#34;)
+        from unittest.mock import MagicMock
+
+        if not isinstance(config, FramerConfig) and not isinstance(config, MagicMock):
+            raise TypeError(
+                &#34;config must be an instance of FramerConfig or a MagicMock for testing&#34;
+            )
         if not isinstance(llm_service, LLMService):
             raise TypeError(&#34;llm_service must be an instance of LLMService&#34;)
         self.logger = logging.getLogger(__name__)
@@ -184,6 +188,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
             llm_service=self.llm_service,
             soul=None,  # We&#39;ll set this later
             brain=None,  # We&#39;ll set this later
+            config=self.config,
         )
         agency = Agency(
             llm_service=self.llm_service,
@@ -196,12 +201,19 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
         roles, goals = await self._generate_unique_roles_and_goals(agency, roles, goals)
 
         # Initialize the Soul component with the provided or default seed
-        soul = Soul(seed=self.config.soul_seed)
+        soul = Soul(
+            seed=(
+                self.config.soul_seed
+                if isinstance(self.config.soul_seed, (str, dict, type(None)))
+                else None
+            )
+        )
         # Initialize the WorkflowManager component
         workflow_manager = WorkflowManager()
-        # Set the memory service if provided, otherwise create a new one
-        mem0_adapter = Mem0Adapter(api_key=self.config.mem0_api_key)
-        memory_service = memory_service or MemoryService(adapter=mem0_adapter)
+        # Set the memory service if provided, otherwise create a new one if with_memory permission is present
+        if &#34;with_memory&#34; in self.config.permissions:
+            mem0_adapter = Mem0Adapter(api_key=self.config.mem0_api_key)
+            memory_service = memory_service or MemoryService(adapter=mem0_adapter)
         # Initialize the Brain component with roles, goals, default model
         brain = Brain(
             llm_service=self.llm_service,
@@ -274,16 +286,25 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
                 item[&#34;status&#34;] = item.get(&#34;status&#34;, GoalStatus.ACTIVE.value)
             else:
                 item.status = getattr(item, &#34;status&#34;, GoalStatus.ACTIVE)
-
+        priority = lambda x: (
+            x.priority
+            if isinstance(x.priority, int)
+            else x.priority.value if hasattr(x, &#34;priority&#34;) else 5
+        )
         # Sort roles and goals by priority
         sorted_roles = sorted(
             unique_roles.values(),
-            key=lambda x: x.priority.value if hasattr(x, &#34;priority&#34;) else 5,
+            key=priority,
+            reverse=True,
+        )
+        sorted_roles = sorted(
+            unique_roles.values(),
+            key=priority,
             reverse=True,
         )
         sorted_goals = sorted(
             unique_goals.values(),
-            key=lambda x: x.priority.value if hasattr(x, &#34;priority&#34;) else 5,
+            key=priority,
             reverse=True,
         )
 

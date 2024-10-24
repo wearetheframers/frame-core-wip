@@ -46,7 +46,11 @@ hljs.highlightAll();
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Rule:
-    def __init__(self, condition: Callable[[Dict[str, Any]], bool], action: Callable[[Dict[str, Any]], None]):
+    def __init__(
+        self,
+        condition: Callable[[Dict[str, Any]], bool],
+        action: Callable[[Dict[str, Any]], None],
+    ):
         self.condition = condition
         self.action = action
 

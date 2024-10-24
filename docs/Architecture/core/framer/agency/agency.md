@@ -12,7 +12,7 @@ The Agency component is responsible for roles, goals, and task management within
 ## Key Features
 
 - Role and goal management, including automatic generation.
-- Task creation and prioritization.
+- Task creation and prioritization, including tasks generated from decisions.
 - Workflow management.
 
 ## Automatic Role and Goal Generation

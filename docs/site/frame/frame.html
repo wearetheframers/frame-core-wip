@@ -170,7 +170,9 @@ model to be used for completions and loads plugins.</p>
         self.is_loading_plugins = True
         self.plugins, _ = load_plugins(self.plugins_dir)
         self.framer_factory = FramerFactory(
-            FramerConfig(name=&#34;DefaultFramer&#34;, default_model=self._default_model), self.llm_service, plugins=self.plugins
+            FramerConfig(name=&#34;DefaultFramer&#34;, default_model=self._default_model),
+            self.llm_service,
+            plugins=self.plugins,
         )
         self.is_loading_plugins = False
 

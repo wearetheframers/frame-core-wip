@@ -31,38 +31,40 @@ hljs.highlightAll();
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="frame.src.framer.brain.decision.decision.execute"><code class="name flex">
-<span>async def <span class="ident">execute</span></span>(<span>self, action_registry: Any) ‑> Dict[str, Any]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Execute the decision using the provided action registry.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>action_registry</code></strong> :&ensp;<code>Any</code></dt>
-<dd>The action registry containing available actions.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Dict[str, Any]</code></dt>
-<dd>The result of executing the action.</dd>
-</dl></div>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
 <dt id="frame.src.framer.brain.decision.decision.Decision"><code class="flex name class">
 <span>class <span class="ident">Decision</span></span>
-<span>(</span><span>**data)</span>
+<span>(</span><span>**data: Any)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents a decision made by the Brain component of a Framer.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
+<dd>The action to be taken.</dd>
+<dt><strong><code>parameters</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>Parameters for the action.</dd>
+<dt><strong><code>reasoning</code></strong> :&ensp;<code>str</code></dt>
+<dd>The reasoning behind the decision.</dd>
+<dt><strong><code>confidence</code></strong> :&ensp;<code>float</code></dt>
+<dd>The confidence level of the decision.</dd>
+<dt><strong><code>priority</code></strong> :&ensp;<code>int</code></dt>
+<dd>The priority of the decision.</dd>
+<dt><strong><code>status</code></strong> :&ensp;<code><a title="frame.src.framer.brain.decision.decision.DecisionStatus" href="#frame.src.framer.brain.decision.decision.DecisionStatus">DecisionStatus</a></code></dt>
+<dd>The execution status of the decision.</dd>
+</dl>
+<h2 id="notes">Notes</h2>
+<p>The Decision class now includes validation of action parameters to ensure
+that all necessary variables are present and correctly formatted. This
+validation helps prevent execution errors and enhances the reliability of
+the decision-making process.
+Represents a decision made by the Brain component of a Framer.</p>
 <p>To extend decision-making capabilities, you can add new actions to the
 ActionRegistry and ensure they are recognized in the decision-making process.</p>
-<h2 id="attributes">Attributes</h2>
+<h2 id="attributes_1">Attributes</h2>
 <dl>
 <dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
 <dd>The action to be taken.</dd>
@@ -95,6 +97,21 @@ validated to form a valid model.</p>
     &#34;&#34;&#34;
     Represents a decision made by the Brain component of a Framer.
 
+    Attributes:
+        action (str): The action to be taken.
+        parameters (Dict[str, Any]): Parameters for the action.
+        reasoning (str): The reasoning behind the decision.
+        confidence (float): The confidence level of the decision.
+        priority (int): The priority of the decision.
+        status (DecisionStatus): The execution status of the decision.
+
+    Notes:
+        The Decision class now includes validation of action parameters to ensure
+        that all necessary variables are present and correctly formatted. This
+        validation helps prevent execution errors and enhances the reliability of
+        the decision-making process.
+    Represents a decision made by the Brain component of a Framer.
+
     To extend decision-making capabilities, you can add new actions to the
     ActionRegistry and ensure they are recognized in the decision-making process.
 
@@ -110,10 +127,38 @@ validated to form a valid model.</p>
         related_goals (List[Goal]): Goals related to this decision.
     &#34;&#34;&#34;
 
+    is_executable: bool = Field(
+        default=True,
+        description=&#34;Indicates if the decision can be executed automatically&#34;,
+    )
+    execution_mode: ExecutionMode = Field(
+        default=ExecutionMode.AUTO,
+        description=&#34;Defines how the decision should be executed.&#34;,
+    )
+    execution_mode: ExecutionMode = Field(
+        default=ExecutionMode.AUTO,
+        description=&#34;Defines how the decision should be executed.&#34;,
+    )
+    execution_mode: str = Field(
+        default=&#34;auto&#34;,
+        description=&#34;Defines how the decision should be executed. Options: &#39;auto&#39;, &#39;user_approval&#39;, &#39;deferred&#39;&#34;,
+    )
     expected_results: List[Any] = Field(
         default_factory=list, description=&#34;The expected results of the decision&#34;
     )
-    task_status: &#34;TaskStatus&#34; = Field(
+    status: DecisionStatus = Field(
+        default=DecisionStatus.NOT_EXECUTED,
+        description=&#39;The execution status of the decision&#39;
+    )
+    status: DecisionStatus = Field(
+        default=DecisionStatus.NOT_EXECUTED,
+        description=&#39;The execution status of the decision&#39;
+    )
+    status: DecisionStatus = Field(
+        default=DecisionStatus.NOT_EXECUTED,
+        description=&#34;The execution status of the decision&#34;
+    )
+    task_status: TaskStatus = Field(
         default=TaskStatus.PENDING, description=&#34;Status of the associated task&#34;
     )
     related_roles: List[&#34;Role&#34;] = Field(
@@ -148,6 +193,18 @@ validated to form a valid model.</p>
 
         return cls(**decision_dict)
 
+    def to_task(self) -&gt; &#34;Task&#34;:
+        &#34;&#34;&#34;
+        Convert the Decision into a Task.
+        &#34;&#34;&#34;
+        return Task(
+            description=self.reasoning,
+            priority=self.priority,
+            status=TaskStatus.PENDING,
+            data=self.parameters,
+            type=self.action,
+        )
+
     def to_dict(self) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Convert the Decision object to a dictionary.
@@ -161,8 +218,10 @@ validated to form a valid model.</p>
             &#34;reasoning&#34;: self.reasoning,
             &#34;confidence&#34;: self.confidence,
             &#34;priority&#34;: self.priority,
+            &#34;execution_mode&#34;: self.execution_mode.value,
             &#34;expected_results&#34;: self.expected_results,
             &#34;task_status&#34;: self.task_status.value,
+            &#34;status&#34;: self.status.value,
             &#34;related_roles&#34;: [
                 role.to_dict() if hasattr(role, &#34;to_dict&#34;) else str(role)
                 for role in self.related_roles
@@ -265,7 +324,15 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.framer.brain.decision.decision.Decision.execution_mode"><code class="name">var <span class="ident">execution_mode</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.framer.brain.decision.decision.Decision.expected_results"><code class="name">var <span class="ident">expected_results</span> : List[Any]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.Decision.is_executable"><code class="name">var <span class="ident">is_executable</span> : bool</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -289,7 +356,11 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : TaskStatus</code></dt>
+<dt id="frame.src.framer.brain.decision.decision.Decision.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.framer.brain.decision.decision.DecisionStatus" href="#frame.src.framer.brain.decision.decision.DecisionStatus">DecisionStatus</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : <a title="frame.src.framer.agency.tasks.status.TaskStatus" href="../../agency/tasks/status.html#frame.src.framer.agency.tasks.status.TaskStatus">TaskStatus</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -374,6 +445,105 @@ validated to form a valid model.</p>
 <dd>A dictionary representation of the Decision.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.framer.brain.decision.decision.Decision.to_task"><code class="name flex">
+<span>def <span class="ident">to_task</span></span>(<span>self) ‑> <a title="frame.src.framer.agency.tasks.task.Task" href="../../agency/tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert the Decision into a Task.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.DecisionStatus"><code class="flex name class">
+<span>class <span class="ident">DecisionStatus</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>str(object='') -&gt; str
+str(bytes_or_buffer[, encoding[, errors]]) -&gt; str</p>
+<p>Create a new string object from the given object. If encoding or
+errors is specified, then the object must expose a data buffer
+that will be decoded using the given encoding and error handler.
+Otherwise, returns the result of object.<strong>str</strong>() (if defined)
+or repr(object).
+encoding defaults to sys.getdefaultencoding().
+errors defaults to 'strict'.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DecisionStatus(str, Enum):
+    EXECUTED = &#39;executed&#39;
+    PENDING_APPROVAL = &#39;pending_approval&#39;
+    DEFERRED = &#39;deferred&#39;
+    NOT_EXECUTED = &#39;not_executed&#39;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.brain.decision.decision.DecisionStatus.DEFERRED"><code class="name">var <span class="ident">DEFERRED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.DecisionStatus.EXECUTED"><code class="name">var <span class="ident">EXECUTED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.DecisionStatus.NOT_EXECUTED"><code class="name">var <span class="ident">NOT_EXECUTED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.DecisionStatus.PENDING_APPROVAL"><code class="name">var <span class="ident">PENDING_APPROVAL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.ExecutionMode"><code class="flex name class">
+<span>class <span class="ident">ExecutionMode</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>str(object='') -&gt; str
+str(bytes_or_buffer[, encoding[, errors]]) -&gt; str</p>
+<p>Create a new string object from the given object. If encoding or
+errors is specified, then the object must expose a data buffer
+that will be decoded using the given encoding and error handler.
+Otherwise, returns the result of object.<strong>str</strong>() (if defined)
+or repr(object).
+encoding defaults to sys.getdefaultencoding().
+errors defaults to 'strict'.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ExecutionMode(str, Enum):
+    AUTO = &#34;auto&#34;
+    USER_APPROVAL = &#34;user_approval&#34;
+    DEFERRED = &#34;deferred&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.brain.decision.decision.ExecutionMode.AUTO"><code class="name">var <span class="ident">AUTO</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.ExecutionMode.DEFERRED"><code class="name">var <span class="ident">DEFERRED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.brain.decision.decision.ExecutionMode.USER_APPROVAL"><code class="name">var <span class="ident">USER_APPROVAL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -389,11 +559,6 @@ validated to form a valid model.</p>
 <li><code><a title="frame.src.framer.brain.decision" href="index.html">frame.src.framer.brain.decision</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="frame.src.framer.brain.decision.decision.execute" href="#frame.src.framer.brain.decision.decision.execute">execute</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
@@ -402,15 +567,36 @@ validated to form a valid model.</p>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.Config" href="#frame.src.framer.brain.decision.decision.Decision.Config">Config</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.convert_priority" href="#frame.src.framer.brain.decision.decision.Decision.convert_priority">convert_priority</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.create" href="#frame.src.framer.brain.decision.decision.Decision.create">create</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.Decision.execution_mode" href="#frame.src.framer.brain.decision.decision.Decision.execution_mode">execution_mode</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.expected_results" href="#frame.src.framer.brain.decision.decision.Decision.expected_results">expected_results</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.from_json" href="#frame.src.framer.brain.decision.decision.Decision.from_json">from_json</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.Decision.is_executable" href="#frame.src.framer.brain.decision.decision.Decision.is_executable">is_executable</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.model_computed_fields" href="#frame.src.framer.brain.decision.decision.Decision.model_computed_fields">model_computed_fields</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.model_config" href="#frame.src.framer.brain.decision.decision.Decision.model_config">model_config</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.model_fields" href="#frame.src.framer.brain.decision.decision.Decision.model_fields">model_fields</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.related_goals" href="#frame.src.framer.brain.decision.decision.Decision.related_goals">related_goals</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.related_roles" href="#frame.src.framer.brain.decision.decision.Decision.related_roles">related_roles</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.Decision.status" href="#frame.src.framer.brain.decision.decision.Decision.status">status</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.task_status" href="#frame.src.framer.brain.decision.decision.Decision.task_status">task_status</a></code></li>
 <li><code><a title="frame.src.framer.brain.decision.decision.Decision.to_dict" href="#frame.src.framer.brain.decision.decision.Decision.to_dict">to_dict</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.Decision.to_task" href="#frame.src.framer.brain.decision.decision.Decision.to_task">to_task</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.brain.decision.decision.DecisionStatus" href="#frame.src.framer.brain.decision.decision.DecisionStatus">DecisionStatus</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.brain.decision.decision.DecisionStatus.DEFERRED" href="#frame.src.framer.brain.decision.decision.DecisionStatus.DEFERRED">DEFERRED</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.DecisionStatus.EXECUTED" href="#frame.src.framer.brain.decision.decision.DecisionStatus.EXECUTED">EXECUTED</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.DecisionStatus.NOT_EXECUTED" href="#frame.src.framer.brain.decision.decision.DecisionStatus.NOT_EXECUTED">NOT_EXECUTED</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.DecisionStatus.PENDING_APPROVAL" href="#frame.src.framer.brain.decision.decision.DecisionStatus.PENDING_APPROVAL">PENDING_APPROVAL</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="frame.src.framer.brain.decision.decision.ExecutionMode" href="#frame.src.framer.brain.decision.decision.ExecutionMode">ExecutionMode</a></code></h4>
+<ul class="">
+<li><code><a title="frame.src.framer.brain.decision.decision.ExecutionMode.AUTO" href="#frame.src.framer.brain.decision.decision.ExecutionMode.AUTO">AUTO</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.ExecutionMode.DEFERRED" href="#frame.src.framer.brain.decision.decision.ExecutionMode.DEFERRED">DEFERRED</a></code></li>
+<li><code><a title="frame.src.framer.brain.decision.decision.ExecutionMode.USER_APPROVAL" href="#frame.src.framer.brain.decision.decision.ExecutionMode.USER_APPROVAL">USER_APPROVAL</a></code></li>
 </ul>
 </li>
 </ul>

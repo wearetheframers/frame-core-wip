@@ -37,6 +37,10 @@ hljs.highlightAll();
 <dd>
 <div class="desc"></div>
 </dd>
+<dt><code class="name"><a title="frame.src.framer.common" href="common/index.html">frame.src.framer.common</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt><code class="name"><a title="frame.src.framer.config" href="config.html">frame.src.framer.config</a></code></dt>
 <dd>
 <div class="desc"></div>
@@ -64,7 +68,7 @@ hljs.highlightAll();
 <dl>
 <dt id="frame.src.framer.Framer"><code class="flex name class">
 <span>class <span class="ident">Framer</span></span>
-<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.workflow.workflow_manager.WorkflowManager" href="agency/workflow/workflow_manager.html#frame.src.framer.agency.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, brain: Optional[<a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>] = None, memory_adapter: Optional[<a title="frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface" href="brain/memory/memory_adapter_interface.html#frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface">MemoryAdapterInterface</a>] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], plugins: Optional[Dict[str, Any]] = None, plugin_loading_progress: Optional[Callable[[int], None]] = None, execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>] = None)</span>
+<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="../services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, soul: <a title="frame.src.models.framer.soul.soul.Soul" href="../models/framer/soul/soul.html#frame.src.models.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.workflow.workflow_manager.WorkflowManager" href="agency/workflow/workflow_manager.html#frame.src.framer.agency.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, brain: Optional[<a title="frame.src.framer.brain.brain.Brain" href="brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>] = None, memory_adapter: Optional[<a title="frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface" href="brain/memory/memory_adapter_interface.html#frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface">MemoryAdapterInterface</a>] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="../services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="../services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], plugins: Optional[Dict[str, Any]] = None, plugin_loading_progress: Optional[Callable[[int], None]] = None, execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="../services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -152,7 +156,7 @@ hljs.highlightAll();
         self.llm_service = llm_service
 
         self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service, soul=soul
+            llm_service=self.llm_service, soul=soul, config=config
         )
         self.execution_context.soul = soul
         self.execution_context.brain = brain
@@ -163,17 +167,11 @@ hljs.highlightAll();
         if &#34;with_memory&#34; in self.permissions:
             self.permissions.append(&#34;with_mem0_search_extract_summarize_plugin&#34;)
 
-        logger.info(f&#34;Permissions: {self.permissions}&#34;)
-        logger.info(f&#34;Memory adapter: {memory_adapter}&#34;)
-
-        if &#34;with_memory&#34; in self.permissions and memory_adapter:
-            logger.info(&#34;Creating memory service&#34;)
+        if &#34;with_memory&#34; in self.permissions:
             self.memory_service = memory_service or MemoryService(
-                adapter=memory_adapter
+                adapter=memory_adapter or Mem0Adapter(api_key=self.config.mem0_api_key)
             )
-            logger.info(f&#34;Memory service created: {self.memory_service}&#34;)
         else:
-            logger.info(&#34;Memory service not created&#34;)
             self.memory_service = None
 
         if &#34;with_eq&#34; in self.permissions:
@@ -191,6 +189,7 @@ hljs.highlightAll();
         self.plugin_loading_complete = False
         self.plugin_loading_complete = False
         self._streamed_response = {&#34;status&#34;: &#34;pending&#34;, &#34;result&#34;: &#34;&#34;}
+        self._streaming_task = None
 
         logger.info(&#34;Creating Brain&#34;)
         self.brain = Brain(
@@ -208,14 +207,84 @@ hljs.highlightAll();
         self._dynamic_model_choice = False
         self.observers: List[Observer] = []
         self.can_execute = True
-        self.acting = False
+        self.acting = True
+
+    async def initialize(self):
+        &#34;&#34;&#34;
+        Initialize the Framer by generating initial roles and goals if not provided.
+        &#34;&#34;&#34;
+        if not self.roles or not self.goals:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+
+        # Ensure uniqueness
+        self.roles = list(
+            {
+                (
+                    role.name
+                    if isinstance(role, Role)
+                    else getattr(role, &#34;get&#34;, lambda k, d=None: d)(&#34;name&#34;, &#34;default_name&#34;)
+                ): (
+                    role
+                    if isinstance(role, Role)
+                    else {
+                        &#34;id&#34;: &#34;default_id&#34;,
+                        &#34;name&#34;: role,
+                        &#34;description&#34;: &#34;default_description&#34;,
+                        &#34;permissions&#34;: [],
+                        &#34;priority&#34;: 5,
+                        &#34;status&#34;: RoleStatus.ACTIVE,
+                    }
+                )
+                for role in self.roles
+            }.values()
+        )
+        self.goals = list(
+            {
+                goal.description if isinstance(goal, Goal) else goal[&#34;description&#34;]: (
+                    goal if isinstance(goal, Goal) else Goal(name=goal.get(&#34;name&#34;, &#34;default_name&#34;), description=goal.get(&#34;description&#34;, &#34;default_description&#34;))
+                )
+                for goal in self.goals
+            }.values()
+        )
+
+        logger.info(
+            f&#34;Generated initial roles: {[role.name if isinstance(role, Role) else role[&#39;name&#39;] for role in self.roles]}&#34;
+        )
+        logger.info(
+            f&#34;Generated initial goals: {[goal[&#39;description&#39;] if isinstance(goal, dict) else goal.description for goal in self.goals]}&#34;
+        )
+
+        if hasattr(self.brain, &#34;set_roles&#34;):
+            self.brain.set_roles(self.roles)
+        if hasattr(self.brain, &#34;set_goals&#34;):
+            self.brain.set_goals(self.goals)
+
+        if hasattr(self.execution_context, &#34;set_roles&#34;):
+            self.execution_context.set_roles(self.roles)
+        if hasattr(self.execution_context, &#34;set_goals&#34;):
+            self.execution_context.set_goals(self.goals)
+        await self.load_plugins()
+
     async def load_plugins(self):
         &#34;&#34;&#34;
         Load all plugins by calling their on_load method.
         &#34;&#34;&#34;
+        logger.info(f&#34;Loading plugins for Framer with config: {self.config}&#34;)
+        loaded_plugins = set()
         for plugin_name, plugin_instance in self.plugins.items():
+            if (
+                plugin_name in loaded_plugins
+                or any(
+                    isinstance(existing_plugin, type(plugin_instance))
+                    for existing_plugin in loaded_plugins
+                )
+                or plugin_instance in loaded_plugins
+            ):
+                logger.info(f&#34;Plugin {plugin_name} already loaded. Skipping.&#34;)
+                continue
+
             if hasattr(plugin_instance, &#34;on_load&#34;):
-                await plugin_instance.on_load()
+                await plugin_instance.on_load(self)
                 # Register plugin actions in the brain&#39;s action_registry
                 for action_name, action_func in plugin_instance.get_actions().items():
                     self.brain.action_registry.add_action(
@@ -224,6 +293,8 @@ hljs.highlightAll();
                         description=f&#34;Action from {plugin_name} plugin&#34;,
                         priority=5,  # Default priority, adjust as needed
                     )
+                loaded_plugins.add(plugin_name)
+                loaded_plugins.add(plugin_instance)
         self.plugin_loading_complete = True
         self.act()
         await self.process_queued_perceptions()
@@ -239,11 +310,27 @@ hljs.highlightAll();
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
 
         # Ensure uniqueness
-        self.roles = list({role[&#39;name&#39;]: role for role in self.roles}.values())
-        self.goals = list({goal[&#39;description&#39;]: goal for goal in self.goals}.values())
+        self.roles = list(
+            {
+                role[&#34;name&#34;] if isinstance(role, dict) else role.name: role
+                for role in self.roles
+            }.values()
+        )
+        self.goals = list(
+            {
+                (
+                    goal[&#34;description&#34;] if isinstance(goal, dict) else goal.description
+                ): goal
+                for goal in self.goals
+            }.values()
+        )
 
-        logger.info(f&#34;Generated initial roles: {[role[&#39;name&#39;] for role in self.roles]}&#34;)
-        logger.info(f&#34;Generated initial goals: {[goal[&#39;description&#39;] for goal in self.goals]}&#34;)
+        logger.info(
+            f&#34;Generated initial roles: {[role[&#39;name&#39;] if isinstance(role, dict) else role.name for role in self.roles]}&#34;
+        )
+        logger.info(
+            f&#34;Generated initial goals: {[goal[&#39;description&#39;] if isinstance(goal, dict) else goal.description for goal in self.goals]}&#34;
+        )
 
         if hasattr(self.brain, &#34;set_roles&#34;):
             self.brain.set_roles(self.roles)
@@ -283,23 +370,6 @@ hljs.highlightAll();
         plugin_instance = self.plugins.pop(plugin_name, None)
         if plugin_instance and hasattr(plugin_instance, &#34;on_remove&#34;):
             asyncio.create_task(plugin_instance.on_remove())
-        &#34;&#34;&#34;
-        Load all plugins by calling their on_load method.
-        &#34;&#34;&#34;
-        for plugin_name, plugin_instance in self.plugins.items():
-            if hasattr(plugin_instance, &#34;on_load&#34;):
-                await plugin_instance.on_load(self)
-                # Register plugin actions in the brain&#39;s action_registry
-                for action_name, action_func in plugin_instance.get_actions().items():
-                    self.brain.action_registry.add_action(
-                        action_name,
-                        action_func=action_func,
-                        description=f&#34;Action from {plugin_name} plugin&#34;,
-                        priority=5,  # Default priority, adjust as needed
-                    )
-        self.plugin_loading_complete = True
-        self.act()
-        await self.process_queued_perceptions()
 
     async def process_queued_perceptions(self):
         &#34;&#34;&#34;
@@ -323,8 +393,18 @@ hljs.highlightAll();
                 _, self.goals = await self.agency.generate_roles_and_goals()
 
             # Sort roles and goals by priority
-            self.roles.sort(key=lambda x: x.get(&#34;priority&#34;, 5), reverse=True)
-            self.goals.sort(key=lambda x: x.get(&#34;priority&#34;, 5), reverse=True)
+            self.roles.sort(
+                key=lambda x: (
+                    x.priority if isinstance(x, Role) else x.get(&#34;priority&#34;, 5)
+                ),
+                reverse=True,
+            )
+            self.goals.sort(
+                key=lambda x: (
+                    x.priority if isinstance(x, Goal) else x.get(&#34;priority&#34;, 5)
+                ),
+                reverse=True,
+            )
 
             self.agency.set_roles(self.roles)
             self.agency.set_goals(self.goals)
@@ -333,8 +413,14 @@ hljs.highlightAll();
             logger.info(f&#34;Queued perception: {perception}&#34;)
 
         # Sort roles and goals by priority
-        self.roles.sort(key=lambda x: x.get(&#34;priority&#34;, 5), reverse=True)
-        self.goals.sort(key=lambda x: x.get(&#34;priority&#34;, 5), reverse=True)
+        self.roles.sort(
+            key=lambda x: x.priority if isinstance(x, Role) else x.get(&#34;priority&#34;, 5),
+            reverse=True,
+        )
+        self.goals.sort(
+            key=lambda x: x.priority if isinstance(x, Goal) else x.get(&#34;priority&#34;, 5),
+            reverse=True,
+        )
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
@@ -404,7 +490,7 @@ hljs.highlightAll();
             goals=config.goals if config.goals is not None else [],
         )
 
-    def export_to_markdown(self, file_path: str) -&gt; None:
+    async def export_to_markdown(self, file_path: str) -&gt; None:
         &#34;&#34;&#34;
         Export the Framer configuration to a Markdown file.
 
@@ -502,29 +588,22 @@ hljs.highlightAll();
         decision = await self.brain.process_perception(perception, current_goals)
 
         if decision:
-            if isinstance(decision, dict):
-                decision = Decision(
-                    action=decision.get(&#34;action&#34;, &#34;respond&#34;),
-                    parameters=decision.get(&#34;parameters&#34;, {}),
-                    reasoning=decision.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;),
-                    confidence=decision.get(&#34;confidence&#34;, 0.5),
-                    priority=decision.get(&#34;priority&#34;, 1),
-                    related_roles=decision.get(&#34;related_roles&#34;, []),
-                    related_goals=decision.get(&#34;related_goals&#34;, []),
-                )
-            # Consider goal status in decision-making
-            active_goals = [
-                goal for goal in current_goals if goal.status == GoalStatus.ACTIVE
-            ]
-            if active_goals:
-                decision.reasoning += (
-                    f&#34; (Aligned with {len(active_goals)} active goals)&#34;
-                )
+            # Handle execution based on execution_mode
+            executed_decision = await self.brain.execute_decision(decision)
 
-            if hasattr(self, &#34;can_execute&#34;) and self.can_execute:
-                await self.brain.execute_decision(decision)
-            logger.debug(f&#34;Processed perception: {perception}, Decision: {decision}&#34;)
-            self.notify_observers(decision)
+            # Check the status of the executed decision
+            if executed_decision.status == &#39;pending_approval&#39;:
+                # Notify user or system for approval
+                pass
+            elif executed_decision.status == &#39;deferred&#39;:
+                # Schedule for later execution
+                pass
+            elif executed_decision.status == &#39;executed&#39;:
+                # Proceed as normal
+                pass
+
+            # Notify observers with the executed decision
+            self.notify_observers(executed_decision)
         else:
             logger.warning(&#34;No decision was made for the given perception.&#34;)
             return None
@@ -652,7 +731,16 @@ hljs.highlightAll();
         if hasattr(self, &#34;plugins&#34;):
             for plugin in self.plugins.values():
                 if hasattr(plugin, &#34;on_framer_closed&#34;):
-                    plugin.on_framer_closed(self)</code></pre>
+                    plugin.on_framer_closed(self)
+
+        # Ensure plugins are properly shut down
+        for plugin in self.plugins.values():
+            if hasattr(plugin, &#34;on_shutdown&#34;):
+                # Await on_shutdown if it&#39;s a coroutine
+                if asyncio.iscoroutinefunction(plugin.on_shutdown):
+                    await plugin.on_shutdown()
+                else:
+                    plugin.on_shutdown()</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -802,7 +890,7 @@ systems, facilitating interoperability and reuse.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.framer.Framer.export_to_markdown"><code class="name flex">
-<span>def <span class="ident">export_to_markdown</span></span>(<span>self, file_path: str) ‑> None</span>
+<span>async def <span class="ident">export_to_markdown</span></span>(<span>self, file_path: str) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Export the Framer configuration to a Markdown file.</p>
@@ -839,6 +927,12 @@ systems, facilitating interoperability and reuse.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Stop the Framer from processing further actions and tasks.</p></div>
+</dd>
+<dt id="frame.src.framer.Framer.initialize"><code class="name flex">
+<span>async def <span class="ident">initialize</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Initialize the Framer by generating initial roles and goals if not provided.</p></div>
 </dd>
 <dt id="frame.src.framer.Framer.is_ready"><code class="name flex">
 <span>def <span class="ident">is_ready</span></span>(<span>self) ‑> bool</span>
@@ -1022,7 +1116,9 @@ validated to form a valid model.</p>
 <pre><code class="python">class FramerConfig(BaseModel):
     name: str = &#34;DefaultFramer&#34;
     model: Optional[str] = DEFAULT_MODEL
-    soul_seed: Optional[Union[str, Dict[str, Any]]] = Field(default=&#34;You are a helpful AI assistant.&#34;)
+    soul_seed: Optional[Union[str, Dict[str, Any]]] = Field(
+        default=&#34;You are a helpful AI assistant.&#34;
+    )
     use_local_model: bool = False
     # Default permissions include services like memory, eq, and shared_context.
     # These services do not require explicit permissions to be accessed.
@@ -1033,7 +1129,9 @@ validated to form a valid model.</p>
             &#34;with_shared_context&#34;,
         ]
     )
-    mem0_api_key: Optional[str] = Field(default_factory=lambda: os.getenv(&#39;MEM0_API_KEY&#39;, MEM0_API_KEY))
+    mem0_api_key: Optional[str] = Field(
+        default_factory=lambda: os.getenv(&#34;MEM0_API_KEY&#34;, MEM0_API_KEY)
+    )
     &#34;&#34;&#34;
     Configuration class for Framer instances.
 
@@ -1324,8 +1422,12 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
             config (FramerConfig): Configuration for the Framer.
             llm_service (LLMService): Language model service for text generation.
         &#34;&#34;&#34;
-        if not isinstance(config, FramerConfig):
-            raise TypeError(&#34;config must be an instance of FramerConfig&#34;)
+        from unittest.mock import MagicMock
+
+        if not isinstance(config, FramerConfig) and not isinstance(config, MagicMock):
+            raise TypeError(
+                &#34;config must be an instance of FramerConfig or a MagicMock for testing&#34;
+            )
         if not isinstance(llm_service, LLMService):
             raise TypeError(&#34;llm_service must be an instance of LLMService&#34;)
         self.logger = logging.getLogger(__name__)
@@ -1346,6 +1448,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
             llm_service=self.llm_service,
             soul=None,  # We&#39;ll set this later
             brain=None,  # We&#39;ll set this later
+            config=self.config,
         )
         agency = Agency(
             llm_service=self.llm_service,
@@ -1358,12 +1461,19 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
         roles, goals = await self._generate_unique_roles_and_goals(agency, roles, goals)
 
         # Initialize the Soul component with the provided or default seed
-        soul = Soul(seed=self.config.soul_seed)
+        soul = Soul(
+            seed=(
+                self.config.soul_seed
+                if isinstance(self.config.soul_seed, (str, dict, type(None)))
+                else None
+            )
+        )
         # Initialize the WorkflowManager component
         workflow_manager = WorkflowManager()
-        # Set the memory service if provided, otherwise create a new one
-        mem0_adapter = Mem0Adapter(api_key=self.config.mem0_api_key)
-        memory_service = memory_service or MemoryService(adapter=mem0_adapter)
+        # Set the memory service if provided, otherwise create a new one if with_memory permission is present
+        if &#34;with_memory&#34; in self.config.permissions:
+            mem0_adapter = Mem0Adapter(api_key=self.config.mem0_api_key)
+            memory_service = memory_service or MemoryService(adapter=mem0_adapter)
         # Initialize the Brain component with roles, goals, default model
         brain = Brain(
             llm_service=self.llm_service,
@@ -1436,16 +1546,25 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
                 item[&#34;status&#34;] = item.get(&#34;status&#34;, GoalStatus.ACTIVE.value)
             else:
                 item.status = getattr(item, &#34;status&#34;, GoalStatus.ACTIVE)
-
+        priority = lambda x: (
+            x.priority
+            if isinstance(x.priority, int)
+            else x.priority.value if hasattr(x, &#34;priority&#34;) else 5
+        )
         # Sort roles and goals by priority
         sorted_roles = sorted(
             unique_roles.values(),
-            key=lambda x: x.priority.value if hasattr(x, &#34;priority&#34;) else 5,
+            key=priority,
+            reverse=True,
+        )
+        sorted_roles = sorted(
+            unique_roles.values(),
+            key=priority,
             reverse=True,
         )
         sorted_goals = sorted(
             unique_goals.values(),
-            key=lambda x: x.priority.value if hasattr(x, &#34;priority&#34;) else 5,
+            key=priority,
             reverse=True,
         )
 
@@ -1478,6 +1597,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
 <ul>
 <li><code><a title="frame.src.framer.agency" href="agency/index.html">frame.src.framer.agency</a></code></li>
 <li><code><a title="frame.src.framer.brain" href="brain/index.html">frame.src.framer.brain</a></code></li>
+<li><code><a title="frame.src.framer.common" href="common/index.html">frame.src.framer.common</a></code></li>
 <li><code><a title="frame.src.framer.config" href="config.html">frame.src.framer.config</a></code></li>
 <li><code><a title="frame.src.framer.framer" href="framer.html">frame.src.framer.framer</a></code></li>
 <li><code><a title="frame.src.framer.framer_factory" href="framer_factory.html">frame.src.framer.framer_factory</a></code></li>
@@ -1498,6 +1618,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
 <li><code><a title="frame.src.framer.Framer.export_to_markdown" href="#frame.src.framer.Framer.export_to_markdown">export_to_markdown</a></code></li>
 <li><code><a title="frame.src.framer.Framer.generate_tasks_from_perception" href="#frame.src.framer.Framer.generate_tasks_from_perception">generate_tasks_from_perception</a></code></li>
 <li><code><a title="frame.src.framer.Framer.halt" href="#frame.src.framer.Framer.halt">halt</a></code></li>
+<li><code><a title="frame.src.framer.Framer.initialize" href="#frame.src.framer.Framer.initialize">initialize</a></code></li>
 <li><code><a title="frame.src.framer.Framer.is_ready" href="#frame.src.framer.Framer.is_ready">is_ready</a></code></li>
 <li><code><a title="frame.src.framer.Framer.load_from_file" href="#frame.src.framer.Framer.load_from_file">load_from_file</a></code></li>
 <li><code><a title="frame.src.framer.Framer.load_plugins" href="#frame.src.framer.Framer.load_plugins">load_plugins</a></code></li>

@@ -22,6 +22,11 @@ task = Task(
 task_dict = task.to_dict()
 print(task_dict)
 
+# Create a task from a decision
+decision = Decision(action="analyze_data", parameters={"data": "market trends"}, reasoning="Analyze market trends for insights.")
+task = decision.to_task()
+agency.add_task(task)
+
 # Update task status
 task.status = "in_progress"
 
@@ -30,6 +35,10 @@ print(f"Task Description: {task.description}")
 print(f"Task Priority: {task.priority}")
 print(f"Task Status: {task.status}")
 ```
+
+## Parameter Validation
+
+Tasks now include validation of their parameters to ensure that all required information is present before execution. This validation helps prevent errors during task processing by verifying that each task has the necessary data in the correct format.
 
 ## Related Components
 

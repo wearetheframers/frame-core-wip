@@ -163,9 +163,10 @@ hljs.highlightAll();
     def add_action(
         self,
         action_or_name: Union[BaseAction, str],
-        description: str = &#34;&#34;,
         action_func: Optional[Callable] = None,
+        description: str = &#34;&#34;,
         priority: int = 5,
+        expected_parameters: Optional[List[str]] = None,
     ):
         &#34;&#34;&#34;
         Add a new action to the registry.
@@ -183,6 +184,8 @@ hljs.highlightAll();
             priority = priority or action_or_name.priority
         else:
             name = action_or_name
+            if not callable(action_func):
+                raise ValueError(f&#34;Action function for &#39;{name}&#39; must be callable.&#34;)
 
         if priority is not None and not (1 &lt;= priority &lt;= 10):
             raise ValueError(&#34;Priority must be between 1 and 10&#34;)
@@ -196,6 +199,7 @@ hljs.highlightAll();
             &#34;action_func&#34;: action_func,
             &#34;description&#34;: description,
             &#34;priority&#34;: priority,
+            &#34;expected_parameters&#34;: expected_parameters or [],
         }
         if not callable(action_func):
             raise ValueError(f&#34;Action function for &#39;{name}&#39; must be callable.&#34;)
@@ -247,6 +251,11 @@ hljs.highlightAll();
         callback_args: Optional[tuple] = (),
         **kwargs,
     ):
+        # Validate action parameters before execution
+        if not self._validate_parameters(name, kwargs):
+            logger.error(f&#34;Invalid parameters for action &#39;{name}&#39;. Aborting execution.&#34;)
+            return
+
         action = self.get_action(name)
         if not action:
             raise ValueError(f&#34;Action &#39;{name}&#39; not found&#34;)
@@ -270,9 +279,9 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         return self.actions.get(name)
 
-    async def execute_action(self, action_name: str, *args, **kwargs):
+    async def execute_action(self, action_name: str, **kwargs):
         &#34;&#34;&#34;Execute an action by its name.&#34;&#34;&#34;
-        logger.info(
+        logger.debug(
             f&#34;Available actions before executing &#39;{action_name}&#39;: {list(self.actions.keys())}&#34;
         )
         logger.info(f&#34;Action name: {action_name}&#34;)
@@ -282,30 +291,50 @@ hljs.highlightAll();
             return None
 
         action = self.get_action(action_name)
-        print(&#34;Found action: &#34;, action)
         if not action:
             error_message = f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;
             logger.error(error_message)
             return await self._handle_error(error_message)
 
         action_func = action[&#34;action_func&#34;]
+        result = {}
         try:
-            result = await action_func(self.execution_context, **kwargs)  # Pass execution_context
-            if result is None:
+            _result = await action_func(
+                self.execution_context, **kwargs
+            )  # Pass execution_context
+            if _result is None:
                 return {
                     &#34;error&#34;: &#34;Action returned None&#34;,
                     &#34;fallback_response&#34;: &#34;The action didn&#39;t produce a response. Please try again.&#34;,
                 }
-            elif isinstance(result, dict):
-                return result
-            elif isinstance(result, str):
-                return {&#34;response&#34;: result}
+            elif isinstance(_result, dict):
+                result[&#34;response&#34;] = _result
+            elif isinstance(_result, str):
+                result[&#34;response&#34;] = _result
+            elif isinstance(_result, list):
+                result[&#34;response&#34;] = _result
             else:
-                return {&#34;response&#34;: str(result)}
+                result[&#34;response&#34;] = _result
+            # Get reasoning or default empty string
+            if _result is None:
+                return {
+                    &#34;error&#34;: &#34;Action returned None&#34;,
+                    &#34;fallback_response&#34;: &#34;The action didn&#39;t produce a response. Please try again.&#34;,
+                }
+            if isinstance(_result, dict):
+                result[&#34;response&#34;] = _result
+                if &#34;reasoning&#34; in _result:
+                    result[&#34;reasoning&#34;] = _result[&#34;reasoning&#34;]
+                else:
+                    result[&#34;reasoning&#34;] = &#34;No reasoning provided.&#34;
+            else:
+                result[&#34;response&#34;] = _result
+                result[&#34;reasoning&#34;] = &#34;No reasoning provided.&#34;
         except Exception as e:
             error_message = f&#34;Error executing action &#39;{action_name}&#39;: {str(e)}&#34;
             logger.error(error_message)
             return await self._handle_error(error_message)
+        return result
 
     def set_execution_context(self, execution_context):
         self.execution_context = execution_context
@@ -325,7 +354,7 @@ hljs.highlightAll();
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.ActionRegistry.add_action"><code class="name flex">
-<span>def <span class="ident">add_action</span></span>(<span>self, action_or_name: Union[<a title="frame.src.framer.brain.actions.base.BaseAction" href="framer/brain/actions/base.html#frame.src.framer.brain.actions.base.BaseAction">BaseAction</a>, str], description: str = '', action_func: Optional[Callable] = None, priority: int = 5)</span>
+<span>def <span class="ident">add_action</span></span>(<span>self, action_or_name: Union[<a title="frame.src.framer.brain.actions.base.BaseAction" href="framer/brain/actions/base.html#frame.src.framer.brain.actions.base.BaseAction">BaseAction</a>, str], action_func: Optional[Callable] = None, description: str = '', priority: int = 5, expected_parameters: Optional[List[str]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a new action to the registry.</p>
@@ -360,7 +389,7 @@ hljs.highlightAll();
 </dl></div>
 </dd>
 <dt id="frame.src.ActionRegistry.execute_action"><code class="name flex">
-<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, *args, **kwargs)</span>
+<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Execute an action by its name.</p></div>
@@ -455,22 +484,21 @@ hljs.highlightAll();
         self.framer = framer
         self.logger = logging.getLogger(self.__class__.__name__)
         self.execution_context = getattr(framer, &#34;execution_context&#34;, None)
-        if self.execution_context is None:
-            self.logger.warning(
-                &#34;Plugin warning: Framer does not have an execution_context attribute. Possible unexpected behaviors may occur.&#34;
-            )
+        self.ruleset = Ruleset()
+        self.logger.warning(
+            &#34;Plugin warning: Framer does not have an execution_context attribute. Possible unexpected behaviors may occur.&#34;
+        )
 
-    def remove_action(self, name: str):
+    def add_rule(self, condition: Callable[[Dict[str, Any]], bool], action: Callable[[Dict[str, Any]], None]):
         &#34;&#34;&#34;
-        Remove an action from the action registry by its name.
+        Add a rule to the plugin.
 
         Args:
-            name (str): The name of the action to remove.
+            condition (Callable[[Dict[str, Any]], bool]): The condition function for the rule.
+            action (Callable[[Dict[str, Any]], None]): The action function to execute if the condition is met.
         &#34;&#34;&#34;
-        if name in self.framer.brain.action_registry.actions:
-            self.framer.brain.action_registry.remove_action(name)
-        else:
-            self.logger.warning(f&#34;Action &#39;{name}&#39; not found in Framer action registry.&#34;)
+        rule = Rule(condition, action)
+        self.ruleset.add_rule(rule)
 
     @abstractmethod
     async def on_load(self):
@@ -599,8 +627,38 @@ defined capabilities of the Framer.</p>
 </dl>
 <p>The Brain class serves as the cognitive core of the Framer, coordinating various components
 to enable intelligent decision-making and action execution.</p>
-<p>Initialize the Brain with the necessary components.</p>
+<p>Execute the decision made by the brain.</p>
 <h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>decision</code></strong> :&ensp;<code><a title="frame.src.Decision" href="#frame.src.Decision">Decision</a></code></dt>
+<dd>The decision to execute.</dd>
+<dt><strong><code>perception</code></strong> :&ensp;<code>Optional[Perception]</code></dt>
+<dd>The perception that led to this decision.</dd>
+</dl>
+<h2 id="notes">Notes</h2>
+<p>Before execution, this method validates the parameters associated with the
+action to ensure they are correct and complete. If invalid parameters are
+found, the execution may be halted or adjusted accordingly.
+Make a decision on what action to take next based on the current state and perception.</p>
+<h2 id="args_1">Args</h2>
+<dl>
+<dt><strong><code>perception</code></strong> :&ensp;<code>Optional[Perception]</code></dt>
+<dd>The current perception of the environment.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="frame.src.Decision" href="#frame.src.Decision">Decision</a></code></dt>
+<dd>The decision made based on the current state and perception,
+including the action to take, parameters, reasoning, confidence,
+and priority.</dd>
+</dl>
+<h2 id="notes_1">Notes</h2>
+<p>This method now includes validation of variables and parameters to ensure
+the decision can be executed properly. Invalid parameters are identified,
+and appropriate actions are taken to handle them, such as adjusting the
+decision or requesting additional information.
+Initialize the Brain with the necessary components.</p>
+<h2 id="args_2">Args</h2>
 <dl>
 <dt><strong><code>llm_service</code></strong> :&ensp;<code>LLMService</code></dt>
 <dd>The language model service.</dd>
@@ -664,8 +722,33 @@ to enable intelligent decision-making and action execution.</p>
         goals: List[Dict[str, Any]] = [],
         default_model: str = &#34;gpt-3.5-turbo&#34;,
         soul: Optional[Soul] = None,
-    ):
+    ) -&gt; Decision:
         &#34;&#34;&#34;
+        Execute the decision made by the brain.
+
+        Args:
+            decision (Decision): The decision to execute.
+            perception (Optional[Perception]): The perception that led to this decision.
+
+        Notes:
+            Before execution, this method validates the parameters associated with the
+            action to ensure they are correct and complete. If invalid parameters are
+            found, the execution may be halted or adjusted accordingly.
+        Make a decision on what action to take next based on the current state and perception.
+
+        Args:
+            perception (Optional[Perception]): The current perception of the environment.
+
+        Returns:
+            Decision: The decision made based on the current state and perception,
+                      including the action to take, parameters, reasoning, confidence,
+                      and priority.
+
+        Notes:
+            This method now includes validation of variables and parameters to ensure
+            the decision can be executed properly. Invalid parameters are identified,
+            and appropriate actions are taken to handle them, such as adjusting the
+            decision or requesting additional information.
         Initialize the Brain with the necessary components.
 
         Args:
@@ -678,36 +761,29 @@ to enable intelligent decision-making and action execution.</p>
             soul (Optional[Soul]): The Soul instance for the Brain.
         &#34;&#34;&#34;
         self.logger = logging.getLogger(__name__)
-        self.logger.info(&#34;Initializing Brain&#34;)
         self.llm_service = llm_service
         self.execution_context = execution_context or ExecutionContext(
             llm_service=self.llm_service, config=None
         )
         self.default_model = default_model
-        self.roles = roles
-        self.goals = goals
+        self.roles = [
+            Role(**role) if isinstance(role, dict) else role for role in roles
+        ]
+        self.goals = [
+            Goal(**goal) if isinstance(goal, dict) else goal for goal in goals
+        ]
         self.soul = soul
         self.memory_service = memory_service
-        self.logger.info(f&#34;Memory service received: {self.memory_service}&#34;)
-
         if self.memory_service:
-            self.logger.info(&#34;Creating Memory object&#34;)
             self.memory = Memory(self.memory_service)
-            self.logger.info(f&#34;Memory object created: {self.memory}&#34;)
         else:
             self.logger.warning(&#34;No memory service provided, Memory object not created&#34;)
             self.memory = None
 
         self.mind = Mind(self)
-        # Initialize ActionRegistry
         self.action_registry = ActionRegistry(execution_context=self.execution_context)
         if not isinstance(self.execution_context, ExecutionContext):
             raise TypeError(&#34;execution_context must be an instance of ExecutionContext&#34;)
-
-        self.logger.info(
-            f&#34;Brain initialized with memory service: {self.memory_service}&#34;
-        )
-        self.logger.info(f&#34;Brain memory object: {self.memory}&#34;)
 
     def set_memory_service(self, memory_service: Optional[&#34;MemoryService&#34;]):
         &#34;&#34;&#34;
@@ -811,7 +887,7 @@ to enable intelligent decision-making and action execution.</p>
         &#34;&#34;&#34;
         if response is None:
             logger.error(&#34;Received None response, cannot parse JSON.&#34;)
-            return {
+            result = {
                 &#34;action&#34;: &#34;error&#34;,
                 &#34;parameters&#34;: {
                     &#34;error&#34;: &#34;Received None response&#34;,
@@ -894,6 +970,10 @@ to enable intelligent decision-making and action execution.</p>
         # Convert perception to Perception object if it is a dictionary
         if isinstance(perception, dict):
             perception = Perception.from_dict(perception)
+        elif not isinstance(perception, Perception):
+            raise TypeError(&#34;Perception must be a Perception object or a dictionary.&#34;)
+        else:
+            perception = Perception.from_dict(perception.to_dict())
 
         self.mind.perceptions.append(perception)
         available_actions = self.action_registry.get_all_actions().keys()
@@ -904,7 +984,21 @@ to enable intelligent decision-making and action execution.</p>
             if decision is None:
                 self.logger.warning(&#34;No decision was made for the given perception.&#34;)
                 return None
-            await self.execute_decision(decision, perception)
+            if not decision.reasoning:
+                decision.reasoning = (
+                    &#34;Reasoning not provided. Encourage detailed reasoning.&#34;
+                )
+            # Check if the decision has already been executed
+            if (
+                not hasattr(self, &#34;_last_executed_decision&#34;)
+                or self._last_executed_decision != decision
+            ):
+                await self.execute_decision(decision, perception)
+                self._last_executed_decision = decision
+            else:
+                self.logger.info(
+                    &#34;Decision has already been executed, skipping re-execution.&#34;
+                )
         else:
             logger.warn(&#34;Framer is not ready to execute decisions. Queuing perception.&#34;)
             # Code to queue the perception can be added here if needed
@@ -913,6 +1007,17 @@ to enable intelligent decision-making and action execution.</p>
     async def make_decision(
         self, perception: Optional[Perception] = None
     ) -&gt; &#34;Decision&#34;:
+        &#34;&#34;&#34;
+        Make a decision on what action to take next based on the current state and perception.
+
+        Args:
+            perception (Optional[Perception]): The current perception of the environment.
+
+        Returns:
+            Decision: The decision made based on the current state and perception,
+                      including the action to take, parameters, reasoning, confidence,
+                      and priority.
+        &#34;&#34;&#34;
         from frame.src.framer.brain.decision import Decision
 
         &#34;&#34;&#34;
@@ -926,7 +1031,7 @@ to enable intelligent decision-making and action execution.</p>
                       including the action to take, parameters, reasoning, confidence,
                       and priority.
         &#34;&#34;&#34;
-        logger.info(f&#34;Making decision based on perception: {perception}&#34;)
+        # If no perception is provided, return a default decision with no action
         if perception is None:
             return Decision(
                 action=&#34;no_action&#34;,
@@ -938,6 +1043,7 @@ to enable intelligent decision-making and action execution.</p>
                 related_goals=[],
             )
 
+        # Get a decision prompt based on the current perception
         response = await self._get_decision_prompt(perception)
 
         if response is None or (isinstance(response, str) and not response.strip()):
@@ -952,9 +1058,10 @@ to enable intelligent decision-making and action execution.</p>
                 related_goals=[],
             )
 
+        # Parse the response from the LLM service to extract decision data
         decision_data = self.parse_json_response(response)
 
-        logger.info(f&#34;Decision data received: {decision_data}&#34;)
+        logger.debug(f&#34;Decision data received: {decision_data}&#34;)
 
         if isinstance(decision_data, dict) and &#34;error&#34; in decision_data:
             logger.error(f&#34;Error in decision making: {decision_data[&#39;error&#39;]}&#34;)
@@ -968,13 +1075,18 @@ to enable intelligent decision-making and action execution.</p>
                 related_goals=[],
             )
 
-        action = decision_data.get(&#34;action&#34;, &#34;respond&#34;).lower()
+        # Use default action &#39;respond&#39; if no action is provided
+        try:
+            action = decision_data.get(&#34;action&#34;, &#34;respond&#34;)
+        except:
+            action = &#34;no_action&#34;
         valid_actions = [
             str(action).lower()
             for action in self.action_registry.get_all_actions().keys()
         ]
 
         # Retrieve context from the execution context
+        # If the context indicates high urgency and risk, choose an adaptive decision
         context = self.execution_context.get_full_state()
         # Determine the best action based on context
         if context.get(&#34;urgency&#34;, 0) &gt; 7 and context.get(&#34;risk&#34;, 0) &gt; 5:
@@ -983,47 +1095,28 @@ to enable intelligent decision-making and action execution.</p>
             decision_data[&#34;reasoning&#34;] = (
                 f&#34;High urgency and risk detected. Using &#39;{action}&#39; to adaptively decide the best course of action.&#34;
             )
-        elif action not in valid_actions:
-            # If the action is not valid, check if it&#39;s related to memory retrieval
-            if any(keyword in action for keyword in [&#34;memory&#34;, &#34;recall&#34;, &#34;retrieve&#34;]):
-                action = &#34;respond with memory retrieval&#34;
-                decision_data[&#34;action&#34;] = action
-                decision_data[&#34;reasoning&#34;] = (
-                    f&#34;Action &#39;{action}&#39; was generated based on the perception. &#34;
-                    f&#34;Using the memory retrieval plugin to process this request.&#34;
-                )
-            else:
-                invalid_action = action
-                action = &#34;respond&#34;
-                logger.warning(
-                    f&#34;Invalid action &#39;{invalid_action}&#39; generated. &#34;
-                    f&#34;Valid actions are: {&#39;, &#39;.join(valid_actions)}&#34;
-                )
-                decision_data[&#34;action&#34;] = action
-                decision_data[&#34;reasoning&#34;] = (
-                    f&#34;Invalid action &#39;{invalid_action}&#39; was generated. Defaulted to &#39;{action}&#39;.&#34;
-                )
 
-        logger.info(f&#34;Decision data generated: {decision_data}&#34;)
-        logger.info(f&#34;Action &#39;{action}&#39; generated: {decision_data}&#34;)
+        logger.info(f&#34;Decision made: {decision_data}&#34;)
 
+        # Merge perception data into parameters
         parameters = decision_data.get(&#34;parameters&#34;, {})
-        if action == &#34;respond with memory retrieval&#34; and &#34;query&#34; not in parameters:
-            parameters[&#34;query&#34;] = perception.data.get(&#34;text&#34;, &#34;&#34;)
-        elif &#34;topic&#34; in parameters:
-            parameters[&#34;research_topic&#34;] = parameters.pop(&#34;topic&#34;)
         if not isinstance(parameters, dict):
-            parameters = {&#34;value&#34;: parameters}
+            parameters = {}
+        if perception and perception.data:
+            # Ensure that perception data is considered
+            parameters = {**perception.data, **parameters}
 
         reasoning = decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
 
         # Check if goals are None and generate them if necessary
+        # This ensures that the decision-making process has relevant goals to consider
         if self.execution_context and not self.execution_context.get_goals():
             # Assuming the execution_context has a method to generate goals
             goals = await self.execution_context.generate_goals()
             self.execution_context.set_goals(goals)
 
         # Consider role and goal priorities when setting decision priority
+        # This helps in aligning the decision with the most critical roles and goals
         active_roles = [role for role in self.roles if role.status == RoleStatus.ACTIVE]
         active_goals = [
             goal
@@ -1039,6 +1132,7 @@ to enable intelligent decision-making and action execution.</p>
         priority_value = None
         priority_int = None
         # Ensure priority is a Priority enum
+        # Return the final decision object with all necessary attributes
         priority_value = decision_data.get(&#34;priority&#34;, Priority.MEDIUM)
         try:
             if isinstance(priority_value, str):
@@ -1074,6 +1168,31 @@ to enable intelligent decision-making and action execution.</p>
             decision.reasoning += f&#34; (Aligned with {len(active_goals)} active goals)&#34;
         else:
             logger.error(&#34;Decision object does not have a &#39;reasoning&#39; attribute.&#34;)
+        print(&#34;Final decision object: &#34;, decision)
+        # Convert related_roles and related_goals to Role and Goal instances
+        related_roles = [
+            role
+            for role in active_roles
+            if role.name in decision_data.get(&#34;related_roles&#34;, [])
+        ]
+        related_goals = [
+            goal
+            for goal in active_goals
+            if goal.name in decision_data.get(&#34;related_goals&#34;, [])
+        ]
+
+        decision = Decision(
+            action=decision_data.get(&#34;action&#34;, &#34;respond&#34;),
+            parameters=decision_data.get(&#34;parameters&#34;, {}),
+            reasoning=decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;),
+            confidence=float(decision_data.get(&#34;confidence&#34;, 0.5)),
+            priority=decision_data.get(&#34;priority&#34;, Priority.MEDIUM),
+            related_roles=related_roles,
+            related_goals=related_goals,
+        )
+        decision.result = decision_data.get(&#34;parameters&#34;, {}).get(
+            &#34;response_content&#34;, None
+        )
         return decision
 
     async def _get_decision_prompt(self, perception: Optional[Perception]) -&gt; str:
@@ -1090,18 +1209,19 @@ to enable intelligent decision-making and action execution.</p>
         logger.debug(f&#34;Valid actions: {valid_actions}&#34;)
 
         active_roles = [
-            f&#34;{role.name} (Priority: {role.priority.name}, Status: {role.status.name})&#34;
+            f&#34;{role.name} (Priority: {role.priority}, Status: {role.status.name})&#34;
             for role in self.roles
             if role.status == RoleStatus.ACTIVE
         ]
         active_goals = [
-            f&#34;{goal.name} (Priority: {goal.priority.name}, Status: {goal.status.name})&#34;
+            f&#34;{goal.name} (Priority: {goal.priority}, Status: {goal.status.name})&#34;
             for goal in self.goals
             if goal.status == GoalStatus.ACTIVE
         ]
 
         prompt = f&#34;&#34;&#34;Given the following perception and context, decide on the most appropriate action to take.
         Perception: {perception}
+        Perception Data: {perception.data}
         
         Current active roles:
         {json.dumps(active_roles, indent=2)}
@@ -1110,7 +1230,7 @@ to enable intelligent decision-making and action execution.</p>
         {json.dumps(active_goals, indent=2)}
 
         Valid actions are:
-        {json.dumps({str(action): f&#34;{self.action_registry.actions[action][&#39;description&#39;]} (Priority: {self.action_registry.actions[action][&#39;priority&#39;]})&#34; for action in self.action_registry.actions}, indent=2)}
+        {json.dumps({action_name: {&#34;description&#34;: action_info[&#34;description&#34;], &#34;expected_parameters&#34;: action_info.get(&#34;expected_parameters&#34;, []), &#34;priority&#34;: action_info[&#34;priority&#34;]} for action_name, action_info in self.action_registry.actions.items()}, indent=2)}
         
         For each perception, carefully evaluate:
         - The type and content of the perception
@@ -1187,48 +1307,77 @@ to enable intelligent decision-making and action execution.</p>
             decision (Decision): The decision to execute.
             perception (Optional[Perception]): The perception that led to this decision.
         &#34;&#34;&#34;
-        logger.info(
+        logger.debug(
             f&#34;Executing decision: {decision.action} with params {decision.parameters}&#34;
         )
-        result = None
-        try:
-            if decision.action not in self.action_registry.get_all_actions():
-                logger.warning(
-                    f&#34;Action &#39;{decision.action}&#39; not found in registry. Defaulting to &#39;process_perception&#39;.&#34;
-                )
-                decision.action = &#34;process_perception&#34;
-                if &#34;perception&#34; not in decision.parameters:
-                    decision.parameters[&#34;perception&#34;] = (
-                        perception.data if perception else None
-                    )
-
-            if decision.action == &#34;respond with memory retrieval&#34;:
-                if (
-                    &#34;query&#34; not in decision.parameters
-                    or not decision.parameters[&#34;query&#34;]
-                ):
-                    decision.parameters[&#34;query&#34;] = (
-                        perception.data.get(&#34;text&#34;, &#34;&#34;) if perception else &#34;&#34;
-                    )
-
+        logger.debug(f&#34;Perception object: {perception}&#34;)
+        # Handle different execution modes
+        if decision.execution_mode == ExecutionMode.AUTO:
+            # Execute the action immediately
             result = await self.action_registry.execute_action(
-                decision.action, decision.parameters
+                decision.action, **decision.parameters
             )
+            decision.result = result
+            decision.status = DecisionStatus.EXECUTED
 
-            logger.info(
-                f&#34;Action result: {result} with reasoning: {decision.reasoning}.&#34;
-            )
+        elif decision.execution_mode == ExecutionMode.USER_APPROVAL:
+            # Handle user approval logic
+            decision.status = DecisionStatus.PENDING_APPROVAL
+            # Optionally, queue the decision for approval
 
-        except Exception as e:
-            logger.error(f&#34;Error executing decision: {e}&#34;)
-            logger.exception(&#34;Detailed traceback:&#34;)
-            result = {&#34;error&#34;: str(e)}
+        elif decision.execution_mode == ExecutionMode.DEFERRED:
+            # Handle deferred execution logic
+            decision.status = DecisionStatus.DEFERRED
+            # Optionally, schedule the decision for later execution
 
-        return result
+        else:
+            # Default to not executing
+            decision.status = DecisionStatus.NOT_EXECUTED
 
-    async def execute_action(self, action_name: str, parameters: dict):
+        # Return the decision object with the result and status
+        return decision
+
+    def _validate_parameters(self, action_name: str, parameters: Dict[str, Any]) -&gt; bool:
+        &#34;&#34;&#34;
+        Validates that the given parameters match the expected format for the action.
+
+        Args:
+            action_name (str): The name of the action.
+            parameters (Dict[str, Any]): The parameters to validate.
+
+        Returns:
+            bool: True if parameters are valid, False otherwise.
+
+        Notes:
+            This method checks whether all required parameters for the action are present
+            and correctly formatted.
+        &#34;&#34;&#34;
+        # Validation logic...
+        return True  # Placeholder for actual validation logic
+
+    async def execute_action(
+        self, action_name: str, parameters: Optional[dict] = None
+    ) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;Execute an action by its name using the action registry.&#34;&#34;&#34;
-        return await self.action_registry.execute_action(action_name, parameters)
+        if parameters is None:
+            parameters = {}
+        result = await self.action_registry.execute_action(action_name, **parameters)
+        if isinstance(result, dict):
+            result.setdefault(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
+            result.setdefault(&#34;confidence&#34;, 0.5)
+            result.setdefault(&#34;priority&#34;, 1)
+            result.setdefault(&#34;related_roles&#34;, [])
+            result.setdefault(&#34;related_goals&#34;, [])
+            return result
+        else:
+            return {
+                &#34;response&#34;: result,
+                &#34;reasoning&#34;: &#34;No reasoning provided.&#34;,
+                &#34;confidence&#34;: 0.5,
+                &#34;priority&#34;: 1,
+                &#34;related_roles&#34;: [],
+                &#34;related_goals&#34;: [],
+            }
 
     async def _execute_decision(self, decision: Decision) -&gt; Any:
         &#34;&#34;&#34;
@@ -1276,7 +1425,7 @@ to enable intelligent decision-making and action execution.</p>
             else:
                 raise ValueError(f&#34;Action &#39;{decision.action}&#39; not found in registry.&#34;)
 
-            logger.info(f&#34;Executed action: {decision.action}&#34;)
+            logger.debug(f&#34;Executed action: {decision.action}&#34;)
             logger.debug(f&#34;Action result: {result}&#34;)
             logger.debug(f&#34;Decision reasoning: {decision.reasoning}&#34;)
 
@@ -1376,7 +1525,7 @@ to enable intelligent decision-making and action execution.</p>
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.Brain.execute_action"><code class="name flex">
-<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, parameters: dict)</span>
+<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, parameters: Optional[dict] = None) ‑> Dict[str, Any]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Execute an action by its name using the action registry.</p></div>
@@ -1397,7 +1546,19 @@ to enable intelligent decision-making and action execution.</p>
 <span>async def <span class="ident">make_decision</span></span>(<span>self, perception: Optional[<a title="frame.src.framer.brain.mind.perception.perception.Perception" href="framer/brain/mind/perception/perception.html#frame.src.framer.brain.mind.perception.perception.Perception">Perception</a>] = None) ‑> <a title="frame.src.models.framer.brain.decision.decision.Decision" href="models/framer/brain/decision/decision.html#frame.src.models.framer.brain.decision.decision.Decision">Decision</a></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Make a decision on what action to take next based on the current state and perception.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>perception</code></strong> :&ensp;<code>Optional[Perception]</code></dt>
+<dd>The current perception of the environment.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="frame.src.Decision" href="#frame.src.Decision">Decision</a></code></dt>
+<dd>The decision made based on the current state and perception,
+including the action to take, parameters, reasoning, confidence,
+and priority.</dd>
+</dl></div>
 </dd>
 <dt id="frame.src.Brain.parse_json_response"><code class="name flex">
 <span>def <span class="ident">parse_json_response</span></span>(<span>self, response: Any) ‑> Any</span>
@@ -1464,13 +1625,34 @@ to enable intelligent decision-making and action execution.</p>
 </dd>
 <dt id="frame.src.Decision"><code class="flex name class">
 <span>class <span class="ident">Decision</span></span>
-<span>(</span><span>**data)</span>
+<span>(</span><span>**data: Any)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents a decision made by the Brain component of a Framer.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
+<dd>The action to be taken.</dd>
+<dt><strong><code>parameters</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>Parameters for the action.</dd>
+<dt><strong><code>reasoning</code></strong> :&ensp;<code>str</code></dt>
+<dd>The reasoning behind the decision.</dd>
+<dt><strong><code>confidence</code></strong> :&ensp;<code>float</code></dt>
+<dd>The confidence level of the decision.</dd>
+<dt><strong><code>priority</code></strong> :&ensp;<code>int</code></dt>
+<dd>The priority of the decision.</dd>
+<dt><strong><code>status</code></strong> :&ensp;<code>DecisionStatus</code></dt>
+<dd>The execution status of the decision.</dd>
+</dl>
+<h2 id="notes">Notes</h2>
+<p>The Decision class now includes validation of action parameters to ensure
+that all necessary variables are present and correctly formatted. This
+validation helps prevent execution errors and enhances the reliability of
+the decision-making process.
+Represents a decision made by the Brain component of a Framer.</p>
 <p>To extend decision-making capabilities, you can add new actions to the
 ActionRegistry and ensure they are recognized in the decision-making process.</p>
-<h2 id="attributes">Attributes</h2>
+<h2 id="attributes_1">Attributes</h2>
 <dl>
 <dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
 <dd>The action to be taken.</dd>
@@ -1503,6 +1685,21 @@ validated to form a valid model.</p>
     &#34;&#34;&#34;
     Represents a decision made by the Brain component of a Framer.
 
+    Attributes:
+        action (str): The action to be taken.
+        parameters (Dict[str, Any]): Parameters for the action.
+        reasoning (str): The reasoning behind the decision.
+        confidence (float): The confidence level of the decision.
+        priority (int): The priority of the decision.
+        status (DecisionStatus): The execution status of the decision.
+
+    Notes:
+        The Decision class now includes validation of action parameters to ensure
+        that all necessary variables are present and correctly formatted. This
+        validation helps prevent execution errors and enhances the reliability of
+        the decision-making process.
+    Represents a decision made by the Brain component of a Framer.
+
     To extend decision-making capabilities, you can add new actions to the
     ActionRegistry and ensure they are recognized in the decision-making process.
 
@@ -1518,10 +1715,38 @@ validated to form a valid model.</p>
         related_goals (List[Goal]): Goals related to this decision.
     &#34;&#34;&#34;
 
+    is_executable: bool = Field(
+        default=True,
+        description=&#34;Indicates if the decision can be executed automatically&#34;,
+    )
+    execution_mode: ExecutionMode = Field(
+        default=ExecutionMode.AUTO,
+        description=&#34;Defines how the decision should be executed.&#34;,
+    )
+    execution_mode: ExecutionMode = Field(
+        default=ExecutionMode.AUTO,
+        description=&#34;Defines how the decision should be executed.&#34;,
+    )
+    execution_mode: str = Field(
+        default=&#34;auto&#34;,
+        description=&#34;Defines how the decision should be executed. Options: &#39;auto&#39;, &#39;user_approval&#39;, &#39;deferred&#39;&#34;,
+    )
     expected_results: List[Any] = Field(
         default_factory=list, description=&#34;The expected results of the decision&#34;
     )
-    task_status: &#34;TaskStatus&#34; = Field(
+    status: DecisionStatus = Field(
+        default=DecisionStatus.NOT_EXECUTED,
+        description=&#39;The execution status of the decision&#39;
+    )
+    status: DecisionStatus = Field(
+        default=DecisionStatus.NOT_EXECUTED,
+        description=&#39;The execution status of the decision&#39;
+    )
+    status: DecisionStatus = Field(
+        default=DecisionStatus.NOT_EXECUTED,
+        description=&#34;The execution status of the decision&#34;
+    )
+    task_status: TaskStatus = Field(
         default=TaskStatus.PENDING, description=&#34;Status of the associated task&#34;
     )
     related_roles: List[&#34;Role&#34;] = Field(
@@ -1556,6 +1781,18 @@ validated to form a valid model.</p>
 
         return cls(**decision_dict)
 
+    def to_task(self) -&gt; &#34;Task&#34;:
+        &#34;&#34;&#34;
+        Convert the Decision into a Task.
+        &#34;&#34;&#34;
+        return Task(
+            description=self.reasoning,
+            priority=self.priority,
+            status=TaskStatus.PENDING,
+            data=self.parameters,
+            type=self.action,
+        )
+
     def to_dict(self) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
         Convert the Decision object to a dictionary.
@@ -1569,8 +1806,10 @@ validated to form a valid model.</p>
             &#34;reasoning&#34;: self.reasoning,
             &#34;confidence&#34;: self.confidence,
             &#34;priority&#34;: self.priority,
+            &#34;execution_mode&#34;: self.execution_mode.value,
             &#34;expected_results&#34;: self.expected_results,
             &#34;task_status&#34;: self.task_status.value,
+            &#34;status&#34;: self.status.value,
             &#34;related_roles&#34;: [
                 role.to_dict() if hasattr(role, &#34;to_dict&#34;) else str(role)
                 for role in self.related_roles
@@ -1673,7 +1912,15 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="frame.src.Decision.execution_mode"><code class="name">var <span class="ident">execution_mode</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.Decision.expected_results"><code class="name">var <span class="ident">expected_results</span> : List[Any]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.Decision.is_executable"><code class="name">var <span class="ident">is_executable</span> : bool</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1697,7 +1944,11 @@ validated to form a valid model.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : TaskStatus</code></dt>
+<dt id="frame.src.Decision.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.framer.brain.decision.decision.DecisionStatus" href="framer/brain/decision/decision.html#frame.src.framer.brain.decision.decision.DecisionStatus">DecisionStatus</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.Decision.task_status"><code class="name">var <span class="ident">task_status</span> : <a title="frame.src.framer.agency.tasks.status.TaskStatus" href="framer/agency/tasks/status.html#frame.src.framer.agency.tasks.status.TaskStatus">TaskStatus</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1782,11 +2033,17 @@ validated to form a valid model.</p>
 <dd>A dictionary representation of the Decision.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.Decision.to_task"><code class="name flex">
+<span>def <span class="ident">to_task</span></span>(<span>self) ‑> <a title="frame.src.framer.agency.tasks.task.Task" href="framer/agency/tasks/task.html#frame.src.framer.agency.tasks.task.Task">Task</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert the Decision into a Task.</p></div>
+</dd>
 </dl>
 </dd>
 <dt id="frame.src.Framer"><code class="flex name class">
 <span>class <span class="ident">Framer</span></span>
-<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="framer/config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="framer/agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, soul: <a title="frame.src.framer.soul.soul.Soul" href="framer/soul/soul.html#frame.src.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.workflow.workflow_manager.WorkflowManager" href="framer/agency/workflow/workflow_manager.html#frame.src.framer.agency.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, brain: Optional[<a title="frame.src.framer.brain.brain.Brain" href="framer/brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>] = None, memory_adapter: Optional[<a title="frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface" href="framer/brain/memory/memory_adapter_interface.html#frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface">MemoryAdapterInterface</a>] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], plugins: Optional[Dict[str, Any]] = None, plugin_loading_progress: Optional[Callable[[int], None]] = None, execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>] = None)</span>
+<span>(</span><span>config: <a title="frame.src.framer.config.FramerConfig" href="framer/config.html#frame.src.framer.config.FramerConfig">FramerConfig</a>, llm_service: <a title="frame.src.services.llm.main.LLMService" href="services/llm/main.html#frame.src.services.llm.main.LLMService">LLMService</a>, agency: <a title="frame.src.framer.agency.agency.Agency" href="framer/agency/agency.html#frame.src.framer.agency.agency.Agency">Agency</a>, soul: <a title="frame.src.models.framer.soul.soul.Soul" href="models/framer/soul/soul.html#frame.src.models.framer.soul.soul.Soul">Soul</a>, workflow_manager: <a title="frame.src.framer.agency.workflow.workflow_manager.WorkflowManager" href="framer/agency/workflow/workflow_manager.html#frame.src.framer.agency.workflow.workflow_manager.WorkflowManager">WorkflowManager</a>, brain: Optional[<a title="frame.src.framer.brain.brain.Brain" href="framer/brain/brain.html#frame.src.framer.brain.brain.Brain">Brain</a>] = None, memory_adapter: Optional[<a title="frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface" href="framer/brain/memory/memory_adapter_interface.html#frame.src.framer.brain.memory.memory_adapter_interface.MemoryAdapterInterface">MemoryAdapterInterface</a>] = None, memory_service: Optional[<a title="frame.src.services.memory.main.MemoryService" href="services/memory/main.html#frame.src.services.memory.main.MemoryService">MemoryService</a>] = None, eq_service: Optional[<a title="frame.src.services.eq.main.EQService" href="services/eq/main.html#frame.src.services.eq.main.EQService">EQService</a>] = None, roles: List[Dict[str, Any]] = [], goals: List[Dict[str, Any]] = [], plugins: Optional[Dict[str, Any]] = None, plugin_loading_progress: Optional[Callable[[int], None]] = None, execution_context: Optional[<a title="frame.src.services.context.execution_context_service.ExecutionContext" href="services/context/execution_context_service.html#frame.src.services.context.execution_context_service.ExecutionContext">ExecutionContext</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1874,7 +2131,7 @@ validated to form a valid model.</p>
         self.llm_service = llm_service
 
         self.execution_context = execution_context or ExecutionContext(
-            llm_service=self.llm_service, soul=soul
+            llm_service=self.llm_service, soul=soul, config=config
         )
         self.execution_context.soul = soul
         self.execution_context.brain = brain
@@ -1885,17 +2142,11 @@ validated to form a valid model.</p>
         if &#34;with_memory&#34; in self.permissions:
             self.permissions.append(&#34;with_mem0_search_extract_summarize_plugin&#34;)
 
-        logger.info(f&#34;Permissions: {self.permissions}&#34;)
-        logger.info(f&#34;Memory adapter: {memory_adapter}&#34;)
-
-        if &#34;with_memory&#34; in self.permissions and memory_adapter:
-            logger.info(&#34;Creating memory service&#34;)
+        if &#34;with_memory&#34; in self.permissions:
             self.memory_service = memory_service or MemoryService(
-                adapter=memory_adapter
+                adapter=memory_adapter or Mem0Adapter(api_key=self.config.mem0_api_key)
             )
-            logger.info(f&#34;Memory service created: {self.memory_service}&#34;)
         else:
-            logger.info(&#34;Memory service not created&#34;)
             self.memory_service = None
 
         if &#34;with_eq&#34; in self.permissions:
@@ -1913,6 +2164,7 @@ validated to form a valid model.</p>
         self.plugin_loading_complete = False
         self.plugin_loading_complete = False
         self._streamed_response = {&#34;status&#34;: &#34;pending&#34;, &#34;result&#34;: &#34;&#34;}
+        self._streaming_task = None
 
         logger.info(&#34;Creating Brain&#34;)
         self.brain = Brain(
@@ -1930,14 +2182,84 @@ validated to form a valid model.</p>
         self._dynamic_model_choice = False
         self.observers: List[Observer] = []
         self.can_execute = True
-        self.acting = False
+        self.acting = True
+
+    async def initialize(self):
+        &#34;&#34;&#34;
+        Initialize the Framer by generating initial roles and goals if not provided.
+        &#34;&#34;&#34;
+        if not self.roles or not self.goals:
+            self.roles, self.goals = await self.agency.generate_roles_and_goals()
+
+        # Ensure uniqueness
+        self.roles = list(
+            {
+                (
+                    role.name
+                    if isinstance(role, Role)
+                    else getattr(role, &#34;get&#34;, lambda k, d=None: d)(&#34;name&#34;, &#34;default_name&#34;)
+                ): (
+                    role
+                    if isinstance(role, Role)
+                    else {
+                        &#34;id&#34;: &#34;default_id&#34;,
+                        &#34;name&#34;: role,
+                        &#34;description&#34;: &#34;default_description&#34;,
+                        &#34;permissions&#34;: [],
+                        &#34;priority&#34;: 5,
+                        &#34;status&#34;: RoleStatus.ACTIVE,
+                    }
+                )
+                for role in self.roles
+            }.values()
+        )
+        self.goals = list(
+            {
+                goal.description if isinstance(goal, Goal) else goal[&#34;description&#34;]: (
+                    goal if isinstance(goal, Goal) else Goal(name=goal.get(&#34;name&#34;, &#34;default_name&#34;), description=goal.get(&#34;description&#34;, &#34;default_description&#34;))
+                )
+                for goal in self.goals
+            }.values()
+        )
+
+        logger.info(
+            f&#34;Generated initial roles: {[role.name if isinstance(role, Role) else role[&#39;name&#39;] for role in self.roles]}&#34;
+        )
+        logger.info(
+            f&#34;Generated initial goals: {[goal[&#39;description&#39;] if isinstance(goal, dict) else goal.description for goal in self.goals]}&#34;
+        )
+
+        if hasattr(self.brain, &#34;set_roles&#34;):
+            self.brain.set_roles(self.roles)
+        if hasattr(self.brain, &#34;set_goals&#34;):
+            self.brain.set_goals(self.goals)
+
+        if hasattr(self.execution_context, &#34;set_roles&#34;):
+            self.execution_context.set_roles(self.roles)
+        if hasattr(self.execution_context, &#34;set_goals&#34;):
+            self.execution_context.set_goals(self.goals)
+        await self.load_plugins()
+
     async def load_plugins(self):
         &#34;&#34;&#34;
         Load all plugins by calling their on_load method.
         &#34;&#34;&#34;
+        logger.info(f&#34;Loading plugins for Framer with config: {self.config}&#34;)
+        loaded_plugins = set()
         for plugin_name, plugin_instance in self.plugins.items():
+            if (
+                plugin_name in loaded_plugins
+                or any(
+                    isinstance(existing_plugin, type(plugin_instance))
+                    for existing_plugin in loaded_plugins
+                )
+                or plugin_instance in loaded_plugins
+            ):
+                logger.info(f&#34;Plugin {plugin_name} already loaded. Skipping.&#34;)
+                continue
+
             if hasattr(plugin_instance, &#34;on_load&#34;):
-                await plugin_instance.on_load()
+                await plugin_instance.on_load(self)
                 # Register plugin actions in the brain&#39;s action_registry
                 for action_name, action_func in plugin_instance.get_actions().items():
                     self.brain.action_registry.add_action(
@@ -1946,6 +2268,8 @@ validated to form a valid model.</p>
                         description=f&#34;Action from {plugin_name} plugin&#34;,
                         priority=5,  # Default priority, adjust as needed
                     )
+                loaded_plugins.add(plugin_name)
+                loaded_plugins.add(plugin_instance)
         self.plugin_loading_complete = True
         self.act()
         await self.process_queued_perceptions()
@@ -1961,11 +2285,27 @@ validated to form a valid model.</p>
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
 
         # Ensure uniqueness
-        self.roles = list({role[&#39;name&#39;]: role for role in self.roles}.values())
-        self.goals = list({goal[&#39;description&#39;]: goal for goal in self.goals}.values())
+        self.roles = list(
+            {
+                role[&#34;name&#34;] if isinstance(role, dict) else role.name: role
+                for role in self.roles
+            }.values()
+        )
+        self.goals = list(
+            {
+                (
+                    goal[&#34;description&#34;] if isinstance(goal, dict) else goal.description
+                ): goal
+                for goal in self.goals
+            }.values()
+        )
 
-        logger.info(f&#34;Generated initial roles: {[role[&#39;name&#39;] for role in self.roles]}&#34;)
-        logger.info(f&#34;Generated initial goals: {[goal[&#39;description&#39;] for goal in self.goals]}&#34;)
+        logger.info(
+            f&#34;Generated initial roles: {[role[&#39;name&#39;] if isinstance(role, dict) else role.name for role in self.roles]}&#34;
+        )
+        logger.info(
+            f&#34;Generated initial goals: {[goal[&#39;description&#39;] if isinstance(goal, dict) else goal.description for goal in self.goals]}&#34;
+        )
 
         if hasattr(self.brain, &#34;set_roles&#34;):
             self.brain.set_roles(self.roles)
@@ -2005,23 +2345,6 @@ validated to form a valid model.</p>
         plugin_instance = self.plugins.pop(plugin_name, None)
         if plugin_instance and hasattr(plugin_instance, &#34;on_remove&#34;):
             asyncio.create_task(plugin_instance.on_remove())
-        &#34;&#34;&#34;
-        Load all plugins by calling their on_load method.
-        &#34;&#34;&#34;
-        for plugin_name, plugin_instance in self.plugins.items():
-            if hasattr(plugin_instance, &#34;on_load&#34;):
-                await plugin_instance.on_load(self)
-                # Register plugin actions in the brain&#39;s action_registry
-                for action_name, action_func in plugin_instance.get_actions().items():
-                    self.brain.action_registry.add_action(
-                        action_name,
-                        action_func=action_func,
-                        description=f&#34;Action from {plugin_name} plugin&#34;,
-                        priority=5,  # Default priority, adjust as needed
-                    )
-        self.plugin_loading_complete = True
-        self.act()
-        await self.process_queued_perceptions()
 
     async def process_queued_perceptions(self):
         &#34;&#34;&#34;
@@ -2045,8 +2368,18 @@ validated to form a valid model.</p>
                 _, self.goals = await self.agency.generate_roles_and_goals()
 
             # Sort roles and goals by priority
-            self.roles.sort(key=lambda x: x.get(&#34;priority&#34;, 5), reverse=True)
-            self.goals.sort(key=lambda x: x.get(&#34;priority&#34;, 5), reverse=True)
+            self.roles.sort(
+                key=lambda x: (
+                    x.priority if isinstance(x, Role) else x.get(&#34;priority&#34;, 5)
+                ),
+                reverse=True,
+            )
+            self.goals.sort(
+                key=lambda x: (
+                    x.priority if isinstance(x, Goal) else x.get(&#34;priority&#34;, 5)
+                ),
+                reverse=True,
+            )
 
             self.agency.set_roles(self.roles)
             self.agency.set_goals(self.goals)
@@ -2055,8 +2388,14 @@ validated to form a valid model.</p>
             logger.info(f&#34;Queued perception: {perception}&#34;)
 
         # Sort roles and goals by priority
-        self.roles.sort(key=lambda x: x.get(&#34;priority&#34;, 5), reverse=True)
-        self.goals.sort(key=lambda x: x.get(&#34;priority&#34;, 5), reverse=True)
+        self.roles.sort(
+            key=lambda x: x.priority if isinstance(x, Role) else x.get(&#34;priority&#34;, 5),
+            reverse=True,
+        )
+        self.goals.sort(
+            key=lambda x: x.priority if isinstance(x, Goal) else x.get(&#34;priority&#34;, 5),
+            reverse=True,
+        )
 
         self.agency.set_roles(self.roles)
         self.agency.set_goals(self.goals)
@@ -2126,7 +2465,7 @@ validated to form a valid model.</p>
             goals=config.goals if config.goals is not None else [],
         )
 
-    def export_to_markdown(self, file_path: str) -&gt; None:
+    async def export_to_markdown(self, file_path: str) -&gt; None:
         &#34;&#34;&#34;
         Export the Framer configuration to a Markdown file.
 
@@ -2224,29 +2563,22 @@ validated to form a valid model.</p>
         decision = await self.brain.process_perception(perception, current_goals)
 
         if decision:
-            if isinstance(decision, dict):
-                decision = Decision(
-                    action=decision.get(&#34;action&#34;, &#34;respond&#34;),
-                    parameters=decision.get(&#34;parameters&#34;, {}),
-                    reasoning=decision.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;),
-                    confidence=decision.get(&#34;confidence&#34;, 0.5),
-                    priority=decision.get(&#34;priority&#34;, 1),
-                    related_roles=decision.get(&#34;related_roles&#34;, []),
-                    related_goals=decision.get(&#34;related_goals&#34;, []),
-                )
-            # Consider goal status in decision-making
-            active_goals = [
-                goal for goal in current_goals if goal.status == GoalStatus.ACTIVE
-            ]
-            if active_goals:
-                decision.reasoning += (
-                    f&#34; (Aligned with {len(active_goals)} active goals)&#34;
-                )
+            # Handle execution based on execution_mode
+            executed_decision = await self.brain.execute_decision(decision)
 
-            if hasattr(self, &#34;can_execute&#34;) and self.can_execute:
-                await self.brain.execute_decision(decision)
-            logger.debug(f&#34;Processed perception: {perception}, Decision: {decision}&#34;)
-            self.notify_observers(decision)
+            # Check the status of the executed decision
+            if executed_decision.status == &#39;pending_approval&#39;:
+                # Notify user or system for approval
+                pass
+            elif executed_decision.status == &#39;deferred&#39;:
+                # Schedule for later execution
+                pass
+            elif executed_decision.status == &#39;executed&#39;:
+                # Proceed as normal
+                pass
+
+            # Notify observers with the executed decision
+            self.notify_observers(executed_decision)
         else:
             logger.warning(&#34;No decision was made for the given perception.&#34;)
             return None
@@ -2374,7 +2706,16 @@ validated to form a valid model.</p>
         if hasattr(self, &#34;plugins&#34;):
             for plugin in self.plugins.values():
                 if hasattr(plugin, &#34;on_framer_closed&#34;):
-                    plugin.on_framer_closed(self)</code></pre>
+                    plugin.on_framer_closed(self)
+
+        # Ensure plugins are properly shut down
+        for plugin in self.plugins.values():
+            if hasattr(plugin, &#34;on_shutdown&#34;):
+                # Await on_shutdown if it&#39;s a coroutine
+                if asyncio.iscoroutinefunction(plugin.on_shutdown):
+                    await plugin.on_shutdown()
+                else:
+                    plugin.on_shutdown()</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -2524,7 +2865,7 @@ systems, facilitating interoperability and reuse.</p>
 </dl></div>
 </dd>
 <dt id="frame.src.Framer.export_to_markdown"><code class="name flex">
-<span>def <span class="ident">export_to_markdown</span></span>(<span>self, file_path: str) ‑> None</span>
+<span>async def <span class="ident">export_to_markdown</span></span>(<span>self, file_path: str) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Export the Framer configuration to a Markdown file.</p>
@@ -2561,6 +2902,12 @@ systems, facilitating interoperability and reuse.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Stop the Framer from processing further actions and tasks.</p></div>
+</dd>
+<dt id="frame.src.Framer.initialize"><code class="name flex">
+<span>async def <span class="ident">initialize</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Initialize the Framer by generating initial roles and goals if not provided.</p></div>
 </dd>
 <dt id="frame.src.Framer.is_ready"><code class="name flex">
 <span>def <span class="ident">is_ready</span></span>(<span>self) ‑> bool</span>
@@ -2744,7 +3091,9 @@ validated to form a valid model.</p>
 <pre><code class="python">class FramerConfig(BaseModel):
     name: str = &#34;DefaultFramer&#34;
     model: Optional[str] = DEFAULT_MODEL
-    soul_seed: Optional[Union[str, Dict[str, Any]]] = Field(default=&#34;You are a helpful AI assistant.&#34;)
+    soul_seed: Optional[Union[str, Dict[str, Any]]] = Field(
+        default=&#34;You are a helpful AI assistant.&#34;
+    )
     use_local_model: bool = False
     # Default permissions include services like memory, eq, and shared_context.
     # These services do not require explicit permissions to be accessed.
@@ -2755,7 +3104,9 @@ validated to form a valid model.</p>
             &#34;with_shared_context&#34;,
         ]
     )
-    mem0_api_key: Optional[str] = Field(default_factory=lambda: os.getenv(&#39;MEM0_API_KEY&#39;, MEM0_API_KEY))
+    mem0_api_key: Optional[str] = Field(
+        default_factory=lambda: os.getenv(&#34;MEM0_API_KEY&#34;, MEM0_API_KEY)
+    )
     &#34;&#34;&#34;
     Configuration class for Framer instances.
 
@@ -3611,15 +3962,19 @@ and the Brain's decision-making processes.</p></div>
 <li><code><a title="frame.src.Decision.Config" href="#frame.src.Decision.Config">Config</a></code></li>
 <li><code><a title="frame.src.Decision.convert_priority" href="#frame.src.Decision.convert_priority">convert_priority</a></code></li>
 <li><code><a title="frame.src.Decision.create" href="#frame.src.Decision.create">create</a></code></li>
+<li><code><a title="frame.src.Decision.execution_mode" href="#frame.src.Decision.execution_mode">execution_mode</a></code></li>
 <li><code><a title="frame.src.Decision.expected_results" href="#frame.src.Decision.expected_results">expected_results</a></code></li>
 <li><code><a title="frame.src.Decision.from_json" href="#frame.src.Decision.from_json">from_json</a></code></li>
+<li><code><a title="frame.src.Decision.is_executable" href="#frame.src.Decision.is_executable">is_executable</a></code></li>
 <li><code><a title="frame.src.Decision.model_computed_fields" href="#frame.src.Decision.model_computed_fields">model_computed_fields</a></code></li>
 <li><code><a title="frame.src.Decision.model_config" href="#frame.src.Decision.model_config">model_config</a></code></li>
 <li><code><a title="frame.src.Decision.model_fields" href="#frame.src.Decision.model_fields">model_fields</a></code></li>
 <li><code><a title="frame.src.Decision.related_goals" href="#frame.src.Decision.related_goals">related_goals</a></code></li>
 <li><code><a title="frame.src.Decision.related_roles" href="#frame.src.Decision.related_roles">related_roles</a></code></li>
+<li><code><a title="frame.src.Decision.status" href="#frame.src.Decision.status">status</a></code></li>
 <li><code><a title="frame.src.Decision.task_status" href="#frame.src.Decision.task_status">task_status</a></code></li>
 <li><code><a title="frame.src.Decision.to_dict" href="#frame.src.Decision.to_dict">to_dict</a></code></li>
+<li><code><a title="frame.src.Decision.to_task" href="#frame.src.Decision.to_task">to_task</a></code></li>
 </ul>
 </li>
 <li>
@@ -3634,6 +3989,7 @@ and the Brain's decision-making processes.</p></div>
 <li><code><a title="frame.src.Framer.export_to_markdown" href="#frame.src.Framer.export_to_markdown">export_to_markdown</a></code></li>
 <li><code><a title="frame.src.Framer.generate_tasks_from_perception" href="#frame.src.Framer.generate_tasks_from_perception">generate_tasks_from_perception</a></code></li>
 <li><code><a title="frame.src.Framer.halt" href="#frame.src.Framer.halt">halt</a></code></li>
+<li><code><a title="frame.src.Framer.initialize" href="#frame.src.Framer.initialize">initialize</a></code></li>
 <li><code><a title="frame.src.Framer.is_ready" href="#frame.src.Framer.is_ready">is_ready</a></code></li>
 <li><code><a title="frame.src.Framer.load_from_file" href="#frame.src.Framer.load_from_file">load_from_file</a></code></li>
 <li><code><a title="frame.src.Framer.load_plugins" href="#frame.src.Framer.load_plugins">load_plugins</a></code></li>

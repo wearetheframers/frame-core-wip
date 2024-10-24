@@ -50,9 +50,9 @@ hljs.highlightAll();
         super().__init__(
             name=&#34;adaptive_decision&#34;,
             description=&#34;A high-level action that uses strategies to make decisions dynamically based on varying levels of urgency and risk. &#34;
-                        &#34;Ideal for environments where conditions change rapidly, requiring a flexible decision-making approach. &#34;
-                        &#34;Examples include financial trading during volatile markets, task prioritization in dynamic project environments, &#34;
-                        &#34;or resource allocation in cloud computing under fluctuating demand.&#34;,
+            &#34;Ideal for environments where conditions change rapidly, requiring a flexible decision-making approach. &#34;
+            &#34;Examples include financial trading during volatile markets, task prioritization in dynamic project environments, &#34;
+            &#34;or resource allocation in cloud computing under fluctuating demand.&#34;,
             priority=5,
         )
         self.strategies = {
@@ -61,16 +61,14 @@ hljs.highlightAll();
             &#34;balanced&#34;: BalancedStrategy(),
         }
 
-    async def execute(
-        self, execution_context: ExecutionContext, **kwargs: Any
-    ) -&gt; Dict[str, Any]:
+    async def execute(self, execution_context: ExecutionContext, context: Dict[str, Any]) -&gt; Dict[str, Any]:
         # Determine the best strategy based on the context
-        context = execution_context.get_full_state()
         context = self.extrapolate_context(context)
         strategy_name = self.choose_strategy(context)
         strategy = self.strategies[strategy_name]
         decision = await strategy.decide(context)
-        return {&#34;decision&#34;: decision, &#34;strategy&#34;: strategy_name}
+        reasoning = decision.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;)
+        return {&#34;decision&#34;: decision, &#34;strategy&#34;: strategy_name, &#34;reasoning&#34;: reasoning}
 
     def extrapolate_context(self, context: Dict[str, Any]) -&gt; Dict[str, Any]:
         &#34;&#34;&#34;
@@ -147,6 +145,7 @@ hljs.highlightAll();
 <ul class="hlist">
 <li><code><a title="frame.src.framer.brain.actions.base.BaseAction.create_task" href="base.html#frame.src.framer.brain.actions.base.BaseAction.create_task">create_task</a></code></li>
 <li><code><a title="frame.src.framer.brain.actions.base.BaseAction.execute" href="base.html#frame.src.framer.brain.actions.base.BaseAction.execute">execute</a></code></li>
+<li><code><a title="frame.src.framer.brain.actions.base.BaseAction.get_active_role_names" href="base.html#frame.src.framer.brain.actions.base.BaseAction.get_active_role_names">get_active_role_names</a></code></li>
 </ul>
 </li>
 </ul>

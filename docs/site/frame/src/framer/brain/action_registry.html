@@ -132,9 +132,10 @@ hljs.highlightAll();
     def add_action(
         self,
         action_or_name: Union[BaseAction, str],
-        description: str = &#34;&#34;,
         action_func: Optional[Callable] = None,
+        description: str = &#34;&#34;,
         priority: int = 5,
+        expected_parameters: Optional[List[str]] = None,
     ):
         &#34;&#34;&#34;
         Add a new action to the registry.
@@ -152,6 +153,8 @@ hljs.highlightAll();
             priority = priority or action_or_name.priority
         else:
             name = action_or_name
+            if not callable(action_func):
+                raise ValueError(f&#34;Action function for &#39;{name}&#39; must be callable.&#34;)
 
         if priority is not None and not (1 &lt;= priority &lt;= 10):
             raise ValueError(&#34;Priority must be between 1 and 10&#34;)
@@ -165,6 +168,7 @@ hljs.highlightAll();
             &#34;action_func&#34;: action_func,
             &#34;description&#34;: description,
             &#34;priority&#34;: priority,
+            &#34;expected_parameters&#34;: expected_parameters or [],
         }
         if not callable(action_func):
             raise ValueError(f&#34;Action function for &#39;{name}&#39; must be callable.&#34;)
@@ -216,6 +220,11 @@ hljs.highlightAll();
         callback_args: Optional[tuple] = (),
         **kwargs,
     ):
+        # Validate action parameters before execution
+        if not self._validate_parameters(name, kwargs):
+            logger.error(f&#34;Invalid parameters for action &#39;{name}&#39;. Aborting execution.&#34;)
+            return
+
         action = self.get_action(name)
         if not action:
             raise ValueError(f&#34;Action &#39;{name}&#39; not found&#34;)
@@ -239,9 +248,9 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         return self.actions.get(name)
 
-    async def execute_action(self, action_name: str, *args, **kwargs):
+    async def execute_action(self, action_name: str, **kwargs):
         &#34;&#34;&#34;Execute an action by its name.&#34;&#34;&#34;
-        logger.info(
+        logger.debug(
             f&#34;Available actions before executing &#39;{action_name}&#39;: {list(self.actions.keys())}&#34;
         )
         logger.info(f&#34;Action name: {action_name}&#34;)
@@ -251,30 +260,50 @@ hljs.highlightAll();
             return None
 
         action = self.get_action(action_name)
-        print(&#34;Found action: &#34;, action)
         if not action:
             error_message = f&#34;Action &#39;{action_name}&#39; not found in the registry.&#34;
             logger.error(error_message)
             return await self._handle_error(error_message)
 
         action_func = action[&#34;action_func&#34;]
+        result = {}
         try:
-            result = await action_func(self.execution_context, **kwargs)  # Pass execution_context
-            if result is None:
+            _result = await action_func(
+                self.execution_context, **kwargs
+            )  # Pass execution_context
+            if _result is None:
                 return {
                     &#34;error&#34;: &#34;Action returned None&#34;,
                     &#34;fallback_response&#34;: &#34;The action didn&#39;t produce a response. Please try again.&#34;,
                 }
-            elif isinstance(result, dict):
-                return result
-            elif isinstance(result, str):
-                return {&#34;response&#34;: result}
+            elif isinstance(_result, dict):
+                result[&#34;response&#34;] = _result
+            elif isinstance(_result, str):
+                result[&#34;response&#34;] = _result
+            elif isinstance(_result, list):
+                result[&#34;response&#34;] = _result
             else:
-                return {&#34;response&#34;: str(result)}
+                result[&#34;response&#34;] = _result
+            # Get reasoning or default empty string
+            if _result is None:
+                return {
+                    &#34;error&#34;: &#34;Action returned None&#34;,
+                    &#34;fallback_response&#34;: &#34;The action didn&#39;t produce a response. Please try again.&#34;,
+                }
+            if isinstance(_result, dict):
+                result[&#34;response&#34;] = _result
+                if &#34;reasoning&#34; in _result:
+                    result[&#34;reasoning&#34;] = _result[&#34;reasoning&#34;]
+                else:
+                    result[&#34;reasoning&#34;] = &#34;No reasoning provided.&#34;
+            else:
+                result[&#34;response&#34;] = _result
+                result[&#34;reasoning&#34;] = &#34;No reasoning provided.&#34;
         except Exception as e:
             error_message = f&#34;Error executing action &#39;{action_name}&#39;: {str(e)}&#34;
             logger.error(error_message)
             return await self._handle_error(error_message)
+        return result
 
     def set_execution_context(self, execution_context):
         self.execution_context = execution_context
@@ -294,7 +323,7 @@ hljs.highlightAll();
 <h3>Methods</h3>
 <dl>
 <dt id="frame.src.framer.brain.action_registry.ActionRegistry.add_action"><code class="name flex">
-<span>def <span class="ident">add_action</span></span>(<span>self, action_or_name: Union[<a title="frame.src.framer.brain.actions.base.BaseAction" href="actions/base.html#frame.src.framer.brain.actions.base.BaseAction">BaseAction</a>, str], description: str = '', action_func: Optional[Callable] = None, priority: int = 5)</span>
+<span>def <span class="ident">add_action</span></span>(<span>self, action_or_name: Union[<a title="frame.src.framer.brain.actions.base.BaseAction" href="actions/base.html#frame.src.framer.brain.actions.base.BaseAction">BaseAction</a>, str], action_func: Optional[Callable] = None, description: str = '', priority: int = 5, expected_parameters: Optional[List[str]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a new action to the registry.</p>
@@ -329,7 +358,7 @@ hljs.highlightAll();
 </dl></div>
 </dd>
 <dt id="frame.src.framer.brain.action_registry.ActionRegistry.execute_action"><code class="name flex">
-<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, *args, **kwargs)</span>
+<span>async def <span class="ident">execute_action</span></span>(<span>self, action_name: str, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Execute an action by its name.</p></div>
