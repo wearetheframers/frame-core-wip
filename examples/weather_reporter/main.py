@@ -12,6 +12,7 @@ from frame.src.services.llm.main import LLMService
 from frame.src.framer.framer_factory import FramerFactory
 from plugins.weather_plugin import WeatherPlugin
 
+
 async def main():
     # Initialize the Frame
     frame = Frame()
@@ -24,9 +25,7 @@ async def main():
     goals = ["Provide accurate weather information"]
 
     framer_factory = FramerFactory(config, llm_service)
-    framer = await framer_factory.create_framer(
-        memory_service=None, eq_service=None
-    )
+    framer = await framer_factory.create_framer(memory_service=None, eq_service=None)
 
     await framer.initialize()  # Initialize roles and goals
 

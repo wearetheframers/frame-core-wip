@@ -56,7 +56,9 @@ class TestFramerIO(IsolatedAsyncioTestCase):
         await framer.export_to_file("dummy_path", llm=MagicMock())
         mock_open.assert_called_once_with("dummy_path", "w")
         mock_export_config.assert_called_once_with(framer.config, "dummy_path")
-        mock_export_config.assert_called_once_with(framer.config.to_dict(), mock_open(), indent=4)
+        mock_export_config.assert_called_once_with(
+            framer.config.to_dict(), mock_open(), indent=4
+        )
         mock_json_dump.assert_called_once()
 
     @patch(

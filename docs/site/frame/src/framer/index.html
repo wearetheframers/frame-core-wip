@@ -185,7 +185,7 @@ hljs.highlightAll();
         self.workflow_manager = workflow_manager
         self.roles = roles or []
         self.goals = goals or []
-        self.plugins = plugins or {}
+        self.plugins = {}
         self.plugin_loading_complete = False
         self.plugin_loading_complete = False
         self._streamed_response = {&#34;status&#34;: &#34;pending&#34;, &#34;result&#34;: &#34;&#34;}
@@ -1463,6 +1463,7 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
         self.config = config
         self.llm_service = llm_service
         self.plugins = plugins
+        self.permissions = config.permissions or []
 
     async def create_framer(
         self,
@@ -1546,12 +1547,17 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
             if hasattr(observer, &#34;on_framer_opened&#34;):
                 observer.on_framer_opened(framer)
 
-        # Call on_load for each plugin
-        for plugin_name, plugin_instance in self.plugins.items():
-            if hasattr(plugin_instance, &#34;on_load&#34;):
-                self.logger.info(f&#34;Loading plugin: {plugin_name}&#34;)
-                await plugin_instance.on_load(framer)
-                self.logger.info(f&#34;Plugin {plugin_name} loaded successfully.&#34;)
+        # Load plugins only if they are default or included in permissions
+        for plugin_name, plugin_instance in (plugins or {}).items():
+            permission_name = f&#34;with_{plugin_name}&#34;
+            if plugin_name in os.getenv(&#34;DEFAULT_PLUGINS&#34;, &#34;&#34;).split(&#34;,&#34;) or permission_name in self.config.permissions:
+                self.plugins[plugin_name] = plugin_instance
+                if hasattr(plugin_instance, &#34;on_load&#34;):
+                    self.logger.info(f&#34;Loading plugin: {plugin_name}&#34;)
+                    await plugin_instance.on_load(framer)
+                    self.logger.info(f&#34;Plugin {plugin_name} loaded successfully.&#34;)
+            else:
+                self.logger.info(f&#34;Plugin {plugin_name} not loaded due to missing permission or not being a default plugin.&#34;)
 
         framer.plugin_loading_complete = True
 

@@ -51,7 +51,9 @@ def load_plugins(plugins_dir: Optional[str] = None) -> Tuple[Dict[str, Any], Lis
                 config = load_plugin_config(plugin_dir)
 
                 # Import the plugin module
-                logger.debug(f"Attempting to import module for plugin: plugins.{plugin_dir}")
+                logger.debug(
+                    f"Attempting to import module for plugin: plugins.{plugin_dir}"
+                )
                 module = importlib.import_module(f"plugins.{item}.{item}")
                 logger.info(f"Module imported successfully for plugin: {plugin_dir}")
 
@@ -76,10 +78,14 @@ def load_plugins(plugins_dir: Optional[str] = None) -> Tuple[Dict[str, Any], Lis
 
                 # Check if the plugin is a default plugin or included in permissions
                 permission_name = f"with_{item}"
-                if item in os.getenv("DEFAULT_PLUGINS", "").split(",") or permission_name in os.getenv("PERMISSIONS", "").split(","):
+                if item in os.getenv("DEFAULT_PLUGINS", "").split(
+                    ","
+                ) or permission_name in os.getenv("PERMISSIONS", "").split(","):
                     # Check if the plugin is a default plugin or included in permissions
                     permission_name = f"with_{item}"
-                    if item in os.getenv("DEFAULT_PLUGINS", "").split(",") or permission_name in os.getenv("PERMISSIONS", "").split(","):
+                    if item in os.getenv("DEFAULT_PLUGINS", "").split(
+                        ","
+                    ) or permission_name in os.getenv("PERMISSIONS", "").split(","):
                         # Initialize the plugin with its configuration
                         logger.debug(f"Initializing plugin {item} with configuration")
                         plugin_instance = plugin_class(config)
@@ -98,9 +104,13 @@ def load_plugins(plugins_dir: Optional[str] = None) -> Tuple[Dict[str, Any], Lis
                         plugins[item] = plugin_instance
                         logger.info(f"Loaded plugin: {item}")
                     else:
-                        logger.info(f"Plugin {item} not loaded due to missing permission or not being a default plugin.")
+                        logger.info(
+                            f"Plugin {item} not loaded due to missing permission or not being a default plugin."
+                        )
                 else:
-                    logger.info(f"Plugin {item} not loaded due to missing permission or not being a default plugin.")
+                    logger.info(
+                        f"Plugin {item} not loaded due to missing permission or not being a default plugin."
+                    )
             except (ImportError, AttributeError) as e:
                 logger.error(f"Failed to load plugin {item}: {str(e)}", exc_info=True)
 

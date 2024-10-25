@@ -13,11 +13,15 @@ from frame.src.services import ExecutionContext
 def action_registry():
     llm_service = Mock(spec=LLMService, default_model="gpt-3.5-turbo")
     llm_service.default_model = "gpt-3.5-turbo"
-    llm_service.get_completion = AsyncMock(return_value=json.dumps({
-        "name": "Role1",
-        "description": "A test role",
-        "priority": "medium",
-    }))
+    llm_service.get_completion = AsyncMock(
+        return_value=json.dumps(
+            {
+                "name": "Role1",
+                "description": "A test role",
+                "priority": "medium",
+            }
+        )
+    )
     return ActionRegistry(execution_context=ExecutionContext(llm_service=llm_service))
 
 

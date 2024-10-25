@@ -23,7 +23,7 @@ class Decision(BaseModel):
     )
     status: DecisionStatus = Field(
         default=DecisionStatus.NOT_EXECUTED,
-        description="The execution status of the decision"
+        description="The execution status of the decision",
     )
     task_status: TaskStatus = Field(
         default=None, description="Status of the associated task"

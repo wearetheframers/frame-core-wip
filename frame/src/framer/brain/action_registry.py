@@ -217,9 +217,13 @@ class ActionRegistry:
         if self.execution_context is None:
             raise ValueError("Execution context is not set")
         if name == "get_weather":
-            response = await action["action_func"](self.execution_context, city=kwargs.get("city"))
+            response = await action["action_func"](
+                self.execution_context, city=kwargs.get("city")
+            )
         else:
-            response = await action["action_func"](self.execution_context, *args, **kwargs)
+            response = await action["action_func"](
+                self.execution_context, *args, **kwargs
+            )
         role = response if isinstance(response, dict) else response
         if callback:
             callback(response, *callback_args)

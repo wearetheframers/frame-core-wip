@@ -1,4 +1,5 @@
 import asyncio
+import multiprocessing
 import sounddevice as sd
 import numpy as np
 import whisper
@@ -20,51 +21,168 @@ from frame.src.framer.brain.plugins.base import BasePlugin
 
 
 class AudioTranscriptionPlugin(BasePlugin):
-    def __init__(self, config=None):
+
+    def __init__(
+        self,
+        config=None,
+        base_sound_level: int = 50,
+        sensitivity: int = 50,
+        should_setup_mic: bool = True,
+        should_setup_mic_loop: bool = True,
+        setup_interval: int = 6000,
+    ):
+        """
+        Initialize the AudioTranscriptionPlugin.
+
+        Args:
+            config (Optional[Dict[str, Any]]): Configuration for the plugin.
+            base_sound_level (int): The base sound level of the environment (0-100).
+            sensitivity (int): The sensitivity level for sound detection (0-100).
+            should_setup_mic (bool): Whether to set up the microphone initially.
+            should_setup_mic_loop (bool): Whether to continuously recheck sensitivity levels.
+        """
         super().__init__(framer=None)  # Ensure BasePlugin's init is called
         self.logger = logging.getLogger(self.__class__.__name__)
         self.action_registry = None
+        self.base_sound_level = base_sound_level
+        self.sensitivity = sensitivity
         self.model = whisper.load_model("base")
+        self.framer = None  # Initialize framer attribute
+        self.should_setup_mic = should_setup_mic
+        self.selected_device = 0  # Initialize selected_device with a default value
+        self.should_setup_mic_loop = should_setup_mic_loop
+
+        self.adjust_sensitivity_duration_check = 5
+        self.setup_interval = (
+            60  # Interval in seconds for rechecking sensitivity levels
+        )
+
+    async def on_load(self, framer):
+        self.framer = framer
+        self.logger.info("AudioTranscriptionPlugin loaded")
+        if self.should_setup_mic:
+            await self.setup_microphone(self.framer)
+
+    def adjust_sensitivity(self):
+        print("Setting up microphone for background noise analysis.")
+        self.logger.info("Setting up microphone for background noise analysis.")
+        duration = self.adjust_sensitivity_duration_check  # seconds
+        sample_rate = 16000
+        audio = sd.rec(
+            int(duration * sample_rate),
+            samplerate=sample_rate,
+            channels=1,
+            dtype="float32",
+        )
+        sd.wait()
+        audio = np.squeeze(audio)
+        average_level = np.mean(np.abs(audio))
+        self.logger.info(f"Average background noise level: {average_level}")
+        print(f"Average background noise level: {average_level}")
+        # Map audio levels to sensitivity
+        # Adjust the sensitivity calculation to be more responsive to changes in noise level
+        raw_sensitivity = max(0, min(100, (1 - average_level) * 1000))
+        self.sensitivity = max(10, min(100, int(raw_sensitivity)))
+        self.logger.info(f"Mapped sensitivity: {self.sensitivity}")
+        print(f"Sensitivity adjusted to: {self.sensitivity}")
+        # List and log available audio devices
+        devices = self.list_audio_devices()
+        # # Automatically select the best default device
+        recommended_devices = [
+            i
+            for i, device in enumerate(devices)
+            if any(
+                keyword in device["name"].lower()
+                for keyword in ["mic", "microphone", "input"]
+            )
+        ]
+        # self.selected_device = recommended_devices[0] if recommended_devices else 0
+        self.selected_device[0]
+        self.logger.info(
+            f"Default audio device selected: {devices[self.selected_device]['name']}"
+        )
+        print("Default audio device selected: {devices[self.selected_device]['name']}")
+        print("Finished setting up microphone.")
+
+    async def setup_microphone(self, framer):
+        """
+        Record for 10 seconds to listen for background noise, calculate an average sound level,
+        and adjust the sensitivity based on this average.
+        """
+        while self.should_setup_mic_loop:
+            # Run the sensitivity adjustment in a separate process
+            process = multiprocessing.Process(
+                target=self.adjust_sensitivity, args=(self.base_sound_level,)
+            )
+            process.start()
+            # Do not join the process to allow non-blocking behavior
+
+            if not self.should_setup_mic_loop:
+                break
+
+            # Optionally, set a flag or use a callback to handle completion
+
+    @staticmethod
+    def adjust_sensitivity(base_sound_level):
+        print("Setting up microphone for background noise analysis.")
+        logger = logging.getLogger("AudioTranscriptionPlugin")
+        logger.info("Setting up microphone for background noise analysis.")
+        duration = 10  # seconds
+        sample_rate = 16000
+        audio = sd.rec(
+            int(duration * sample_rate),
+            samplerate=sample_rate,
+            channels=1,
+            dtype="float32",
+        )
+        sd.wait()
+        audio = np.squeeze(audio)
+        average_level = np.mean(np.abs(audio))
+        logger.info(f"Average background noise level: {average_level}")
+        print(f"Average background noise level: {average_level}")
+        # Map audio levels to sensitivity
+        # Use a logarithmic scale to map average_level (0 to 1) to sensitivity (10 to 100)
+        # This ensures that small changes in noise level have a larger impact on sensitivity
+        # while larger changes have a diminishing effect.
+        # Use a more aggressive mapping to adjust sensitivity
+        # Invert the sensitivity calculation to increase sensitivity with higher noise levels
+        sensitivity = 10 + (np.log1p(average_level * 1000) * 90)
+        sensitivity = max(10, min(100, int(sensitivity)))
+        logger.info(f"Mapped sensitivity: {sensitivity}")
+        print("Sensitivity adjusted to:", sensitivity)
+        # List and log available audio devices
+        devices = sd.query_devices()
+        # Automatically select the best default device
+        recommended_devices = [
+            i
+            for i, device in enumerate(devices)
+            if any(
+                keyword in device["name"].lower()
+                for keyword in ["mic", "microphone", "input"]
+            )
+        ]
+        selected_device = recommended_devices[0] if recommended_devices else 0
+        logger.info(
+            f"Default audio device selected: {devices[selected_device]['name']}"
+        )
+        print(f"Default audio device selected: {devices[selected_device]['name']}")
+        print("Finished setting up microphone.")
 
     def list_audio_devices(self):
-        """List available audio devices and recommend input devices."""
+        """
+        List available audio devices and recommend input devices.
+        """
         devices = sd.query_devices()
         recommended_devices = []
         for i, device in enumerate(devices):
-            self.logger.info(f"Device {i}: {device['name']}")
             # Check for common microphone keywords
-            if any(keyword in device['name'].lower() for keyword in ['mic', 'microphone', 'input']):
-                recommended_devices.append((i, device['name']))
-        
-        if recommended_devices:
-            self.logger.info("Recommended input devices:")
-            for index, name in recommended_devices:
-                self.logger.info(f"Device {index}: {name}")
-        else:
-            self.logger.info("No specific input devices recommended. Please select manually.")
-        
+            if any(
+                keyword in device["name"].lower()
+                for keyword in ["mic", "microphone", "input"]
+            ):
+                recommended_devices.append((i, device["name"]))
+        self.logger.info(f"Recommended audio devices: {recommended_devices}")
         return devices
-
-    async def on_load(self, framer):
-        # List and log available audio devices
-        devices = self.list_audio_devices()
-        # Automatically select the best default device
-        recommended_devices = [
-            i for i, device in enumerate(devices)
-            if any(keyword in device['name'].lower() for keyword in ['mic', 'microphone', 'input'])
-        ]
-        self.selected_device = recommended_devices[0] if recommended_devices else 0
-        self.logger.info(f"Default audio device selected: {devices[self.selected_device]['name']}")
-        self.execution_context = framer.execution_context
-        self.framer = framer  # Ensure framer is set
-        self.action_registry = ActionRegistry(
-            execution_context=framer.execution_context
-        )
-        self.register_actions(self.action_registry)
-        self.logger.info("Actions registered in AudioTranscriptionPlugin")
-        for action_name in self.action_registry.get_all_actions():
-            self.logger.debug(f"Registered action: {action_name}")
-        self.logger.info("AudioTranscriptionPlugin loaded")
 
     async def on_remove(self):
         self.logger.info("AudioTranscriptionPlugin removed")
@@ -77,6 +195,8 @@ class AudioTranscriptionPlugin(BasePlugin):
     async def execute(self, action: str, params: Dict[str, Any]) -> Any:
         """
         Execute a specified action with given parameters.
+
+        The silence threshold and sound detection are adjusted based on the base sound level and sensitivity.
 
         Args:
             action (str): The action to execute.
@@ -93,6 +213,7 @@ class AudioTranscriptionPlugin(BasePlugin):
                 self.execution_context, transcription
             )
         elif action == "continuous_record_and_transcribe":
+            self.logger.info("Executing continuous_record_and_transcribe action.")
             return await self.continuous_record_and_transcribe.execute(
                 self.execution_context
             )
@@ -101,7 +222,6 @@ class AudioTranscriptionPlugin(BasePlugin):
             return await self.understand_intent.execute(
                 self.execution_context, transcription
             )
-            raise ValueError(f"Unknown action: {action}")
 
     class RecordAndTranscribeAction(BaseAction):
         def __init__(self, plugin):
@@ -163,6 +283,7 @@ class AudioTranscriptionPlugin(BasePlugin):
 
     class ContinuousRecordAndTranscribeAction(BaseAction):
         def __init__(self, plugin):
+            print("WE FLUFFIN")
             super().__init__(
                 "continuous_record_and_transcribe",
                 "Continuously record and transcribe audio",
@@ -173,24 +294,34 @@ class AudioTranscriptionPlugin(BasePlugin):
         async def execute(
             self,
             execution_context: ExecutionContext = None,
-            silence_threshold: float = 0.02,
             pause_duration: float = 2.5,
             sample_rate: int = 16000,
             chunk_duration: float = 0.5,
             device: Optional[int] = None,
         ) -> None:
+            print("WE FLUFFIN2")
+            silence_threshold: float = 0.02 * (1 - self.plugin.base_sound_level / 100)
+            print("WE FLUFFIN3")
             if device is None:
                 device = self.plugin.selected_device
-            self.plugin.logger.info(f"Using audio device: {sd.query_devices(device)['name']}")
+            print(f"Using audio device: {sd.query_devices(device)['name']}")
+            print(
+                f"Base sound level: {self.plugin.base_sound_level}, Sensitivity: {self.plugin.sensitivity}"
+            )
+            print("Starting continuous recording. Press Ctrl+C to stop.")
+            print(
+                "Adjusting silence threshold and sound detection based on base sound level and sensitivity."
+            )
             if execution_context is None:
                 execution_context = self.plugin.execution_context
-            logger.info("Starting continuous recording. Press Ctrl+C to stop.")
+            print("Starting continuous recording. Press Ctrl+C to stop.")
             silence_duration = 0
             recording = False
             audio_buffer = []
 
             try:
                 while True:
+                    logger.debug("Recording audio chunk...")
                     audio_chunk = sd.rec(
                         int(chunk_duration * sample_rate),
                         samplerate=sample_rate,
@@ -198,27 +329,39 @@ class AudioTranscriptionPlugin(BasePlugin):
                         dtype="float32",
                     )
                     sd.wait()
+                    logger.debug("Audio chunk recorded.")
+                    # print("Audio chunk recorded.")
                     audio_chunk = np.squeeze(audio_chunk)
+                    logger.debug(f"Audio chunk shape: {audio_chunk.shape}")
+                    # print(f"Audio chunk shape: {audio_chunk.shape}")
                     max_audio_level = np.max(np.abs(audio_chunk))
                     logger.debug(f"Max audio level detected: {max_audio_level}")
-
-                    if max_audio_level > silence_threshold:
-                        recording = True
+                    # print(f"Max audio level detected: {max_audio_level}")
+                    if max_audio_level > silence_threshold * (
+                        self.plugin.sensitivity / 50
+                    ):
+                        if not recording:
+                            print("Sound detected, starting recording.")
+                            logger.info("Sound detected, starting recording.")
                         silence_duration = 0
                         audio_buffer.append(audio_chunk)
                     elif recording:
                         silence_duration += chunk_duration
                         if silence_duration >= pause_duration:
-                            logger.info("Silence detected, stopping recording.")
+                            print("Silence detected, stopping recording.")
                             full_audio = np.concatenate(audio_buffer)
-                            transcription = self.plugin.model.transcribe(full_audio, fp16=False)
+                            print("Transcribing audio...")
+                            transcription = self.plugin.model.transcribe(
+                                full_audio, fp16=False
+                            )
                             if transcription and "text" in transcription:
                                 logger.info(f"Transcription: {transcription['text']}")
                                 notes = await self.plugin.analyze_transcription.execute(
                                     execution_context, transcription["text"]
                                 )
-                                logger.info(f"Actionable Notes: {notes}")
+                                print(f"Actionable Notes: {notes}")
                             else:
+                                print("No transcription text found.")
                                 logger.warning("No transcription text found.")
                             audio_buffer = []
                             recording = False
@@ -226,6 +369,7 @@ class AudioTranscriptionPlugin(BasePlugin):
                         audio_buffer = []
                         recording = False
             except KeyboardInterrupt:
+                print("Continuous recording stopped.")
                 logger.info("Continuous recording stopped.")
 
     class UnderstandIntentAction(BaseAction):

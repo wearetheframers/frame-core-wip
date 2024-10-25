@@ -197,7 +197,9 @@ class Framer:
                 (
                     role.name
                     if isinstance(role, Role)
-                    else getattr(role, "get", lambda k, d=None: d)("name", "default_name")
+                    else getattr(role, "get", lambda k, d=None: d)(
+                        "name", "default_name"
+                    )
                 ): (
                     role
                     if isinstance(role, Role)
@@ -216,7 +218,12 @@ class Framer:
         self.goals = list(
             {
                 goal.description if isinstance(goal, Goal) else goal["description"]: (
-                    goal if isinstance(goal, Goal) else Goal(name=goal.get("name", "default_name"), description=goal.get("description", "default_description"))
+                    goal
+                    if isinstance(goal, Goal)
+                    else Goal(
+                        name=goal.get("name", "default_name"),
+                        description=goal.get("description", "default_description"),
+                    )
                 )
                 for goal in self.goals
             }.values()
@@ -246,6 +253,7 @@ class Framer:
         """
         logger.info(f"Loading plugins for Framer with config: {self.config}")
         loaded_plugins = set()
+
         def load_plugin(plugin_name, plugin_instance):
             if (
                 plugin_name in loaded_plugins
@@ -270,11 +278,13 @@ class Framer:
                             priority=5,  # Default priority, adjust as needed
                         )
                     else:
-                        logger.info(f"Action {action_name} already registered. Skipping.")
+                        logger.info(
+                            f"Action {action_name} already registered. Skipping."
+                        )
                 loaded_plugins.add(plugin_name)
                 loaded_plugins.add(plugin_instance)
 
-        if 'all' in self.plugins:
+        if "all" in self.plugins:
             for plugin_name, plugin_instance in self.plugins.items():
                 load_plugin(plugin_name, plugin_instance)
         else:
@@ -440,7 +450,9 @@ class Framer:
         config.roles = self.roles
         config.goals = self.goals
         config_dict = config.to_dict()
-        config_dict["execution_context"] = execution_context_to_json(self.execution_context)
+        config_dict["execution_context"] = execution_context_to_json(
+            self.execution_context
+        )
         with open(file_path, "w") as f:
             json.dump(config_dict, f, indent=4)
 
@@ -472,7 +484,9 @@ class Framer:
         config = parse_json_config(file_path)
         config_data = parse_json_config(file_path)
         execution_context_data = config_data.pop("execution_context", {})
-        execution_context = execution_context_from_json(execution_context_data, ExecutionContext)
+        execution_context = execution_context_from_json(
+            execution_context_data, ExecutionContext
+        )
 
         return cls(
             execution_context=execution_context,
@@ -596,13 +610,13 @@ class Framer:
             executed_decision = await self.brain.execute_decision(decision)
 
             # Check the status of the executed decision
-            if executed_decision.status == 'pending_approval':
+            if executed_decision.status == "pending_approval":
                 # Notify user or system for approval
                 pass
-            elif executed_decision.status == 'deferred':
+            elif executed_decision.status == "deferred":
                 # Schedule for later execution
                 pass
-            elif executed_decision.status == 'executed':
+            elif executed_decision.status == "executed":
                 # Proceed as normal
                 pass
 

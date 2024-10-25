@@ -56,7 +56,9 @@ async def main():
     print("Available audio devices:")
     for i, device in enumerate(devices):
         print(f"{i}: {device['name']}")
-    device_choice = input(f"Select audio device by number (default is {at_plugin.selected_device}): ")
+    device_choice = input(
+        f"Select audio device by number (default is {at_plugin.selected_device}): "
+    )
     try:
         selected_device = int(device_choice)
     except ValueError:
@@ -64,30 +66,36 @@ async def main():
     if 0 <= selected_device < len(devices):
         at_plugin.selected_device = selected_device
     else:
-        print(f"Invalid selection. Using default device: {devices[at_plugin.selected_device]['name']}")
-    print("1. Singular Recording")
-    print("2. Continuous Live Recording")
-    choice = input("Enter choice (1 or 2): ")
-
-    if choice == "1":
-        print("\nRecording audio... (Press Ctrl+C to stop)")
-        transcription = await framer.brain.action_registry.execute_action(
-            "record_and_transcribe"
+        print(
+            f"Invalid selection. Using default device: {devices[at_plugin.selected_device]['name']}"
         )
-        print(f"Transcription: {transcription}")
+    try:
+        print("1. Singular Recording")
+        print("2. Continuous Live Recording")
+        choice = input("Enter choice (1 or 2): ")
 
-        notes = await framer.brain.action_registry.execute_action(
-            "analyze_transcription", transcription=transcription
-        )
-        print(f"Actionable Notes: {notes}")
+        if choice == "1":
+            print("\nRecording audio... (Press Ctrl+C to stop)")
+            transcription = await framer.brain.action_registry.execute_action(
+                "record_and_transcribe"
+            )
+            print(f"Transcription: {transcription}")
 
-    elif choice == "2":
-        await framer.brain.action_registry.execute_action(
-            "continuous_record_and_transcribe"
-        )
+            notes = await framer.brain.action_registry.execute_action(
+                "analyze_transcription", transcription=transcription
+            )
+            print(f"Actionable Notes: {notes}")
 
-    else:
-        print("Invalid choice. Please restart and select 1 or 2.")
+        elif choice == "2":
+            print("\nStarting continuous live recording... (Press Ctrl+C to stop)")
+            await framer.brain.action_registry.execute_action(
+                "continuous_record_and_transcribe"
+            )
+
+        else:
+            print("Invalid choice. Please restart and select 1 or 2.")
+    except KeyboardInterrupt:
+        print("\nRecording stopped by user.")
 
     await framer.close()
 

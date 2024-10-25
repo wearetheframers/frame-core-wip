@@ -93,7 +93,9 @@ class LMQLAdapter(LLMAdapterInterface):
         )  # 60 requests per minute
 
     def format_prompt(
-        self, prompt: str, additional_context: Optional[Dict[str, Any]] = None,
+        self,
+        prompt: str,
+        additional_context: Optional[Dict[str, Any]] = None,
         stream: Optional[bool] = False,
     ) -> str:
         """

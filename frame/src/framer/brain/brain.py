@@ -695,7 +695,9 @@ class Brain:
         # Return the decision object with the result and status
         return decision
 
-    def _validate_parameters(self, action_name: str, parameters: Dict[str, Any]) -> bool:
+    def _validate_parameters(
+        self, action_name: str, parameters: Dict[str, Any]
+    ) -> bool:
         """
         Validates that the given parameters match the expected format for the action.
 

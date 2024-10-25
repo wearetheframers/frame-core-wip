@@ -21,12 +21,13 @@ from frame.src.services.llm.main import LLMService
 
 frame = Frame()
 
+
 class EngageConversationAction(BaseAction):
     def __init__(self):
         super().__init__(
             name="engage_conversation",
             description="Engage in a deep conversation",
-            priority=Priority.HIGH
+            priority=Priority.HIGH,
         )
 
     async def execute(self, execution_context: ExecutionContext, **kwargs):
@@ -34,12 +35,13 @@ class EngageConversationAction(BaseAction):
         response = await execution_context.llm_service.get_completion(prompt)
         return f"Engaged in a deep conversation: {response}"
 
+
 class TellStoryAction(BaseAction):
     def __init__(self):
         super().__init__(
             name="tell_story",
             description="Craft and narrate a captivating story",
-            priority=Priority.MEDIUM
+            priority=Priority.MEDIUM,
         )
 
     async def execute(self, execution_context: ExecutionContext, **kwargs):
@@ -47,12 +49,13 @@ class TellStoryAction(BaseAction):
         response = await execution_context.llm_service.get_completion(prompt)
         return f"Story told: {response}"
 
+
 class InspireCreativityAction(BaseAction):
     def __init__(self):
         super().__init__(
             name="inspire_creativity",
             description="Inspire creativity through storytelling",
-            priority=Priority.HIGH
+            priority=Priority.HIGH,
         )
 
     async def execute(self, execution_context: ExecutionContext, **kwargs):
@@ -60,31 +63,36 @@ class InspireCreativityAction(BaseAction):
         response = await execution_context.llm_service.get_completion(prompt)
         return f"Creativity inspired: {response}"
 
+
 async def export_config(framer, filename):
     def default_serializer(obj):
         if isinstance(obj, LLMService):
             return str(obj)  # or any other representation you prefer
         if isinstance(obj, FramerConfig):
             return obj.__dict__
-        raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+        raise TypeError(
+            f"Object of type {obj.__class__.__name__} is not JSON serializable"
+        )
 
     framer_dict = framer.__dict__.copy()
     # Remove execution_context and shared_context from export
-    framer_dict.pop('execution_context', None)
-    framer_dict.pop('shared_context', None)
+    framer_dict.pop("execution_context", None)
+    framer_dict.pop("shared_context", None)
     # Remove execution_context and shared_context from export
-    framer_dict.pop('execution_context', None)
-    framer_dict.pop('shared_context', None)
-    with open(filename, 'w') as f:
+    framer_dict.pop("execution_context", None)
+    framer_dict.pop("shared_context", None)
+    with open(filename, "w") as f:
         json.dump(framer_dict, f, indent=4, default=default_serializer)
     print(f"Configuration exported to {filename}")
 
+
 async def import_config(filename):
-    with open(filename, 'r') as f:
+    with open(filename, "r") as f:
         config_data = json.load(f)
     framer = Frame()  # Create a new Frame instance
     framer = await frame.create_framer(config=FramerConfig(**config_data))
     return framer
+
 
 async def main():
     logger = logging.getLogger(__name__)
@@ -115,7 +123,7 @@ async def main():
 
     config_data = config.__dict__ if isinstance(config, FramerConfig) else config
     # Extract actions and remove them from config_data
-    action_list = config_data.pop('actions', None)
+    action_list = config_data.pop("actions", None)
 
     # Create FramerConfig without the 'actions' key
     framer_config = FramerConfig(**config_data)
@@ -129,7 +137,9 @@ async def main():
             action_name = action_info["name"]
             action_class_name = action_info.get("action_class")
             if not action_class_name:
-                logger.warning(f"No 'action_class' specified for action '{action_name}'. Skipping.")
+                logger.warning(
+                    f"No 'action_class' specified for action '{action_name}'. Skipping."
+                )
                 continue
 
             # Dynamically get the action class from globals()
@@ -155,7 +165,7 @@ async def main():
         logger.warning("No actions to execute.")
 
     # Export the configuration to a JSON file in the same directory as the script
-    export_path = os.path.join(os.path.dirname(__file__), 'exported_framer_config.json')
+    export_path = os.path.join(os.path.dirname(__file__), "exported_framer_config.json")
     await export_config(framer, export_path)
 
     await framer.close()

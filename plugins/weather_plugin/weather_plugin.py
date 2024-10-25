@@ -17,7 +17,9 @@ class WeatherPlugin:
             )
             self.plugin = plugin
 
-        async def execute(self, execution_context: ExecutionContext, query: str, location: str) -> Dict[str, Any]:
+        async def execute(
+            self, execution_context: ExecutionContext, query: str, location: str
+        ) -> Dict[str, Any]:
             """
             Execute the action to get weather information for a given location.
 
@@ -41,21 +43,26 @@ class WeatherPlugin:
                         return {
                             "response": f"Query: {query}\n{weather_summary}",
                             "data": data,
-                            "status": response.status
+                            "status": response.status,
                         }
                     else:
                         return {
                             "response": f"Error: Unable to fetch weather data for {location}. Status code: {response.status}",
                             "data": None,
-                            "status": response.status
+                            "status": response.status,
                         }
 
     def register_actions(self, action_registry):
         self.get_weather = self.GetWeatherAction(self)
         action_registry.add_action(self.get_weather)
+        self.get_weather = self.GetWeatherAction(self)
+        action_registry.add_action(self.get_weather)
+
+
 import logging
 from frame.src.framer.brain.plugins.base import BasePlugin
 from frame.src.framer.agency.priority import Priority
+
 
 class WeatherPlugin(BasePlugin):
     def __init__(self, framer=None):
@@ -65,7 +72,7 @@ class WeatherPlugin(BasePlugin):
     async def on_load(self, framer):
         self.framer = framer
         self.logger.info("WeatherPlugin loaded")
-        self.register_actions()
+        self.register_actions(framer.brain.action_registry)
 
     def register_actions(self, action_registry):
         self.add_action(

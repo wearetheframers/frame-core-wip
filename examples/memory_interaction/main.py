@@ -112,17 +112,19 @@ async def main():
             # Log the reasoning
             logger.info(f"Reasoning: {decision.reasoning}")
             # Ensure parameters is a dictionary
-            if decision.action == "respond with memory retrieval" and not isinstance(decision.parameters, dict):
+            if decision.action == "respond with memory retrieval" and not isinstance(
+                decision.parameters, dict
+            ):
                 decision.parameters = {}
             # Execute the decision and get the result
             result = await framer.brain.execute_decision(decision)
             # Print the result of the decision
             if isinstance(result, dict):
-                if "output" in result and result['output'] is not None:
+                if "output" in result and result["output"] is not None:
                     print(f"Response: {result['output']}\n")
-                elif "error" in result and result['error'] is not None:
+                elif "error" in result and result["error"] is not None:
                     print(f"Error: {result['error']}\n")
-                elif "response" in result and result['response'] is not None:
+                elif "response" in result and result["response"] is not None:
                     print(f"Response: {result['response']}\n")
                 else:
                     print(f"Unexpected result format: {result}\n")

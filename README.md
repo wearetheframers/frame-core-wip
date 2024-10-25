@@ -44,6 +44,12 @@ To grant all permissions for all plugins (which is considered unsafe), you can p
 
 ### Features
 
+### Sensitivity Adjustment for Noisy Environments
+
+The `AudioTranscriptionPlugin` now adjusts its sensitivity to be more responsive in noisy environments. This ensures that the system can capture intents or transcriptions effectively, even when the background noise level is high. The sensitivity increases (lower threshold to activate) with higher noise levels, using a logarithmic scale for smooth adjustment.
+
+The `AudioTranscriptionPlugin` now uses a logarithmic scale to adjust the sensitivity based on the average background noise level. This approach ensures that small changes in noise level have a larger impact on sensitivity, while larger changes have a diminishing effect. This is achieved using the `np.log1p` function, which computes the natural logarithm of one plus the input array, providing a smooth transition in sensitivity adjustment.
+
 - Multi-modal cognitive agents framework capable of processing diverse types of perceptions
 - Supports developing dynamic, emergent behaviors
 - Layered memory understanding entity relationships with Mem0

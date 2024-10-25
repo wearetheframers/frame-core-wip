@@ -98,12 +98,16 @@ class Agency:
             if isinstance(goal, Goal):
                 self.goals.append(goal)
             else:
-                self.goals.append(Goal(
-                    name=goal.get("name", goal.get("description", "Default Goal Name")),
-                    description=goal.get("description", ""),
-                    priority=goal.get("priority", 5),
-                    status=goal.get("status", GoalStatus.ACTIVE),
-                ))
+                self.goals.append(
+                    Goal(
+                        name=goal.get(
+                            "name", goal.get("description", "Default Goal Name")
+                        ),
+                        description=goal.get("description", ""),
+                        priority=goal.get("priority", 5),
+                        status=goal.get("status", GoalStatus.ACTIVE),
+                    )
+                )
 
     def get_roles(self) -> List[Role]:
         return self.roles

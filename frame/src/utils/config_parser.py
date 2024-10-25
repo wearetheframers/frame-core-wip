@@ -93,7 +93,10 @@ def execution_context_to_json(execution_context: ExecutionContext) -> Dict[str, 
         "state": execution_context.state,
     }
 
-def execution_context_from_json(data: Dict[str, Any], execution_context_cls: Type[ExecutionContext]) -> ExecutionContext:
+
+def execution_context_from_json(
+    data: Dict[str, Any], execution_context_cls: Type[ExecutionContext]
+) -> ExecutionContext:
     """
     Create an ExecutionContext object from a JSON-serializable dictionary.
     """

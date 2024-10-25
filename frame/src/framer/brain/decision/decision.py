@@ -1,31 +1,38 @@
 import json
 from enum import Enum
 
+
 class DecisionStatus(str, Enum):
-    EXECUTED = 'executed'
-    PENDING_APPROVAL = 'pending_approval'
-    DEFERRED = 'deferred'
-    NOT_EXECUTED = 'not_executed'
+    EXECUTED = "executed"
+    PENDING_APPROVAL = "pending_approval"
+    DEFERRED = "deferred"
+    NOT_EXECUTED = "not_executed"
+
+
 from enum import Enum
 from enum import Enum
 from pydantic import BaseModel, Field
 
-class DecisionStatus(str, Enum):
-    EXECUTED = 'executed'
-    PENDING_APPROVAL = 'pending_approval'
-    DEFERRED = 'deferred'
-    NOT_EXECUTED = 'not_executed'
 
 class DecisionStatus(str, Enum):
-    EXECUTED = 'executed'
-    PENDING_APPROVAL = 'pending_approval'
-    DEFERRED = 'deferred'
-    NOT_EXECUTED = 'not_executed'
+    EXECUTED = "executed"
+    PENDING_APPROVAL = "pending_approval"
+    DEFERRED = "deferred"
+    NOT_EXECUTED = "not_executed"
+
+
+class DecisionStatus(str, Enum):
+    EXECUTED = "executed"
+    PENDING_APPROVAL = "pending_approval"
+    DEFERRED = "deferred"
+    NOT_EXECUTED = "not_executed"
+
 
 class ExecutionMode(str, Enum):
     AUTO = "auto"
     USER_APPROVAL = "user_approval"
     DEFERRED = "deferred"
+
 
 from typing import Dict, Any, Optional, Union, List
 from frame.src.models.framer.brain.decision import Decision as DecisionModel
@@ -102,15 +109,15 @@ class Decision(DecisionModel):
     )
     status: DecisionStatus = Field(
         default=DecisionStatus.NOT_EXECUTED,
-        description='The execution status of the decision'
+        description="The execution status of the decision",
     )
     status: DecisionStatus = Field(
         default=DecisionStatus.NOT_EXECUTED,
-        description='The execution status of the decision'
+        description="The execution status of the decision",
     )
     status: DecisionStatus = Field(
         default=DecisionStatus.NOT_EXECUTED,
-        description="The execution status of the decision"
+        description="The execution status of the decision",
     )
     task_status: TaskStatus = Field(
         default=TaskStatus.PENDING, description="Status of the associated task"

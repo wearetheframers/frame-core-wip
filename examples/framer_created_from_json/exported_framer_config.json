@@ -1,0 +1,78 @@
+{
+    "llm_service": "<frame.src.services.llm.main.LLMService object at 0x000001A9335BB050>",
+    "memory_service": {
+        "name": "ExplorerFramer",
+        "model": "gpt-4o-mini",
+        "soul_seed": {
+            "text": "Curiosity drives exploration"
+        },
+        "use_local_model": false,
+        "permissions": [
+            "with_memory",
+            "with_mem0_search_extract_summarize_plugin",
+            "with_shared_context"
+        ],
+        "mem0_api_key": "m0-5rmIkc7F6tr1a8ELjqSKvT83gOKkSsplmXpgv7J1",
+        "description": null,
+        "singleton": false,
+        "gender": "neutral",
+        "default_model": "gpt-3.5-turbo",
+        "multi_modal_model": "gpt-4-vision-preview",
+        "llm_temperature": 0.7,
+        "llm_max_tokens": 1024,
+        "llm_top_p": 1.0,
+        "llm_frequency_penalty": 0.0,
+        "llm_presence_penalty": 0.0,
+        "is_multi_modal": false,
+        "roles": [
+            {
+                "name": "Explorer",
+                "description": "Explore new environments",
+                "priority": 1
+            }
+        ],
+        "goals": [
+            {
+                "name": "Discover New Places",
+                "description": "Explore unknown environments to find new locations.",
+                "priority": 1
+            }
+        ],
+        "recent_memories_limit": 5
+    },
+    "eq_service": null,
+    "plugin_loading_progress": null,
+    "config": {
+        "name": "DefaultFramer",
+        "model": "gpt-4o-mini",
+        "soul_seed": "You are a helpful AI assistant.",
+        "use_local_model": false,
+        "permissions": [
+            "with_memory",
+            "with_mem0_search_extract_summarize_plugin",
+            "with_shared_context",
+            "with_mem0_search_extract_summarize_plugin"
+        ],
+        "mem0_api_key": "m0-5rmIkc7F6tr1a8ELjqSKvT83gOKkSsplmXpgv7J1",
+        "description": null,
+        "singleton": false,
+        "gender": "neutral",
+        "default_model": "gpt-4o-mini",
+        "multi_modal_model": "gpt-4-vision-preview",
+        "llm_temperature": 0.7,
+        "llm_max_tokens": 1024,
+        "llm_top_p": 1.0,
+        "llm_frequency_penalty": 0.0,
+        "llm_presence_penalty": 0.0,
+        "is_multi_modal": false,
+        "roles": null,
+        "goals": null,
+        "recent_memories_limit": 5
+    },
+    "permissions": [
+        "with_memory",
+        "with_mem0_search_extract_summarize_plugin",
+        "with_shared_context",
+        "with_mem0_search_extract_summarize_plugin"
+    ],
+    "shared_context_service": 

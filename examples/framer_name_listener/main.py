@@ -6,7 +6,10 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame import Frame, FramerConfig
-from plugins.audio_transcription_plugin.audio_transcription_plugin import AudioTranscriptionPlugin
+from plugins.audio_transcription_plugin.audio_transcription_plugin import (
+    AudioTranscriptionPlugin,
+)
+
 
 async def main():
     # Initialize Frame
@@ -34,6 +37,7 @@ async def main():
         print("Stopping the Framer...")
     finally:
         await framer.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

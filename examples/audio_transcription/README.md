@@ -34,6 +34,16 @@ python main.py
 
 The `AudioTranscriptionPlugin` now includes an action to understand "intents" from transcriptions. This feature allows the Framer to listen for its name (as specified in the `FramerConfig`) and respond by playing a positive sound and starting to listen to the user, similar to how Alexa functions. This demonstrates how plugins can extend default behavior to create a more helpful assistant, and can be disabled or removed if not needed.
 
+## Sensitivity Adjustment Logic
+
+The `AudioTranscriptionPlugin` adjusts the sensitivity based on the average background noise level. The sensitivity is now calculated such that it increases (lower threshold to activate) when the background noise level is higher. This approach ensures that the system is more responsive to sounds in louder environments, which is particularly useful for capturing intents or transcriptions from possible dialog. The logic uses a logarithmic scale to map the noise level to a sensitivity range, providing a smooth transition in sensitivity adjustment.
+
+## Why Use Multiprocessing for Microphone Setup?
+
+In the `AudioTranscriptionPlugin`, the microphone setup process involves recording audio to analyze background noise and adjust sensitivity. Initially, this was done using a `ThreadPoolExecutor` to run the setup in a separate thread. However, this approach can still block the main execution if the thread is not managed properly, leading to a frozen application.
+
+To avoid this, we switched to using `multiprocessing.Process`. This allows the microphone setup to run in a completely separate process, ensuring that the main application remains responsive. This change is crucial for applications that require real-time processing and cannot afford to be blocked by setup tasks.
+
 ## Customization
 
 ### Custom Action Registry

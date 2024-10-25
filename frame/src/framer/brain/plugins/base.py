@@ -7,12 +7,14 @@ from frame.src.framer.brain.rules.ruleset import Rule, Ruleset
 
 from frame.src.framer.brain.rules.ruleset import Ruleset
 
+
 class BasePlugin(ABC):
     def __init__(self, framer):
         self.framer = framer
         self.logger = logging.getLogger(self.__class__.__name__)
         self.execution_context = getattr(framer, "execution_context", None)
         self.ruleset = Ruleset()
+
     """
     Base class for all Frame plugins.
 
@@ -38,7 +40,11 @@ class BasePlugin(ABC):
             "Plugin warning: Framer does not have an execution_context attribute. Possible unexpected behaviors may occur."
         )
 
-    def add_rule(self, condition: Callable[[Dict[str, Any]], bool], action: Callable[[Dict[str, Any]], None]):
+    def add_rule(
+        self,
+        condition: Callable[[Dict[str, Any]], bool],
+        action: Callable[[Dict[str, Any]], None],
+    ):
         """
         Add a rule to the plugin.
 
