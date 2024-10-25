@@ -1,24 +1,18 @@
 import json
 from enum import Enum
-
-
-class DecisionStatus(str, Enum):
-    EXECUTED = "executed"
-    PENDING_APPROVAL = "pending_approval"
-    DEFERRED = "deferred"
-    NOT_EXECUTED = "not_executed"
-
-
-from enum import Enum
-from enum import Enum
 from pydantic import BaseModel, Field
+from typing import Dict, Any, Optional, Union, List
+from frame.src.models.framer.brain.decision import Decision as DecisionModel
+from frame.src.framer.agency.priority import Priority
+from frame.src.framer.agency.roles import Role
+from frame.src.framer.agency.goals import Goal
+from frame.src.framer.agency.tasks import TaskStatus, Task
 
+from typing import TYPE_CHECKING
 
-class DecisionStatus(str, Enum):
-    EXECUTED = "executed"
-    PENDING_APPROVAL = "pending_approval"
-    DEFERRED = "deferred"
-    NOT_EXECUTED = "not_executed"
+if TYPE_CHECKING:
+    from frame.src.framer.agency.roles import Role
+    from frame.src.framer.agency.goals import Goal
 
 
 class DecisionStatus(str, Enum):
@@ -32,20 +26,6 @@ class ExecutionMode(str, Enum):
     AUTO = "auto"
     USER_APPROVAL = "user_approval"
     DEFERRED = "deferred"
-
-
-from typing import Dict, Any, Optional, Union, List
-from frame.src.models.framer.brain.decision import Decision as DecisionModel
-from frame.src.framer.agency.priority import Priority
-from frame.src.framer.agency.roles import Role
-from frame.src.framer.agency.goals import Goal
-from frame.src.framer.agency.tasks import TaskStatus, Task
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from frame.src.framer.agency.roles import Role
-    from frame.src.framer.agency.goals import Goal
 
 
 class ExecutionMode(str, Enum):

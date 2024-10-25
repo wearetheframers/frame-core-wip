@@ -186,29 +186,30 @@ hljs.highlightAll();
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
 
         # Ensure uniqueness
-        self.roles = list(
-            {
-                (
-                    role.name
-                    if isinstance(role, Role)
-                    else getattr(role, &#34;get&#34;, lambda k, d=None: d)(
-                        &#34;name&#34;, &#34;default_name&#34;
+        if not self.roles:
+            self.roles = list(
+                {
+                    (
+                        role.name
+                        if isinstance(role, Role)
+                        else getattr(role, &#34;get&#34;, lambda k, d=None: d)(
+                            &#34;name&#34;, &#34;default_name&#34;
+                        )
+                    ): (
+                        role
+                        if isinstance(role, Role)
+                        else {
+                            &#34;id&#34;: &#34;default_id&#34;,
+                            &#34;name&#34;: role,
+                            &#34;description&#34;: &#34;default_description&#34;,
+                            &#34;permissions&#34;: [],
+                            &#34;priority&#34;: 5,
+                            &#34;status&#34;: RoleStatus.ACTIVE,
+                        }
                     )
-                ): (
-                    role
-                    if isinstance(role, Role)
-                    else {
-                        &#34;id&#34;: &#34;default_id&#34;,
-                        &#34;name&#34;: role,
-                        &#34;description&#34;: &#34;default_description&#34;,
-                        &#34;permissions&#34;: [],
-                        &#34;priority&#34;: 5,
-                        &#34;status&#34;: RoleStatus.ACTIVE,
-                    }
-                )
-                for role in self.roles
-            }.values()
-        )
+                    for role in self.roles
+                }.values()
+            )
         self.goals = list(
             {
                 (goal.description if isinstance(goal, Goal) 

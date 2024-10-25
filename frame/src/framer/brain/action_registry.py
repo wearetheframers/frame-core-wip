@@ -284,14 +284,9 @@ class ActionRegistry:
                     "fallback_response": "The action didn't produce a response. Please try again.",
                 }
             if isinstance(_result, dict):
-                result["response"] = _result
-                if "reasoning" in _result:
-                    result["reasoning"] = _result["reasoning"]
-                else:
-                    result["reasoning"] = "No reasoning provided."
+                result = _result
             else:
-                result["response"] = _result
-                result["reasoning"] = "No reasoning provided."
+                result = {"response": _result}
         except Exception as e:
             error_message = f"Error executing action '{action_name}': {str(e)}"
             logger.error(error_message)

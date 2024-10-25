@@ -192,29 +192,30 @@ class Framer:
             self.roles, self.goals = await self.agency.generate_roles_and_goals()
 
         # Ensure uniqueness
-        self.roles = list(
-            {
-                (
-                    role.name
-                    if isinstance(role, Role)
-                    else getattr(role, "get", lambda k, d=None: d)(
-                        "name", "default_name"
+        if not self.roles:
+            self.roles = list(
+                {
+                    (
+                        role.name
+                        if isinstance(role, Role)
+                        else getattr(role, "get", lambda k, d=None: d)(
+                            "name", "default_name"
+                        )
+                    ): (
+                        role
+                        if isinstance(role, Role)
+                        else {
+                            "id": "default_id",
+                            "name": role,
+                            "description": "default_description",
+                            "permissions": [],
+                            "priority": 5,
+                            "status": RoleStatus.ACTIVE,
+                        }
                     )
-                ): (
-                    role
-                    if isinstance(role, Role)
-                    else {
-                        "id": "default_id",
-                        "name": role,
-                        "description": "default_description",
-                        "permissions": [],
-                        "priority": 5,
-                        "status": RoleStatus.ACTIVE,
-                    }
-                )
-                for role in self.roles
-            }.values()
-        )
+                    for role in self.roles
+                }.values()
+            )
         self.goals = list(
             {
                 (goal.description if isinstance(goal, Goal) 

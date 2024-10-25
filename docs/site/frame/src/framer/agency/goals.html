@@ -94,17 +94,12 @@ validated to form a valid model.</p>
     priority: Priority = Field(default=Priority.MEDIUM)
     status: GoalStatus = GoalStatus.ACTIVE
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -&gt; &#34;Goal&#34;:
+        return cls(**data)
+
     def get(self, key: str, default: Any = None) -&gt; Any:
-        return getattr(self, key, default)
-
-
-    def to_dict(self) -&gt; Dict[str, Any]:
-        return {
-            &#34;name&#34;: self.name,
-            &#34;description&#34;: self.description,
-            &#34;priority&#34;: self.priority,
-            &#34;status&#34;: self.status.value,
-        }</code></pre>
+        return getattr(self, key, default)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -141,16 +136,19 @@ validated to form a valid model.</p>
 <div class="desc"></div>
 </dd>
 </dl>
-<h3>Methods</h3>
+<h3>Static methods</h3>
 <dl>
-<dt id="frame.src.framer.agency.goals.Goal.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, key: str, default: Any = None) ‑> Any</span>
+<dt id="frame.src.framer.agency.goals.Goal.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>data: Dict[str, Any]) ‑> <a title="frame.src.framer.agency.goals.Goal" href="#frame.src.framer.agency.goals.Goal">Goal</a></span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="frame.src.framer.agency.goals.Goal.to_dict"><code class="name flex">
-<span>def <span class="ident">to_dict</span></span>(<span>self) ‑> Dict[str, Any]</span>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.goals.Goal.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>self, key: str, default: Any = None) ‑> Any</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -260,6 +258,7 @@ attributes &ndash; see the documentation for details.</p></div>
 <h4><code><a title="frame.src.framer.agency.goals.Goal" href="#frame.src.framer.agency.goals.Goal">Goal</a></code></h4>
 <ul class="">
 <li><code><a title="frame.src.framer.agency.goals.Goal.description" href="#frame.src.framer.agency.goals.Goal.description">description</a></code></li>
+<li><code><a title="frame.src.framer.agency.goals.Goal.from_dict" href="#frame.src.framer.agency.goals.Goal.from_dict">from_dict</a></code></li>
 <li><code><a title="frame.src.framer.agency.goals.Goal.get" href="#frame.src.framer.agency.goals.Goal.get">get</a></code></li>
 <li><code><a title="frame.src.framer.agency.goals.Goal.model_computed_fields" href="#frame.src.framer.agency.goals.Goal.model_computed_fields">model_computed_fields</a></code></li>
 <li><code><a title="frame.src.framer.agency.goals.Goal.model_config" href="#frame.src.framer.agency.goals.Goal.model_config">model_config</a></code></li>
@@ -267,7 +266,6 @@ attributes &ndash; see the documentation for details.</p></div>
 <li><code><a title="frame.src.framer.agency.goals.Goal.name" href="#frame.src.framer.agency.goals.Goal.name">name</a></code></li>
 <li><code><a title="frame.src.framer.agency.goals.Goal.priority" href="#frame.src.framer.agency.goals.Goal.priority">priority</a></code></li>
 <li><code><a title="frame.src.framer.agency.goals.Goal.status" href="#frame.src.framer.agency.goals.Goal.status">status</a></code></li>
-<li><code><a title="frame.src.framer.agency.goals.Goal.to_dict" href="#frame.src.framer.agency.goals.Goal.to_dict">to_dict</a></code></li>
 </ul>
 </li>
 <li>

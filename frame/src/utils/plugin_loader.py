@@ -54,7 +54,7 @@ def load_plugins(plugins_dir: Optional[str] = None) -> Tuple[Dict[str, Any], Lis
                 logger.debug(
                     f"Attempting to import module for plugin: plugins.{plugin_dir}"
                 )
-                module = importlib.import_module(f"plugins.{item}.{item}")
+                module = importlib.import_module(f"{plugins_dir}.{item}.{item}")
                 logger.info(f"Module imported successfully for plugin: {plugin_dir}")
 
                 # Construct the plugin class name by converting the directory name to CamelCase

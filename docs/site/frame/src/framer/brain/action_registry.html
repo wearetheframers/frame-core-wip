@@ -303,14 +303,9 @@ hljs.highlightAll();
                     &#34;fallback_response&#34;: &#34;The action didn&#39;t produce a response. Please try again.&#34;,
                 }
             if isinstance(_result, dict):
-                result[&#34;response&#34;] = _result
-                if &#34;reasoning&#34; in _result:
-                    result[&#34;reasoning&#34;] = _result[&#34;reasoning&#34;]
-                else:
-                    result[&#34;reasoning&#34;] = &#34;No reasoning provided.&#34;
+                result = _result
             else:
-                result[&#34;response&#34;] = _result
-                result[&#34;reasoning&#34;] = &#34;No reasoning provided.&#34;
+                result = {&#34;response&#34;: _result}
         except Exception as e:
             error_message = f&#34;Error executing action &#39;{action_name}&#39;: {str(e)}&#34;
             logger.error(error_message)

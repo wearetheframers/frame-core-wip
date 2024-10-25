@@ -5,6 +5,10 @@ from typing import Any, Dict, Optional, List, Callable
 from enum import Enum
 from frame.src.models.framer.agency.tasks import TaskModel, TaskStatus
 
+# Ensure TaskStatus has CANCELED status
+if not hasattr(TaskStatus, 'CANCELED'):
+    TaskStatus.CANCELED = 'CANCELED'
+
 logger = logging.getLogger(__name__)
 
 
