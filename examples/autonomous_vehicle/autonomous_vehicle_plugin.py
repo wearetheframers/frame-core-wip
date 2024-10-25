@@ -29,14 +29,6 @@ class AutonomousVehiclePlugin(BasePlugin):
 
     async def on_load(self):
         # Register actions with the Framer's action registry
-        # This is how you can normally call the plugin
-        # self.add_action("stop_vehicle", self.stop_vehicle, "Stop the autonomous vehicle")
-        # self.add_action("slow_down_vehicle", self.slow_down_vehicle, "Slow down the autonomous vehicle")
-        # self.add_action("speed_up_vehicle", self.speed_up_vehicle, "Speed up the autonomous vehicle")
-        # self.add_action("change_lane", self.change_lane, "Change the lane of the autonomous vehicle")
-        # self.add_action("start_driving", self.start_driving, "Start driving the autonomous vehicle")
-        # self.add_action("no_action", self.no_action, "Continue with the current action")
-        # self.add_action("brake_vehicle", self.brake_vehicle, "Apply brakes to the vehicle")
         self.add_action(
             "stop_vehicle", self.stop_vehicle, "Stop the autonomous vehicle"
         )
