@@ -251,12 +251,12 @@ This project is dual-licensed under the GNU Affero General Public License versio
 
 To run all tests, navigate to the root directory of the project and execute:
 
-venv\Scripts\activate && pytest
+pytest
 ```
 
 *Note*: Testing can take a little while as we have tests for rate limiting / retry logic, so you can exclude those (they are in the `llm_adapter` tests) if it's slow while developing others:
 
-venv\Scripts\activate && pytest -k "not (llm_service or llm_adapter)"
+pytest -k "not (llm_service or llm_adapter)"
 ```
 
 ### Documentation
@@ -265,14 +265,14 @@ The project uses MkDocs and can also use pdoc3 for documentation. The MkDocs con
 
 To build and serve MkDocs documentation, run:
 
-venv\Scripts\activate && mkdocs serve --config-file ./mkdocs.yml
+mkdocs serve --config-file ./mkdocs.yml
 ```
 
 You must run the `roam_links_converter.py` script before to convert linked references to their actual paths. 
 
 To serve both MkDocs and pdoc3 simultaneously, use the following command:
 
-venv\Scripts\activate && python scripts\serve_docs.py
+python scripts\serve_docs.py
 ```
 
 This runs MkDocs on port 3010 and pdoc3 on port 3011. This script runs both with live reloading, runs unit tests on initialization and generates a coverage report, and also parses and converts link references automatically. Add `--skip-tests` to skip tests when started.
