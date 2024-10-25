@@ -16,10 +16,11 @@ async def main():
 
     # Register the GmailPlugin
     # Define the path to the token file
-    token_file_path = os.path.join(os.path.dirname(__file__), "token.json")
+    token_file_path = os.path.join(os.path.dirname(__file__), "credentials.json")
+    print("Token file path:", token_file_path)
 
     # Initialize the GmailPlugin with the token file path
-    gmail_plugin = GmailPlugin(framer, token_file_path=token_file_path)
+    gmail_plugin = GmailPlugin(framer)
     await gmail_plugin.on_load(framer)
     framer.plugins["gmail_plugin"] = gmail_plugin
 

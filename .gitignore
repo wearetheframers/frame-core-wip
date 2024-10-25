@@ -61,6 +61,17 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# Gmail Plugin Example credentials and tokens
+examples/gmail_plugin_example/credentials.json
+examples/gmail_plugin_example/token.json
+examples/gmail_plugin_example/emails.csv
+plugins/gmail_plugin/credentials.json
+plugins/gmail_plugin/token.json
+plugins/gmail_plugin/token.json
+plugins/gmail_plugin/token.json
+plugins/gmail_plugin/token.json
+plugins/gmail_plugin/token.json
+
 # Flask stuff:
 instance/
 .webassets-cache
@@ -124,7 +135,6 @@ celerybeat.pid
 # Environments
 .env
 .venv
-venv2
 env/
 venv/
 ENV/

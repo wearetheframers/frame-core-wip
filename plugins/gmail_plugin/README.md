@@ -1,30 +1,35 @@
-# Gmail Plugin Example
+# Gmail Plugin
 
-This example demonstrates how to use the `GmailPlugin` with the Frame framework to read the latest emails from a Gmail account.
+The `GmailPlugin` is a component of the Frame framework that allows interaction with Gmail to read emails and manage messages. It handles Gmail API authorization and token management.
 
 ## Setup
 
-1. Ensure you have the necessary dependencies installed. You can install them using:
+1. **Enable the Gmail API:**
+   - Go to the Google Cloud console and enable the Gmail API for your project.
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+2. **Configure OAuth Consent Screen:**
+   - Set up the OAuth consent screen in the Google Cloud console.
 
-2. Navigate to the `examples/gmail_plugin_example` directory.
+3. **Authorize Credentials:**
+   - Create OAuth 2.0 Client IDs for a desktop application in the Google Cloud console.
+   - Save the downloaded JSON file as `credentials.json` in the plugin directory.
 
-3. Update the `config.json` file with your Gmail API key.
+4. **Install Dependencies:**
+   - Run the following command to install the required libraries:
+     ```bash
+     pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+     ```
 
-4. Run the main script to see the plugin in action:
+## Token and Credentials Management
 
-   ```bash
-   python main.py
-   ```
+- **Credentials File:** The `credentials.json` file should be placed in the plugin directory. It contains the client ID and client secret required for OAuth2 authentication.
+- **Token File:** The `token.json` file is generated after the first successful authentication and is saved in the plugin directory. It stores the user's access and refresh tokens.
+- **Environment Variables:** You can set `GMAIL_CLIENT_ID` and `GMAIL_CLIENT_SECRET` as environment variables to override the values in `config.json`.
 
-## How It Works
+## Using the Plugin
 
-- The `GmailPlugin` is registered with a Framer instance.
-- The plugin provides an action `read_emails` that fetches the latest emails from Gmail.
-- The main script calls the `read_emails` action to retrieve and display the latest email subjects.
+- The `GmailPlugin` class can be integrated into a larger application to read emails.
+- It provides an action `read_emails` that fetches the latest emails from Gmail.
 
 ## Customization
 
