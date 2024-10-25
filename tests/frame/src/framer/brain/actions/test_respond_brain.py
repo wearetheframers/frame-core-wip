@@ -4,6 +4,7 @@ from frame.src.framer.brain.actions.respond import RespondAction
 from frame.src.services import ExecutionContext
 from frame.src.framer.soul import Soul
 
+
 @pytest.fixture
 def execution_context():
     context = MagicMock(spec=ExecutionContext)
@@ -13,9 +14,11 @@ def execution_context():
     context.memory_service = MagicMock()
     return context
 
+
 @pytest.fixture
 def respond_action():
     return RespondAction()
+
 
 @pytest.mark.asyncio
 async def test_respond_action_basic_response():
@@ -28,14 +31,15 @@ async def test_respond_action_basic_response():
     context.soul = MagicMock()
     context.soul.get_current_state.return_value = {}
     context.get_state.return_value = []
-    
+
     # Act
     result = await action.execute(context, content="Test input")
-    
+
     # Assert
     assert isinstance(result, dict)
     assert "response" in result
     assert result["response"] == "Test response"
+
 
 @pytest.mark.asyncio
 async def test_respond_action_with_context():
@@ -52,17 +56,18 @@ async def test_respond_action_with_context():
         [],  # for recent_memories
         [],  # for recent_perceptions
         [],  # for roles
-        []   # for goals
+        [],  # for goals
     ]
-    
+
     # Act
     result = await action.execute(context)
-    
+
     # Assert
     assert isinstance(result, dict)
     assert "response" in result
     assert result["response"] == "Contextual response"
     assert context.llm_service.get_completion.called
+
 
 @pytest.mark.asyncio
 async def test_respond_action_invalid_context():
@@ -70,10 +75,11 @@ async def test_respond_action_invalid_context():
     # Arrange
     action = RespondAction()
     invalid_context = "not a context"
-    
+
     # Act/Assert
     with pytest.raises(TypeError):
         await action.execute(invalid_context)
+
 
 @pytest.mark.asyncio
 async def test_respond_action_none_response():
@@ -86,19 +92,20 @@ async def test_respond_action_none_response():
     context.soul = MagicMock()
     context.soul.get_current_state.return_value = {}
     context.get_state.return_value = []
-    
+
     # Act
     result = await action.execute(context)
-    
+
     # Assert
     assert isinstance(result, dict)
     assert result["response"] == "No response generated."
+
 
 @pytest.mark.asyncio
 async def test_respond_action_priority():
     """Test that respond action has correct priority"""
     # Arrange
     action = RespondAction()
-    
+
     # Assert
     assert action.priority == 2

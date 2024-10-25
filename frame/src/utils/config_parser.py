@@ -71,6 +71,7 @@ def export_config_to_json(config: FramerConfig, file_path: str) -> None:
     with open(file_path, "w") as file:
         json.dump(config.dict(), file, indent=4)
 
+
 def export_config_to_markdown(config: FramerConfig, file_path: str) -> None:
     with open(file_path, "w") as file:
         for key, value in config.dict().items():

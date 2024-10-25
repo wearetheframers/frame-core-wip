@@ -120,6 +120,14 @@ hljs.highlightAll();
         self.ruleset.add_rule(rule)
 
     @abstractmethod
+    async def on_remove(self):
+        &#34;&#34;&#34;
+        Abstract method that is called when the plugin is removed.
+
+        This method should be implemented by all plugin subclasses to perform
+        any necessary cleanup or teardown when the plugin is removed.
+        &#34;&#34;&#34;
+        pass
     async def on_load(self):
         &#34;&#34;&#34;
         Abstract method that is called when the plugin is loaded.
@@ -169,7 +177,9 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         pass
 
-    async def execute(self, action: str, params: Dict[str, Any], execution_context: Any) -&gt; Any:
+    async def execute(
+        self, action: str, params: Dict[str, Any], execution_context: Any
+    ) -&gt; Any:
         &#34;&#34;&#34;
         Execute a plugin action.
 

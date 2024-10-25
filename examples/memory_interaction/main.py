@@ -81,6 +81,7 @@ async def main():
     if framer.brain and framer.brain.memory:
         default_user = "test"  # Define default user ID once
         from frame.src.constants.user import DEFAULT_USER_ID
+
         framer.brain.memory.store("My favorite color is blue.", user_id=DEFAULT_USER_ID)
         framer.brain.memory.store(
             "I have a dentist appointment on October 20th.", user_id=DEFAULT_USER_ID
@@ -126,12 +127,12 @@ async def main():
                 elif "memories" in result:
                     memories = result.get("memories", [])
                     if memories and isinstance(memories, list) and len(memories) > 0:
-                        memory_text = memories[0].get('text', 'No text found')
+                        memory_text = memories[0].get("text", "No text found")
                         print(f"Found in memory: {memory_text}\n")
                     else:
                         print("No relevant memories found.\n")
                 else:
-                    print(f"Unexpected result format: {result}\n") 
+                    print(f"Unexpected result format: {result}\n")
             elif isinstance(result, str):
                 print(f"Response: {result}\n")
             else:

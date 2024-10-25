@@ -3,11 +3,14 @@ from unittest.mock import AsyncMock, MagicMock
 from frame.src.framer.brain.actions.think import ThinkAction
 from frame.src.services import ExecutionContext
 
+
 class TestThinkAction(unittest.IsolatedAsyncioTestCase):
     async def test_execute_think_action(self):
         execution_context = MagicMock(spec=ExecutionContext)
         execution_context.brain = MagicMock()
-        execution_context.brain._execute_think_action = AsyncMock(return_value={"result": "success"})
+        execution_context.brain._execute_think_action = AsyncMock(
+            return_value={"result": "success"}
+        )
 
         action = ThinkAction()
         result = await action.execute(execution_context, thought="Reflecting...")
@@ -20,6 +23,7 @@ class TestThinkAction(unittest.IsolatedAsyncioTestCase):
         action = ThinkAction()
         result = await action.execute(execution_context, thought="Reflecting...")
         self.assertEqual(result, {"error": "Brain not available in execution context"})
+
 
 if __name__ == "__main__":
     unittest.main()

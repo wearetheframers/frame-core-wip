@@ -22,4 +22,3 @@ class Goal(BaseModel):
 
     def get(self, key: str, default: Any = None) -> Any:
         return getattr(self, key, default)
-

@@ -237,14 +237,28 @@ hljs.highlightAll();
             )
         self.goals = list(
             {
-                (goal.description if isinstance(goal, Goal) 
-                 else goal if isinstance(goal, str)
-                 else goal.get(&#34;description&#34;, &#34;default_description&#34;)): (
+                (
+                    goal.description
+                    if isinstance(goal, Goal)
+                    else (
+                        goal
+                        if isinstance(goal, str)
+                        else goal.get(&#34;description&#34;, &#34;default_description&#34;)
+                    )
+                ): (
                     goal
                     if isinstance(goal, Goal)
                     else Goal(
-                        name=&#34;default_name&#34; if isinstance(goal, str) else goal.get(&#34;name&#34;, &#34;default_name&#34;),
-                        description=goal if isinstance(goal, str) else goal.get(&#34;description&#34;, &#34;default_description&#34;),
+                        name=(
+                            &#34;default_name&#34;
+                            if isinstance(goal, str)
+                            else goal.get(&#34;name&#34;, &#34;default_name&#34;)
+                        ),
+                        description=(
+                            goal
+                            if isinstance(goal, str)
+                            else goal.get(&#34;description&#34;, &#34;default_description&#34;)
+                        ),
                     )
                 )
                 for goal in self.goals

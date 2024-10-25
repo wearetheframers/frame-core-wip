@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 class Brain:
     """
     The Brain class represents the central decision-making and cognitive processing component of the Framer.
-    
+
     Note: Plugins are lazily loaded. If a plugin does not have the necessary permissions, it will not be loaded until explicitly added with the required permissions.
 
     It is responsible for processing perceptions, making decisions, and executing actions based on those decisions.
@@ -162,9 +162,12 @@ class Brain:
                 "Memory service is not set. Memory operations will not be available."
             )
 
-    def set_framer(self, framer):
+    async def set_framer(self, framer):
         self.framer = framer
         self.action_registry.set_execution_context(self.execution_context)
+        for plugin in getattr(framer, "plugins", {}).values():
+            if hasattr(plugin, "on_remove"):
+                await plugin.on_remove()
 
     def get_framer(self):
         return self.framer
@@ -545,7 +548,7 @@ class Brain:
         parameters = decision_data.get("parameters", {})
         if not isinstance(parameters, dict):
             parameters = {}
-            
+
         # Ensure parameters is a dictionary
         if isinstance(decision_data.get("parameters"), list):
             parameters = {}
@@ -558,12 +561,15 @@ class Brain:
         if decision_data.get("action") == "respond with memory retrieval":
             parameters = {} if isinstance(parameters, list) else parameters
             if perception and perception.data:
-                parameters.update({
-                    "query": perception.data.get("text", ""),
-                    "execution_context": self.execution_context,
-                    "llm_service": self.llm_service,
-                })
+                parameters.update(
+                    {
+                        "query": perception.data.get("text", ""),
+                        "execution_context": self.execution_context,
+                        "llm_service": self.llm_service,
+                    }
+                )
                 from frame.src.constants.user import DEFAULT_USER_ID
+
                 parameters["user_id"] = parameters.get("user_id", DEFAULT_USER_ID)
 
         decision = Decision(
@@ -575,9 +581,7 @@ class Brain:
             related_roles=related_roles,
             related_goals=related_goals,
         )
-        decision.result = decision.parameters.get(
-            "response_content", None
-        )
+        decision.result = decision.parameters.get("response_content", None)
         return decision
 
     async def _get_decision_prompt(self, perception: Optional[Perception]) -> str:

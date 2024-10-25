@@ -82,6 +82,15 @@ class BasePlugin(ABC):
         self.ruleset.add_rule(rule)
 
     @abstractmethod
+    async def on_remove(self):
+        """
+        Abstract method that is called when the plugin is removed.
+
+        This method should be implemented by all plugin subclasses to perform
+        any necessary cleanup or teardown when the plugin is removed.
+        """
+        pass
+
     async def on_load(self):
         """
         Abstract method that is called when the plugin is loaded.
@@ -131,7 +140,9 @@ class BasePlugin(ABC):
         """
         pass
 
-    async def execute(self, action: str, params: Dict[str, Any], execution_context: Any) -> Any:
+    async def execute(
+        self, action: str, params: Dict[str, Any], execution_context: Any
+    ) -> Any:
         """
         Execute a plugin action.
 

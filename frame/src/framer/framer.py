@@ -212,14 +212,28 @@ class Framer:
             )
         self.goals = list(
             {
-                (goal.description if isinstance(goal, Goal) 
-                 else goal if isinstance(goal, str)
-                 else goal.get("description", "default_description")): (
+                (
+                    goal.description
+                    if isinstance(goal, Goal)
+                    else (
+                        goal
+                        if isinstance(goal, str)
+                        else goal.get("description", "default_description")
+                    )
+                ): (
                     goal
                     if isinstance(goal, Goal)
                     else Goal(
-                        name="default_name" if isinstance(goal, str) else goal.get("name", "default_name"),
-                        description=goal if isinstance(goal, str) else goal.get("description", "default_description"),
+                        name=(
+                            "default_name"
+                            if isinstance(goal, str)
+                            else goal.get("name", "default_name")
+                        ),
+                        description=(
+                            goal
+                            if isinstance(goal, str)
+                            else goal.get("description", "default_description")
+                        ),
                     )
                 )
                 for goal in self.goals

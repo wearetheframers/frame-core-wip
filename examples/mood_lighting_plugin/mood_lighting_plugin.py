@@ -2,6 +2,7 @@ import logging
 from typing import Dict, Any
 from frame.src.framer.brain.plugins.base import BasePlugin
 
+
 class MoodLightingPlugin(BasePlugin):
     def __init__(self, framer=None):
         super().__init__(framer)

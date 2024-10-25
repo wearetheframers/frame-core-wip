@@ -80,7 +80,7 @@ hljs.highlightAll();
         )
 
         # Get recent memories and perceptions
-        memory_service = getattr(execution_context, &#39;memory_service&#39;, None)
+        memory_service = getattr(execution_context, &#34;memory_service&#34;, None)
         recent_memories = (
             memory_service.get_recent_memories(5) if memory_service else []
         )

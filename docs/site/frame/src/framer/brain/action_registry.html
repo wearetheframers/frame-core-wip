@@ -181,7 +181,7 @@ hljs.highlightAll();
             self.valid_actions.append(name)
             logger.debug(f&#34;Action &#39;{name}&#39; added to registry.&#34;)
 
-    def remove_action(self, name: str):
+    async def remove_action(self, name: str, plugin=None):
         &#34;&#34;&#34;
         Remove an action from the registry.
 
@@ -190,7 +190,9 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         try:
             if name in self.actions:
-                del self.actions[name]
+                action = self.actions.pop(name, None)
+                if plugin and hasattr(plugin, &#39;on_remove&#39;):
+                    await plugin.on_remove()
                 if name in self.valid_actions:
                     self.valid_actions.remove(name)
             else:
@@ -405,7 +407,7 @@ hljs.highlightAll();
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.brain.action_registry.ActionRegistry.remove_action"><code class="name flex">
-<span>def <span class="ident">remove_action</span></span>(<span>self, name: str)</span>
+<span>async def <span class="ident">remove_action</span></span>(<span>self, name: str, plugin=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Remove an action from the registry.</p>

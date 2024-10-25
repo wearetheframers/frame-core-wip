@@ -162,7 +162,7 @@ class ActionRegistry:
             self.valid_actions.append(name)
             logger.debug(f"Action '{name}' added to registry.")
 
-    def remove_action(self, name: str):
+    async def remove_action(self, name: str, plugin=None):
         """
         Remove an action from the registry.
 
@@ -171,7 +171,9 @@ class ActionRegistry:
         """
         try:
             if name in self.actions:
-                del self.actions[name]
+                action = self.actions.pop(name, None)
+                if plugin and hasattr(plugin, "on_remove"):
+                    await plugin.on_remove()
                 if name in self.valid_actions:
                     self.valid_actions.remove(name)
             else:

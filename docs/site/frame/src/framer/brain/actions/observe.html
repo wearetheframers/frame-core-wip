@@ -83,8 +83,10 @@ hljs.highlightAll();
         if insights:
             print(f&#34;Additional insights: {insights}&#34;)
 
-        insights_str = &#34;, &#34;.join(f&#34;{k}: {v}&#34; for k,v in (insights or {}).items())
-        return f&#34;Processed observation: {observation}\nAdditional insights: {insights_str}&#34;</code></pre>
+        insights_str = &#34;, &#34;.join(f&#34;{k}: {v}&#34; for k, v in (insights or {}).items())
+        return (
+            f&#34;Processed observation: {observation}\nAdditional insights: {insights_str}&#34;
+        )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

@@ -15,7 +15,9 @@ class MockPlugin(BasePlugin):
 logger = logging.getLogger(__name__)
 
 
-def load_plugins(plugins_dir: Optional[str] = None) -> Tuple[Dict[str, Any], List[str]]:
+async def load_plugins(
+    plugins_dir: Optional[str] = None,
+) -> Tuple[Dict[str, Any], List[str]]:
     """
     Load all plugins from the specified directory.
 
@@ -102,6 +104,8 @@ def load_plugins(plugins_dir: Optional[str] = None) -> Tuple[Dict[str, Any], Lis
 
                         # Add the plugin to the plugins dictionary
                         plugins[item] = plugin_instance
+                        if hasattr(plugin_instance, "on_remove"):
+                            await plugin_instance.on_remove()
                         logger.info(f"Loaded plugin: {item}")
                     else:
                         logger.info(

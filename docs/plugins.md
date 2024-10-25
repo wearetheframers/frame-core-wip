@@ -41,7 +41,7 @@ When creating a plugin, it is important to follow a specific naming and director
 
 2. **Main Plugin File**: Inside the plugin directory, there should be a main plugin file named exactly as the directory, but in snake_case format with a `.py` extension. For example, if your plugin directory is named `audio_transcription_plugin`, the main file should be `audio_transcription_plugin.py`.
 
-3. **Class Naming**: The main class within the plugin file should be named in snake_case format, derived from the directory name. For example, `audio_transcription_plugin`. Ensure the class implements the `on_remove` method for cleanup when the plugin is removed.
+3. **Class Naming**: The main class within the plugin file should be named in snake_case format, derived from the directory name. For example, `audio_transcription_plugin`. Ensure the class implements the `on_remove` method for cleanup when the plugin is removed. This method should handle any necessary cleanup or resource deallocation.
 
 4. **__init__.py File**: Each plugin directory must contain an `__init__.py` file. This file should import the main plugin class to ensure it is accessible when the plugin is loaded. For example:
    ```python

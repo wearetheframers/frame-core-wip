@@ -212,7 +212,7 @@ hljs.highlightAll();
             self.valid_actions.append(name)
             logger.debug(f&#34;Action &#39;{name}&#39; added to registry.&#34;)
 
-    def remove_action(self, name: str):
+    async def remove_action(self, name: str, plugin=None):
         &#34;&#34;&#34;
         Remove an action from the registry.
 
@@ -221,7 +221,9 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         try:
             if name in self.actions:
-                del self.actions[name]
+                action = self.actions.pop(name, None)
+                if plugin and hasattr(plugin, &#39;on_remove&#39;):
+                    await plugin.on_remove()
                 if name in self.valid_actions:
                     self.valid_actions.remove(name)
             else:
@@ -436,7 +438,7 @@ hljs.highlightAll();
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.ActionRegistry.remove_action"><code class="name flex">
-<span>def <span class="ident">remove_action</span></span>(<span>self, name: str)</span>
+<span>async def <span class="ident">remove_action</span></span>(<span>self, name: str, plugin=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Remove an action from the registry.</p>
@@ -545,6 +547,14 @@ hljs.highlightAll();
         self.ruleset.add_rule(rule)
 
     @abstractmethod
+    async def on_remove(self):
+        &#34;&#34;&#34;
+        Abstract method that is called when the plugin is removed.
+
+        This method should be implemented by all plugin subclasses to perform
+        any necessary cleanup or teardown when the plugin is removed.
+        &#34;&#34;&#34;
+        pass
     async def on_load(self):
         &#34;&#34;&#34;
         Abstract method that is called when the plugin is loaded.
@@ -594,7 +604,9 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         pass
 
-    async def execute(self, action: str, params: Dict[str, Any], execution_context: Any) -&gt; Any:
+    async def execute(
+        self, action: str, params: Dict[str, Any], execution_context: Any
+    ) -&gt; Any:
         &#34;&#34;&#34;
         Execute a plugin action.
 
@@ -744,7 +756,7 @@ Initialize the Brain with the necessary components.</p>
 <pre><code class="python">class Brain:
     &#34;&#34;&#34;
     The Brain class represents the central decision-making and cognitive processing component of the Framer.
-    
+
     Note: Plugins are lazily loaded. If a plugin does not have the necessary permissions, it will not be loaded until explicitly added with the required permissions.
 
     It is responsible for processing perceptions, making decisions, and executing actions based on those decisions.
@@ -867,9 +879,12 @@ Initialize the Brain with the necessary components.</p>
                 &#34;Memory service is not set. Memory operations will not be available.&#34;
             )
 
-    def set_framer(self, framer):
+    async def set_framer(self, framer):
         self.framer = framer
         self.action_registry.set_execution_context(self.execution_context)
+        for plugin in getattr(framer, &#39;plugins&#39;, {}).values():
+            if hasattr(plugin, &#39;on_remove&#39;):
+                await plugin.on_remove()
 
     def get_framer(self):
         return self.framer
@@ -1250,7 +1265,7 @@ Initialize the Brain with the necessary components.</p>
         parameters = decision_data.get(&#34;parameters&#34;, {})
         if not isinstance(parameters, dict):
             parameters = {}
-            
+
         # Ensure parameters is a dictionary
         if isinstance(decision_data.get(&#34;parameters&#34;), list):
             parameters = {}
@@ -1263,12 +1278,15 @@ Initialize the Brain with the necessary components.</p>
         if decision_data.get(&#34;action&#34;) == &#34;respond with memory retrieval&#34;:
             parameters = {} if isinstance(parameters, list) else parameters
             if perception and perception.data:
-                parameters.update({
-                    &#34;query&#34;: perception.data.get(&#34;text&#34;, &#34;&#34;),
-                    &#34;execution_context&#34;: self.execution_context,
-                    &#34;llm_service&#34;: self.llm_service,
-                })
+                parameters.update(
+                    {
+                        &#34;query&#34;: perception.data.get(&#34;text&#34;, &#34;&#34;),
+                        &#34;execution_context&#34;: self.execution_context,
+                        &#34;llm_service&#34;: self.llm_service,
+                    }
+                )
                 from frame.src.constants.user import DEFAULT_USER_ID
+
                 parameters[&#34;user_id&#34;] = parameters.get(&#34;user_id&#34;, DEFAULT_USER_ID)
 
         decision = Decision(
@@ -1280,9 +1298,7 @@ Initialize the Brain with the necessary components.</p>
             related_roles=related_roles,
             related_goals=related_goals,
         )
-        decision.result = decision.parameters.get(
-            &#34;response_content&#34;, None
-        )
+        decision.result = decision.parameters.get(&#34;response_content&#34;, None)
         return decision
 
     async def _get_decision_prompt(self, perception: Optional[Perception]) -&gt; str:
@@ -1697,7 +1713,7 @@ and priority.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.Brain.set_framer"><code class="name flex">
-<span>def <span class="ident">set_framer</span></span>(<span>self, framer)</span>
+<span>async def <span class="ident">set_framer</span></span>(<span>self, framer)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -2315,14 +2331,28 @@ validated to form a valid model.</p>
             )
         self.goals = list(
             {
-                (goal.description if isinstance(goal, Goal) 
-                 else goal if isinstance(goal, str)
-                 else goal.get(&#34;description&#34;, &#34;default_description&#34;)): (
+                (
+                    goal.description
+                    if isinstance(goal, Goal)
+                    else (
+                        goal
+                        if isinstance(goal, str)
+                        else goal.get(&#34;description&#34;, &#34;default_description&#34;)
+                    )
+                ): (
                     goal
                     if isinstance(goal, Goal)
                     else Goal(
-                        name=&#34;default_name&#34; if isinstance(goal, str) else goal.get(&#34;name&#34;, &#34;default_name&#34;),
-                        description=goal if isinstance(goal, str) else goal.get(&#34;description&#34;, &#34;default_description&#34;),
+                        name=(
+                            &#34;default_name&#34;
+                            if isinstance(goal, str)
+                            else goal.get(&#34;name&#34;, &#34;default_name&#34;)
+                        ),
+                        description=(
+                            goal
+                            if isinstance(goal, str)
+                            else goal.get(&#34;description&#34;, &#34;default_description&#34;)
+                        ),
                     )
                 )
                 for goal in self.goals

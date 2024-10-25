@@ -43,5 +43,7 @@ class ObserveAction(BaseAction):
         if insights:
             print(f"Additional insights: {insights}")
 
-        insights_str = ", ".join(f"{k}: {v}" for k,v in (insights or {}).items())
-        return f"Processed observation: {observation}\nAdditional insights: {insights_str}"
+        insights_str = ", ".join(f"{k}: {v}" for k, v in (insights or {}).items())
+        return (
+            f"Processed observation: {observation}\nAdditional insights: {insights_str}"
+        )
