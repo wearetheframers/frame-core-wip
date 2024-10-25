@@ -261,9 +261,11 @@ class ActionRegistry:
         action_func = action["action_func"]
         result = {}
         try:
-            _result = await action_func(
-                self.execution_context, **kwargs
-            )  # Pass execution_context
+            # Don't pass execution_context if it's already in kwargs
+            if "execution_context" in kwargs:
+                _result = await action_func(**kwargs)
+            else:
+                _result = await action_func(self.execution_context, **kwargs)
             if _result is None:
                 return {
                     "error": "Action returned None",

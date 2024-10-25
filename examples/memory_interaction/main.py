@@ -79,13 +79,15 @@ async def main():
 
     logger.info("Adding memories...")
     if framer.brain and framer.brain.memory:
-        # framer.brain.memory.store("My favorite color is blue.", user_id="user1")
-        # framer.brain.memory.store(
-        #     "I have a dentist appointment on October 20th.", user_id="user1"
-        # )
-        # framer.brain.memory.store(
-        #     "I plan to visit Hawaii for my vacation.", user_id="user1"
-        # )
+        default_user = "test"  # Define default user ID once
+        from frame.src.constants.user import DEFAULT_USER_ID
+        framer.brain.memory.store("My favorite color is blue.", user_id=DEFAULT_USER_ID)
+        framer.brain.memory.store(
+            "I have a dentist appointment on October 20th.", user_id=DEFAULT_USER_ID
+        )
+        framer.brain.memory.store(
+            "I plan to visit Hawaii for my vacation.", user_id=DEFAULT_USER_ID
+        )
         logger.info("All memories added.")
     else:
         logger.error(
@@ -111,11 +113,6 @@ async def main():
         if decision is not None:
             # Log the reasoning
             logger.info(f"Reasoning: {decision.reasoning}")
-            # Ensure parameters is a dictionary
-            if decision.action == "respond with memory retrieval" and not isinstance(
-                decision.parameters, dict
-            ):
-                decision.parameters = {}
             # Execute the decision and get the result
             result = await framer.brain.execute_decision(decision)
             # Print the result of the decision
@@ -126,10 +123,19 @@ async def main():
                     print(f"Error: {result['error']}\n")
                 elif "response" in result and result["response"] is not None:
                     print(f"Response: {result['response']}\n")
+                elif "memories" in result:
+                    memories = result.get("memories", [])
+                    if memories and isinstance(memories, list) and len(memories) > 0:
+                        memory_text = memories[0].get('text', 'No text found')
+                        print(f"Found in memory: {memory_text}\n")
+                    else:
+                        print("No relevant memories found.\n")
                 else:
-                    print(f"Unexpected result format: {result}\n")
-            else:
+                    print(f"Unexpected result format: {result}\n") 
+            elif isinstance(result, str):
                 print(f"Response: {result}\n")
+            else:
+                print(f"Raw response: {result}\n")
         else:
             logger.warning("Decision is None, perception was queued.")
 

@@ -103,13 +103,18 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         )
         if action_name == "respond with memory retrieval":
             self.logger.info("Executing 'respond with memory retrieval' action.")
-            query = parameters.get("memory_question") or parameters.get("text", "")
-            execution_context = (
-                parameters.get("execution_context", None)
-                or self.framer.execution_context
-            )
+            query = parameters.get("memory_question") or parameters.get("text", "") or parameters.get("query", "")
+            execution_context = parameters.get("execution_context") or self.framer.execution_context
+            llm_service = parameters.get("llm_service") or (execution_context.llm_service if execution_context else None)
+        
+            if not llm_service:
+                raise ValueError("LLM service is required but not provided")
+            
             return await self.mem0_search_extract_summarize(
-                query=query, execution_context=execution_context, **parameters
+                query=query,
+                execution_context=execution_context,
+                llm_service=llm_service,
+                **parameters
             )
         else:
             raise ValueError(f"Action {action_name} not found in plugin.")
@@ -151,6 +156,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         filters: Optional[Dict[str, Any]] = None,
         model_name: str = "gpt-4o-mini",
         text_response: Optional[str] = None,
+        llm_service: Optional[Any] = None,
         **kwargs: Any,
     ) -> str:
         self.logger.debug(f"mem0_search_extract_summarize called with query: '{query}'")
@@ -231,7 +237,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         if not context:
             return "No relevant information found in Mem0."
 
-        summary = await self.summarize(query, context, model_name)
+        summary = await self.summarize(query, context, model_name, llm_service)
 
         references = "\n".join(
             [f"[{i+1}] {result['id']}" for i, result in enumerate(search_results)]
@@ -239,7 +245,7 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         self.logger.info(f"Memory retrieval response: {summary}")
         return summary
 
-    async def summarize(self, query: str, context: str, model_name: str) -> str:
+    async def summarize(self, query: str, context: str, model_name: str, llm_service: Any) -> str:
         prompt = f"""
         Given the following context and query, provide a comprehensive answer:
 
@@ -251,7 +257,10 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
         Answer:
         """
 
-        response = await self.framer.llm_service.get_completion(
+        if not llm_service:
+            raise ValueError("LLM service is required but not provided")
+            
+        response = await llm_service.get_completion(
             prompt,
             model=model_name,
             max_tokens=1000,

@@ -539,16 +539,41 @@ class Brain:
             if goal.name in decision_data.get("related_goals", [])
         ]
 
+        # Ensure parameters is a dictionary
+        parameters = decision_data.get("parameters", {})
+        if not isinstance(parameters, dict):
+            parameters = {}
+            
+        # Ensure parameters is a dictionary
+        if isinstance(decision_data.get("parameters"), list):
+            parameters = {}
+        else:
+            parameters = decision_data.get("parameters", {})
+            if not isinstance(parameters, dict):
+                parameters = {}
+
+        # Ensure parameters includes the query and execution context for memory retrieval
+        if decision_data.get("action") == "respond with memory retrieval":
+            parameters = {} if isinstance(parameters, list) else parameters
+            if perception and perception.data:
+                parameters.update({
+                    "query": perception.data.get("text", ""),
+                    "execution_context": self.execution_context,
+                    "llm_service": self.llm_service,
+                })
+                from frame.src.constants.user import DEFAULT_USER_ID
+                parameters["user_id"] = parameters.get("user_id", DEFAULT_USER_ID)
+
         decision = Decision(
             action=decision_data.get("action", "respond"),
-            parameters=decision_data.get("parameters", {}),
+            parameters=parameters,
             reasoning=decision_data.get("reasoning", "No reasoning provided."),
             confidence=float(decision_data.get("confidence", 0.5)),
             priority=decision_data.get("priority", Priority.MEDIUM),
             related_roles=related_roles,
             related_goals=related_goals,
         )
-        decision.result = decision_data.get("parameters", {}).get(
+        decision.result = decision.parameters.get(
             "response_content", None
         )
         return decision
@@ -597,16 +622,27 @@ class Brain:
         - Whether immediate action, further research, or no action is most appropriate
 
         Examples of personal/memory questions (ALWAYS use 'respond with memory retrieval' for these):
-        - "What is my favorite hobby?"
-        - "When is my next meeting?"
-        - "What did I mention about my travel plans?"
+        - "What is my favorite hobby?" (contains "my" and asks about personal preference)
+        - "When is my next meeting?" (contains "my" and asks about personal schedule)
+        - "What did I mention about..." (contains "I" and refers to past conversation)
 
-        Examples of general knowledge questions (use 'respond' for these):
-        - "What is the largest ocean on Earth?"
-        - "How many planets are in the solar system?"
-        - "What is the freezing point of water in Fahrenheit?"
+        Examples of general knowledge questions (Use 'respond' for basic facts an AI would know):
+        - "What is the largest ocean on Earth?" (basic geography)
+        - "How many planets are in the solar system?" (basic science)
+        - "What is the boiling point of water?" (common knowledge)
+        - "What is the capital of France?" (basic geography)
 
-        IMPORTANT: For ANY question that seems to require personal information or memory, ALWAYS choose the 'respond with memory retrieval' action. This includes questions about appointments, preferences, past conversations, or any user-specific information.
+        Only use 'research' for complex topics requiring detailed investigation or verification, like:
+        - "What are the latest developments in quantum computing?"
+        - "How has climate change affected migration patterns in Arctic birds?"
+        - "What are the economic implications of recent policy changes?"
+
+        IMPORTANT: ONLY use 'respond with memory retrieval' for questions that:
+        1. Contain personal pronouns like "my", "I", "we"
+        2. Ask about personal preferences, schedules, or past conversations
+        3. Request information specific to the user
+
+        For general knowledge, facts, or objective information, ALWAYS use 'respond'.
 
         Priority levels and their meanings:
         from frame.src.framer.agency.priority import Priority
