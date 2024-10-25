@@ -74,23 +74,33 @@ def load_plugins(plugins_dir: Optional[str] = None) -> Tuple[Dict[str, Any], Lis
                     )
                     continue
 
-                # Initialize the plugin with its configuration
-                logger.debug(f"Initializing plugin {item} with configuration")
-                plugin_instance = plugin_class(config)
+                # Check if the plugin is a default plugin or included in permissions
+                permission_name = f"with_{item}"
+                if item in os.getenv("DEFAULT_PLUGINS", "").split(",") or permission_name in os.getenv("PERMISSIONS", "").split(","):
+                    # Check if the plugin is a default plugin or included in permissions
+                    permission_name = f"with_{item}"
+                    if item in os.getenv("DEFAULT_PLUGINS", "").split(",") or permission_name in os.getenv("PERMISSIONS", "").split(","):
+                        # Initialize the plugin with its configuration
+                        logger.debug(f"Initializing plugin {item} with configuration")
+                        plugin_instance = plugin_class(config)
 
-                # Check for conflicting actions
-                plugin_actions = plugin_instance.get_actions()
-                for action_name, action_func in plugin_actions.items():
-                    if action_name in loaded_actions:
-                        conflict_warnings.append(
-                            f"Action '{action_name}' in plugin '{item}' conflicts with an existing action. Skipping."
-                        )
+                        # Check for conflicting actions
+                        plugin_actions = plugin_instance.get_actions()
+                        for action_name, action_func in plugin_actions.items():
+                            if action_name in loaded_actions:
+                                conflict_warnings.append(
+                                    f"Action '{action_name}' in plugin '{item}' conflicts with an existing action. Skipping."
+                                )
+                            else:
+                                loaded_actions[action_name] = action_func
+
+                        # Add the plugin to the plugins dictionary
+                        plugins[item] = plugin_instance
+                        logger.info(f"Loaded plugin: {item}")
                     else:
-                        loaded_actions[action_name] = action_func
-
-                # Add the plugin to the plugins dictionary
-                plugins[item] = plugin_instance
-                logger.info(f"Loaded plugin: {item}")
+                        logger.info(f"Plugin {item} not loaded due to missing permission or not being a default plugin.")
+                else:
+                    logger.info(f"Plugin {item} not loaded due to missing permission or not being a default plugin.")
             except (ImportError, AttributeError) as e:
                 logger.error(f"Failed to load plugin {item}: {str(e)}", exc_info=True)
 

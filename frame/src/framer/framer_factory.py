@@ -1,3 +1,4 @@
+import os
 from typing import Optional, Dict, Any, Union, List
 from frame.src.framer.framer import Framer
 
@@ -70,6 +71,7 @@ class FramerFactory:
         self.config = config
         self.llm_service = llm_service
         self.plugins = plugins
+        self.permissions = config.permissions or []
 
     async def create_framer(
         self,
@@ -153,12 +155,17 @@ class FramerFactory:
             if hasattr(observer, "on_framer_opened"):
                 observer.on_framer_opened(framer)
 
-        # Call on_load for each plugin
-        for plugin_name, plugin_instance in self.plugins.items():
-            if hasattr(plugin_instance, "on_load"):
-                self.logger.info(f"Loading plugin: {plugin_name}")
-                await plugin_instance.on_load(framer)
-                self.logger.info(f"Plugin {plugin_name} loaded successfully.")
+        # Load plugins only if they are default or included in permissions
+        for plugin_name, plugin_instance in (plugins or {}).items():
+            permission_name = f"with_{plugin_name}"
+            if plugin_name in os.getenv("DEFAULT_PLUGINS", "").split(",") or permission_name in self.config.permissions:
+                self.plugins[plugin_name] = plugin_instance
+                if hasattr(plugin_instance, "on_load"):
+                    self.logger.info(f"Loading plugin: {plugin_name}")
+                    await plugin_instance.on_load(framer)
+                    self.logger.info(f"Plugin {plugin_name} loaded successfully.")
+            else:
+                self.logger.info(f"Plugin {plugin_name} not loaded due to missing permission or not being a default plugin.")
 
         framer.plugin_loading_complete = True
 

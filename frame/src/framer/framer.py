@@ -160,7 +160,7 @@ class Framer:
         self.workflow_manager = workflow_manager
         self.roles = roles or []
         self.goals = goals or []
-        self.plugins = plugins or {}
+        self.plugins = {}
         self.plugin_loading_complete = False
         self.plugin_loading_complete = False
         self._streamed_response = {"status": "pending", "result": ""}
