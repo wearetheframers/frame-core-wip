@@ -39,6 +39,8 @@ logger = logging.getLogger(__name__)
 class Brain:
     """
     The Brain class represents the central decision-making and cognitive processing component of the Framer.
+    
+    Note: Plugins are lazily loaded. If a plugin does not have the necessary permissions, it will not be loaded until explicitly added with the required permissions.
 
     It is responsible for processing perceptions, making decisions, and executing actions based on those decisions.
     The Brain integrates various cognitive functions, including perception processing, decision-making,

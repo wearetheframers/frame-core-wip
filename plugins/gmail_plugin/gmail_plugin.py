@@ -1,8 +1,7 @@
 import os
 import json
-import base64
 import logging
-from typing import Dict, Any
+from typing import Any
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from frame.src.framer.brain.plugins.base import BasePlugin
@@ -20,10 +19,13 @@ class GmailPlugin(BasePlugin):
         self.register_actions(framer.brain.action_registry)
 
     def load_config(self):
-        config_path = os.path.join(os.path.dirname(__file__), "config.json")
+        curr_dir = os.path.dirname(os.path.abspath(__file__))
+        config_path = os.path.join(curr_dir, "config.json")
         with open(config_path, "r") as config_file:
             config = json.load(config_file)
             self.api_key = config.get("GMAIL_API_KEY")
+            self.client_id = config.get("GMAIL_CLIENT_ID", os.getenv("GMAIL_CLIENT_ID"))
+            self.client_secret = config.get("GMAIL_CLIENT_SECRET", os.getenv("GMAIL_CLIENT_SECRET"))
 
     def register_actions(self, action_registry):
         self.add_action(

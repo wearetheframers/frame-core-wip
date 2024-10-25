@@ -26,7 +26,12 @@ Frame features a powerful and flexible plugin system inspired by game mods, allo
   - [[#default-plugins]]
   - [[#permissions]]
   - [[#creating-new-actions]]
+- [[#execution-context]]
 - [[#example-weather-forecast-plugin]]
+
+## Execution Context
+
+When using plugin actions, an `execution_context` argument is required. This context provides necessary information for the plugin to execute its actions properly. Ensure to define and pass this context when invoking plugin actions.
 
 ## Plugin Naming and Structure
 

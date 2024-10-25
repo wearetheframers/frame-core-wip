@@ -4,7 +4,7 @@ import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from frame import Frame, FramerConfig
-from gmail_plugin import GmailPlugin
+from plugins.gmail_plugin.gmail_plugin import GmailPlugin
 
 async def main():
     # Initialize Frame
@@ -15,14 +15,21 @@ async def main():
     framer = await frame.create_framer(config)
 
     # Register the GmailPlugin
-    gmail_plugin = GmailPlugin(framer)
+    # Define the path to the token file
+    token_file_path = os.path.join(os.path.dirname(__file__), "token.json")
+
+    # Initialize the GmailPlugin with the token file path
+    gmail_plugin = GmailPlugin(framer, token_file_path=token_file_path)
+    await gmail_plugin.on_load(framer)
     framer.plugins["gmail_plugin"] = gmail_plugin
 
     # Read emails
-    response = await framer.use_plugin_action("gmail_plugin", "read_emails", {})
+    execution_context = {}  # Define the execution context as needed
+    response = await framer.use_plugin_action("gmail_plugin", "read_emails", {"execution_context": execution_context})
     print(f"Email reading response: {response}")
 
     await framer.close()
 
 if __name__ == "__main__":
     asyncio.run(main())
+

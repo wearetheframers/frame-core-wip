@@ -131,7 +131,15 @@ class BasePlugin(ABC):
         """
         pass
 
-    async def execute(self, action: str, params: Dict[str, Any]) -> Any:
+    async def execute(self, action: str, params: Dict[str, Any], execution_context: Any) -> Any:
+        """
+        Execute a plugin action.
+
+        :param action: The name of the action to execute.
+        :param params: A dictionary of parameters for the action.
+        :param execution_context: The context in which the action is executed.
+        :return: The result of the action.
+        """
         """
         Abstract method to execute a plugin-specific action.
 

@@ -602,7 +602,15 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         pass
 
-    async def execute(self, action: str, params: Dict[str, Any]) -&gt; Any:
+    async def execute(self, action: str, params: Dict[str, Any], execution_context: Any) -&gt; Any:
+        &#34;&#34;&#34;
+        Execute a plugin action.
+
+        :param action: The name of the action to execute.
+        :param params: A dictionary of parameters for the action.
+        :param execution_context: The context in which the action is executed.
+        :return: The result of the action.
+        &#34;&#34;&#34;
         &#34;&#34;&#34;
         Abstract method to execute a plugin-specific action.
 
@@ -653,6 +661,7 @@ hljs.highlightAll();
 </code></dt>
 <dd>
 <div class="desc"><p>The Brain class represents the central decision-making and cognitive processing component of the Framer.</p>
+<p>Note: Plugins are lazily loaded. If a plugin does not have the necessary permissions, it will not be loaded until explicitly added with the required permissions.</p>
 <p>It is responsible for processing perceptions, making decisions, and executing actions based on those decisions.
 The Brain integrates various cognitive functions, including perception processing, decision-making,
 memory management, and action execution.</p>
@@ -743,6 +752,8 @@ Initialize the Brain with the necessary components.</p>
 <pre><code class="python">class Brain:
     &#34;&#34;&#34;
     The Brain class represents the central decision-making and cognitive processing component of the Framer.
+    
+    Note: Plugins are lazily loaded. If a plugin does not have the necessary permissions, it will not be loaded until explicitly added with the required permissions.
 
     It is responsible for processing perceptions, making decisions, and executing actions based on those decisions.
     The Brain integrates various cognitive functions, including perception processing, decision-making,
