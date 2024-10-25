@@ -148,15 +148,15 @@ validated to form a valid model.</p>
     )
     status: DecisionStatus = Field(
         default=DecisionStatus.NOT_EXECUTED,
-        description=&#39;The execution status of the decision&#39;
+        description=&#34;The execution status of the decision&#34;,
     )
     status: DecisionStatus = Field(
         default=DecisionStatus.NOT_EXECUTED,
-        description=&#39;The execution status of the decision&#39;
+        description=&#34;The execution status of the decision&#34;,
     )
     status: DecisionStatus = Field(
         default=DecisionStatus.NOT_EXECUTED,
-        description=&#34;The execution status of the decision&#34;
+        description=&#34;The execution status of the decision&#34;,
     )
     task_status: TaskStatus = Field(
         default=TaskStatus.PENDING, description=&#34;Status of the associated task&#34;
@@ -472,10 +472,10 @@ errors defaults to 'strict'.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DecisionStatus(str, Enum):
-    EXECUTED = &#39;executed&#39;
-    PENDING_APPROVAL = &#39;pending_approval&#39;
-    DEFERRED = &#39;deferred&#39;
-    NOT_EXECUTED = &#39;not_executed&#39;</code></pre>
+    EXECUTED = &#34;executed&#34;
+    PENDING_APPROVAL = &#34;pending_approval&#34;
+    DEFERRED = &#34;deferred&#34;
+    NOT_EXECUTED = &#34;not_executed&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

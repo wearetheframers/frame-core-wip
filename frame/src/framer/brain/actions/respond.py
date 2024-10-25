@@ -40,10 +40,9 @@ class RespondAction(BaseAction):
         )
 
         # Get recent memories and perceptions
+        memory_service = getattr(execution_context, 'memory_service', None)
         recent_memories = (
-            execution_context.memory_service.get_recent_memories(5)
-            if execution_context.memory_service
-            else []
+            memory_service.get_recent_memories(5) if memory_service else []
         )
         recent_perceptions = execution_context.get_state("recent_perceptions", [])[-5:]
 

@@ -272,13 +272,11 @@ class ActionRegistry:
                     "fallback_response": "The action didn't produce a response. Please try again.",
                 }
             elif isinstance(_result, dict):
-                result["response"] = _result
-            elif isinstance(_result, str):
-                result["response"] = _result
-            elif isinstance(_result, list):
-                result["response"] = _result
+                result = _result if "response" in _result else {"response": _result}
+            elif isinstance(_result, (str, list)):
+                result = {"response": _result}
             else:
-                result["response"] = _result
+                result = {"response": str(_result)}
             # Get reasoning or default empty string
             if _result is None:
                 return {

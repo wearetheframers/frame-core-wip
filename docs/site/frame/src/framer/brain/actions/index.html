@@ -108,7 +108,9 @@ hljs.highlightAll();
             &#34;balanced&#34;: BalancedStrategy(),
         }
 
-    async def execute(self, execution_context: ExecutionContext, context: Dict[str, Any]) -&gt; Dict[str, Any]:
+    async def execute(
+        self, execution_context: ExecutionContext, context: Dict[str, Any]
+    ) -&gt; Dict[str, Any]:
         # Determine the best strategy based on the context
         context = self.extrapolate_context(context)
         strategy_name = self.choose_strategy(context)
@@ -602,7 +604,8 @@ hljs.highlightAll();
         if insights:
             print(f&#34;Additional insights: {insights}&#34;)
 
-        return f&#34;Processed observation: {observation}, Insights: {insights}&#34;</code></pre>
+        insights_str = &#34;, &#34;.join(f&#34;{k}: {v}&#34; for k,v in (insights or {}).items())
+        return f&#34;Processed observation: {observation}\nAdditional insights: {insights_str}&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -777,10 +780,9 @@ hljs.highlightAll();
         )
 
         # Get recent memories and perceptions
+        memory_service = getattr(execution_context, &#39;memory_service&#39;, None)
         recent_memories = (
-            execution_context.memory_service.get_recent_memories(5)
-            if execution_context.memory_service
-            else []
+            memory_service.get_recent_memories(5) if memory_service else []
         )
         recent_perceptions = execution_context.get_state(&#34;recent_perceptions&#34;, [])[-5:]
 

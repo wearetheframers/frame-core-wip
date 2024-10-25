@@ -275,9 +275,13 @@ hljs.highlightAll();
         if self.execution_context is None:
             raise ValueError(&#34;Execution context is not set&#34;)
         if name == &#34;get_weather&#34;:
-            response = await action[&#34;action_func&#34;](self.execution_context, city=kwargs.get(&#34;city&#34;))
+            response = await action[&#34;action_func&#34;](
+                self.execution_context, city=kwargs.get(&#34;city&#34;)
+            )
         else:
-            response = await action[&#34;action_func&#34;](self.execution_context, *args, **kwargs)
+            response = await action[&#34;action_func&#34;](
+                self.execution_context, *args, **kwargs
+            )
         role = response if isinstance(response, dict) else response
         if callback:
             callback(response, *callback_args)
@@ -315,22 +319,22 @@ hljs.highlightAll();
         action_func = action[&#34;action_func&#34;]
         result = {}
         try:
-            _result = await action_func(
-                self.execution_context, **kwargs
-            )  # Pass execution_context
+            # Don&#39;t pass execution_context if it&#39;s already in kwargs
+            if &#34;execution_context&#34; in kwargs:
+                _result = await action_func(**kwargs)
+            else:
+                _result = await action_func(self.execution_context, **kwargs)
             if _result is None:
                 return {
                     &#34;error&#34;: &#34;Action returned None&#34;,
                     &#34;fallback_response&#34;: &#34;The action didn&#39;t produce a response. Please try again.&#34;,
                 }
             elif isinstance(_result, dict):
-                result[&#34;response&#34;] = _result
-            elif isinstance(_result, str):
-                result[&#34;response&#34;] = _result
-            elif isinstance(_result, list):
-                result[&#34;response&#34;] = _result
+                result = _result if &#34;response&#34; in _result else {&#34;response&#34;: _result}
+            elif isinstance(_result, (str, list)):
+                result = {&#34;response&#34;: _result}
             else:
-                result[&#34;response&#34;] = _result
+                result = {&#34;response&#34;: str(_result)}
             # Get reasoning or default empty string
             if _result is None:
                 return {
@@ -485,6 +489,7 @@ hljs.highlightAll();
         self.logger = logging.getLogger(self.__class__.__name__)
         self.execution_context = getattr(framer, &#34;execution_context&#34;, None)
         self.ruleset = Ruleset()
+
     &#34;&#34;&#34;
     Base class for all Frame plugins.
 
@@ -510,7 +515,11 @@ hljs.highlightAll();
             &#34;Plugin warning: Framer does not have an execution_context attribute. Possible unexpected behaviors may occur.&#34;
         )
 
-    def add_rule(self, condition: Callable[[Dict[str, Any]], bool], action: Callable[[Dict[str, Any]], None]):
+    def add_rule(
+        self,
+        condition: Callable[[Dict[str, Any]], bool],
+        action: Callable[[Dict[str, Any]], None],
+    ):
         &#34;&#34;&#34;
         Add a rule to the plugin.
 
@@ -1202,16 +1211,41 @@ Initialize the Brain with the necessary components.</p>
             if goal.name in decision_data.get(&#34;related_goals&#34;, [])
         ]
 
+        # Ensure parameters is a dictionary
+        parameters = decision_data.get(&#34;parameters&#34;, {})
+        if not isinstance(parameters, dict):
+            parameters = {}
+            
+        # Ensure parameters is a dictionary
+        if isinstance(decision_data.get(&#34;parameters&#34;), list):
+            parameters = {}
+        else:
+            parameters = decision_data.get(&#34;parameters&#34;, {})
+            if not isinstance(parameters, dict):
+                parameters = {}
+
+        # Ensure parameters includes the query and execution context for memory retrieval
+        if decision_data.get(&#34;action&#34;) == &#34;respond with memory retrieval&#34;:
+            parameters = {} if isinstance(parameters, list) else parameters
+            if perception and perception.data:
+                parameters.update({
+                    &#34;query&#34;: perception.data.get(&#34;text&#34;, &#34;&#34;),
+                    &#34;execution_context&#34;: self.execution_context,
+                    &#34;llm_service&#34;: self.llm_service,
+                })
+                from frame.src.constants.user import DEFAULT_USER_ID
+                parameters[&#34;user_id&#34;] = parameters.get(&#34;user_id&#34;, DEFAULT_USER_ID)
+
         decision = Decision(
             action=decision_data.get(&#34;action&#34;, &#34;respond&#34;),
-            parameters=decision_data.get(&#34;parameters&#34;, {}),
+            parameters=parameters,
             reasoning=decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;),
             confidence=float(decision_data.get(&#34;confidence&#34;, 0.5)),
             priority=decision_data.get(&#34;priority&#34;, Priority.MEDIUM),
             related_roles=related_roles,
             related_goals=related_goals,
         )
-        decision.result = decision_data.get(&#34;parameters&#34;, {}).get(
+        decision.result = decision.parameters.get(
             &#34;response_content&#34;, None
         )
         return decision
@@ -1260,16 +1294,27 @@ Initialize the Brain with the necessary components.</p>
         - Whether immediate action, further research, or no action is most appropriate
 
         Examples of personal/memory questions (ALWAYS use &#39;respond with memory retrieval&#39; for these):
-        - &#34;What is my favorite hobby?&#34;
-        - &#34;When is my next meeting?&#34;
-        - &#34;What did I mention about my travel plans?&#34;
+        - &#34;What is my favorite hobby?&#34; (contains &#34;my&#34; and asks about personal preference)
+        - &#34;When is my next meeting?&#34; (contains &#34;my&#34; and asks about personal schedule)
+        - &#34;What did I mention about...&#34; (contains &#34;I&#34; and refers to past conversation)
 
-        Examples of general knowledge questions (use &#39;respond&#39; for these):
-        - &#34;What is the largest ocean on Earth?&#34;
-        - &#34;How many planets are in the solar system?&#34;
-        - &#34;What is the freezing point of water in Fahrenheit?&#34;
+        Examples of general knowledge questions (Use &#39;respond&#39; for basic facts an AI would know):
+        - &#34;What is the largest ocean on Earth?&#34; (basic geography)
+        - &#34;How many planets are in the solar system?&#34; (basic science)
+        - &#34;What is the boiling point of water?&#34; (common knowledge)
+        - &#34;What is the capital of France?&#34; (basic geography)
 
-        IMPORTANT: For ANY question that seems to require personal information or memory, ALWAYS choose the &#39;respond with memory retrieval&#39; action. This includes questions about appointments, preferences, past conversations, or any user-specific information.
+        Only use &#39;research&#39; for complex topics requiring detailed investigation or verification, like:
+        - &#34;What are the latest developments in quantum computing?&#34;
+        - &#34;How has climate change affected migration patterns in Arctic birds?&#34;
+        - &#34;What are the economic implications of recent policy changes?&#34;
+
+        IMPORTANT: ONLY use &#39;respond with memory retrieval&#39; for questions that:
+        1. Contain personal pronouns like &#34;my&#34;, &#34;I&#34;, &#34;we&#34;
+        2. Ask about personal preferences, schedules, or past conversations
+        3. Request information specific to the user
+
+        For general knowledge, facts, or objective information, ALWAYS use &#39;respond&#39;.
 
         Priority levels and their meanings:
         from frame.src.framer.agency.priority import Priority
@@ -1358,7 +1403,9 @@ Initialize the Brain with the necessary components.</p>
         # Return the decision object with the result and status
         return decision
 
-    def _validate_parameters(self, action_name: str, parameters: Dict[str, Any]) -&gt; bool:
+    def _validate_parameters(
+        self, action_name: str, parameters: Dict[str, Any]
+    ) -&gt; bool:
         &#34;&#34;&#34;
         Validates that the given parameters match the expected format for the action.
 
@@ -1757,15 +1804,15 @@ validated to form a valid model.</p>
     )
     status: DecisionStatus = Field(
         default=DecisionStatus.NOT_EXECUTED,
-        description=&#39;The execution status of the decision&#39;
+        description=&#34;The execution status of the decision&#34;,
     )
     status: DecisionStatus = Field(
         default=DecisionStatus.NOT_EXECUTED,
-        description=&#39;The execution status of the decision&#39;
+        description=&#34;The execution status of the decision&#34;,
     )
     status: DecisionStatus = Field(
         default=DecisionStatus.NOT_EXECUTED,
-        description=&#34;The execution status of the decision&#34;
+        description=&#34;The execution status of the decision&#34;,
     )
     task_status: TaskStatus = Field(
         default=TaskStatus.PENDING, description=&#34;Status of the associated task&#34;

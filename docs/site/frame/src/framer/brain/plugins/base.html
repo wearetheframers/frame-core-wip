@@ -51,6 +51,7 @@ hljs.highlightAll();
         self.logger = logging.getLogger(self.__class__.__name__)
         self.execution_context = getattr(framer, &#34;execution_context&#34;, None)
         self.ruleset = Ruleset()
+
     &#34;&#34;&#34;
     Base class for all Frame plugins.
 
@@ -76,7 +77,11 @@ hljs.highlightAll();
             &#34;Plugin warning: Framer does not have an execution_context attribute. Possible unexpected behaviors may occur.&#34;
         )
 
-    def add_rule(self, condition: Callable[[Dict[str, Any]], bool], action: Callable[[Dict[str, Any]], None]):
+    def add_rule(
+        self,
+        condition: Callable[[Dict[str, Any]], bool],
+        action: Callable[[Dict[str, Any]], None],
+    ):
         &#34;&#34;&#34;
         Add a rule to the plugin.
 

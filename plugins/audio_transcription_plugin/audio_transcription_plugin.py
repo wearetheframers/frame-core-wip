@@ -283,7 +283,6 @@ class AudioTranscriptionPlugin(BasePlugin):
 
     class ContinuousRecordAndTranscribeAction(BaseAction):
         def __init__(self, plugin):
-            print("WE FLUFFIN")
             super().__init__(
                 "continuous_record_and_transcribe",
                 "Continuously record and transcribe audio",

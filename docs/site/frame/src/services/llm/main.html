@@ -247,9 +247,12 @@ the specified or default model.</p>
 
             end_time = time.time()
             execution_time = end_time - start_time
-            tokens_used = len(full_prompt.split()) + (
-                len(result.split()) if isinstance(result, str) else 0
-            ) if result is not None else 0
+            tokens_used = (
+                len(full_prompt.split())
+                + (len(result.split()) if isinstance(result, str) else 0)
+                if result is not None
+                else 0
+            )
 
             self.metrics.track_usage(model, tokens_used)
 

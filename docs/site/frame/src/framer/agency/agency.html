@@ -162,12 +162,16 @@ and multi-faceted behavior.</p>
             if isinstance(goal, Goal):
                 self.goals.append(goal)
             else:
-                self.goals.append(Goal(
-                    name=goal.get(&#34;name&#34;, goal.get(&#34;description&#34;, &#34;Default Goal Name&#34;)),
-                    description=goal.get(&#34;description&#34;, &#34;&#34;),
-                    priority=goal.get(&#34;priority&#34;, 5),
-                    status=goal.get(&#34;status&#34;, GoalStatus.ACTIVE),
-                ))
+                self.goals.append(
+                    Goal(
+                        name=goal.get(
+                            &#34;name&#34;, goal.get(&#34;description&#34;, &#34;Default Goal Name&#34;)
+                        ),
+                        description=goal.get(&#34;description&#34;, &#34;&#34;),
+                        priority=goal.get(&#34;priority&#34;, 5),
+                        status=goal.get(&#34;status&#34;, GoalStatus.ACTIVE),
+                    )
+                )
 
     def get_roles(self) -&gt; List[Role]:
         return self.roles

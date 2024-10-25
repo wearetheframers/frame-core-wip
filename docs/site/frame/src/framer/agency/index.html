@@ -189,12 +189,16 @@ and multi-faceted behavior.</p>
             if isinstance(goal, Goal):
                 self.goals.append(goal)
             else:
-                self.goals.append(Goal(
-                    name=goal.get(&#34;name&#34;, goal.get(&#34;description&#34;, &#34;Default Goal Name&#34;)),
-                    description=goal.get(&#34;description&#34;, &#34;&#34;),
-                    priority=goal.get(&#34;priority&#34;, 5),
-                    status=goal.get(&#34;status&#34;, GoalStatus.ACTIVE),
-                ))
+                self.goals.append(
+                    Goal(
+                        name=goal.get(
+                            &#34;name&#34;, goal.get(&#34;description&#34;, &#34;Default Goal Name&#34;)
+                        ),
+                        description=goal.get(&#34;description&#34;, &#34;&#34;),
+                        priority=goal.get(&#34;priority&#34;, 5),
+                        status=goal.get(&#34;status&#34;, GoalStatus.ACTIVE),
+                    )
+                )
 
     def get_roles(self) -&gt; List[Role]:
         return self.roles
@@ -917,10 +921,53 @@ and multi-faceted behavior.</p>
 </dd>
 <dt id="frame.src.framer.agency.Goal"><code class="flex name class">
 <span>class <span class="ident">Goal</span></span>
-<span>(</span><span>name: str, description: str, priority: int = 5, status: <a title="frame.src.framer.agency.goals.GoalStatus" href="goals.html#frame.src.framer.agency.goals.GoalStatus">GoalStatus</a> = GoalStatus.ACTIVE)</span>
+<span>(</span><span>**data: Any)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of the class variables defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The synthesized <code>__init__</code> [<code>Signature</code>][inspect.Signature] of the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The core schema of the model.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a [<code>RootModel</code>][pydantic.root_model.RootModel].</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The <code>pydantic-core</code> <code>SchemaSerializer</code> used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The <code>pydantic-core</code> <code>SchemaValidator</code> used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>A dictionary containing extra values, if [<code>extra</code>][pydantic.config.ConfigDict.extra]
+is set to <code>'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>The names of fields explicitly set during instantiation.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -932,10 +979,60 @@ and multi-faceted behavior.</p>
     status: GoalStatus = GoalStatus.ACTIVE
 
     def get(self, key: str, default: Any = None) -&gt; Any:
-        return getattr(self, key, default)</code></pre>
+        return getattr(self, key, default)
+
+
+    def to_dict(self) -&gt; Dict[str, Any]:
+        return {
+            &#34;name&#34;: self.name,
+            &#34;description&#34;: self.description,
+            &#34;priority&#34;: self.priority,
+            &#34;status&#34;: self.status.value,
+        }</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.agency.Goal.description"><code class="name">var <span class="ident">description</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Goal.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Goal.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Goal.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Goal.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Goal.priority"><code class="name">var <span class="ident">priority</span> : <a title="frame.src.framer.agency.priority.Priority" href="priority.html#frame.src.framer.agency.priority.Priority">Priority</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Goal.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.framer.agency.goals.GoalStatus" href="goals.html#frame.src.framer.agency.goals.GoalStatus">GoalStatus</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
+<dt id="frame.src.framer.agency.Goal.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>self, key: str, default: Any = None) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.framer.agency.Goal.to_dict"><code class="name flex">
 <span>def <span class="ident">to_dict</span></span>(<span>self) ‑> Dict[str, Any]</span>
 </code></dt>
@@ -1159,10 +1256,53 @@ attributes &ndash; see the documentation for details.</p></div>
 </dd>
 <dt id="frame.src.framer.agency.Role"><code class="flex name class">
 <span>class <span class="ident">Role</span></span>
-<span>(</span><span>id: str, name: str, description: str, permissions: list, priority: int, status: <a title="frame.src.framer.agency.roles.RoleStatus" href="roles.html#frame.src.framer.agency.roles.RoleStatus">RoleStatus</a>)</span>
+<span>(</span><span>**data: Any)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.9/concepts/models/">https://docs.pydantic.dev/2.9/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of the class variables defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The synthesized <code>__init__</code> [<code>Signature</code>][inspect.Signature] of the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The core schema of the model.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a [<code>RootModel</code>][pydantic.root_model.RootModel].</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The <code>pydantic-core</code> <code>SchemaSerializer</code> used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The <code>pydantic-core</code> <code>SchemaValidator</code> used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>A dictionary containing extra values, if [<code>extra</code>][pydantic.config.ConfigDict.extra]
+is set to <code>'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>The names of fields explicitly set during instantiation.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1192,8 +1332,66 @@ attributes &ndash; see the documentation for details.</p></div>
     def get(self, key: str, default: Any = None) -&gt; Any:
         return getattr(self, key, default)</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="frame.src.framer.agency.Role.description"><code class="name">var <span class="ident">description</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.permissions"><code class="name">var <span class="ident">permissions</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.priority"><code class="name">var <span class="ident">priority</span> : <a title="frame.src.framer.agency.priority.Priority" href="priority.html#frame.src.framer.agency.priority.Priority">Priority</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.framer.agency.Role.status"><code class="name">var <span class="ident">status</span> : <a title="frame.src.framer.agency.roles.RoleStatus" href="roles.html#frame.src.framer.agency.roles.RoleStatus">RoleStatus</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="frame.src.framer.agency.Role.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>data: Dict[str, Any]) ‑> <a title="frame.src.framer.agency.roles.Role" href="roles.html#frame.src.framer.agency.roles.Role">Role</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
+<dt id="frame.src.framer.agency.Role.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>self, key: str, default: Any = None) ‑> Any</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.framer.agency.Role.to_dict"><code class="name flex">
 <span>def <span class="ident">to_dict</span></span>(<span>self) ‑> Dict[str, Any]</span>
 </code></dt>
@@ -1272,15 +1470,15 @@ attributes &ndash; see the documentation for details.</p></div>
 </ul>
 <h3>Class variables</h3>
 <dl>
+<dt id="frame.src.framer.agency.RoleStatus.ABANDONED"><code class="name">var <span class="ident">ABANDONED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="frame.src.framer.agency.RoleStatus.ACTIVE"><code class="name">var <span class="ident">ACTIVE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 <dt id="frame.src.framer.agency.RoleStatus.INACTIVE"><code class="name">var <span class="ident">INACTIVE</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="frame.src.framer.agency.RoleStatus.SUSPENDED"><code class="name">var <span class="ident">SUSPENDED</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1512,6 +1710,14 @@ attributes &ndash; see the documentation for details.</p></div>
 <li>
 <h4><code><a title="frame.src.framer.agency.Goal" href="#frame.src.framer.agency.Goal">Goal</a></code></h4>
 <ul class="">
+<li><code><a title="frame.src.framer.agency.Goal.description" href="#frame.src.framer.agency.Goal.description">description</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.get" href="#frame.src.framer.agency.Goal.get">get</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.model_computed_fields" href="#frame.src.framer.agency.Goal.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.model_config" href="#frame.src.framer.agency.Goal.model_config">model_config</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.model_fields" href="#frame.src.framer.agency.Goal.model_fields">model_fields</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.name" href="#frame.src.framer.agency.Goal.name">name</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.priority" href="#frame.src.framer.agency.Goal.priority">priority</a></code></li>
+<li><code><a title="frame.src.framer.agency.Goal.status" href="#frame.src.framer.agency.Goal.status">status</a></code></li>
 <li><code><a title="frame.src.framer.agency.Goal.to_dict" href="#frame.src.framer.agency.Goal.to_dict">to_dict</a></code></li>
 </ul>
 </li>
@@ -1544,15 +1750,26 @@ attributes &ndash; see the documentation for details.</p></div>
 <li>
 <h4><code><a title="frame.src.framer.agency.Role" href="#frame.src.framer.agency.Role">Role</a></code></h4>
 <ul class="">
+<li><code><a title="frame.src.framer.agency.Role.description" href="#frame.src.framer.agency.Role.description">description</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.from_dict" href="#frame.src.framer.agency.Role.from_dict">from_dict</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.get" href="#frame.src.framer.agency.Role.get">get</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.id" href="#frame.src.framer.agency.Role.id">id</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.model_computed_fields" href="#frame.src.framer.agency.Role.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.model_config" href="#frame.src.framer.agency.Role.model_config">model_config</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.model_fields" href="#frame.src.framer.agency.Role.model_fields">model_fields</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.name" href="#frame.src.framer.agency.Role.name">name</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.permissions" href="#frame.src.framer.agency.Role.permissions">permissions</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.priority" href="#frame.src.framer.agency.Role.priority">priority</a></code></li>
+<li><code><a title="frame.src.framer.agency.Role.status" href="#frame.src.framer.agency.Role.status">status</a></code></li>
 <li><code><a title="frame.src.framer.agency.Role.to_dict" href="#frame.src.framer.agency.Role.to_dict">to_dict</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="frame.src.framer.agency.RoleStatus" href="#frame.src.framer.agency.RoleStatus">RoleStatus</a></code></h4>
 <ul class="">
+<li><code><a title="frame.src.framer.agency.RoleStatus.ABANDONED" href="#frame.src.framer.agency.RoleStatus.ABANDONED">ABANDONED</a></code></li>
 <li><code><a title="frame.src.framer.agency.RoleStatus.ACTIVE" href="#frame.src.framer.agency.RoleStatus.ACTIVE">ACTIVE</a></code></li>
 <li><code><a title="frame.src.framer.agency.RoleStatus.INACTIVE" href="#frame.src.framer.agency.RoleStatus.INACTIVE">INACTIVE</a></code></li>
-<li><code><a title="frame.src.framer.agency.RoleStatus.SUSPENDED" href="#frame.src.framer.agency.RoleStatus.SUSPENDED">SUSPENDED</a></code></li>
 </ul>
 </li>
 <li>

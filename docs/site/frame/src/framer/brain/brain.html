@@ -631,16 +631,41 @@ Initialize the Brain with the necessary components.</p>
             if goal.name in decision_data.get(&#34;related_goals&#34;, [])
         ]
 
+        # Ensure parameters is a dictionary
+        parameters = decision_data.get(&#34;parameters&#34;, {})
+        if not isinstance(parameters, dict):
+            parameters = {}
+            
+        # Ensure parameters is a dictionary
+        if isinstance(decision_data.get(&#34;parameters&#34;), list):
+            parameters = {}
+        else:
+            parameters = decision_data.get(&#34;parameters&#34;, {})
+            if not isinstance(parameters, dict):
+                parameters = {}
+
+        # Ensure parameters includes the query and execution context for memory retrieval
+        if decision_data.get(&#34;action&#34;) == &#34;respond with memory retrieval&#34;:
+            parameters = {} if isinstance(parameters, list) else parameters
+            if perception and perception.data:
+                parameters.update({
+                    &#34;query&#34;: perception.data.get(&#34;text&#34;, &#34;&#34;),
+                    &#34;execution_context&#34;: self.execution_context,
+                    &#34;llm_service&#34;: self.llm_service,
+                })
+                from frame.src.constants.user import DEFAULT_USER_ID
+                parameters[&#34;user_id&#34;] = parameters.get(&#34;user_id&#34;, DEFAULT_USER_ID)
+
         decision = Decision(
             action=decision_data.get(&#34;action&#34;, &#34;respond&#34;),
-            parameters=decision_data.get(&#34;parameters&#34;, {}),
+            parameters=parameters,
             reasoning=decision_data.get(&#34;reasoning&#34;, &#34;No reasoning provided.&#34;),
             confidence=float(decision_data.get(&#34;confidence&#34;, 0.5)),
             priority=decision_data.get(&#34;priority&#34;, Priority.MEDIUM),
             related_roles=related_roles,
             related_goals=related_goals,
         )
-        decision.result = decision_data.get(&#34;parameters&#34;, {}).get(
+        decision.result = decision.parameters.get(
             &#34;response_content&#34;, None
         )
         return decision
@@ -689,16 +714,27 @@ Initialize the Brain with the necessary components.</p>
         - Whether immediate action, further research, or no action is most appropriate
 
         Examples of personal/memory questions (ALWAYS use &#39;respond with memory retrieval&#39; for these):
-        - &#34;What is my favorite hobby?&#34;
-        - &#34;When is my next meeting?&#34;
-        - &#34;What did I mention about my travel plans?&#34;
+        - &#34;What is my favorite hobby?&#34; (contains &#34;my&#34; and asks about personal preference)
+        - &#34;When is my next meeting?&#34; (contains &#34;my&#34; and asks about personal schedule)
+        - &#34;What did I mention about...&#34; (contains &#34;I&#34; and refers to past conversation)
 
-        Examples of general knowledge questions (use &#39;respond&#39; for these):
-        - &#34;What is the largest ocean on Earth?&#34;
-        - &#34;How many planets are in the solar system?&#34;
-        - &#34;What is the freezing point of water in Fahrenheit?&#34;
+        Examples of general knowledge questions (Use &#39;respond&#39; for basic facts an AI would know):
+        - &#34;What is the largest ocean on Earth?&#34; (basic geography)
+        - &#34;How many planets are in the solar system?&#34; (basic science)
+        - &#34;What is the boiling point of water?&#34; (common knowledge)
+        - &#34;What is the capital of France?&#34; (basic geography)
 
-        IMPORTANT: For ANY question that seems to require personal information or memory, ALWAYS choose the &#39;respond with memory retrieval&#39; action. This includes questions about appointments, preferences, past conversations, or any user-specific information.
+        Only use &#39;research&#39; for complex topics requiring detailed investigation or verification, like:
+        - &#34;What are the latest developments in quantum computing?&#34;
+        - &#34;How has climate change affected migration patterns in Arctic birds?&#34;
+        - &#34;What are the economic implications of recent policy changes?&#34;
+
+        IMPORTANT: ONLY use &#39;respond with memory retrieval&#39; for questions that:
+        1. Contain personal pronouns like &#34;my&#34;, &#34;I&#34;, &#34;we&#34;
+        2. Ask about personal preferences, schedules, or past conversations
+        3. Request information specific to the user
+
+        For general knowledge, facts, or objective information, ALWAYS use &#39;respond&#39;.
 
         Priority levels and their meanings:
         from frame.src.framer.agency.priority import Priority
@@ -787,7 +823,9 @@ Initialize the Brain with the necessary components.</p>
         # Return the decision object with the result and status
         return decision
 
-    def _validate_parameters(self, action_name: str, parameters: Dict[str, Any]) -&gt; bool:
+    def _validate_parameters(
+        self, action_name: str, parameters: Dict[str, Any]
+    ) -&gt; bool:
         &#34;&#34;&#34;
         Validates that the given parameters match the expected format for the action.
 

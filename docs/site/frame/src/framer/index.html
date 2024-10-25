@@ -222,7 +222,9 @@ hljs.highlightAll();
                 (
                     role.name
                     if isinstance(role, Role)
-                    else getattr(role, &#34;get&#34;, lambda k, d=None: d)(&#34;name&#34;, &#34;default_name&#34;)
+                    else getattr(role, &#34;get&#34;, lambda k, d=None: d)(
+                        &#34;name&#34;, &#34;default_name&#34;
+                    )
                 ): (
                     role
                     if isinstance(role, Role)
@@ -240,8 +242,15 @@ hljs.highlightAll();
         )
         self.goals = list(
             {
-                goal.description if isinstance(goal, Goal) else goal[&#34;description&#34;]: (
-                    goal if isinstance(goal, Goal) else Goal(name=goal.get(&#34;name&#34;, &#34;default_name&#34;), description=goal.get(&#34;description&#34;, &#34;default_description&#34;))
+                (goal.description if isinstance(goal, Goal) 
+                 else goal if isinstance(goal, str)
+                 else goal.get(&#34;description&#34;, &#34;default_description&#34;)): (
+                    goal
+                    if isinstance(goal, Goal)
+                    else Goal(
+                        name=&#34;default_name&#34; if isinstance(goal, str) else goal.get(&#34;name&#34;, &#34;default_name&#34;),
+                        description=goal if isinstance(goal, str) else goal.get(&#34;description&#34;, &#34;default_description&#34;),
+                    )
                 )
                 for goal in self.goals
             }.values()
@@ -271,6 +280,7 @@ hljs.highlightAll();
         &#34;&#34;&#34;
         logger.info(f&#34;Loading plugins for Framer with config: {self.config}&#34;)
         loaded_plugins = set()
+
         def load_plugin(plugin_name, plugin_instance):
             if (
                 plugin_name in loaded_plugins
@@ -295,11 +305,13 @@ hljs.highlightAll();
                             priority=5,  # Default priority, adjust as needed
                         )
                     else:
-                        logger.info(f&#34;Action {action_name} already registered. Skipping.&#34;)
+                        logger.info(
+                            f&#34;Action {action_name} already registered. Skipping.&#34;
+                        )
                 loaded_plugins.add(plugin_name)
                 loaded_plugins.add(plugin_instance)
 
-        if &#39;all&#39; in self.plugins:
+        if &#34;all&#34; in self.plugins:
             for plugin_name, plugin_instance in self.plugins.items():
                 load_plugin(plugin_name, plugin_instance)
         else:
@@ -465,7 +477,9 @@ hljs.highlightAll();
         config.roles = self.roles
         config.goals = self.goals
         config_dict = config.to_dict()
-        config_dict[&#34;execution_context&#34;] = execution_context_to_json(self.execution_context)
+        config_dict[&#34;execution_context&#34;] = execution_context_to_json(
+            self.execution_context
+        )
         with open(file_path, &#34;w&#34;) as f:
             json.dump(config_dict, f, indent=4)
 
@@ -497,7 +511,9 @@ hljs.highlightAll();
         config = parse_json_config(file_path)
         config_data = parse_json_config(file_path)
         execution_context_data = config_data.pop(&#34;execution_context&#34;, {})
-        execution_context = execution_context_from_json(execution_context_data, ExecutionContext)
+        execution_context = execution_context_from_json(
+            execution_context_data, ExecutionContext
+        )
 
         return cls(
             execution_context=execution_context,
@@ -621,13 +637,13 @@ hljs.highlightAll();
             executed_decision = await self.brain.execute_decision(decision)
 
             # Check the status of the executed decision
-            if executed_decision.status == &#39;pending_approval&#39;:
+            if executed_decision.status == &#34;pending_approval&#34;:
                 # Notify user or system for approval
                 pass
-            elif executed_decision.status == &#39;deferred&#39;:
+            elif executed_decision.status == &#34;deferred&#34;:
                 # Schedule for later execution
                 pass
-            elif executed_decision.status == &#39;executed&#39;:
+            elif executed_decision.status == &#34;executed&#34;:
                 # Proceed as normal
                 pass
 
@@ -1550,14 +1566,19 @@ which can be used for graceful shutdown or pausing of the Framer's operations.</
         # Load plugins only if they are default or included in permissions
         for plugin_name, plugin_instance in (plugins or {}).items():
             permission_name = f&#34;with_{plugin_name}&#34;
-            if plugin_name in os.getenv(&#34;DEFAULT_PLUGINS&#34;, &#34;&#34;).split(&#34;,&#34;) or permission_name in self.config.permissions:
+            if (
+                plugin_name in os.getenv(&#34;DEFAULT_PLUGINS&#34;, &#34;&#34;).split(&#34;,&#34;)
+                or permission_name in self.config.permissions
+            ):
                 self.plugins[plugin_name] = plugin_instance
                 if hasattr(plugin_instance, &#34;on_load&#34;):
                     self.logger.info(f&#34;Loading plugin: {plugin_name}&#34;)
                     await plugin_instance.on_load(framer)
                     self.logger.info(f&#34;Plugin {plugin_name} loaded successfully.&#34;)
             else:
-                self.logger.info(f&#34;Plugin {plugin_name} not loaded due to missing permission or not being a default plugin.&#34;)
+                self.logger.info(
+                    f&#34;Plugin {plugin_name} not loaded due to missing permission or not being a default plugin.&#34;
+                )
 
         framer.plugin_loading_complete = True
 

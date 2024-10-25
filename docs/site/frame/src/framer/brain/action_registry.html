@@ -236,9 +236,13 @@ hljs.highlightAll();
         if self.execution_context is None:
             raise ValueError(&#34;Execution context is not set&#34;)
         if name == &#34;get_weather&#34;:
-            response = await action[&#34;action_func&#34;](self.execution_context, city=kwargs.get(&#34;city&#34;))
+            response = await action[&#34;action_func&#34;](
+                self.execution_context, city=kwargs.get(&#34;city&#34;)
+            )
         else:
-            response = await action[&#34;action_func&#34;](self.execution_context, *args, **kwargs)
+            response = await action[&#34;action_func&#34;](
+                self.execution_context, *args, **kwargs
+            )
         role = response if isinstance(response, dict) else response
         if callback:
             callback(response, *callback_args)
@@ -276,22 +280,22 @@ hljs.highlightAll();
         action_func = action[&#34;action_func&#34;]
         result = {}
         try:
-            _result = await action_func(
-                self.execution_context, **kwargs
-            )  # Pass execution_context
+            # Don&#39;t pass execution_context if it&#39;s already in kwargs
+            if &#34;execution_context&#34; in kwargs:
+                _result = await action_func(**kwargs)
+            else:
+                _result = await action_func(self.execution_context, **kwargs)
             if _result is None:
                 return {
                     &#34;error&#34;: &#34;Action returned None&#34;,
                     &#34;fallback_response&#34;: &#34;The action didn&#39;t produce a response. Please try again.&#34;,
                 }
             elif isinstance(_result, dict):
-                result[&#34;response&#34;] = _result
-            elif isinstance(_result, str):
-                result[&#34;response&#34;] = _result
-            elif isinstance(_result, list):
-                result[&#34;response&#34;] = _result
+                result = _result if &#34;response&#34; in _result else {&#34;response&#34;: _result}
+            elif isinstance(_result, (str, list)):
+                result = {&#34;response&#34;: _result}
             else:
-                result[&#34;response&#34;] = _result
+                result = {&#34;response&#34;: str(_result)}
             # Get reasoning or default empty string
             if _result is None:
                 return {
