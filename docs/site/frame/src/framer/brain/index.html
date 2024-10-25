@@ -230,7 +230,7 @@ hljs.highlightAll();
         try:
             if name in self.actions:
                 action = self.actions.pop(name, None)
-                if plugin and hasattr(plugin, &#39;on_remove&#39;):
+                if plugin and hasattr(plugin, &#34;on_remove&#34;):
                     await plugin.on_remove()
                 if name in self.valid_actions:
                     self.valid_actions.remove(name)
@@ -563,6 +563,7 @@ hljs.highlightAll();
         any necessary cleanup or teardown when the plugin is removed.
         &#34;&#34;&#34;
         pass
+
     async def on_load(self):
         &#34;&#34;&#34;
         Abstract method that is called when the plugin is loaded.
@@ -890,8 +891,8 @@ Initialize the Brain with the necessary components.</p>
     async def set_framer(self, framer):
         self.framer = framer
         self.action_registry.set_execution_context(self.execution_context)
-        for plugin in getattr(framer, &#39;plugins&#39;, {}).values():
-            if hasattr(plugin, &#39;on_remove&#39;):
+        for plugin in getattr(framer, &#34;plugins&#34;, {}).values():
+            if hasattr(plugin, &#34;on_remove&#34;):
                 await plugin.on_remove()
 
     def get_framer(self):

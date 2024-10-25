@@ -258,8 +258,8 @@ Initialize the Brain with the necessary components.</p>
     async def set_framer(self, framer):
         self.framer = framer
         self.action_registry.set_execution_context(self.execution_context)
-        for plugin in getattr(framer, &#39;plugins&#39;, {}).values():
-            if hasattr(plugin, &#39;on_remove&#39;):
+        for plugin in getattr(framer, &#34;plugins&#34;, {}).values():
+            if hasattr(plugin, &#34;on_remove&#34;):
                 await plugin.on_remove()
 
     def get_framer(self):

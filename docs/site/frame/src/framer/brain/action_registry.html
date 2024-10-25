@@ -191,7 +191,7 @@ hljs.highlightAll();
         try:
             if name in self.actions:
                 action = self.actions.pop(name, None)
-                if plugin and hasattr(plugin, &#39;on_remove&#39;):
+                if plugin and hasattr(plugin, &#34;on_remove&#34;):
                     await plugin.on_remove()
                 if name in self.valid_actions:
                     self.valid_actions.remove(name)
