@@ -251,11 +251,13 @@ This project is dual-licensed under the GNU Affero General Public License versio
 
 To run all tests, navigate to the root directory of the project and execute:
 
+```bash
 pytest
 ```
 
 *Note*: Testing can take a little while as we have tests for rate limiting / retry logic, so you can exclude those (they are in the `llm_adapter` tests) if it's slow while developing others:
 
+```bash
 pytest -k "not (llm_service or llm_adapter)"
 ```
 
@@ -265,6 +267,7 @@ The project uses MkDocs and can also use pdoc3 for documentation. The MkDocs con
 
 To build and serve MkDocs documentation, run:
 
+```bash
 mkdocs serve --config-file ./mkdocs.yml
 ```
 
@@ -272,6 +275,7 @@ You must run the `roam_links_converter.py` script before to convert linked refer
 
 To serve both MkDocs and pdoc3 simultaneously, use the following command:
 
+```bash
 python scripts\serve_docs.py
 ```
 
