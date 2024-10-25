@@ -86,6 +86,9 @@ class WeatherPlugin(BasePlugin):
         self.logger.info(f"Retrieving weather for city: {city}")
         return f"The weather in {city} is sunny with a high of 75°F."
 
+    async def on_remove(self):
+        self.logger.info("WeatherPlugin removed")
+
     async def execute(self, action: str, params: Dict[str, Any]) -> Any:
         if action == "get_weather":
             city = params.get("city", "unknown location")

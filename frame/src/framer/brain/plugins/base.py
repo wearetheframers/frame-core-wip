@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
 import logging
+import os
+import json
 from typing import Any, Dict, Callable
 from frame.src.framer.agency.priority import Priority
 from frame.src.framer.brain.rules.ruleset import Rule, Ruleset
-
-
-from frame.src.framer.brain.rules.ruleset import Ruleset
 
 
 class BasePlugin(ABC):
@@ -14,6 +13,33 @@ class BasePlugin(ABC):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.execution_context = getattr(framer, "execution_context", None)
         self.ruleset = Ruleset()
+
+    def load_config(self, plugin_dir: str) -> Dict[str, Any]:
+        """
+        Load configuration for the plugin, prioritizing environment variables,
+        then .env file, and finally config.json in the plugin directory.
+
+        Args:
+            plugin_dir (str): The directory of the plugin.
+
+        Returns:
+            Dict[str, Any]: The loaded configuration.
+        """
+        config = {}
+
+        # Load from config.json
+        config_file = os.path.join(plugin_dir, "config.json")
+        if os.path.exists(config_file):
+            with open(config_file, "r") as f:
+                config = json.load(f)
+
+        # Override with environment variables
+        for key in config.keys():
+            env_value = os.getenv(key.upper())
+            if env_value is not None:
+                config[key] = env_value
+
+        return config
 
     """
     Base class for all Frame plugins.
@@ -95,6 +121,16 @@ class BasePlugin(ABC):
             )
 
     @abstractmethod
+    @abstractmethod
+    async def on_remove(self):
+        """
+        Abstract method that is called when the plugin is removed.
+
+        This method should be implemented by all plugin subclasses to perform
+        any necessary cleanup or teardown when the plugin is removed.
+        """
+        pass
+
     async def execute(self, action: str, params: Dict[str, Any]) -> Any:
         """
         Abstract method to execute a plugin-specific action.

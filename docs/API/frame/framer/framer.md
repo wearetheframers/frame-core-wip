@@ -59,9 +59,13 @@ Processes a perception and makes a decision based on current goals, their status
 
 Processes a text prompt as a new perception.
 
-### `perform_task`
+### `add_plugins`
 
-Executes a specific task.
+Adds multiple plugins to the Framer.
+
+### `remove_plugins`
+
+Removes multiple plugins from the Framer.
 
 ### `generate_tasks_from_perception`
 

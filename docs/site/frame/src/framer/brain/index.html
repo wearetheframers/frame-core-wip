@@ -485,6 +485,33 @@ hljs.highlightAll();
         self.execution_context = getattr(framer, &#34;execution_context&#34;, None)
         self.ruleset = Ruleset()
 
+    def load_config(self, plugin_dir: str) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Load configuration for the plugin, prioritizing environment variables,
+        then .env file, and finally config.json in the plugin directory.
+
+        Args:
+            plugin_dir (str): The directory of the plugin.
+
+        Returns:
+            Dict[str, Any]: The loaded configuration.
+        &#34;&#34;&#34;
+        config = {}
+
+        # Load from config.json
+        config_file = os.path.join(plugin_dir, &#34;config.json&#34;)
+        if os.path.exists(config_file):
+            with open(config_file, &#34;r&#34;) as f:
+                config = json.load(f)
+
+        # Override with environment variables
+        for key in config.keys():
+            env_value = os.getenv(key.upper())
+            if env_value is not None:
+                config[key] = env_value
+
+        return config
+
     &#34;&#34;&#34;
     Base class for all Frame plugins.
 
@@ -565,6 +592,16 @@ hljs.highlightAll();
             )
 
     @abstractmethod
+    @abstractmethod
+    async def on_remove(self):
+        &#34;&#34;&#34;
+        Abstract method that is called when the plugin is removed.
+
+        This method should be implemented by all plugin subclasses to perform
+        any necessary cleanup or teardown when the plugin is removed.
+        &#34;&#34;&#34;
+        pass
+
     async def execute(self, action: str, params: Dict[str, Any]) -&gt; Any:
         &#34;&#34;&#34;
         Abstract method to execute a plugin-specific action.

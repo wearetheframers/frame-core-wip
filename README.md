@@ -26,6 +26,12 @@ Frame is a multi-modal, multi-agent cognitive framework designed to support full
 - Layered memory understanding entity relationships with Mem0
 - Supports global and multi-user memory storage
 - Extensible architecture with plugin engine allowing for limitless modifications
+
+By default, the plugins directory is located in the same directory as the `frame` package, inside a folder called `./plugins`. This can be changed by specifying a different directory when initializing the Frame instance. Note that there are no default permissions, so you must explicitly specify permissions for each plugin:
+
+```python
+frame = Frame(plugins_dir="/path/to/custom/plugins")
+```
 - Integration with popular AI APIs (OpenAI GPT, Mistral, etc.) as well as local model support
 - Streaming text generation support 
 - Flexible behavior and decision-making mechanics that can be based off of emotions and memories

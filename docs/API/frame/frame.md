@@ -22,6 +22,12 @@ Frame includes several default plugins and services that are automatically avail
 - Support for a plugin marketplace, allowing for premium and community plugins
 - Flexible plugin system inspired by game mods, enabling unlimited expansions and customizations
 
+By default, the plugins directory is located in the same directory as the `frame` package, inside a folder called `./plugins`. This can be changed by specifying a different directory when initializing the Frame instance:
+
+```python
+frame = Frame(plugins_dir="/path/to/custom/plugins")
+```
+
 ### Attributes
 
 - `openai_api_key` (Optional[str]): API key for OpenAI services. Default is None.

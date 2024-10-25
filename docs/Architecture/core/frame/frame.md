@@ -16,6 +16,12 @@ The Frame component serves as the main interface for creating and managing Frame
 - Managing LLM services and model interactions, including support for local models.
 - Creating Framed groups for multi-agent coordination and collaborative problem-solving.
 - Supporting an extensive plugin system for extending functionality, including a marketplace for premium and community plugins.
+
+By default, the plugins directory is located in the same directory as the `frame` package, inside a folder called `./plugins`. This can be changed by specifying a different directory when initializing the Frame instance:
+
+```python
+frame = Frame(plugins_dir="/path/to/custom/plugins")
+```
 - Handling multi-modal perceptions and integrating them into the decision-making process.
 - Managing layered memory systems for improved context understanding and entity relationships.
 

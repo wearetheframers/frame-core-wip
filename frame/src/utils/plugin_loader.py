@@ -77,7 +77,7 @@ def load_plugins(plugins_dir: Optional[str] = None) -> Tuple[Dict[str, Any], Lis
                     continue
 
                 # Check if the plugin is a default plugin or included in permissions
-                permission_name = f"with_{item}"
+                permission_name = f"with_{item.lower()}"
                 if item in os.getenv("DEFAULT_PLUGINS", "").split(
                     ","
                 ) or permission_name in os.getenv("PERMISSIONS", "").split(","):

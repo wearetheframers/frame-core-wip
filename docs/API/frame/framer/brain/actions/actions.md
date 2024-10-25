@@ -13,7 +13,7 @@ The decision-making process takes into account:
 1. The type and content of the perception (which can be highly diverse)
 2. The Framer's current roles and goals
 3. The priority of each available action
-4. The Framer's permissions (which determine which plugins and actions it can use)
+4. The Framer's permissions (which determine which plugins and actions it can use, as there are no default permissions)
 
 When an action is well-described and registered in the ActionRegistry, the Framer can make informed decisions about when and how to use that action based on the current context and its internal reasoning process. The priority of an action plays a crucial role in this decision-making, as higher priority actions are more likely to be chosen when multiple actions are applicable.
 

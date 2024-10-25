@@ -36,14 +36,14 @@ When creating a plugin, it is important to follow a specific naming and director
 
 2. **Main Plugin File**: Inside the plugin directory, there should be a main plugin file named exactly as the directory, but in snake_case format with a `.py` extension. For example, if your plugin directory is named `audio_transcription_plugin`, the main file should be `audio_transcription_plugin.py`.
 
-3. **Class Naming**: The main class within the plugin file should be named in CamelCase format, derived from the directory name. For example, `AudioTranscriptionPlugin`.
+3. **Class Naming**: The main class within the plugin file should be named in snake_case format, derived from the directory name. For example, `audio_transcription_plugin`. Ensure the class implements the `on_remove` method for cleanup when the plugin is removed.
 
 4. **__init__.py File**: Each plugin directory must contain an `__init__.py` file. This file should import the main plugin class to ensure it is accessible when the plugin is loaded. For example:
    ```python
    from .audio_transcription_plugin import AudioTranscriptionPlugin
    ```
 
-5. **Plugin Base Class**: All plugins must inherit from the `BasePlugin` class to ensure they implement the necessary interface for integration with the Frame system.
+5. **Plugin Base Class**: All plugins must inherit from the `base_plugin` class to ensure they implement the necessary interface for integration with the Frame system.
 
 By adhering to this structure, plugins can be easily discovered and loaded by the Frame system, ensuring a seamless integration process.
 
@@ -66,6 +66,12 @@ By adhering to this structure, plugins can be easily discovered and loaded by th
 
 ## Plugin System and Permissions Overview
 
+By default, the plugins directory is located in the same directory as the `frame` package, inside a folder called `./plugins`. This can be changed by specifying a different directory when initializing the Frame instance. Note that there are no default permissions, so you must explicitly specify permissions for each plugin:
+
+```python
+frame = Frame(plugins_dir="/path/to/custom/plugins")
+```
+
 Frame's plugin system is designed to be flexible and extensible, allowing developers to easily add new functionality to their Framer instances. This overview will cover the key aspects of the plugin system, including the PluginBase class, plugin creation, configuration, loading, usage, and the new permissions system.
 
 ### Permissions System
@@ -76,15 +82,15 @@ Frame now uses a permissions system to control which plugins and services a Fram
 
 There are three default permissions that correspond to core services:
 
-- `withMemory`: Enables access to the Memory service
-- `withEQ`: Enables access to the Emotional Intelligence (EQ) service
-- `withSharedContext`: Enables access to the Shared Context service
+- `with_memory`: Enables access to the Memory service
+- `with_eq`: Enables access to the Emotional Intelligence (EQ) service
+- `with_shared_context`: Enables access to the Shared Context service
 
 #### Custom Plugin Permissions
 
 For custom plugins, the permission name follows the format `with<PluginName>`. For example:
 
-- `withSearchExtractSummarizePlugin`: Enables access to the Search Extract Summarize plugin
+- `with_search_extract_summarize_plugin`: Enables access to the Search Extract Summarize plugin
 
 #### Setting Permissions
 
@@ -94,7 +100,7 @@ You can set permissions when creating a Framer:
 config = FramerConfig(
     name="Example Framer",
     default_model="gpt-4o-mini",
-    permissions=["withMemory", "withEQ", "withSearchExtractSummarizePlugin"]
+    permissions=["with_memory", "with_eq", "with_search_extract_summarize_plugin"]
 )
 framer = await frame.create_framer(config)
 ```
@@ -270,7 +276,7 @@ Frame comes with a set of default actions that are available to all Framers. Act
 
 By default, Framers have **no** access to default or installed plugins unless they are specified.
 
-- **with_memory**: Allows access to memory services for storing and retrieving information. While Framer has access to memory by default, if you want it to respond with RAG-like features and automatically determine when to use memory retrieval versus responding without looking into any memories, you need to ensure the `with_mem0_search_extract_summarize` permission is enabled.
+- **with_memory**: Allows access to memory services for storing and retrieving information. To enable RAG-like features and automatic memory retrieval, ensure the `with_mem0_search_extract_summarize` permission is enabled.
 - **with_eq**: Enables emotional intelligence features for more nuanced interactions.
 - **with_shared_context**: Provides access to shared context services for collaboration.
 

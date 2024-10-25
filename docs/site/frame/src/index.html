@@ -477,6 +477,33 @@ hljs.highlightAll();
         self.execution_context = getattr(framer, &#34;execution_context&#34;, None)
         self.ruleset = Ruleset()
 
+    def load_config(self, plugin_dir: str) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;
+        Load configuration for the plugin, prioritizing environment variables,
+        then .env file, and finally config.json in the plugin directory.
+
+        Args:
+            plugin_dir (str): The directory of the plugin.
+
+        Returns:
+            Dict[str, Any]: The loaded configuration.
+        &#34;&#34;&#34;
+        config = {}
+
+        # Load from config.json
+        config_file = os.path.join(plugin_dir, &#34;config.json&#34;)
+        if os.path.exists(config_file):
+            with open(config_file, &#34;r&#34;) as f:
+                config = json.load(f)
+
+        # Override with environment variables
+        for key in config.keys():
+            env_value = os.getenv(key.upper())
+            if env_value is not None:
+                config[key] = env_value
+
+        return config
+
     &#34;&#34;&#34;
     Base class for all Frame plugins.
 
@@ -557,6 +584,16 @@ hljs.highlightAll();
             )
 
     @abstractmethod
+    @abstractmethod
+    async def on_remove(self):
+        &#34;&#34;&#34;
+        Abstract method that is called when the plugin is removed.
+
+        This method should be implemented by all plugin subclasses to perform
+        any necessary cleanup or teardown when the plugin is removed.
+        &#34;&#34;&#34;
+        pass
+
     async def execute(self, action: str, params: Dict[str, Any]) -&gt; Any:
         &#34;&#34;&#34;
         Abstract method to execute a plugin-specific action.
@@ -2178,11 +2215,7 @@ validated to form a valid model.</p>
         self.eq_service = eq_service
         self.plugin_loading_progress = plugin_loading_progress
         self.config = config
-        self.permissions = config.permissions or [
-            &#34;with_memory&#34;,
-            # &#34;with_mem0_search_extract_summarize_plugin&#34;,  # Do not allow RAG responses by default
-            # &#34;with_shared_context&#34;, # Do not allow shared context by default
-        ]
+        self.permissions = config.permissions or []
         self.llm_service = llm_service
 
         self.execution_context = execution_context or ExecutionContext(
@@ -2194,8 +2227,6 @@ validated to form a valid model.</p>
         self.execution_context.set_goals(goals)
 
         # Initialize services and plugins based on permissions
-        if &#34;with_memory&#34; in self.permissions:
-            self.permissions.append(&#34;with_mem0_search_extract_summarize_plugin&#34;)
 
         if &#34;with_memory&#34; in self.permissions:
             self.memory_service = memory_service or MemoryService(
@@ -2426,16 +2457,25 @@ validated to form a valid model.</p>
         if hasattr(plugin_instance, &#34;on_load&#34;):
             asyncio.create_task(plugin_instance.on_load(self))
 
-    async def remove_plugin(self, plugin_name: str):
+    async def add_plugins(self, plugins: Dict[str, Any]):
         &#34;&#34;&#34;
-        Remove a plugin from the Framer.
+        Add multiple plugins to the Framer.
 
         Args:
-            plugin_name (str): The name of the plugin to remove.
+            plugins (Dict[str, Any]): A dictionary of plugin names and instances to add.
         &#34;&#34;&#34;
-        plugin_instance = self.plugins.pop(plugin_name, None)
-        if plugin_instance and hasattr(plugin_instance, &#34;on_remove&#34;):
-            asyncio.create_task(plugin_instance.on_remove())
+        for plugin_name, plugin_instance in plugins.items():
+            self.add_plugin(plugin_name, plugin_instance)
+
+    async def remove_plugins(self, plugin_names: List[str]):
+        &#34;&#34;&#34;
+        Remove multiple plugins from the Framer.
+
+        Args:
+            plugin_names (List[str]): A list of plugin names to remove.
+        &#34;&#34;&#34;
+        for plugin_name in plugin_names:
+            await self.remove_plugin(plugin_name)
 
     async def process_queued_perceptions(self):
         &#34;&#34;&#34;
@@ -2939,6 +2979,17 @@ ensuring continuity and consistency across different sessions or environments.</
 <dd>The plugin instance to add.</dd>
 </dl></div>
 </dd>
+<dt id="frame.src.Framer.add_plugins"><code class="name flex">
+<span>async def <span class="ident">add_plugins</span></span>(<span>self, plugins: Dict[str, Any])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add multiple plugins to the Framer.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>plugins</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
+<dd>A dictionary of plugin names and instances to add.</dd>
+</dl></div>
+</dd>
 <dt id="frame.src.Framer.close"><code class="name flex">
 <span>async def <span class="ident">close</span></span>(<span>self) ‑> None</span>
 </code></dt>
@@ -3087,15 +3138,15 @@ systems, facilitating interoperability and reuse.</p>
 <dd>The observer function to remove.</dd>
 </dl></div>
 </dd>
-<dt id="frame.src.Framer.remove_plugin"><code class="name flex">
-<span>async def <span class="ident">remove_plugin</span></span>(<span>self, plugin_name: str)</span>
+<dt id="frame.src.Framer.remove_plugins"><code class="name flex">
+<span>async def <span class="ident">remove_plugins</span></span>(<span>self, plugin_names: List[str])</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Remove a plugin from the Framer.</p>
+<div class="desc"><p>Remove multiple plugins from the Framer.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>plugin_name</code></strong> :&ensp;<code>str</code></dt>
-<dd>The name of the plugin to remove.</dd>
+<dt><strong><code>plugin_names</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>A list of plugin names to remove.</dd>
 </dl></div>
 </dd>
 <dt id="frame.src.Framer.sense"><code class="name flex">
@@ -4084,6 +4135,7 @@ and the Brain's decision-making processes.</p></div>
 <li><code><a title="frame.src.Framer.act" href="#frame.src.Framer.act">act</a></code></li>
 <li><code><a title="frame.src.Framer.add_observer" href="#frame.src.Framer.add_observer">add_observer</a></code></li>
 <li><code><a title="frame.src.Framer.add_plugin" href="#frame.src.Framer.add_plugin">add_plugin</a></code></li>
+<li><code><a title="frame.src.Framer.add_plugins" href="#frame.src.Framer.add_plugins">add_plugins</a></code></li>
 <li><code><a title="frame.src.Framer.close" href="#frame.src.Framer.close">close</a></code></li>
 <li><code><a title="frame.src.Framer.create" href="#frame.src.Framer.create">create</a></code></li>
 <li><code><a title="frame.src.Framer.export_to_file" href="#frame.src.Framer.export_to_file">export_to_file</a></code></li>
@@ -4100,7 +4152,7 @@ and the Brain's decision-making processes.</p></div>
 <li><code><a title="frame.src.Framer.process_queued_perceptions" href="#frame.src.Framer.process_queued_perceptions">process_queued_perceptions</a></code></li>
 <li><code><a title="frame.src.Framer.prompt" href="#frame.src.Framer.prompt">prompt</a></code></li>
 <li><code><a title="frame.src.Framer.remove_observer" href="#frame.src.Framer.remove_observer">remove_observer</a></code></li>
-<li><code><a title="frame.src.Framer.remove_plugin" href="#frame.src.Framer.remove_plugin">remove_plugin</a></code></li>
+<li><code><a title="frame.src.Framer.remove_plugins" href="#frame.src.Framer.remove_plugins">remove_plugins</a></code></li>
 <li><code><a title="frame.src.Framer.sense" href="#frame.src.Framer.sense">sense</a></code></li>
 <li><code><a title="frame.src.Framer.use_plugin_action" href="#frame.src.Framer.use_plugin_action">use_plugin_action</a></code></li>
 </ul>

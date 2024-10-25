@@ -19,7 +19,7 @@ The ActionRegistry component, now part of the Brain, is responsible for managing
 
 The ActionRegistry now uses an ExecutionContext, which provides:
 
-- Consistent access to services (LLM, memory, EQ) across all actions.
+- Consistent access to services (LLM, memory, EQ) across all actions, based on granted permissions.
 - Improved modularity and testability.
 - Simplified action implementation by providing necessary resources.
 

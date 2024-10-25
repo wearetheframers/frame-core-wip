@@ -123,11 +123,7 @@ class Framer:
         self.eq_service = eq_service
         self.plugin_loading_progress = plugin_loading_progress
         self.config = config
-        self.permissions = config.permissions or [
-            "with_memory",
-            # "with_mem0_search_extract_summarize_plugin",  # Do not allow RAG responses by default
-            # "with_shared_context", # Do not allow shared context by default
-        ]
+        self.permissions = config.permissions or []
         self.llm_service = llm_service
 
         self.execution_context = execution_context or ExecutionContext(
@@ -139,8 +135,6 @@ class Framer:
         self.execution_context.set_goals(goals)
 
         # Initialize services and plugins based on permissions
-        if "with_memory" in self.permissions:
-            self.permissions.append("with_mem0_search_extract_summarize_plugin")
 
         if "with_memory" in self.permissions:
             self.memory_service = memory_service or MemoryService(
@@ -371,16 +365,25 @@ class Framer:
         if hasattr(plugin_instance, "on_load"):
             asyncio.create_task(plugin_instance.on_load(self))
 
-    async def remove_plugin(self, plugin_name: str):
+    async def add_plugins(self, plugins: Dict[str, Any]):
         """
-        Remove a plugin from the Framer.
+        Add multiple plugins to the Framer.
 
         Args:
-            plugin_name (str): The name of the plugin to remove.
+            plugins (Dict[str, Any]): A dictionary of plugin names and instances to add.
         """
-        plugin_instance = self.plugins.pop(plugin_name, None)
-        if plugin_instance and hasattr(plugin_instance, "on_remove"):
-            asyncio.create_task(plugin_instance.on_remove())
+        for plugin_name, plugin_instance in plugins.items():
+            self.add_plugin(plugin_name, plugin_instance)
+
+    async def remove_plugins(self, plugin_names: List[str]):
+        """
+        Remove multiple plugins from the Framer.
+
+        Args:
+            plugin_names (List[str]): A list of plugin names to remove.
+        """
+        for plugin_name in plugin_names:
+            await self.remove_plugin(plugin_name)
 
     async def process_queued_perceptions(self):
         """
