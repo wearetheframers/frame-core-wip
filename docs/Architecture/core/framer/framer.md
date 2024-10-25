@@ -26,7 +26,7 @@ Framers include several default plugins and services that are automatically avai
 
 - **Services**: `memory`, `eq`, and `shared_context` are special plugins called services. They function like plugins but do not require explicit permissions to be accessed. They are always available to Framers, enhancing their capabilities by providing essential functionalities without the need for additional permissions.
 
-- **Default Plugin**: The `Mem0SearchExtractSummarizePlugin` is included as a default plugin. It provides a response mechanism that requires memory retrieval, functioning as a Retrieval-Augmented Generation (RAG) mechanism. By default, all Framers inherit this action, enabling them to search, extract, and summarize information effectively.
+- **Default Plugin**: The `Mem0SearchExtractSummarizePlugin` is included as a default plugin when the `with_memory` permission is granted. It provides intelligent memory retrieval, automatically determining when to use memory-based responses versus direct knowledge responses based on query analysis. The plugin recognizes personal queries (containing "my", "I", "we") and user-specific information requests, using memory retrieval only when appropriate.
 
 - **Perception Processing**: Framers can sense and process various types of incoming data (perceptions) such as text, images, and sounds, provided the appropriate plugins and inputs are available.
 - **Decision Making**: Based on incoming perceptions, roles, goals, available plugins, and permissions, Framers make decisions on what actions to take.

@@ -19,36 +19,7 @@
 
 Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are fully equipped for task automation and collaborative work. The framework's extensible architecture allows for the integration of custom plugins, enabling developers to tailor the system to specific real-world applications.
 
-### Strategy Pattern and Rules Integration
-
-The Strategy Pattern is a key feature of Frame, allowing for dynamic decision-making based on context. By integrating with rule-based systems, Frame can select the most appropriate strategy for a given situation, enhancing its adaptability and responsiveness.
-
-### Custom Plugins
-
-Frame's plugin system supports the development of custom plugins for unique real-world use cases. These plugins can extend the functionality of Framer agents, enabling them to perform specialized tasks in various domains, such as environmental monitoring, personalized education, and adaptive security systems.
-
-Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are fully equipped for task automation and collaborative work. The framework's extensible architecture allows for the integration of custom plugins, enabling developers to tailor the system to specific real-world applications.
-
-### New Feature: Weather Query Handling
-
-The `WeatherReporter` plugin now includes an action to handle weather queries. It accepts a query and a location, retrieves weather data from the OpenWeatherMap API, and generates a response based on the data. This feature allows the Framer to answer questions like "What's the temperature in Tokyo right now?" by parsing the location from the query and using it to fetch relevant weather information.
-
-### New Feature: Intent Understanding
-
-The `AudioTranscriptionPlugin` now includes an action to understand "intents" from transcriptions. This feature allows the Framer to listen for its name (as specified in the `FramerConfig`) and respond by playing a positive sound and starting to listen to the user, similar to how Alexa functions. This demonstrates how plugins can extend default behavior to create a more helpful assistant, and can be disabled or removed if not needed.
-
-
-### Permissions
-
-To grant all permissions for all plugins (which is considered unsafe), you can pass `'all'` to the permissions list in the `FramerConfig`. This will enable all available plugins and services without restriction.
-
 ### Features
-
-### Sensitivity Adjustment for Noisy Environments
-
-The `AudioTranscriptionPlugin` now adjusts its sensitivity to be more responsive in noisy environments. This ensures that the system can capture intents or transcriptions effectively, even when the background noise level is high. The sensitivity increases (lower threshold to activate) with higher noise levels, using a logarithmic scale for smooth adjustment.
-
-The `AudioTranscriptionPlugin` now uses a logarithmic scale to adjust the sensitivity based on the average background noise level. This approach ensures that small changes in noise level have a larger impact on sensitivity, while larger changes have a diminishing effect. This is achieved using the `np.log1p` function, which computes the natural logarithm of one plus the input array, providing a smooth transition in sensitivity adjustment.
 
 - Multi-modal cognitive agents framework capable of processing diverse types of perceptions
 - Supports developing dynamic, emergent behaviors

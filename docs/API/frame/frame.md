@@ -84,7 +84,13 @@ Frame supports multi-modal cognitive agents, allowing for processing of various 
 
 ### Memory Management
 
-Frame incorporates complex memory mechanics, including support for global and multi-user memory storage through the Mem0 system. This advanced memory management allows Framers to maintain context, learn from past interactions, and make more informed decisions.
+Frame incorporates complex memory mechanics, including support for global and multi-user memory storage through the Mem0 system. The memory system intelligently determines when to use memory retrieval based on query analysis:
+
+- Personal queries (containing "my", "I", "we")
+- Questions about preferences or past conversations
+- User-specific information requests
+
+For general knowledge questions, the system uses direct responses without memory retrieval. This advanced memory management allows Framers to maintain context, learn from past interactions, and make more informed decisions while optimizing response generation.
 
 ### Plugin System
 

@@ -2,7 +2,14 @@
 
 The Memory class manages memory storage and retrieval for Framers, integrating closely with perception processing and decision-making.
 
-It supports both global and multi-user memory contexts, as well as different types of memory storage (core, short-term, and long-term). When no user ID is provided, memories are stored in a global context. When multiple user IDs are provided, the memory retrieval process searches across all specified user IDs.
+It supports both global and multi-user memory contexts, as well as different types of memory storage (core, short-term, and long-term). When no user ID is provided, memories are stored in a global context (DEFAULT_USER_ID). When multiple user IDs are provided, the memory retrieval process searches across all specified user IDs.
+
+The memory system automatically determines whether to use memory retrieval based on the nature of the query:
+- Questions containing personal pronouns ("my", "I", "we")
+- Questions about personal preferences or past conversations 
+- Questions requesting user-specific information
+
+For general knowledge questions, the system will use direct responses without memory retrieval.
 
 This is achieved using the MemoryService and Mem0Adapter, which abstract away the underlying storage solution and provide a flexible interface for memory operations. The architecture allows for easy swapping of memory components, offering alternatives like RAG with the same interface but different underlying drivers.
 
