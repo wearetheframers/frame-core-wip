@@ -80,7 +80,7 @@ Frame now uses a permissions system to control which plugins and services a Fram
 
 #### Default Permissions
 
-There are three default permissions that correspond to core services:
+There are no default permissions. You must explicitly specify permissions for each plugin and service you want to use. Here are three common permissions that correspond to core services:
 
 - `with_memory`: Enables access to the Memory service
 - `with_eq`: Enables access to the Emotional Intelligence (EQ) service
