@@ -88,8 +88,8 @@ async def test_framer_initialize():
 
     # Test case 1: Both roles and goals are None
     agency.generate_roles_and_goals.return_value = (
-        [{"name": "Generated Role", "description": "A role description"}],
-        [{"description": "Generated Goal"}],
+        '[{"name": "Generated Role", "description": "A role description"}]',
+        '[{"description": "Generated Goal"}]',
     )
     framer = Framer(
         config=config,
@@ -100,7 +100,7 @@ async def test_framer_initialize():
         workflow_manager=workflow_manager,
     )
     await framer.initialize()
-    assert framer.roles == ["Generated Role"] or framer.roles is None
+    assert framer.roles == [{"name": "Generated Role", "description": "A role description"}] or framer.roles is None
     assert framer.goals == ["Generated Goal"]
     assert (
         agency.generate_roles_and_goals.call_count == 2

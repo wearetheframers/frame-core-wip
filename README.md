@@ -1,4 +1,4 @@
-# Frame: Multi-Modal Multi-Agent Cognitive Framework
+# Frame: Lightweight Multi-Agent Cognitive Framework with Plugin Architecture
 
 <div align="center">
 
@@ -17,7 +17,7 @@
 
 ## Overview
 
-Frame is a multi-modal, multi-agent cognitive framework designed to support fully emergent characteristics. Framer agents are fully equipped for task automation and collaborative work. The framework's extensible architecture allows for the integration of custom plugins, enabling developers to tailor the system to specific real-world applications.
+Frame is a lightweight, extensible cognitive framework with a powerful plugin architecture. The core engine provides essential AI agent capabilities, while optional plugins enable advanced features like multi-modal processing, advanced memory systems, and specialized tools. This modular approach allows developers to keep their applications lightweight while having the flexibility to add capabilities as needed.
 
 ### Features
 

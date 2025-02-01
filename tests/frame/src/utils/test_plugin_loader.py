@@ -39,7 +39,8 @@ def mock_plugin_dir(tmp_path):
     return str(plugin_dir)
 
 
-def test_load_plugins(mock_plugin_dir):
+@pytest.mark.asyncio
+async def test_load_plugins(mock_plugin_dir):
     with patch(
         "frame.src.utils.plugin_loader.importlib.import_module"
     ) as mock_import, patch(
@@ -59,15 +60,17 @@ def test_load_plugins(mock_plugin_dir):
         mock_isdir.return_value = True
         mock_load_config.return_value = {"name": "MockPlugin"}
 
-        plugins, warnings = load_plugins(mock_plugin_dir)
+        plugins, warnings = await load_plugins(mock_plugin_dir)
 
         assert len(plugins) == 1, f"Expected 1 plugin, got {len(plugins)}"
+        assert "MockPlugin" in plugins
         assert "mock_plugin" in plugins
         assert isinstance(plugins["mock_plugin"], MockPlugin)
         assert len(warnings) == 0
 
 
-def test_load_plugins_with_conflict(mock_plugin_dir):
+@pytest.mark.asyncio
+async def test_load_plugins_with_conflict(mock_plugin_dir):
     with patch(
         "frame.src.utils.plugin_loader.importlib.import_module"
     ) as mock_import, patch(
@@ -89,9 +92,11 @@ def test_load_plugins_with_conflict(mock_plugin_dir):
             {"name": "MockPlugin2"},
         ]
 
-        plugins, warnings = load_plugins(mock_plugin_dir)
+        plugins, warnings = await load_plugins(mock_plugin_dir)
 
         assert len(plugins) == 2, f"Expected 2 plugins, got {len(plugins)}"
+        assert "MockPlugin1" in plugins
+        assert "MockPlugin2" in plugins
         assert "mock_plugin1" in plugins
         assert "mock_plugin2" in plugins
         assert len(warnings) == 1

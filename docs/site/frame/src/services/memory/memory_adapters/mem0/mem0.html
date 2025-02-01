@@ -75,8 +75,6 @@ including adding, retrieving, and searching memories.</p></div>
             return user_memories[memory_id]
         return None
 
-    def get_all(self, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
-        return self.storage.get(user_id, [])
 
     def add(
         self,
@@ -87,7 +85,7 @@ including adding, retrieving, and searching memories.</p></div>
         self.store(memory, user_id, metadata)
 
     def get_all(self, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
-        return self.retrieve(user_id)
+        return self.storage.get(user_id, [])
 
     def search(self, query: str, user_id: str = &#34;default&#34;) -&gt; List[Dict[str, Any]]:
         if not query:
@@ -105,6 +103,12 @@ including adding, retrieving, and searching memories.</p></div>
     def history(self, memory_id: int, user_id: str = &#34;default&#34;) -&gt; List[str]:
         if user_id in self.storage and 0 &lt;= memory_id &lt; len(self.storage[user_id]):
             return [self.storage[user_id][memory_id][&#34;memory&#34;]]
+        return []
+    def delete(self, memory_id: int, user_id: str = &#34;default&#34;) -&gt; None:
+        if user_id in self.storage and 0 &lt;= memory_id &lt; len(self.storage[user_id]):
+            del self.storage[user_id][memory_id]
+        if user_id in self.storage and 0 &lt;= memory_id &lt; len(self.storage[user_id]):
+            return [self.storage[user_id][memory_id][&#34;memory&#34;]]
         return []</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -116,6 +120,12 @@ including adding, retrieving, and searching memories.</p></div>
 <dl>
 <dt id="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.add"><code class="name flex">
 <span>def <span class="ident">add</span></span>(<span>self, memory: str, user_id: str = 'default', metadata: Optional[Dict[str, Any]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.delete"><code class="name flex">
+<span>def <span class="ident">delete</span></span>(<span>self, memory_id: int, user_id: str = 'default') ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -177,6 +187,7 @@ including adding, retrieving, and searching memories.</p></div>
 <h4><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter">Mem0Adapter</a></code></h4>
 <ul class="two-column">
 <li><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.add" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.add">add</a></code></li>
+<li><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.delete" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.delete">delete</a></code></li>
 <li><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.get_all" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.get_all">get_all</a></code></li>
 <li><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.history" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.history">history</a></code></li>
 <li><code><a title="frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.retrieve" href="#frame.src.services.memory.memory_adapters.mem0.mem0.Mem0Adapter.retrieve">retrieve</a></code></li>
