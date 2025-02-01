@@ -4,13 +4,10 @@ from dataclasses import dataclass
 from typing import Dict, Any, Optional
 import time
 import logging
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from frame.framer.brain.plugins.base import BasePlugin
 from frame.src.services.llm.llm_adapter_interface import LLMAdapterInterface
-from frame.src.utils.prompt_formatters import format_huggingface_prompt
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class HuggingFaceConfig:
@@ -20,73 +17,41 @@ class HuggingFaceConfig:
     top_p: float = 1.0
     repetition_penalty: float = 1.0
 
-
-class TokenBucket:
-    """
-    Implements token bucket algorithm for rate limiting.
-    """
-
-    def __init__(self, capacity: int, fill_rate: float, api_key: Optional[str] = None):
-        self.api_key = api_key
-        self.capacity = capacity
-        self.fill_rate = fill_rate
-        self.tokens = capacity
-        self.last_fill = time.time()
-
-    def _fill(self):
-        now = time.time()
-        delta = now - self.last_fill
-        self.tokens = min(self.capacity, self.tokens + delta * self.fill_rate)
-        self.last_fill = now
-
-    def consume(self, tokens: int) -> bool:
-        self._fill()
-        if tokens <= self.tokens:
-            self.tokens -= tokens
-            return True
-        return False
-
-
 class HuggingFaceAdapter(LLMAdapterInterface):
     """
     Adapter for Hugging Face operations with rate limiting.
-
-    This class provides methods to interact with Hugging Face models, including
-    setting the default model and generating completions with retry logic.
-
-    Attributes:
-        config (HuggingFaceConfig): Configuration for Hugging Face operations.
-        token_bucket (TokenBucket): Token bucket for rate limiting.
     """
-
     def __init__(self, huggingface_api_key: str):
         self.huggingface_api_key = huggingface_api_key
         self.default_model = "gpt2"
         self.api_key = huggingface_api_key
-        self.token_bucket = TokenBucket(
-            capacity=60, fill_rate=1
-        )  # 60 requests per minute
         self._tokenizer = None
         self._model = None
 
-    def set_default_model(self, model: str):
-        """
-        Set the default model for Hugging Face operations.
+        # Lazy import transformers only when adapter is used
+        try:
+            import torch
+            from transformers import AutoTokenizer, AutoModelForCausalLM
+            self.AutoTokenizer = AutoTokenizer
+            self.AutoModelForCausalLM = AutoModelForCausalLM
+            self.torch = torch
+        except ImportError:
+            logger.warning("transformers/torch not installed. Install with: pip install transformers torch")
+            self.AutoTokenizer = None
+            self.AutoModelForCausalLM = None
+            self.torch = None
 
-        Args:
-            model (str): The model to set as default.
-        """
+    def set_default_model(self, model: str):
         self.default_model = model
         self._tokenizer = None
         self._model = None
 
     def get_config(self, max_tokens: int, temperature: float) -> HuggingFaceConfig:
         return HuggingFaceConfig(
-            model=self.default_model, max_tokens=max_tokens, temperature=temperature
+            model=self.default_model,
+            max_tokens=max_tokens,
+            temperature=temperature
         )
-
-    def format_prompt(self, prompt: str) -> str:
-        return format_huggingface_prompt(prompt)
 
     @tenacity.retry(
         stop=tenacity.stop_after_attempt(5),
@@ -101,22 +66,10 @@ class HuggingFaceAdapter(LLMAdapterInterface):
         additional_context: Optional[Dict[str, Any]] = None,
         model: Optional[str] = None,
     ) -> str:
-        """
-        Generate a completion using the Hugging Face model with retry logic.
+        if not all([self.AutoTokenizer, self.AutoModelForCausalLM, self.torch]):
+            raise ImportError("transformers/torch not installed. Install plugin requirements first.")
 
-        Args:
-            prompt (str): The input prompt for the model.
-            config (HuggingFaceConfig): Configuration for the Hugging Face model.
-            additional_context (Optional[Dict[str, Any]], optional): Additional context for the model.
-            model (Optional[str], optional): The model to use.
-
-        Returns:
-            str: The generated completion.
-        """
         model_name = model or self.default_model
-
-        if not self.token_bucket.consume(1):
-            await asyncio.sleep(1)  # Wait for a token to become available
 
         try:
             return await self._get_huggingface_completion(prompt, config, model_name)
@@ -128,15 +81,15 @@ class HuggingFaceAdapter(LLMAdapterInterface):
         self, prompt: str, config: HuggingFaceConfig, model_name: str
     ) -> str:
         if self._tokenizer is None or self._model is None:
-            self._tokenizer = AutoTokenizer.from_pretrained(model_name)
-            self._model = AutoModelForCausalLM.from_pretrained(model_name)
+            self._tokenizer = self.AutoTokenizer.from_pretrained(model_name)
+            self._model = self.AutoModelForCausalLM.from_pretrained(model_name)
 
         inputs = self._tokenizer(prompt, return_tensors="pt")
         input_length = inputs["input_ids"].shape[1]
         max_new_tokens = max(config.max_tokens - input_length, 1)
 
         attention_mask = inputs.get(
-            "attention_mask", torch.ones_like(inputs["input_ids"])
+            "attention_mask", self.torch.ones_like(inputs["input_ids"])
         )
 
         outputs = self._model.generate(
@@ -151,3 +104,10 @@ class HuggingFaceAdapter(LLMAdapterInterface):
         )
 
         return self._tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+class HuggingFacePlugin(BasePlugin):
+    """Plugin to register HuggingFace adapter with Frame"""
+    
+    async def on_load(self):
+        from frame.src.services.llm.llm_adapters import register_adapter
+        register_adapter('huggingface', HuggingFaceAdapter)

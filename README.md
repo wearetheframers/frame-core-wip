@@ -119,6 +119,62 @@ pip install -e ".[dev]"
 
 This will install all development dependencies including testing and documentation tools.
 
+### Installing Plugins
+
+Frame supports several plugin types that can be installed separately:
+
+```bash
+# Install all available plugins
+pip install -e ".[all-plugins]"
+
+# Or install specific plugins
+pip install frame-ai-plugin-audio  # Audio processing
+pip install frame-ai-plugin-local-inference  # Local LLM support
+pip install frame-ai-plugin-vector-store  # Vector storage
+pip install frame-ai-plugin-dspy  # DSPy integration
+pip install frame-ai-plugin-memory  # Advanced memory systems
+```
+
+### Local LLM Setup
+
+To use local LLMs, you'll need to:
+
+1. Install the local inference plugin:
+```bash
+pip install frame-ai-plugin-local-inference
+```
+
+2. Install supported model backends:
+```bash
+# For CPU inference
+pip install llama-cpp-python
+
+# For CUDA GPU support
+pip install llama-cpp-python --prefer-binary --extra-index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu118
+```
+
+3. Download model weights:
+- Place your GGUF format models in `~/.frame/models/`
+- Supported models include:
+  - Mistral-7B-v0.1.Q4_K_M
+  - Llama-2-7b-chat.Q4_K_M
+  - Neural-Chat-7B-v3-1.Q4_K_M
+  - And other GGUF format models
+
+4. Configure model paths in your code:
+```python
+from frame import Frame
+from frame.framer.config import FramerConfig
+
+frame = Frame(
+    default_model="local://~/.frame/models/mistral-7b-v0.1.Q4_K_M.gguf",
+    model_config={
+        "context_length": 4096,
+        "gpu_layers": 0  # Set to higher number to use GPU
+    }
+)
+```
+
 ### Docker
 
 To run the Frame package using Docker, build the Docker image locally:
@@ -240,12 +296,61 @@ asyncio.run(main())
 
 ## Actions / Plugins
 
-Frame features a powerful and flexible plugin system inspired by game mods, allowing developers to extend the functionality of Framers. This system supports a community marketplace where plugins can be shared, sold, or given away, fostering a rich ecosystem of extensions and customizations. Plugins change Framer behaviors by adding or removing actions.
+Frame features a powerful and flexible plugin system inspired by game mods, allowing developers to extend the functionality of Framers. This system supports a community marketplace where plugins can be shared, sold, or given away, fostering a rich ecosystem of extensions and customizations.
 
-By default, the plugins directory is located in the same directory as the `frame` package, inside a folder called `./plugins`. This can be changed by specifying a different directory when initializing the Frame instance. Note that there are no default permissions, so you must explicitly specify permissions for each plugin. Plugins are lazily loaded, meaning they are not loaded until the necessary permissions are explicitly added:
+### Plugin Types
+
+1. **Core Plugins** (included in base package):
+   - Basic memory management
+   - Simple text generation
+   - Core decision making
+
+2. **Official Plugins**:
+   - Audio Processing (`frame-ai-plugin-audio`)
+   - Local LLM Inference (`frame-ai-plugin-local-inference`)
+   - Vector Store (`frame-ai-plugin-vector-store`)
+   - DSPy Integration (`frame-ai-plugin-dspy`)
+   - Advanced Memory (`frame-ai-plugin-memory`)
+
+3. **Community Plugins**:
+   - Available through PyPI
+   - Can be installed via pip
+
+### Plugin Configuration
+
+Plugins can be configured when creating a Frame instance:
 
 ```python
-frame = Frame(plugins_dir="/path/to/custom/plugins")
+frame = Frame(
+    plugins_dir="/path/to/custom/plugins",
+    plugin_config={
+        "audio": {
+            "default_device": 0,
+            "sample_rate": 44100
+        },
+        "local_inference": {
+            "model_path": "~/.frame/models/mistral-7b.gguf",
+            "gpu_layers": 35
+        }
+    }
+)
+```
+
+### Plugin Permissions
+
+Plugins require explicit permissions to be activated:
+
+```python
+config = FramerConfig(
+    name="PluginEnabledFramer",
+    permissions=[
+        "with_memory",
+        "with_audio",
+        "with_local_inference",
+        "with_vector_store"
+    ]
+)
+framer = await frame.create_framer(config)
 ```
 
 For more detailed information on creating and using plugins, please refer to the [Plugins and Actions documentation](docs/plugins.md).
