@@ -6,9 +6,9 @@ import os
 # then you need to have this line uncommented.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-from frame.src.framer.brain.actions import BaseAction
-from frame.src.framer.agency.priority import Priority
-from frame.src.services.context.execution_context_service import ExecutionContext
+from frame.framer.brain.actions import BaseAction
+from frame.framer.agency.priority import Priority
+from frame.services.context.execution_context_service import ExecutionContext
 from typing import Optional
 import asyncio
 from frame import Frame, FramerConfig

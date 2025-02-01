@@ -25,12 +25,12 @@ from autonomous_vehicle_plugin import (
     BrakeVehicleAction,
     AutonomousVehiclePlugin,
 )
-from frame.src.framer.brain.actions import BaseAction
-from frame.src.services import ExecutionContext
-from frame.src.framer.agency.priority import Priority
-from frame.src.framer.brain.decision import Decision
-from frame.src.framer.brain.action_registry import ActionRegistry
-from frame.src.services.context.execution_context_service import ExecutionContext
+from frame.framer.brain.actions import BaseAction
+from frame.services import ExecutionContext
+from frame.framer.agency.priority import Priority
+from frame.framer.brain.decision import Decision
+from frame.framer.brain.action_registry import ActionRegistry
+from frame.services.context.execution_context_service import ExecutionContext
 
 # Set up logging for the module
 logger = logging.getLogger(__name__)

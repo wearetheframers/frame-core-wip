@@ -1,25 +1,37 @@
-# Use an official Python runtime as a parent image
-FROM python:3.10-slim
+# Core stage
+FROM python:3.10-slim as core
 
-# Set the working directory in the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
-
-# Ensure the scripts directory is copied
-COPY scripts /app/scripts
-
-# Make the script executable
-RUN chmod +x /app/scripts/setup_environment.sh
-
-# Run the script to select the appropriate requirements file
-RUN /bin/bash /app/scripts/setup_environment.sh
-
-# Install any needed packages specified in the selected requirements.txt
+# Copy only core requirements and install them
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Make port 80 available to the world outside this container
+# Copy the package files
+COPY . .
+
+# Install the core package
+RUN pip install .
+
+# Plugin stage
+FROM core as plugins
+
+# Install plugin requirements
+COPY requirements-plugins.txt .
+RUN pip install --no-cache-dir -r requirements-plugins.txt
+
+# Development stage
+FROM plugins as dev
+
+# Install development requirements
+COPY requirements-dev.txt .
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+# Default to core stage
+FROM core
+
+# Make port 80 available
 EXPOSE 80
 
 # Run the application

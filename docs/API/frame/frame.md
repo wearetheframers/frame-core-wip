@@ -41,7 +41,7 @@ frame = Frame(plugins_dir="/path/to/custom/plugins")
 
 ```python
 from frame import Frame
-from frame.src.framer.config import FramerConfig
+from frame.framer.config import FramerConfig
 
 # Initialize Frame
 frame = Frame(openai_api_key="your_api_key_here")

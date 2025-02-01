@@ -107,6 +107,18 @@ Services
 
 ## Installation
 
+### Local Development
+
+For local development, clone the repository and install in editable mode with development dependencies:
+
+```bash
+git clone https://github.com/yourusername/frame.git
+cd frame
+pip install -e ".[dev]"
+```
+
+This will install all development dependencies including testing and documentation tools.
+
 ### Docker
 
 To run the Frame package using Docker, build the Docker image locally:
@@ -123,8 +135,8 @@ Here's a simple example to get started with Frame using the synchronous wrapper 
 
 ```python
 from frame.sync_frame import SyncFrame
-from frame.src.framer.config import FramerConfig
-from frame.src.services.llm.main import LLMService
+from frame.framer.config import FramerConfig
+from frame.services.llm.main import LLMService
 
 # Initialize SyncFrame with an LLMService
 llm_service = LLMService(api_key="your_api_key")
@@ -149,7 +161,8 @@ This example demonstrates how to interact with Frame like a chatbot using both t
 
 ```python
 import asyncio
-from frame import Frame, FramerConfig
+from frame import Frame
+from frame.framer.config import FramerConfig
 
 async def main():
     # Initialize Frame

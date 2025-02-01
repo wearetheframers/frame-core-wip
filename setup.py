@@ -1,24 +1,6 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
 setup(
-    name="frame",
-    version="0.1.0",
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
-    install_requires=[
-        "click",
-        "colorama",
-        "openai",
-        "tenacity",
-        "textual",
-        "pydantic",
-    ],
-    extras_require={
-        "dev": ["pytest", "pytest-asyncio", "black", "isort"],
-    },
-    entry_points={
-        "console_scripts": [
-            "frame=frame.__main__:main",
-        ],
-    },
+    packages=find_namespace_packages(include=['frame*']),
+    package_dir={'': 'src'}
 )
