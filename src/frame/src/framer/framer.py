@@ -17,15 +17,15 @@ from frame.src.framer.agency.workflow import WorkflowManager
 from frame.src.framer.agency.tasks import Task, TaskStatus
 from frame.src.framer.agency.goals import Goal, GoalStatus
 from frame.src.framer.brain import Brain
-from frame.src.framer.brain.decision.decision import Decision, ExecutionMode
-from frame.src.models.framer.soul.soul import Soul
+from frame.src.framer.brain.decision import Decision
+from frame.src.models.framer.soul import Soul
 from frame.src.framer.brain.mind.perception import Perception
-from frame.src.models.framer.soul.soul import Soul
+from frame.src.models.framer.soul import Soul
 
 from frame.src.services.context.execution_context_service import ExecutionContext
-from frame.src.services.eq.main import EQService
-from frame.src.services.llm.main import LLMService
-from frame.src.services.memory.main import MemoryService
+from frame.src.services.eq import EQService
+from frame.src.services.llm import LLMService
+from frame.src.services.memory import MemoryService
 from frame.src.services.context.shared_context_service import SharedContext
 
 from frame.src.utils.config_parser import (
@@ -44,7 +44,7 @@ from frame.src.framer.brain.memory.memory_adapter_interface import (
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from frame.src.framer.brain.brain import Brain
+    from frame.src.framer.brain import Brain
 
 Observer = Callable[[Decision], None]
 

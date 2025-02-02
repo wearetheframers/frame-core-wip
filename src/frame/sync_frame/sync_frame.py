@@ -6,7 +6,7 @@ from frame.src.framer import Framer
 from typing import Dict, Any, List, Optional
 
 from frame.src.framer.config import FramerConfig
-from frame.src.services.llm.main import LLMService
+from frame.src.services.llm import LLMService
 from frame.src.framer.framer_factory import FramerFactory
 
 logger = logging.getLogger(__name__)

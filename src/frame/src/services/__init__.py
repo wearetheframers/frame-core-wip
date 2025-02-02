@@ -1,7 +1,7 @@
-from .llm.main import LLMService
-from .eq.main import EQService
+from .llm import LLMService
+from .eq import EQService
 from .context.execution_context_service import ExecutionContext
-from .memory.main import MemoryService
+from .memory import MemoryService
 from .context.shared_context_service import SharedContext
 
 __all__ = [
@@ -29,3 +29,8 @@ __all__ = [
 # EQService: Handles emotional intelligence related functionalities.
 # ExecutionContext: Manages the execution context for Framer operations.
 # SharedContext: Manages shared context across different components.
+from .llm import LLMService
+from .eq import EQService
+from .memory import MemoryService
+
+__all__ = ['LLMService', 'EQService', 'MemoryService']

@@ -1,14 +1,14 @@
 from __future__ import annotations
 from typing import Optional, Dict, Any, List, TYPE_CHECKING, Union
-from frame.src.services.llm.main import LLMService
+from frame.src.services.llm import LLMService
 
 if TYPE_CHECKING:
-    from frame.src.services.llm.main import LLMService
-    from frame.src.services.memory.main import MemoryService
+    from frame.src.services.llm import LLMService
+    from frame.src.services.memory import MemoryService
     from frame.src.framer.config import FramerConfig
     from frame.src.services.eq.eq_service import EQService
-    from frame.src.framer.soul.soul import Soul
-    from frame.src.framer.brain.brain import Brain
+    from frame.src.framer.soul import Soul
+    from frame.src.framer.brain import Brain
 
 
 class ExecutionContext:

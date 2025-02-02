@@ -25,10 +25,10 @@ from autonomous_vehicle_plugin import (
     BrakeVehicleAction,
     AutonomousVehiclePlugin,
 )
-from frame.framer.brain.actions import BaseAction
-from frame.framer.agency.priority import Priority
-from frame.framer.brain.action_registry import ActionRegistry
-from frame.services.context.execution_context_service import ExecutionContext
+from frame.src.framer.brain.actions import BaseAction
+from frame.src.framer.agency.priority import Priority
+from frame.src.framer.brain.action_registry import ActionRegistry
+from frame.src.services.context.execution_context_service import ExecutionContext
 
 # Set up logging for the module
 logger = logging.getLogger(__name__)
@@ -172,7 +172,11 @@ class ProcessPerceptionAction(BaseAction):
 # Main function to run the autonomous vehicle example
 async def main():
     # Initialize the Frame and Framer configuration
-    frame = Frame()
+    frame = Frame(
+        openai_api_key=os.getenv("OPENAI_API_KEY", ""),
+        mistral_api_key=os.getenv("MISTRAL_API_KEY", ""),
+        huggingface_api_key=os.getenv("HUGGINGFACE_API_KEY", "")
+    )
     config = FramerConfig(name="AutonomousVehicleFramer")
     framer = await frame.framer_factory.create_framer(config, plugins=frame.plugins)
 

@@ -1,10 +1,10 @@
 import asyncio
 import time
-from frame.framer.brain.plugins.base import BasePlugin
-from frame.services import ExecutionContext
-from frame.framer.agency.priority import Priority
+from frame.src.framer.brain.plugins.base import BasePlugin
+from frame.src.services.context.execution_context_service import ExecutionContext
+from frame.src.framer.agency.priority import Priority
 from typing import Dict, Any
-from frame.framer.brain.actions import BaseAction
+from frame.src.framer.brain.actions import BaseAction
 
 
 class AutonomousVehiclePlugin(BasePlugin):

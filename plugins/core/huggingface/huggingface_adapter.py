@@ -1,4 +1,5 @@
 import asyncio
+import os
 import tenacity
 from dataclasses import dataclass
 from typing import Dict, Any, Optional
@@ -6,25 +7,20 @@ import time
 import logging
 from frame.framer.brain.plugins.base import BasePlugin
 from frame.src.services.llm.llm_adapter_interface import LLMAdapterInterface
+from frame.src.services.llm.llm_adapters.huggingface.huggingface_adapter import HuggingFaceConfig
 
 logger = logging.getLogger(__name__)
 
-@dataclass
-class HuggingFaceConfig:
-    model: str
-    max_tokens: int = 1024
-    temperature: float = 0.7
-    top_p: float = 1.0
-    repetition_penalty: float = 1.0
 
 class HuggingFaceAdapter(LLMAdapterInterface):
     """
     Adapter for Hugging Face operations with rate limiting.
     """
-    def __init__(self, huggingface_api_key: str):
-        self.huggingface_api_key = huggingface_api_key
-        self.default_model = "gpt2"
-        self.api_key = huggingface_api_key
+    def __init__(self, config: HuggingFaceConfig):
+        """Initialize the HuggingFace adapter with configuration."""
+        self.config = config
+        self.default_model = config.model
+        self.api_key = os.getenv("HUGGINGFACE_API_KEY", "")
         self._tokenizer = None
         self._model = None
 

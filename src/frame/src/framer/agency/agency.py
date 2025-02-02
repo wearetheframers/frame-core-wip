@@ -10,7 +10,7 @@ from frame.src.framer.agency.roles import Role, RoleStatus
 from frame.src.framer.agency.workflow import WorkflowManager, Workflow
 from frame.src.framer.agency.tasks.status import TaskStatus
 from frame.src.framer.agency.goals import Goal, GoalStatus
-from frame.src.services.llm.main import LLMService
+from frame.src.services.llm import LLMService
 from frame.src.services.context.execution_context_service import ExecutionContext
 from frame.src.framer.brain.decision import Decision
 from unittest.mock import AsyncMock
