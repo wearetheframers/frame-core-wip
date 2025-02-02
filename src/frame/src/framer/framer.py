@@ -748,7 +748,22 @@ class Framer:
         important to call this method when the Framer is no longer needed to
         prevent memory leaks and ensure optimal performance. This method
         should be called to gracefully shut down the Framer.
+
+        Prints total LLM costs incurred by this Framer instance.
         """
+        # Get final metrics
+        metrics = self.llm_service.get_metrics()
+        total_cost = self.llm_service.get_total_cost()
+        total_calls = self.llm_service.get_total_calls()
+        
+        print("\nFramer Metrics:")
+        print(f"Total LLM API Calls: {total_calls}")
+        print(f"Total Cost: ${total_cost:.4f}")
+        for model, stats in metrics.items():
+            if isinstance(stats, dict):
+                print(f"\n{model}:")
+                print(f"  Calls: {stats.get('calls', 0)}")
+                print(f"  Cost: ${stats.get('cost', 0):.4f}")
         # Close all workflows
         for workflow in self.workflow_manager.workflows.values():
             workflow.set_final_task(

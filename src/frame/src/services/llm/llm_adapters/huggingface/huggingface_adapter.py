@@ -1,3 +1,4 @@
+import os
 from typing import Dict, Any, Optional
 import asyncio
 import tenacity
@@ -26,13 +27,14 @@ class HuggingFaceAdapter(LLMAdapterInterface):
         token_bucket (TokenBucket): Token bucket for rate limiting.
     """
 
-    def __init__(self, config: HuggingFaceConfig):
+    def __init__(self, huggingface_api_key: str = "", **kwargs):
         """Initialize the HuggingFace adapter with configuration."""
-        self.config = config
+        self.config = HuggingFaceConfig(**kwargs)
         self.token_bucket = TokenBucket(
-            tokens=config.rate_limit_tokens,
-            seconds=config.rate_limit_seconds
+            tokens=self.config.rate_limit_tokens,
+            seconds=self.config.rate_limit_seconds
         )
+        self.api_key = huggingface_api_key or os.getenv("HUGGINGFACE_API_KEY", "")
 
     @tenacity.retry(
         stop=tenacity.stop_after_attempt(5),

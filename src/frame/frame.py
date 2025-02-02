@@ -68,19 +68,14 @@ class Frame:
         self._default_model = default_model
         # Initialize the language model service with provided API keys
         # Initialize the language model service with provided API keys
-        from frame.src.services.llm.llm_adapters.huggingface.huggingface_adapter import HuggingFaceConfig
-        huggingface_config = HuggingFaceConfig(
-            model=self._default_model,
-            api_key=huggingface_api_key
-        )
         self.llm_service = LLMService(
             openai_api_key=openai_api_key,
             mistral_api_key=mistral_api_key,
-            huggingface_config=huggingface_config,
+            huggingface_api_key=huggingface_api_key,
             default_model=self._default_model,
         )
         self.plugins_dir = plugins_dir or os.path.join(
-            os.path.dirname(__file__), "..", "plugins"
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "plugins"
         )
         self.plugins = {}
         self.is_loading_plugins = True

@@ -16,11 +16,11 @@ class HuggingFaceAdapter(LLMAdapterInterface):
     """
     Adapter for Hugging Face operations with rate limiting.
     """
-    def __init__(self, config: HuggingFaceConfig):
+    def __init__(self, huggingface_api_key: str = "", **kwargs):
         """Initialize the HuggingFace adapter with configuration."""
-        self.config = config
-        self.default_model = config.model
-        self.api_key = os.getenv("HUGGINGFACE_API_KEY", "")
+        self.config = HuggingFaceConfig(**kwargs)
+        self.default_model = self.config.model
+        self.api_key = huggingface_api_key or os.getenv("HUGGINGFACE_API_KEY", "")
         self._tokenizer = None
         self._model = None
 
