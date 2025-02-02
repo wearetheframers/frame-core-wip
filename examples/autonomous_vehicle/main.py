@@ -26,9 +26,7 @@ from autonomous_vehicle_plugin import (
     AutonomousVehiclePlugin,
 )
 from frame.framer.brain.actions import BaseAction
-from frame.services import ExecutionContext
 from frame.framer.agency.priority import Priority
-from frame.framer.brain.decision import Decision
 from frame.framer.brain.action_registry import ActionRegistry
 from frame.services.context.execution_context_service import ExecutionContext
 

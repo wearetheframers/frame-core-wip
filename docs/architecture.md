@@ -143,11 +143,19 @@ Frame supports multiple types of language models:
 - Mistral
 - Custom API endpoints
 
-### HuggingFace Integration
-- Local model deployment
-- Custom/uncensored models
-- Fine-tuned models
-- Specialized architectures
+### Optional Model Integrations
+Available through plugins:
+
+- HuggingFace Integration (with_huggingface)
+  - Local model deployment
+  - Custom/uncensored models
+  - Fine-tuned models
+  - Specialized architectures
+  
+- DSPy Integration (with_dspy)
+  - Prompt programming
+  - Chain-of-thought reasoning
+  - Advanced prompting techniques
 
 ### Custom Models
 - Support for custom model architectures

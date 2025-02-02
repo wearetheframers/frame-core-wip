@@ -1,6 +1,13 @@
-# Core dependencies for local inference
-llama-cpp-python>=0.2.11
-torch>=2.1.0
-transformers>=4.36.0
-accelerate>=0.27.0
-bitsandbytes>=0.41.0
+# Core dependencies
+aiohttp>=3.10.10
+asyncio>=3.4.3
+click>=8.1.7
+dataclasses-json>=0.6.7
+lmql>=0.7.3
+pydantic>=2.9.2
+python-dotenv>=1.0.1
+PyYAML>=6.0.2
+structlog>=24.4.0
+typing_extensions>=4.12.2
+
+# Optional dependencies are handled by plugins
