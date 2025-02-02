@@ -14,7 +14,7 @@ colorama==0.4.6
 coverage==7.6.10
 dataclasses-json==0.6.7
 distro==1.9.0
--e git+https://github.com/wearetheframers/frame-core-internal.git@34cf6b5d3ac0af71f8d1b798efd1d9f2faaa791a#egg=frame_ai
+-e git+https://github.com/wearetheframers/frame-core-internal.git@56d441ed6559c9ef304db14b0b83cfe87c7cd406#egg=frame_ai
 frozenlist==1.5.0
 h11==0.14.0
 httpcore==1.0.7
@@ -24,7 +24,9 @@ iniconfig==2.0.0
 isort==6.0.0
 jiter==0.8.2
 lmql==0.7.3
+markdown-it-py==3.0.0
 marshmallow==3.26.0
+mdurl==0.1.2
 multidict==6.1.0
 mypy-extensions==1.0.0
 numpy==2.2.2
@@ -36,6 +38,7 @@ pluggy==1.5.0
 propcache==0.2.1
 pydantic==2.10.6
 pydantic_core==2.27.2
+Pygments==2.19.1
 pytest==8.3.4
 pytest-asyncio==0.25.3
 pytest-cov==6.0.0
@@ -44,6 +47,8 @@ python-dotenv==1.0.1
 PyYAML==6.0.2
 regex==2024.11.6
 requests==2.32.3
+rich==13.9.4
+shellingham==1.5.4
 six==1.17.0
 sniffio==1.3.1
 structlog==25.1.0
@@ -51,6 +56,7 @@ tenacity==9.0.0
 termcolor==2.5.0
 tiktoken==0.8.0
 tqdm==4.67.1
+typer==0.15.1
 typing-inspect==0.9.0
 typing_extensions==4.12.2
 urllib3==2.3.0
