@@ -1,0 +1,5 @@
+# Speech synthesis and recognition
+openai-whisper>=20231117
+pytorch-lightning>=2.1.0
+sounddevice>=0.4.6
+soundfile>=0.12.1

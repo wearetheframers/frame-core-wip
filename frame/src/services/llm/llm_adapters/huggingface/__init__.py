@@ -1,1 +1,0 @@
-from .huggingface_adapter import HuggingFaceAdapter
