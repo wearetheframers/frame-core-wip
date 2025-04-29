@@ -22,6 +22,7 @@ and usage within the Frame framework.
 
 import logging
 import os
+import json
 from frame.src.services.context.execution_context_service import ExecutionContext
 from typing import Any, Dict, List, Optional
 
@@ -38,7 +39,7 @@ from frame.src.constants import MEM0_API_KEY
 
 
 class Mem0SearchExtractSummarizePlugin(BasePlugin):
-    def __init__(self, framer=None):
+    def __init__(self, framer=None, config=None):
         super().__init__(framer)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
@@ -49,15 +50,42 @@ class Mem0SearchExtractSummarizePlugin(BasePlugin):
             )
         )
         self.logger.addHandler(handler)
-        self.mem0_adapter = Mem0Adapter()
+        
+        # Try to load API key from config.json
+        config_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+        try:
+            if os.path.exists(config_file_path):
+                with open(config_file_path, 'r') as f:
+                    config_data = json.load(f)
+                    api_key = config_data.get("MEM0_API_KEY", "")
+                    self.logger.info(f"Loaded API key from plugin config.json")
+            else:
+                # Try to load from memory_interaction directory
+                example_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
+                                         "examples", "memory_interaction", "config.json")
+                if os.path.exists(example_dir):
+                    with open(example_dir, 'r') as f:
+                        config_data = json.load(f)
+                        api_key = config_data.get("MEM0_API_KEY", "")
+                        self.logger.info(f"Loaded API key from memory_interaction/config.json")
+                else:
+                    api_key = os.getenv("MEM0_API_KEY", MEM0_API_KEY)
+                    self.logger.info(f"Using API key from environment or constants")
+        except Exception as e:
+            self.logger.error(f"Error loading config.json: {e}")
+            api_key = os.getenv("MEM0_API_KEY", MEM0_API_KEY)
+            
+        self.logger.info(f"Initializing Mem0Adapter with API key")
+        self.mem0_adapter = Mem0Adapter(api_key=api_key)
 
     async def on_load(self, framer) -> None:
+        # Store a reference to the framer
+        self.framer = framer
+        
         # Check for the correct permission before registering the action
         if "with_mem0_search_extract_summarize_plugin" in framer.permissions:
-            api_key = os.getenv("MEM0_API_KEY", "").strip()
-            if not api_key:
-                api_key = MEM0_API_KEY
-            if api_key:
+            # Use the API key that was already loaded in the constructor
+            if hasattr(self, 'mem0_adapter') and self.mem0_adapter:
                 framer.brain.action_registry.add_action(
                     "respond with memory retrieval",
                     description="This action is ideal for responding to personal questions that involve historical or memory-based "

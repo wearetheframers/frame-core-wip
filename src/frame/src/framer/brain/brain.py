@@ -5,11 +5,6 @@ from typing import Any, Dict, List, Optional, Union, Callable, TYPE_CHECKING
 
 logger = logging.getLogger(__name__)
 
-import json
-import logging
-import re
-from typing import Any, Dict, List, Optional, Union, Callable, TYPE_CHECKING
-
 from frame.src.utils.llm_utils import get_llm_provider
 from frame.src.services import ExecutionContext, LLMService
 from frame.src.models.framer.brain.decision.decision import Decision
@@ -82,33 +77,8 @@ class Brain:
         goals: List[Dict[str, Any]] = [],
         default_model: str = "gpt-3.5-turbo",
         soul: Optional[Soul] = None,
-    ) -> Decision:
+    ):
         """
-        Execute the decision made by the brain.
-
-        Args:
-            decision (Decision): The decision to execute.
-            perception (Optional[Perception]): The perception that led to this decision.
-
-        Notes:
-            Before execution, this method validates the parameters associated with the
-            action to ensure they are correct and complete. If invalid parameters are
-            found, the execution may be halted or adjusted accordingly.
-        Make a decision on what action to take next based on the current state and perception.
-
-        Args:
-            perception (Optional[Perception]): The current perception of the environment.
-
-        Returns:
-            Decision: The decision made based on the current state and perception,
-                      including the action to take, parameters, reasoning, confidence,
-                      and priority.
-
-        Notes:
-            This method now includes validation of variables and parameters to ensure
-            the decision can be executed properly. Invalid parameters are identified,
-            and appropriate actions are taken to handle them, such as adjusting the
-            decision or requesting additional information.
         Initialize the Brain with the necessary components.
 
         Args:
@@ -222,7 +192,7 @@ class Brain:
         - new_prompt: The new prompt to use if generate_new_prompt is True.
         """
         try:
-            await self.llm_service.get_completion(
+            result = await self.llm_service.get_completion(
                 prompt,
                 model=self.default_model,
                 expected_output=f"""
@@ -234,6 +204,7 @@ class Brain:
                 }}
                 """,
             )
+            return result
         except Exception as e:
             logger.error(f"Error in _execute_think_action: {str(e)}")
             return {"error": str(e)}
@@ -260,6 +231,7 @@ class Brain:
                 "confidence": 0.0,
                 "priority": 1,
             }
+            return result
 
         if isinstance(response, dict):
             # If response is already a dictionary, return it as is
@@ -383,17 +355,6 @@ class Brain:
         """
         from frame.src.framer.brain.decision import Decision
 
-        """
-        Make a decision on what action to take next based on the current state and perception.
-
-        Args:
-            perception (Optional[Perception]): The current perception of the environment.
-
-        Returns:
-            Decision: The decision made based on the current state and perception,
-                      including the action to take, parameters, reasoning, confidence,
-                      and priority.
-        """
         # If no perception is provided, return a default decision with no action
         if perception is None:
             return Decision(
@@ -492,10 +453,8 @@ class Brain:
         goals_priority = max(
             [goal.priority for goal in active_goals], default=Priority.MEDIUM
         )
-        priority_value = None
-        priority_int = None
+        
         # Ensure priority is a Priority enum
-        # Return the final decision object with all necessary attributes
         priority_value = decision_data.get("priority", Priority.MEDIUM)
         try:
             if isinstance(priority_value, str):
@@ -512,26 +471,6 @@ class Brain:
 
         priority_int = priority_enum.value
 
-        decision = Decision(
-            action=action,
-            parameters=parameters,
-            reasoning=reasoning,
-            confidence=float(decision_data.get("confidence", 0.5)),
-            priority=priority_int,
-            related_roles=[
-                role for role in active_roles if role.priority >= priority_int
-            ],
-            related_goals=[
-                goal for goal in active_goals if goal.priority >= priority_int
-            ],
-        )
-        logger.info(f"Final decision object: {decision}")
-        logger.info(f"Decision made: {decision}")
-        if hasattr(decision, "reasoning"):
-            decision.reasoning += f" (Aligned with {len(active_goals)} active goals)"
-        else:
-            logger.error("Decision object does not have a 'reasoning' attribute.")
-        print("Final decision object: ", decision)
         # Convert related_roles and related_goals to Role and Goal instances
         related_roles = [
             role
@@ -548,14 +487,6 @@ class Brain:
         parameters = decision_data.get("parameters", {})
         if not isinstance(parameters, dict):
             parameters = {}
-
-        # Ensure parameters is a dictionary
-        if isinstance(decision_data.get("parameters"), list):
-            parameters = {}
-        else:
-            parameters = decision_data.get("parameters", {})
-            if not isinstance(parameters, dict):
-                parameters = {}
 
         # Ensure parameters includes the query and execution context for memory retrieval
         if decision_data.get("action") == "respond with memory retrieval":
@@ -577,10 +508,18 @@ class Brain:
             parameters=parameters,
             reasoning=decision_data.get("reasoning", "No reasoning provided."),
             confidence=float(decision_data.get("confidence", 0.5)),
-            priority=decision_data.get("priority", Priority.MEDIUM),
+            priority=priority_int,
             related_roles=related_roles,
             related_goals=related_goals,
         )
+        
+        logger.info(f"Final decision object: {decision}")
+        
+        if hasattr(decision, "reasoning"):
+            decision.reasoning += f" (Aligned with {len(active_goals)} active goals)"
+        else:
+            logger.error("Decision object does not have a 'reasoning' attribute.")
+            
         decision.result = decision.parameters.get("response_content", None)
         return decision
 
@@ -697,20 +636,22 @@ class Brain:
 
     async def execute_decision(
         self, decision: "Decision", perception: Optional[Perception] = None
-    ):
-        from frame.src.framer.brain.decision import Decision
-
+    ) -> "Decision":
         """
         Execute the decision made by the brain.
 
         Args:
             decision (Decision): The decision to execute.
             perception (Optional[Perception]): The perception that led to this decision.
+
+        Returns:
+            Decision: The executed decision with results and status updated.
         """
         logger.debug(
             f"Executing decision: {decision.action} with params {decision.parameters}"
         )
         logger.debug(f"Perception object: {perception}")
+        
         # Handle different execution modes
         if decision.execution_mode == ExecutionMode.AUTO:
             # Execute the action immediately
@@ -737,175 +678,7 @@ class Brain:
         # Return the decision object with the result and status
         return decision
 
-    def _validate_parameters(
-        self, action_name: str, parameters: Dict[str, Any]
-    ) -> bool:
-        """
-        Validates that the given parameters match the expected format for the action.
-
-        Args:
-            action_name (str): The name of the action.
-            parameters (Dict[str, Any]): The parameters to validate.
-
-        Returns:
-            bool: True if parameters are valid, False otherwise.
-
-        Notes:
-            This method checks whether all required parameters for the action are present
-            and correctly formatted.
-        """
-        # Validation logic...
-        return True  # Placeholder for actual validation logic
-
-    async def execute_action(
-        self, action_name: str, parameters: Optional[dict] = None
-    ) -> Dict[str, Any]:
-        """Execute an action by its name using the action registry."""
-        if parameters is None:
-            parameters = {}
-        result = await self.action_registry.execute_action(action_name, **parameters)
-        if isinstance(result, dict):
-            result.setdefault("reasoning", None)
-            result.setdefault("confidence", 0.5)
-            result.setdefault("priority", 1)
-            result.setdefault("related_roles", [])
-            result.setdefault("related_goals", [])
-            return result
-        else:
-            return {
-                "response": result,
-                "reasoning": "No reasoning provided.",
-                "confidence": 0.5,
-                "priority": 1,
-                "related_roles": [],
-                "related_goals": [],
-            }
-
-    async def _execute_decision(self, decision: Decision) -> Any:
-        """
-        Execute the decision made by the brain.
-
-        Args:
-            decision (Decision): The decision to execute.
-
-        Returns:
-            Any: The result of executing the decision.
-        """
-        logger.debug(f"Executing decision: {decision.action}")
-        logger.debug(f"Decision parameters: {decision.parameters}")
-        result = None
-        try:
-            # Pass priorities to the LLM to help prioritize tasks based on relevance
-            for (
-                action_name,
-                action_info,
-            ) in self.action_registry.get_all_actions().items():
-                if action_name == decision.action:
-                    if action_name == "think":
-                        result = await self._execute_think_action(decision)
-                    elif action_name == "respond":
-                        result = await self.perform_task(
-                            {
-                                "description": decision.parameters.get("content", ""),
-                                "workflow_id": "default",
-                            }
-                        )
-                    else:
-                        print(f"Executing action: {action_name}")
-                        print("Action info: ", action_info)
-                        try:
-                            result = await self.action_registry.execute_action(
-                                action_name, decision.parameters
-                            )
-                        except Exception as e:
-                            logger.error(f"Error executing action '{action_name}': {e}")
-                            result = {
-                                "error": str(e),
-                                "fallback_response": "An error occurred while processing your request. Please try again.",
-                            }
-                    break
-            else:
-                raise ValueError(f"Action '{decision.action}' not found in registry.")
-
-            logger.debug(f"Executed action: {decision.action}")
-            logger.debug(f"Action result: {result}")
-            logger.debug(f"Decision reasoning: {decision.reasoning}")
-
-        except Exception as e:
-            logger.error(f"Error executing decision: {e}")
-            logger.exception("Detailed traceback:")
-            result = {"error": str(e)}
-
-        return result
-
-    async def _execute_think_action(self, decision: Decision):
-        """
-        Execute the 'think' action, which involves pondering on various aspects and potentially creating new tasks.
-
-        Args:
-            decision (Decision): The decision to execute.
-
-        Returns:
-            Any: The result of the think action.
-        """
-        # Gather context for thinking
-        soul_context = (
-            self.execution_context.soul.get_current_state()
-            if self.execution_context.soul
-            else {}
-        )
-        roles_and_goals = {"roles": self.roles, "goals": self.goals}
-        recent_thoughts = self.mind.get_all_thoughts()[-5:]  # Get last 5 thoughts
-        recent_perceptions = self.mind.get_recent_perceptions(
-            5
-        )  # Use a fixed number instead of recent_perceptions_limit
-
-        # Prepare the prompt for the LLM
-        prompt = f"""
-        Based on the following context, ponder and reflect on the current situation:
-
-        Soul state: {soul_context}
-        Roles and goals: {roles_and_goals}
-        Recent thoughts: {recent_thoughts}
-        Recent perceptions: {recent_perceptions}
-        Execution state: {self.execution_context.state}
-
-        Current decision: {decision.to_dict()}
-
-        1. Analyze the current situation and provide insights.
-        2. Determine if any new tasks or actions are necessary.
-        3. If new tasks are needed, describe them in detail.
-        4. Decide if a new prompt should be generated for better results.
-
-        Respond with a JSON object containing:
-        - analysis: Your analysis of the situation
-        - new_tasks: A list of new tasks if any (each task should have 'description' and 'priority')
-        - generate_new_prompt: Boolean indicating if a new prompt should be generated
-        - new_prompt: The new prompt if generate_new_prompt is true
-        """
-
-        response = await self.llm_service.get_completion(
-            prompt, model=self.default_model
-        )
-        result = json.loads(response)
-
-        # Process the result
-        self.mind.think(result["analysis"])
-
-        if result["new_tasks"]:
-            for task_data in result["new_tasks"]:
-                new_task = self.agency.create_task(**task_data)
-                self.agency.add_task(new_task)
-
-        if result["generate_new_prompt"]:
-            new_perception = Perception(
-                type="thought", data={"query": result["new_prompt"]}
-            )
-            await self.process_perception(new_perception)
-
-        return result
-
-    async def _generate_new_query(self, decision: Decision) -> str:
+    async def _generate_new_query(self, decision: "Decision") -> str:
         """
         Generate a new query based on the decision.
 
